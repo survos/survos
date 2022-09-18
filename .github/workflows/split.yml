@@ -46,7 +46,8 @@ jobs:
 #          repository_host: git.private.com:1234
 
           # ↓ the user signed under the split commit
-          user_name: "survos-ci"
+#          user_name: "survos-ci"
+          user_name: "tacman"
           user_email: "info@survos-ci.com"
 
       # with tag
@@ -67,5 +68,5 @@ jobs:
 #          repository_host: git.private.com:1234
 
           # ↓ the user signed under the split commit
-          user_name: "survos-ci"
+          user_name: "tacman"
           user_email: "info@survos-ci.com"

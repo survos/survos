@@ -1,0 +1,15 @@
+{
+    "name": "your-monorepo/first-package",
+    "require": {
+        "php": "^8.0",
+        "symfony/http-kernel": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "YourMonorepo\\FirstPackage\\": "src"
+        }
+    },
+    "conflict": {
+        "your-monorepo/second-package": "<5.4.2"
+    }
+}

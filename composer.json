@@ -18,6 +18,7 @@
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
         "fakerphp/faker": "^1.20",
+        "friendsofsymfony/jsrouting-bundle": "^3.2",
         "knplabs/knp-menu-bundle": "^3.2",
         "picqer/php-barcode-generator": "^2.2",
         "survos/inspection-bundle": "^1.0",
@@ -34,6 +35,7 @@
         "symfony/serializer": "^6.1.0",
         "symfony/string": "^6.1.0",
         "symfony/ux-twig-component": "^2.3",
+        "symfony/webpack-encore-bundle": "^1.11",
         "symfony/yaml": "^6.1.0",
         "tacman/twig-tree-tag": "^v3.0.0",
         "twig/string-extra": "^3.4",
@@ -47,7 +49,6 @@
         "symfony/phpunit-bridge": "^6.1.0",
         "symfony/twig-bundle": "^6.1.0",
         "symfony/var-dumper": "^6.1.0",
-        "symfony/webpack-encore-bundle": "^1.11",
         "symplify/monorepo-builder": "^11.1"
     },
     "config": {
@@ -65,11 +66,13 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/",
+            "Survos\\ApiGrid\\": "packages/api-grid-bundle/src/",
             "Survos\\BarcodeBundle\\": "packages/barcode-bundle/src/",
             "Survos\\BootstrapBundle\\": "packages/bootstrap-bundle/src/",
             "Survos\\CoreBundle\\": "packages/core-bundle/src/",
             "Survos\\FakerBundle\\": "packages/faker-bundle/src/",
             "Survos\\FirstPackage\\": "packages/first-package/src",
+            "Survos\\Grid\\": "packages/grid-bundle/src/",
             "Survos\\InspectionBundle\\": "packages/inspection-bundle/src/",
             "Survos\\SecondPackage\\": "packages/second-package/src",
             "Survos\\Tree\\": "packages/tree-bundle/src/"
@@ -81,11 +84,13 @@
         }
     },
     "replace": {
+        "survos/api-grid-bundle": "self.version",
         "survos/barcode-bundle": "1.2.3",
         "survos/bootstrap-bundle": "self.version",
         "survos/core-bundle": "1.2.3",
         "survos/faker-bundle": "1.2.3",
         "survos/first-package": "1.2.3",
+        "survos/grid-bundle": "self.version",
         "survos/inspection-bundle": "self.version",
         "survos/second-package": "1.2.3",
         "survos/tree-bundle": "1.2.3"

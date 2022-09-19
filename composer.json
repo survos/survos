@@ -35,8 +35,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/",
-            "YourMonorepo\\FirstPackage\\": "packages/first-package/src",
-            "YourMonorepo\\SecondPackage\\": "packages/second-package/src"
+            "Survos\\FirstPackage\\": "packages/first-package/src",
+            "Survos\\SecondPackage\\": "packages/second-package/src"
         }
     },
     "autoload-dev": {
@@ -45,6 +45,8 @@
         }
     },
     "replace": {
+        "survos/first-package": "self.version",
+        "survos/second-package": "self.version",
         "your-monorepo/first-package": "5.4.2",
         "your-monorepo/second-package": "5.4.2"
     },

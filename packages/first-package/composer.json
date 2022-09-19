@@ -10,6 +10,7 @@
         }
     },
     "conflict": {
-        "survos/second-package": "<5.4.2"
+        "survos/second-package": "<1.2.0",
+        "survos/faker-bundle": "<1.2.0"
     }
 }

@@ -19,6 +19,7 @@
         "doctrine/persistence": "^2.0 || ^3.0",
         "fakerphp/faker": "^1.20",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
+        "gajus/dindent": "^2.0",
         "knplabs/knp-menu-bundle": "^3.2",
         "picqer/php-barcode-generator": "^2.2",
         "survos/inspection-bundle": "^1.0",
@@ -26,6 +27,7 @@
         "symfony/console": "^6.1.0",
         "symfony/dependency-injection": "^6.1.0",
         "symfony/dotenv": "^6.1.0",
+        "symfony/finder": "^6.1.0",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "^6.1.0",
         "symfony/http-kernel": "^6.1.0",
@@ -36,18 +38,36 @@
         "symfony/string": "^6.1.0",
         "symfony/ux-twig-component": "^2.3",
         "symfony/webpack-encore-bundle": "^1.11",
+        "symfony/workflow": "^6.1.0",
         "symfony/yaml": "^6.1.0",
         "tacman/twig-tree-tag": "^v3.0.0",
         "twig/string-extra": "^3.4",
         "twig/twig": "^3.4"
     },
     "require-dev": {
+        "codeception/codeception": "^5.0",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-doctrine2": "^3.0",
+        "codeception/module-phpbrowser": "^3.0",
+        "codeception/module-symfony": "^3.0 | *@dev",
+        "haydenpierce/class-finder": "^0.4.3",
         "phpstan/phpstan": "^1.8",
         "phpunit/phpunit": "^9.5",
+        "rector/rector": "^0.13.9",
         "roave/security-advisories": "dev-latest",
+        "sensio/framework-extra-bundle": "^6.2",
+        "squizlabs/php_codesniffer": "^3.7",
         "symfony/browser-kit": "^6.1.0",
+        "symfony/form": ">= 6.0",
+        "symfony/http-client": "^6.1.0",
+        "symfony/maker-bundle": "^1.38",
         "symfony/phpunit-bridge": "^6.1.0",
+        "symfony/polyfill-php80": "^1.16.0",
+        "symfony/process": "^6.1.0",
+        "symfony/security-core": "^6.1.0",
+        "symfony/security-csrf": "^6.1.0",
         "symfony/twig-bundle": "^6.1.0",
+        "symfony/validator": "^6.1.0",
         "symfony/var-dumper": "^6.1.0",
         "symplify/monorepo-builder": "^11.1"
     },
@@ -69,10 +89,13 @@
             "Survos\\ApiGrid\\": "packages/api-grid-bundle/src/",
             "Survos\\BarcodeBundle\\": "packages/barcode-bundle/src/",
             "Survos\\BootstrapBundle\\": "packages/bootstrap-bundle/src/",
+            "Survos\\Bundle\\MakerBundle\\": "packages/maker-bundle/src",
             "Survos\\CoreBundle\\": "packages/core-bundle/src/",
+            "Survos\\DocBundle\\": "packages/doc-bundle/src/",
             "Survos\\FakerBundle\\": "packages/faker-bundle/src/",
             "Survos\\FirstPackage\\": "packages/first-package/src",
             "Survos\\Grid\\": "packages/grid-bundle/src/",
+            "Survos\\HtmlPrettifyBundle\\": "packages/html-prettify-bundle/src/",
             "Survos\\InspectionBundle\\": "packages/inspection-bundle/src/",
             "Survos\\SecondPackage\\": "packages/second-package/src",
             "Survos\\Tree\\": "packages/tree-bundle/src/"
@@ -88,10 +111,13 @@
         "survos/barcode-bundle": "1.2.3",
         "survos/bootstrap-bundle": "self.version",
         "survos/core-bundle": "1.2.3",
+        "survos/doc-bundle": "self.version",
         "survos/faker-bundle": "1.2.3",
         "survos/first-package": "1.2.3",
         "survos/grid-bundle": "self.version",
+        "survos/html-prettify-bundle": "self.version",
         "survos/inspection-bundle": "self.version",
+        "survos/maker-bundle": "self.version",
         "survos/second-package": "1.2.3",
         "survos/tree-bundle": "1.2.3"
     },
@@ -113,7 +139,11 @@
     "extra": {
         "symfony": {
             "require": "^6.1.0",
-            "allow-contrib": false
+            "allow-contrib": [
+                false,
+                "true"
+            ],
+            "id": "maker-bundle.survos.com"
         }
     },
     "minimum-stability": "stable",

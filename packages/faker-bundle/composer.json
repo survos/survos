@@ -1,0 +1,30 @@
+{
+    "name": "survos/faker-bundle",
+    "description": "Makes fakerphp/faker methods available via twig",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tac Tacelosky",
+            "email": "tacman@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "fakerphp/faker": "^1.20",
+        "symfony/config": "^6.1.0",
+        "symfony/dependency-injection": "^6.1.0",
+        "symfony/http-kernel": "^6.1.0",
+        "twig/twig": "^3.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Survos\\FakerBundle\\": "src/"
+        }
+    },
+    "extra": {
+        "symfony": {
+            "require": "^6.1.0"
+        }
+    }
+}

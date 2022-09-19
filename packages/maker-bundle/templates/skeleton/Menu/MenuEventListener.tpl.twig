@@ -1,0 +1,46 @@
+<?= "<?php\n" ?>
+
+namespace <?= $namespace ?>;
+
+<?= $use_statements; ?>
+
+#[AsEventListener(event: KnpMenuEvent::SIDEBAR_MENU_EVENT, method: 'appSidebarMenu')]
+#[AsEventListener(event: KnpMenuEvent::SIDEBAR_MENU_EVENT, method: 'coreMenu')]
+#[AsEventListener(event: KnpMenuEvent::PAGE_MENU_EVENT, method: 'coreMenu')]
+final class AppMenuEventListener
+{
+use KnpMenuHelperTrait;
+
+final class <?= $class_name ?> implements EventSubscriberInterface <?= "\n" ?> implements
+{
+    use KnpMenuHelperTrait;
+
+    public function __construct(private ?AuthorizationCheckerInterface $security=null)
+    {
+    }
+
+    public function onMenuEvent(KnpMenuEvent $event): void
+    {
+        $menu = $event->getMenu();
+        $options = $event->getOptions();
+
+        $this->addMenuItem($menu, ['route' => 'app_homepage']);
+        // for nested menus, don't add a route, just a label, then use it for the argument to addMenuItem
+        $nestedMenu = $this->addMenuItem($menu, ['label' => 'Credits']);
+        foreach (['bundles', 'javascript'] as $type) {
+            // $this->addMenuItem($nestedMenu, ['route' => 'survos_base_credits', 'rp' => ['type' => $type], 'label' => ucfirst($type)]);
+            $this->addMenuItem($nestedMenu, ['uri' => "#$type" , 'label' => ucfirst($type)]);
+        }
+
+    }
+
+    /*
+    * @return array The event names to listen to
+    */
+    public static function getSubscribedEvents()
+    {
+        return [
+            KnpMenuEvent::MENU_EVENT => 'onMenuEvent',
+        ];
+    }
+}

@@ -1,7 +1,4 @@
-# FakerBundle [READONLY]
-
-Split of mono
-
+# FakerBundle
 
 Symfony Bundle for fakerphp/faker, exposes many of the formatters in twig.
 
@@ -23,14 +20,17 @@ By default, the data will change with every page refresh.  To keep it consistent
 If the twig function names interfere with another twig function, set a prefix, e.g. fake_name().
 
 ```yaml
-# config/packages/faker.yaml
+# config/packages/survos_faker.yaml
 survos_faker:
   seed: 42
   prefix: fake_
 ```
 
 You can also set the seed in a twig file, via the faker_set_seed() function.
-yarn install
+
+## Working example
+
+Cut and paste the following to create a new Symfony project with a landing page that demonstrates the faker twig functions.
 
 ```bash
 symfony new FakerDemo --webapp && cd FakerDemo
@@ -41,7 +41,7 @@ echo "<ul> {% for i in 0..10 %} <li>{{ person_name() }} <u>{{ internet_email() }
 symfony server:start 
 ```
 
-now open the site.  Each refresh generates different results.  To make the results consistent, set a seed.
+Now open the site.  Each refresh generates different results.  To make the results consistent, set a seed.
 
 ```bash
 echo "survos_faker: {seed: 1}" > config/packages/survos_faker.yaml

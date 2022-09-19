@@ -75,12 +75,12 @@
         }
     },
     "replace": {
-        "survos/barcode-bundle": "self.version",
-        "survos/core-bundle": "self.version",
-        "survos/faker-bundle": "1.2.1",
-        "survos/first-package": "1.2.1",
-        "survos/second-package": "1.2.1",
-        "survos/tree-bundle": "self.version"
+        "survos/barcode-bundle": "1.2.2",
+        "survos/core-bundle": "1.2.2",
+        "survos/faker-bundle": "1.2.2",
+        "survos/first-package": "1.2.2",
+        "survos/second-package": "1.2.2",
+        "survos/tree-bundle": "1.2.2"
     },
     "scripts": {
         "auto-scripts": {

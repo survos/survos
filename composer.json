@@ -23,7 +23,6 @@
         "knplabs/knp-menu-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.10",
         "picqer/php-barcode-generator": "^2.2",
-        "survos/inspection-bundle": "^1.0",
         "symfony/config": "^6.1.0",
         "symfony/console": "^6.1.0",
         "symfony/dependency-injection": "^6.1.0",
@@ -80,7 +79,8 @@
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "phpstan/extension-installer": true
         },
         "optimize-autoloader": true,
         "preferred-install": {

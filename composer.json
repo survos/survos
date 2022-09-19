@@ -17,6 +17,7 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
+        "fabpot/goutte": "^4.0",
         "fakerphp/faker": "^1.20",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "gajus/dindent": "^2.0",
@@ -97,6 +98,7 @@
             "Survos\\BootstrapBundle\\": "packages/bootstrap-bundle/src/",
             "Survos\\Bundle\\MakerBundle\\": "packages/maker-bundle/src",
             "Survos\\CoreBundle\\": "packages/core-bundle/src/",
+            "Survos\\CrawlerBundle\\": "packages/crawler-bundle/src/",
             "Survos\\DocBundle\\": "packages/doc-bundle/src/",
             "Survos\\FakerBundle\\": "packages/faker-bundle/src/",
             "Survos\\FirstPackage\\": "packages/first-package/src",
@@ -119,6 +121,7 @@
         "survos/barcode-bundle": "1.2.5",
         "survos/bootstrap-bundle": "1.2.5",
         "survos/core-bundle": "1.2.5",
+        "survos/crawler-bundle": "self.version",
         "survos/doc-bundle": "1.2.5",
         "survos/faker-bundle": "1.2.5",
         "survos/first-package": "1.2.5",
@@ -147,7 +150,10 @@
     },
     "extra": {
         "symfony": {
-            "require": "^6.1.0",
+            "require": [
+                "^6.1.0",
+                "^6.1"
+            ],
             "allow-contrib": [
                 false,
                 "true"

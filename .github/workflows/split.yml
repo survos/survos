@@ -23,8 +23,9 @@ jobs:
       matrix:
         # define package to repository map
         package:
-          - {local_path: 'first-package', split_repository: 'first-package'}
           - {local_path: 'faker-bundle', split_repository: 'SurvosFakerBundle'}
+          - {local_path: 'core-bundle', split_repository: 'SurvosCoreBundle'}
+          - {local_path: 'barcode-bundle', split_repository: 'BarcodeBundle'}
 
     steps:
       -   uses: actions/checkout@v2

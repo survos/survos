@@ -1,6 +1,6 @@
-# mono-demo
-Example of a mono repo
+# survos/survos
 
-Uses github actions to split
+Monorepo for all Survos bundles and demos
 
-Does the package repo need to exist with a specific branch (e.g. main)?
+Uses github actions to split.
+

@@ -1,0 +1,71 @@
+<!-- Footer -->
+{# <nav class="navbar fixed-bottom navbar-light bg-light"> #}
+{#    <a class="navbar-brand" href="#">Fixed bottom</a> #}
+{# </nav> #}
+
+
+<footer class="content-footer footer bg-footer-theme">
+    {#    <ul class="nav justify-content-end"> #}
+    {#        <li class="nav-item"> #}
+    {#            <a class="nav-link active" href="#">Active</a> #}
+    {#        </li> #}
+    {#        <li class="nav-item"> #}
+    {#            <a class="nav-link" href="#">Link</a> #}
+    {#        </li> #}
+    {#        <li class="nav-item"> #}
+    {#            <a class="nav-link" href="#">Link</a> #}
+    {#        </li> #}
+    {#        <li class="nav-item"> #}
+    {#            <a class="nav-link disabled" href="#">Disabled</a> #}
+    {#        </li> #}
+    {#    </ul> #}
+
+
+    <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+
+        <div class="mb-2 mb-md-0">
+            {#  sb an unstyled list, or just spans #}
+                        ©
+                        <script>
+                            document.write(new Date().getFullYear());
+                        </script>
+                        , made with ❤️ by
+                        <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">ThemeSelection</a>
+                    </div>
+                    <div>
+            {#            <a href="https://themeselection.com/license/" class="footer-link me-4" target="_blank">License</a> #}
+            {#            <a href="https://themeselection.com/" target="_blank" class="footer-link me-4">More Themes</a> #}
+
+            {#
+            <a
+                    href="https://themeselection.com/demo/sneat-bootstrap-html-admin-template/documentation/"
+                    target="_blank"
+                    class="footer-link me-4"
+            >Documentation</a
+            >
+
+            <a
+                    href="https://github.com/themeselection/sneat-html-admin-template-free/issues"
+                    target="_blank"
+                    class="footer-link me-4"
+            >Support</a
+            >
+            #}
+                        {% block footer_menu %}
+{#            {{ component('menu', {type: 'footer'}) }}#}
+                        {% endblock %}
+        </div>
+
+        {% if hasOffcanvas() %}
+            <button class="btn btn-primary " type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
+                <span class="bx bx-filter"></span>
+            </button>
+        {% endif %}
+
+
+
+
+
+    </div>
+</footer>
+<!-- / Footer -->

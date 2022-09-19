@@ -13,7 +13,7 @@ composer req survos/faker-bundle
 
 <ul>
 {% for i in 1..10 %}
-<li>{{ name() }}, {{ company() }}</li>
+<li>{{ person_name() }}, {{ company_company() }}</li>
 {% endfor %} 
 </ul>
 
@@ -30,14 +30,22 @@ survos_faker:
 ```
 
 You can also set the seed in a twig file, via the faker_set_seed() function.
+yarn install
 
 ```bash
-symfony new FakerDemo --webapp
-yarn install 
+symfony new FakerDemo --webapp && cd FakerDemo
 bin/console make:controller AppController
+sed  -i "s|'/app'|'/'|" src/Controller/AppController.php # the landing page controller
 composer req survos/faker-bundle
-echo "{{ name() }}" > templates/app/index.html.twig
-symfony server:start -d
+echo "<ul> {% for i in 0..10 %} <li>{{ person_name() }} <u>{{ internet_email() }}</u> <br />  <i>{{ company_jobTitle() }}</i>, {{ company_company() }}  </li>{% endfor %}</ul>" > templates/app/index.html.twig
+symfony server:start 
 ```
 
-and go to /app
+now open the site.  Each refresh generates different results.  To make the results consistent, set a seed.
+
+```bash
+echo "survos_faker: {seed: 1}" > config/packages/survos_faker.yaml
+bin/console cache:clear
+symfony server:start
+```
+

@@ -28,7 +28,7 @@
         }
     },
     "conflict": {
-        "survos/second-package": "<1.2.0",
-        "survos/first-package": "<1.2.0"
+        "survos/second-package": "<1.2.1",
+        "survos/first-package": "<1.2.1"
     }
 }

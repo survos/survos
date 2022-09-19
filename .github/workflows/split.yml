@@ -26,6 +26,7 @@ jobs:
           - {local_path: 'faker-bundle', split_repository: 'SurvosFakerBundle'}
           - {local_path: 'core-bundle', split_repository: 'SurvosCoreBundle'}
           - {local_path: 'barcode-bundle', split_repository: 'BarcodeBundle'}
+          - {local_path: 'tree-bundle', split_repository: 'SurvosTreeBundle'}
 
     steps:
       -   uses: actions/checkout@v2

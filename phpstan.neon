@@ -1,0 +1,16 @@
+parameters:
+    level: 3
+    inferPrivatePropertyTypeFromConstructor: true
+    paths:
+        - ./src
+        - ./packages
+
+    excludePaths:
+      - 'src/Resources/skeleton'
+      - */cache/*
+
+    ignoreErrors:
+            -
+                message: '#.*NodeDefinition::children.*#'
+                path: ./src/DependencyInjection
+

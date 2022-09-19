@@ -1,0 +1,20 @@
+{# templates/components/tree.html.twig #}
+{{ _self }}
+
+    {{ dump(filter) }}
+
+<div {{ this.stimulusController ? stimulus_controller(this.stimulusController, {
+    filter: this.filter
+}) }}>
+    {{ this.stimulusController }}
+
+
+    <div {{ stimulus_target(this.stimulusController, 'html') }}>
+
+
+        {% block data %}
+            data here.
+        {% endblock %}
+    </div>
+
+</div>

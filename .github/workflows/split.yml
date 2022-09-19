@@ -35,6 +35,7 @@ jobs:
           - {local_path: 'html-prettify-bundle', split_repository: 'HtmlPrettifyBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'api-grid-bundle', split_repository: 'SurvosApiGridBundle'}
+          - {local_path: 'workflow-helper-bundle', split_repository: 'SurvosWorkflowHelperBundle'}
 
     steps:
       -   uses: actions/checkout@v2

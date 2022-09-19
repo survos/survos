@@ -32,8 +32,10 @@
         "symfony/flex": "^2",
         "symfony/framework-bundle": "^6.1.0",
         "symfony/http-kernel": "^6.1.0",
+        "symfony/messenger": "^6.1.0",
         "symfony/options-resolver": "^6.1.0",
         "symfony/password-hasher": "^6.1.0",
+        "symfony/process": "^6.1.0",
         "symfony/runtime": "^6.1.0",
         "symfony/security-bundle": "^6.1.0",
         "symfony/serializer": "^6.1.0",
@@ -52,7 +54,9 @@
         "codeception/module-doctrine2": "^3.0",
         "codeception/module-phpbrowser": "^3.0",
         "codeception/module-symfony": "^3.0 | *@dev",
+        "ekino/phpstan-banned-code": "^1.0",
         "haydenpierce/class-finder": "^0.4.3",
+        "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^1.8",
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^0.13.9",
@@ -60,12 +64,11 @@
         "sensio/framework-extra-bundle": "^6.2",
         "squizlabs/php_codesniffer": "^3.7",
         "symfony/browser-kit": "^6.1.0",
-        "symfony/form": ">= 6.0",
+        "symfony/form": "^6.1.0",
         "symfony/http-client": "^6.1.0",
         "symfony/maker-bundle": "^1.38",
         "symfony/phpunit-bridge": "^6.1.0",
         "symfony/polyfill-php80": "^1.16.0",
-        "symfony/process": "^6.1.0",
         "symfony/security-core": "^6.1.0",
         "symfony/security-csrf": "^6.1.0",
         "symfony/twig-bundle": "^6.1.0",
@@ -101,7 +104,8 @@
             "Survos\\HtmlPrettifyBundle\\": "packages/html-prettify-bundle/src/",
             "Survos\\InspectionBundle\\": "packages/inspection-bundle/src/",
             "Survos\\SecondPackage\\": "packages/second-package/src",
-            "Survos\\Tree\\": "packages/tree-bundle/src/"
+            "Survos\\Tree\\": "packages/tree-bundle/src/",
+            "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/"
         }
     },
     "autoload-dev": {
@@ -123,7 +127,8 @@
         "survos/inspection-bundle": "1.2.4",
         "survos/maker-bundle": "1.2.4",
         "survos/second-package": "1.2.4",
-        "survos/tree-bundle": "1.2.4"
+        "survos/tree-bundle": "1.2.4",
+        "survos/workflow-helper-bundle": "self.version"
     },
     "scripts": {
         "auto-scripts": {

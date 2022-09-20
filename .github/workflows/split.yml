@@ -15,6 +15,7 @@ env:
 #  GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
 
 jobs:
+
   packages_split:
     runs-on: ubuntu-latest
 
@@ -37,6 +38,9 @@ jobs:
           - {local_path: 'crawler-bundle', split_repository: 'SurvosCrawlerBundle'}
           - {local_path: 'api-grid-bundle', split_repository: 'SurvosApiGridBundle'}
           - {local_path: 'workflow-helper-bundle', split_repository: 'SurvosWorkflowHelperBundle'}
+
+          - {local_path: 'recipes', split_repository: 'SurvosRecipes'}
+
 
     steps:
       -   uses: actions/checkout@v2

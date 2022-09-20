@@ -148,19 +148,6 @@
     "conflict": {
         "symfony/symfony": "*"
     },
-    "extra": {
-        "symfony": {
-            "require": [
-                "^6.1.0",
-                "^6.1"
-            ],
-            "allow-contrib": [
-                false,
-                "true"
-            ],
-            "id": "maker-bundle.survos.com"
-        }
-    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }

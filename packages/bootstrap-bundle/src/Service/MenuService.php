@@ -149,7 +149,8 @@ class MenuService
                     'attributes' => []
                 ])->resolve($options);
         } catch (\Exception $exception) {
-            dd($options, $exception);
+            assert(false, $exception->getMessage());
+//            dd($options, $exception);
         }
 
         // rename rp

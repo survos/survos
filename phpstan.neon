@@ -3,16 +3,28 @@ parameters:
     inferPrivatePropertyTypeFromConstructor: true
     paths:
         - ./src
-        - ./packages
+        - ./packages/
 
     excludePaths:
-      - 'src/Resources/skeleton'
-      - */cache/*
+            analyse:
+#                - packages/*/vendor/*
+                - ./packages/*/vendor/*
+                - */cache/*
+#                - ./packages/maker-bundle/vendor
+#      - ./packages/*/vendor
+#      - ./packages/*/vendor
+#      - packages/*/vendor
+#      - vendor
+#      - 'src/Resources/skeleton'
 
     ignoreErrors:
-            -
-                message: '#.*NodeDefinition::children.*#'
-                path: ./packages/
+#            -
+#                message: '#.*NodeDefinition::children.*#'
+#                path: ./packages/
             -
                 message: '#Should not use node with type "Stmt_Echo"#'
                 path: packages/maker-bundle/templates/skeleton/
+
+            -
+                message: '#FrameworkConfig not found#'
+                path: packages/

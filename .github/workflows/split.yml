@@ -24,6 +24,8 @@ jobs:
       matrix:
         # define package to repository map
         package:
+          - {local_path: 'recipes', split_repository: 'SurvosRecipes'}
+
           - {local_path: 'faker-bundle', split_repository: 'SurvosFakerBundle'}
           - {local_path: 'core-bundle', split_repository: 'SurvosCoreBundle'}
           - {local_path: 'barcode-bundle', split_repository: 'BarcodeBundle'}
@@ -39,7 +41,6 @@ jobs:
           - {local_path: 'api-grid-bundle', split_repository: 'SurvosApiGridBundle'}
           - {local_path: 'workflow-helper-bundle', split_repository: 'SurvosWorkflowHelperBundle'}
 
-          - {local_path: 'recipes', split_repository: 'SurvosRecipes'}
 
 
     steps:

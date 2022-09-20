@@ -30,6 +30,7 @@ class TwigExtension extends AbstractExtension
 
     public function getFunctions(): array
     {
+
         return [
             // Faker\Provider\Uuid
             new TwigFunction($this->prefix . 'uuid_uuid', fn () => $this->generator->uuid()),  // @returns string

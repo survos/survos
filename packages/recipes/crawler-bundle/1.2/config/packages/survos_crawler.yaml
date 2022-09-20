@@ -1,0 +1,9 @@
+survos_crawler:
+  base_url: https://127.0.0.1:8001/
+  login_path: /en/login
+  username_form_variable: _username
+  password_form_variable: _password
+  plaintext_password: kitten
+  submit_button: "login_button"
+#  submit_button: "Sign in"
+#  submit_button: ".btn"

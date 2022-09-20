@@ -1,0 +1,30 @@
+{
+  "manifests": {
+    "survos/barcode-bundle": {
+      "manifest": {
+        "bundles": {
+          "Survos\\BarcodeBundle\\SurvosBarcodeBundle": [
+            "all"
+          ]
+        },
+        "copy-from-recipe": {
+          "config/": "%CONFIG_DIR%"
+        }
+      },
+      "files": {
+        "config/packages/survos_barcode.yaml": {
+          "contents": [
+            "survos_barcode:",
+            "    foregroundColor: black",
+            "    widthFactor: 3",
+            "    height: 40",
+            ""
+          ],
+          "executable": false
+        }
+      },
+      "ref": "8405f3af1312d1fa121afed4dddef636c6c7ff02"
+    }
+  }
+}
+

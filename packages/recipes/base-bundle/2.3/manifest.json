@@ -1,0 +1,10 @@
+{
+    "bundles": {
+        "Survos\\BaseBundle\\SurvosBaseBundle": ["all"]
+    },
+    "copy-from-recipe": {
+        "config/": "%CONFIG_DIR%/",
+        "src/": "%SRC_DIR%/"
+    },
+    "ref": "3df7b6c61c3e92b5570ffa582fdf9c24f3a9123c"
+}

@@ -1,0 +1,20 @@
+{
+  "recipes": {
+    "survos/bootstrap-bundle": [
+      "1.2"
+    ],
+    "survos/crawler-bundle": [
+      "1.2"
+    ],
+    "survos/barcode-bundle": [
+      "1.0"
+    ]
+  },
+  "branch": "main",
+  "is_contrib": true,
+  "_links": {
+    "repository": "github.com/survos/recipes",
+    "origin_template": "{package}:{version}@github.com/survos/recipes",
+    "recipe_template": "https://api.github.com/repos/survos/recipes/contents/{package_dotted}.{version}.json"
+  }
+}

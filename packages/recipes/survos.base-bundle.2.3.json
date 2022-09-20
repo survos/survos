@@ -1,0 +1,44 @@
+{
+  "manifests": {
+    "survos/base-bundle": {
+      "manifest": {
+        "bundles": {
+          "Survos\\BaseBundle\\SurvosBaseBundle": [
+            "all"
+          ]
+        },
+        "copy-from-recipe": {
+          "config/": "%CONFIG_DIR%",
+          "src/Menu/": "%SRC_DIR%/Menu"
+        }
+      },
+
+      "files": {
+        "config/packages/survos_base.yaml": {
+          "contents": [
+            "survos_base:",
+            "    theme: umbrella",
+            "twig:",
+            "    globals:",
+            "       theme: umbrella",
+            "    paths:",
+            "       'vendor/survos/base-bundle/src/Resources/views/umbrella': 'theme'",
+            ""
+          ],
+          "executable": false
+        },
+        "config/routes/survos_base.yaml": {
+          "contents": [
+            "app_homepage: {path: /, controller: 'Survos\\BaseBundle\\Controller\\LandingController::landing'}",
+            "survos_landing: {path: /landing, controller: 'Survos\\BaseBundle\\Controller\\LandingController::landing'}",
+            "app_profile: {path: /profile, controller: 'Survos\\BaseBundle\\Controller\\LandingController::landing'}",
+            "app_logout: {path: /landing, controller: 'Survos\\BaseBundle\\Controller\\LandingController::landing'}"
+          ],
+          "executable": false
+        }
+      },
+      "ref": "7405a3af1312d1f9121afea4dddef636c6c7ff02"
+    }
+  }
+}
+

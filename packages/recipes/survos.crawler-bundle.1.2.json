@@ -1,0 +1,30 @@
+{
+  "manifests": {
+    "survos/crawler-bundle": {
+      "manifest": {
+        "bundles": {
+          "Survos\\CrawlerBundle\\SurvosCrawlerBundle": [
+            "all"
+          ]
+        },
+        "copy-from-recipe": {
+          "config/": "%CONFIG_DIR%"
+        }
+      },
+      "files": {
+        "config/packages/survos_crawler.yaml": {
+          "contents": [
+            "survos_crawler:",
+            "    foregroundColor: black",
+            "    widthFactor: 3",
+            "    height: 40",
+            ""
+          ],
+          "executable": false
+        }
+      },
+      "ref": "8405f3af1aaaa1fa121dfed4dddef636c6c7ff02"
+    }
+  }
+}
+

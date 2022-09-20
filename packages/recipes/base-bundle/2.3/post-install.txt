@@ -1,0 +1,3 @@
+    * <fg=blue>Customize</> Configure your menus
+    * <fg=blue>Read</> documentation at <comment>https://github.com/Bee-Lab/BeelabTagBundle/blob/master/Resources/docs/index.md</>
+

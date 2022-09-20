@@ -27,5 +27,4 @@ trait GoogleTrait
 
         return $this;
     }
-
 }

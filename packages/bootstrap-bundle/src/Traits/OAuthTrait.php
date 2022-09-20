@@ -23,5 +23,4 @@ trait OAuthTrait
 
         return $this;
     }
-
 }

@@ -26,21 +26,22 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class SurvosBootstrapBundle extends AbstractBundle
 {
+    //    protected string $extensionAlias = 'survos_bootstrap';
 
-//    protected string $extensionAlias = 'survos_bootstrap';
-
-    /** @param array<mixed> $config */
+    /**
+     * @param array<mixed> $config
+     */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-//        if ($twig = $container->import('twig')) {
-//            $twig->addGlobal('backend', array(
-//                'title' => $this->container->getParameter('backend.title')
-//            ));
-//        }
+        //        if ($twig = $container->import('twig')) {
+        //            $twig->addGlobal('backend', array(
+        //                'title' => $this->container->getParameter('backend.title')
+        //            ));
+        //        }
         assert(is_array($config['routes']), json_encode($config));
 
-//        $config = $this->getContextOptions($config);
-//        dd($config);
+        //        $config = $this->getContextOptions($config);
+        //        dd($config);
         $builder->register(ContextService::class)
             ->setArgument('$options', $config['options'])
             ->setAutowired(true);
@@ -70,35 +71,33 @@ class SurvosBootstrapBundle extends AbstractBundle
 //            ->setArgument('$componentRenderer', new Reference('ux.twig_component.component_renderer'))
         ;
 
-
         $builder->register(MenuService::class)
             ->setAutowired(true)
             ->setArgument('$authorizationChecker', new Reference('security.authorization_checker'))
-            ;
+        ;
 
-//        $builder->register(MenuBuilder::class)
-//            ->setArgument('$factory', new Reference('knp_menu.factory'))
-//            ->setArgument('$eventDispatcher', new Reference('event_dispatcher'))
-////            ->addTag('knp_menu.menu_builder', ['method' => 'createSidebarMenu', 'alias' => KnpMenuEvent::SIDEBAR_MENU_EVENT])
-////            ->addTag('knp_menu.menu_builder', ['method' => 'createNavbarMenu', 'alias' => KnpMenuEvent::NAVBAR_MENU_EVENT])
-////            ->addTag('knp_menu.menu_builder', ['method' => 'createAuthMenu', 'alias' => KnpMenuEvent::AUTH_MENU_EVENT])
-////            ->addTag('knp_menu.menu_builder', ['method' => 'createFooterMenu', 'alias' => KnpMenuEvent::FOOTER_MENU_EVENT])
-////            ->addTag('knp_menu.menu_builder', ['method' => 'createMenu', 'alias' => KnpMenuEvent::PAGE_MENU_EVENT])
-//            ->addTag('knp_menu.menu_builder', ['method' => 'createMenu', 'alias' => KnpMenuEvent::MENU_EVENT])
-//        ;
-//
+        //        $builder->register(MenuBuilder::class)
+        //            ->setArgument('$factory', new Reference('knp_menu.factory'))
+        //            ->setArgument('$eventDispatcher', new Reference('event_dispatcher'))
+        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createSidebarMenu', 'alias' => KnpMenuEvent::SIDEBAR_MENU_EVENT])
+        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createNavbarMenu', 'alias' => KnpMenuEvent::NAVBAR_MENU_EVENT])
+        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createAuthMenu', 'alias' => KnpMenuEvent::AUTH_MENU_EVENT])
+        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createFooterMenu', 'alias' => KnpMenuEvent::FOOTER_MENU_EVENT])
+        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createMenu', 'alias' => KnpMenuEvent::PAGE_MENU_EVENT])
+        //            ->addTag('knp_menu.menu_builder', ['method' => 'createMenu', 'alias' => KnpMenuEvent::MENU_EVENT])
+        //        ;
+        //
 
-//        Survos\BaseBundle\Menu\MenuBuilder:
-//    class: Survos\BaseBundle\Menu\MenuBuilder
-//    arguments:
-//      - "@knp_menu.factory"
-//      - "@event_dispatcher"
-//    tags:
-//      - { name: knp_menu.menu_builder, method: createSidebarMenu, alias: survos_sidebar_menu }
-//      - { name: knp_menu.menu_builder, method: createPageMenu, alias: survos_page_menu }
+        //        Survos\BaseBundle\Menu\MenuBuilder:
+        //    class: Survos\BaseBundle\Menu\MenuBuilder
+        //    arguments:
+        //      - "@knp_menu.factory"
+        //      - "@event_dispatcher"
+        //    tags:
+        //      - { name: knp_menu.menu_builder, method: createSidebarMenu, alias: survos_sidebar_menu }
+        //      - { name: knp_menu.menu_builder, method: createPageMenu, alias: survos_page_menu }
 
-//        dd($config['routes']);
-
+        //        dd($config['routes']);
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -129,10 +128,10 @@ class SurvosBootstrapBundle extends AbstractBundle
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
-                ->scalarNode('home')
-                ->defaultValue('app_homepage')
-                ->info('name of the homepage route')
-                ->end()
+            ->scalarNode('home')
+            ->defaultValue('app_homepage')
+            ->info('name of the homepage route')
+            ->end()
 
             ->scalarNode('login')->defaultValue('app_login')->info('name of the login')->end()
             ->scalarNode('homepage')->defaultValue('app_homepage')->info('name of the home routes')->end()
@@ -171,8 +170,8 @@ class SurvosBootstrapBundle extends AbstractBundle
 //                ->info("Offcanvas position (top,bottom,start,end")
 //            ->end()
             ->booleanNode('allow_login')
-                ->defaultValue(false)
-                ->info("Login route exists")
+            ->defaultValue(false)
+            ->info("Login route exists")
             ->end();
         return $rootNode;
     }
@@ -180,14 +179,13 @@ class SurvosBootstrapBundle extends AbstractBundle
     /**
      * Merge available configuration options, so they are all available for the ContextHelper.
      *
-     * @param array $config
      * @return array
      */
     protected function getContextOptions(array $config = [])
     {
         $sidebar = [];
 
-        if (isset($config['control_sidebar']) && !empty($config['control_sidebar'])) {
+        if (isset($config['control_sidebar']) && ! empty($config['control_sidebar'])) {
             $sidebar = $config['control_sidebar'];
         }
 
@@ -198,5 +196,4 @@ class SurvosBootstrapBundle extends AbstractBundle
 
         return $contextOptions;
     }
-
 }

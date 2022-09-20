@@ -74,6 +74,7 @@
         "symfony/twig-bundle": "^6.1.0",
         "symfony/validator": "^6.1.0",
         "symfony/var-dumper": "^6.1.0",
+        "symplify/easy-coding-standard": "^11.1",
         "symplify/monorepo-builder": "^11.1"
     },
     "config": {

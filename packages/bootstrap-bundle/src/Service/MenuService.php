@@ -25,18 +25,6 @@ class MenuService
         $this->authorizationChecker = $authorizationChecker;
     }
 
-    public function getParameterBag(): ?ParameterBagInterface
-    {
-        return $this->bag;
-    }
-
-    public function setParameterBag(ParameterBagInterface $bag)
-    {
-        $this->bag = $bag;
-        return $this;
-    }
-
-
     public function getAuthorizationChecker()
     {
         return $this->authorizationChecker;

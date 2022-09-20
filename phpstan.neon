@@ -1,5 +1,5 @@
 parameters:
-    level: 3
+    level: 0
     inferPrivatePropertyTypeFromConstructor: true
     paths:
         - ./src
@@ -12,5 +12,7 @@ parameters:
     ignoreErrors:
             -
                 message: '#.*NodeDefinition::children.*#'
-                path: ./src/DependencyInjection
-
+                path: ./packages/
+            -
+                message: '#Should not use node with type "Stmt_Echo"#'
+                path: packages/maker-bundle/templates/skeleton/

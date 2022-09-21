@@ -1,0 +1,51 @@
+# config/serializer/serialization.yaml
+
+App\Entity\Location:
+  attributes:
+    name:
+      groups: ['jstree']
+    id:
+      groups: ['jstree']
+    code:
+      groups: ['jstree']
+    parent:
+      groups: ['jstree']
+    parentId:
+      groups: ['jstree']
+#    building:
+#      groups: ['jstree']
+
+App\Entity\File:
+  attributes:
+    name:
+      groups: ['jstree']
+    id:
+      groups: ['jstree']
+    isDir:
+      groups: ['jstree']
+    childCount:
+      groups: ['jstree']
+    parent:
+      groups: ['jstree']
+    parentId:
+      groups: ['jstree']
+
+App\Entity\Building:
+  attributes:
+    name:
+      groups: ['jstree']
+    locations:
+      groups: ['jstree']
+    id:
+      groups: ['jstree']
+
+#App\Entity\Topic:
+#  attributes:
+#    name:
+#      groups: ['jstree']
+#    description:
+#      groups: ['jstree']
+#    id:
+#      groups: ['jstree']
+#    parentId:
+#      groups: ['jstree']

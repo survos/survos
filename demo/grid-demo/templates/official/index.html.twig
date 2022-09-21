@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Official index{% endblock %}
+
+{% block body %}
+    <h1>Official index</h1>
+
+    <table class="table" {{ stimulus_controller('@survos/datatables-bundle/datatable') }}>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>OfficialName</th>
+                <th>Data</th>
+                <th>Birthday</th>
+                <th>Gender</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for official in officials %}
+            <tr>
+                <td>{{ official.id }}</td>
+                <td>{{ official.firstName }}</td>
+                <td>{{ official.lastName }}</td>
+                <td>{{ official.officialName }}</td>
+                <td>{{ official.data }}</td>
+                <td>{{ official.birthday ? official.birthday|date('Y-m-d') : '' }}</td>
+                <td>{{ official.gender }}</td>
+                <td>
+                    <a href="{{ path('app_official_show', {'id': official.id}) }}">show</a>
+                    <a href="{{ path('app_official_edit', {'id': official.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_official_new') }}">Create new</a>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Building: {{ building.name }} ({{ building.locations.count }} children){% endblock %}
+
+{% set html_tree %}
+    {% tree item in building.rootLocation.children %}
+        {{ treeloop.first ? '<ul>' }}
+        <li class="jstree-open">
+            #{{ treeloop.index }}
+            {{ item.name }}
+            {#        <a href="{{ path('build') }}">{{ item.name }}</a>#}
+            {% subtree item.children %}
+        </li>
+        {{ treeloop.last ? '</ul>' }}
+    {% endtree %}
+{% endset %}
+
+{% block body %}
+<h1>{{ block('title') }}</h1>
+
+    <h3>Tree Data</h3>
+    {{ html_tree|escape }}
+    {{ html_tree }}
+
+    <h3>api_tree Component</h3>
+    {% component api_tree with {
+        class: 'App\\Entity\\Location',
+    } %}
+    {% endcomponent %}
+
+    {% endblock %}
+
+{% block playground %}
+    <h3>Tree Component (HTML)</h3>
+    {% component tree %}
+        {% block data %}
+            Data here.
+            {{ html_tree }}
+        {% endblock  %}
+    {% endcomponent %}
+
+{% set _controller = '@survos/tree-bundle/api_tree' %}
+{% set apiUrl = path('api_locations_get_collection') %}
+<h3>AJAX Tree, using {{ _controller }}</h3>
+<div
+{{ stimulus_controller(_controller, {
+    apiCall: apiUrl,
+    filter: filter
+}) }}
+>
+    <div {{ stimulus_target(_controller, 'message') }}>Messages go here.</div>
+
+    <ol {{ stimulus_target(_controller, 'ajax') }}>
+        Ajax tree will be populated here.
+    </ol>
+</div>
+
+
+
+{#{% set _controller = '@survos/tree-bundle/tree' %}#}
+{% set _controller = 'jstree' %}
+    {% if true %}
+<h3>HTML Tree, using stimulus {{ _controller }}</h3>
+<div
+        {{ stimulus_controller(_controller) }}
+        {{ stimulus_target(_controller, 'html')
+        }}>
+
+{% tree item in [building.rootLocation] %}
+    {% if treeloop.first %}<ul >{% endif %}
+    <li class="jstree-open">
+        #{{ treeloop.index }}
+        {{ item.name }}
+{#        <a href="{{ path('build') }}">{{ item.name }}</a>#}
+        {% subtree item.children %}
+    </li>
+    {% if treeloop.last %}</ul>{% endif %}
+{% endtree %}
+</div>
+    {% endif %}
+
+{#<h3>Using locationManagerApp for building {{ building.id }}/{{ apiUrl }}</h3>#}
+{#<div id="location_manager"#}
+{#     class="demo"#}
+{#     data-building-id="{{ building.id }}"#}
+{#     data-api-base="{{ apiUrl }}"#}
+{#>#}
+{#    <h3>Specific Building: {{ building.id }} {{ building }}</h3>#}
+{#    <div id="building_locations"#}
+{#         data-building-id="{{ building.id }}" class="demo"></div>#}
+{#</div>#}
+
+
+<table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ building.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ building.name }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>
+        {{ building.name }} Locations:
+    </h3>
+
+
+    {% for location in building.locations %}
+        <li>
+            {{ location.parent ? location.parent.name }} /
+            {{ location.name }}
+        </li>
+    {% endfor %}
+
+    <a href="{{ path('building_edit', building.rp) }}">edit</a>
+
+    {{ include('building/_delete_form.html.twig') }}
+{% endblock %}

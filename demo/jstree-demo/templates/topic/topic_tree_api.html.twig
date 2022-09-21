@@ -1,0 +1,31 @@
+{% extends 'layout.html.twig' %}
+
+{#{% set _sc = '@survos/tree-bundle/tree' %}#}
+    {% set _sc = 'api_tree' %}
+
+{% block title %}Directory Demo, uses twig-tree-tag, {{ _sc }}{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-md-5">
+            <h3>Component api_tree {{ topicClass }}</h3>
+            <div class="">
+            {% component api_tree with {
+                class: topicClass,
+                filter: filter|default({})
+            } %}
+            {% endcomponent %}
+            </div>
+        </div>
+        <div class="col-md-7">
+            {% set _sc = 'topic' %}
+            <div {{ stimulus_controller(_sc) }}>
+                <h3 {{ stimulus_target(_sc, 'title') }}>TOPIC title</h3>
+                <div {{ stimulus_target(_sc, 'results') }}>TOPIC results</div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

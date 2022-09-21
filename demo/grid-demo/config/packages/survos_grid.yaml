@@ -1,0 +1,3 @@
+#  ln -s ~/survos/bundles/grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
+survos_grid:
+#  stimulus_controller: sandbox_api

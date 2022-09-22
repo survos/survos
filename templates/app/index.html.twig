@@ -14,12 +14,18 @@
     <ul>
         {% for namespace, package in packages %}
             <li>
-                {{ namespace }}
+                {% set composer = package.composerJson %}
+{#                {{ namespace }}#}
+{#                {{ package.composerJson.name }}#}
+                <b>{{ composer.shortName }}</b>
 
-                {{ dump(package) }}
-                {{ package.composerJson.name }}
-                {{ package.composerJson.shortName }}
-                {{ dump(package.classes) }}
+                <i>{{ composer.description }}</i>
+                {{ composer.keywords|join(',') }}
+                <ul>
+                    {% for class in package.classes %}
+                        <li>{{ class }}</li>
+                    {% endfor %}
+                </ul>
             </li>
         {% endfor %}
 

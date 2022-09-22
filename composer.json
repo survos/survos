@@ -52,6 +52,7 @@
         "symfony/yaml": "^6.1.0",
         "symplify/composer-json-manipulator": "^11.1",
         "tacman/twig-tree-tag": "^v3.0.0",
+        "twig/extra-bundle": "^3.4",
         "twig/string-extra": "^3.4",
         "twig/twig": "^3.4"
     },

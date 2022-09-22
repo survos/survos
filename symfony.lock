@@ -329,5 +329,8 @@
         "files": [
             "config/packages/workflow.yaml"
         ]
+    },
+    "twig/extra-bundle": {
+        "version": "v3.4.0"
     }
 }

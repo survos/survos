@@ -129,12 +129,10 @@
     },
     "extra": {
         "symfony": {
-            "require": [
-                "^6.1.0",
+            "require":
                 "^6.1"
-            ],
-            "allow-contrib": "true",
-            "id": "maker-bundle.survos.com"
+            ,
+            "allow-contrib": "true"
         }
     },
     "replace": {

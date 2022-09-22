@@ -129,10 +129,7 @@
     },
     "extra": {
         "symfony": {
-            "require": [
-                "^6.1",
-                "^6.1.0"
-            ],
+            "require": "6.1",
             "allow-contrib": "true"
         }
     },

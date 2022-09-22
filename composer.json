@@ -15,6 +15,7 @@
         "ext-iconv": "*",
         "api-platform/core": "^2.7 || ^3.0",
         "doctrine/doctrine-bundle": "^2.7",
+        "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
         "fabpot/goutte": "^4.0",

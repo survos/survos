@@ -15,4 +15,12 @@ class AppController extends AbstractController
             'controller_name' => 'AppController',
         ]);
     }
+
+
+    public function run(): void
+    {
+        // ↓ instance of \Symplify\ComposerJsonManipulator\ValueObject\ComposerJson
+        $composerJson = $this->composerJsonFactory->createFromFilePath(getcwd() . '/composer.json');
+        // ...
+    }
 }

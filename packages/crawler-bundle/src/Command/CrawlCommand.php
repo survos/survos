@@ -3,6 +3,7 @@
 namespace Survos\CrawlerBundle\Command;
 
 //use App\Entity\User;
+use App\Kernel;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -34,11 +35,12 @@ class CrawlCommand extends Command
 {
     public function __construct(
         private ManagerRegistry $registry,
-        private LoggerInterface        $logger,
-        private ParameterBagInterface  $bag,
-        private CrawlerService         $crawlerService,
-        private RouterInterface        $router, string $name = null)
-    {
+        private LoggerInterface $logger,
+        private ParameterBagInterface $bag,
+        private CrawlerService $crawlerService,
+        private RouterInterface $router,
+        string $name = null
+    ) {
         parent::__construct($name);
     }
 
@@ -101,15 +103,11 @@ class CrawlCommand extends Command
             new InputOption('security-firewall', null, InputOption::VALUE_REQUIRED, 'Firewall name', 'secured_area'),
             new InputOption('ignore-route-keyword', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Skip routes containing this string', []),
         ]);
-
-
     }
 
     /**
      * Execute
      *
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @author  Joe Sexton <joe@webtipblog.com
      * @todo    use product sitemap to crawl product pages
      */
@@ -128,9 +126,9 @@ class CrawlCommand extends Command
         $crawlerService->resetLinkList();
 
         foreach ([...$users, null] as $user) {
-//        foreach ($users as $user) {
+            //        foreach ($users as $user) {
             $username = $user?->getUserIdentifier();
-            $io->info(sprintf("Crawling %s as %s", $crawlerService->getInitialPath(), $username?:'Visitor'));
+            $io->info(sprintf("Crawling %s as %s", $crawlerService->getInitialPath(), $username ?: 'Visitor'));
             $crawlerService->authenticateClient($username);
 
             $link = $crawlerService->addLink($username, $crawlerService->getInitialPath());
@@ -142,36 +140,34 @@ class CrawlCommand extends Command
             while ($link = $crawlerService->getUnvisitedLink($username)) {
                 $loop++;
                 $this->logger->info("Considering " . $link->getPath());
-//                $io->info("Considering " . $link->getPath());
+                //                $io->info("Considering " . $link->getPath());
                 $crawlerService->scrape($link);
-                if (!$link->testable()) {
+                if (! $link->testable()) {
                     $io->warning("Rejecting " . $link->getPath() . ' ' . $link->getRoute());
                 }
-                if ( ($limit = $input->getOption('limit')) && ($loop > $limit)) {
+                if (($limit = $input->getOption('limit')) && ($loop > $limit)) {
                     break;
                 }
             }
 
-            $linksToCrawl[$username] = array_filter($crawlerService->getLinkList($username), fn(Link $link) => $link->testable());
-//            $userLinks = array_merge($userLinks, array_values($linksToCrawl));
+            $linksToCrawl[$username] = array_filter($crawlerService->getLinkList($username), fn (Link $link) => $link->testable());
+            //            $userLinks = array_merge($userLinks, array_values($linksToCrawl));
             $table->addRow([$username, count($linksToCrawl[$username]), count($crawlerService->getLinkList($username))]);
 
-//            $userLinks += array_values($linksToCrawl);
+            //            $userLinks += array_values($linksToCrawl);
             $io->success(sprintf("User $username has with %d links", count($linksToCrawl[$username])));
         }
         $table->render();
 
         $outputFilename = $this->bag->get('kernel.project_dir') . '/crawldata.json';
-//        foreach ($crawlerService->getEntireLinkList() as $user=>$userLinks) {
-//            $testableLink =
-//        }
+        //        foreach ($crawlerService->getEntireLinkList() as $user=>$userLinks) {
+        //            $testableLink =
+        //        }
 
         file_put_contents($outputFilename, json_encode($linksToCrawl, JSON_UNESCAPED_LINE_TERMINATORS + JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
         $io->success(sprintf("File $outputFilename written with %d users", count($linksToCrawl)));
 
-
         return self::SUCCESS;
-
 
         // user input
         $this->startingLink = $input->getArgument('startingLink');
@@ -181,10 +177,10 @@ class CrawlCommand extends Command
         $this->ignoredRouteKeywords = $input->getOption('ignore-route-keyword');
         $this->output = $output;
 
-        if (!$this->startingLink) {
+        if (! $this->startingLink) {
             $this->startingLink = $defaultStart;
         }
-        if (!$this->ignoredRouteKeywords) {
+        if (! $this->ignoredRouteKeywords) {
             $this->ignoredRouteKeywords = [
             ];
         }
@@ -219,14 +215,13 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         while ($client->getResponse() instanceof RedirectResponse) {
             $crawler = $client->followRedirect();
         }
-//        $this->domainLinks[$url]['duration'] = $stopwatch->stop('request')->getDuration();
+        //        $this->domainLinks[$url]['duration'] = $stopwatch->stop('request')->getDuration();
 
         $this->processLinksOnPage($crawler, $uri = $crawler->getUri());
         $index = 0;
 
         // crawl links found
-        while (!empty($this->linksToProcess) && ++$index < $this->searchLimit) {
-
+        while (! empty($this->linksToProcess) && ++$index < $this->searchLimit) {
             $client->getHistory()->clear(); // prevent out of memory errors...
 
             $url = array_pop($this->linksToProcess);
@@ -238,7 +233,6 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
             }
 
             $output->writeln('Processing: ' . $url);
-
 
             try {
                 $stopwatch->start($url);
@@ -264,12 +258,12 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         $unique_routes = [];
         foreach ($this->domainLinks as $link => $linkDetails) {
             $output->writeln('    ' . $link . ' : ' . ($route = $linkDetails['route']));
-            if ($route && !$this->isIgnored($route) && !in_array($route, $unique_routes)) {
+            if ($route && ! $this->isIgnored($route) && ! in_array($route, $unique_routes)) {
                 $unique_routes[$route] =
                     [
                         'link' => $link,
                         'referrer' => $linkDetails['referrer'],
-                        'duration' => $linkDetails['duration'] ?? -1
+                        'duration' => $linkDetails['duration'] ?? -1,
                     ];
             };
         }
@@ -277,7 +271,7 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         $fn = dirname($this->getContainer()->get('kernel')->getRootDir()) . '/links.json';
         $results = [
             'unique_routes' => $unique_routes,
-            'links' => $this->domainLinks
+            'links' => $this->domainLinks,
         ];
         file_put_contents($fn, json_encode($results, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
         $output->writeln(sprintf("%d links searched, %s written with %d links.", $index, $fn, count($unique_routes)));
@@ -288,13 +282,11 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
     /**
      * Interact
      *
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @author  Joe Sexton <joe@webtipblog.com
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        if (!$this->startingLink) {
+        if (! $this->startingLink) {
             $defaultStart = 'jardin.wip';
             $defaultStart .= '/project';
             /*
@@ -309,7 +301,7 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
             $input->setArgument('startingLink', $defaultStart);
         }
 
-        if (!$input->getArgument('username')) {
+        if (! $input->getArgument('username')) {
             $username = $this->getHelper('dialog')->askAndValidate(
                 $output,
                 'Please choose a username:',
@@ -325,22 +317,12 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         }
     }
 
-    /**
-     * createKernel
-     *
-     * @return  \AppKernel
-     * @author  Joe Sexton <joe@webtipblog.com
-     */
-    protected function createKernel()
+    protected function createKernel(): Kernel
     {
-
-//
-//        $rootDir = $this->bag->get('kernel.project_dir');
-//        require_once($rootDir . '/Kernel.php');
-//        $kernel = new \Symfony\Bundle\FrameworkBundle\Kernel\('test', true);
-//        $kernel->boot();
-
-//        return $kernel;
+        //        $rootDir = $this->bag->get('kernel.project_dir');
+        //        require_once($rootDir . '/Kernel.php');
+        $kernel = new Kernel('test', true);
+        return $kernel;
     }
 
     /**
@@ -354,30 +336,36 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         $crawler = $client->request('GET', 'https://github.com/');
         $crawler = $client->click($crawler->selectLink('Sign in')->link());
         $form = $crawler->selectButton('Sign in')->form();
-        $crawler = $client->submit($form, ['login' => 'fabpot', 'password' => 'xxxxxx']);
+        $crawler = $client->submit($form, [
+            'login' => 'fabpot',
+            'password' => 'xxxxxx',
+        ]);
         $crawler->filter('.flash-error')->each(function ($node) {
             print $node->text() . "\n";
         });
 
         // @todo: this assumes a local user, it should be a proper login to the endpoint
-        // We need the user class, not sure this makes sense here.
-        $entityManager = $this->registry->getManagerForClass($this->userClass);
-        if (!$user = $this->entityManager->getRepository(Member::class)->findOneBy(['code' => $this->username])) {
+        $userClass = $this->crawlerService->getUserClass();
+        $entityManager = $this->registry->getManagerForClass($userClass);
+        // code? Username? S.b. configurable.
+        if (! $user = $entityManager->getRepository($userClass)->findOneBy([
+            'code' => $this->username,
+        ])) {
             throw new \Exception("Unable to authenticate member " . $this->username);
         }
         // $token = new UsernamePasswordToken($login, $password, $firewall);
-        $token = new UsernamePasswordToken($user, null, $this->securityFirewall, $user->getRoles());
+        $token = new UsernamePasswordToken($user, $this->securityFirewall, $user->getRoles());
 
         /* we do this, not sure if it'll help
         */
         $client->getContainer()->get('security.token_storage')->setToken($token);
 
-        // set session
+        
         $session = $client->getContainer()->get('session');
         $session->set('_security_' . $this->securityFirewall, serialize($token));
         $session->save();
 
-        // set cookie
+        
         $cookie = new Cookie($session->getName(), $session->getId());
         $client->getCookieJar()->set($cookie);
     }
@@ -385,17 +373,14 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
     /**
      * get all links on the page as an array of urls
      *
-     * @param Crawler $crawler
      * @return  array
      * @author  Joe Sexton <joe@webtipblog.com
      */
     protected function getLinksOnCurrentPage(Crawler $crawler)
     {
-
         static $seen = [];
 
         $links = $crawler->filter('a')->each(function (Crawler $node, $i) {
-
             // todo: look for rel="nofollow"
             // dump($i, $node->link()); die();
             $attr = $node->attr('rel');
@@ -407,7 +392,6 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
 
         // remove outboundlinks and links with spaces
         foreach ($links as $key => $link) {
-
             if (isset($this->domainLinks[$link]) || in_array($link, $seen)) {
                 unset($links[$key]);
                 continue;
@@ -440,18 +424,15 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
     /**
      * process all links on a page
      *
-     * @param Crawler $crawler
      * @param string $currentUrl
      * @author  Joe Sexton <joe@webtipblog.com
      */
     protected function processLinksOnPage(Crawler $crawler, $currentUrl)
     {
-
         $links = $this->getLinksOnCurrentPage($crawler);
 
         // process each link
         foreach ($links as $key => $link) {
-
             $this->processSingleLink($link, $currentUrl);
         }
     }
@@ -469,17 +450,16 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         if (empty($this->domainLinks[$link])) {
             // check for routes that should only be indexed once
             // do this before we add the link to the domainLinks array since we check that array for duplicates...
-            if (!$this->isDuplicateIgnoredRoute($link)) {
+            if (! $this->isDuplicateIgnoredRoute($link)) {
                 // exclude any links with blanks
                 if (false === strpos($link, ' ')) {
                     $this->linksToProcess[] = $link;
                 }
-
             }
 
             // add details to the domainLinks array
             $route = $this->getRouteInfo($link);
-            $this->domainLinks[$link]['route'] = (!empty($route['_route'])) ? $route['_route'] : '';
+            $this->domainLinks[$link]['route'] = (! empty($route['_route'])) ? $route['_route'] : '';
             $this->domainLinks[$link]['referrer'] = $currentUrl;
         }
     }
@@ -509,14 +489,11 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
      */
     protected function routeIsInQueue($routeName)
     {
-
         // check each existing link for a similar match
         $allLinks = $this->domainLinks;
         foreach ($allLinks as $existingLink) {
-
             // does the url contain app name?
             if ($existingLink['route'] === $routeName) {
-
                 return true;
             }
         }
@@ -534,10 +511,10 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
     protected function isDuplicateIgnoredRoute($newLink)
     {
         $route = $this->getRouteInfo($newLink);
-        if (!$route) {
+        if (! $route) {
             return true;
         }
-        $routeName = (!empty($route['_route'])) ? $route['_route'] : '';
+        $routeName = (! empty($route['_route'])) ? $route['_route'] : '';
 
         return $this->isIgnored($routeName) || $this->routeIsInQueue($routeName);
     }
@@ -545,7 +522,6 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
     protected function isIgnored($routeName)
     {
         foreach ($this->ignoredRouteKeywords as $keyword) {
-
             $keyword = '/' . $keyword . '/'; // add delimiters
 
             if (preg_match($keyword, $routeName) === 1) {

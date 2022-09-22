@@ -1,7 +1,7 @@
 {
     "license": "proprietary",
-    "name": "survos/mono",
-    "description": "mono-repo for survos bundles and demos test",
+    "name": "survos/survos",
+    "description": "survos monorepo -- bundles and demos",
     "authors": [
         {
             "name": "Tac Tacelosky",
@@ -21,15 +21,19 @@
         "fakerphp/faker": "^1.20",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "gajus/dindent": "^2.0",
+        "haydenpierce/class-finder": "^0.4.3",
         "knplabs/knp-menu-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.10",
         "picqer/php-barcode-generator": "^2.2",
+        "stof/doctrine-extensions-bundle": "^1.7",
+        "survos/api-grid-bundle": "^1.2",
         "symfony/config": "^6.1.0",
         "symfony/console": "^6.1.0",
         "symfony/dependency-injection": "^6.1.0",
         "symfony/dotenv": "^6.1.0",
         "symfony/finder": "^6.1.0",
-        "symfony/flex": "^2",
+        "symfony/flex": "^2.0",
+        "symfony/form": "^6.1.0",
         "symfony/framework-bundle": "^6.1.0",
         "symfony/http-kernel": "^6.1.0",
         "symfony/messenger": "^6.1.0",
@@ -39,11 +43,14 @@
         "symfony/runtime": "^6.1.0",
         "symfony/security-bundle": "^6.1.0",
         "symfony/serializer": "^6.1.0",
+        "symfony/stopwatch": "^6.1",
         "symfony/string": "^6.1.0",
         "symfony/ux-twig-component": "^2.3",
+        "symfony/validator": "^6.1.0",
         "symfony/webpack-encore-bundle": "^1.11",
         "symfony/workflow": "^6.1.0",
         "symfony/yaml": "^6.1.0",
+        "symplify/composer-json-manipulator": "^11.1",
         "tacman/twig-tree-tag": "^v3.0.0",
         "twig/string-extra": "^3.4",
         "twig/twig": "^3.4"
@@ -55,7 +62,6 @@
         "codeception/module-phpbrowser": "^3.0",
         "codeception/module-symfony": "^3.0 | *@dev",
         "ekino/phpstan-banned-code": "^1.0",
-        "haydenpierce/class-finder": "^0.4.3",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^1.8",
         "phpunit/phpunit": "^9.5",
@@ -64,7 +70,7 @@
         "sensio/framework-extra-bundle": "^6.2",
         "squizlabs/php_codesniffer": "^3.7",
         "symfony/browser-kit": "^6.1.0",
-        "symfony/form": "^6.1.0",
+        "symfony/debug-bundle": "^6.1.0",
         "symfony/http-client": "^6.1.0",
         "symfony/maker-bundle": "^1.38",
         "symfony/phpunit-bridge": "^6.1.0",
@@ -72,8 +78,10 @@
         "symfony/security-core": "^6.1.0",
         "symfony/security-csrf": "^6.1.0",
         "symfony/twig-bundle": "^6.1.0",
-        "symfony/validator": "^6.1.0",
         "symfony/var-dumper": "^6.1.0",
+        "symfony/web-profiler-bundle": "^6.1.0",
+        "symplify/config-transformer": "^11.1",
+        "symplify/easy-coding-standard": "^11.1",
         "symplify/monorepo-builder": "^11.1"
     },
     "config": {
@@ -90,6 +98,9 @@
         "sort-packages": true
     },
     "autoload": {
+        "exclude-from-classmap": [
+            "packages/location-bundle/Tests/"
+        ],
         "psr-4": {
             "App\\": "src/",
             "Survos\\ApiGrid\\": "packages/api-grid-bundle/src/",
@@ -105,6 +116,7 @@
             "Survos\\Grid\\": "packages/grid-bundle/src/",
             "Survos\\HtmlPrettifyBundle\\": "packages/html-prettify-bundle/src/",
             "Survos\\InspectionBundle\\": "packages/inspection-bundle/src/",
+            "Survos\\LocationBundle\\": "packages/location-bundle/src",
             "Survos\\SecondPackage\\": "packages/second-package/src",
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/"
@@ -112,26 +124,28 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "App\\Tests\\": "tests/",
+            "Survos\\LocationBundle\\Tests\\": "packages/location-bundle/tests/"
         }
     },
     "replace": {
-        "survos/api-grid-bundle": "1.2.6",
-        "survos/auth-bundle": "1.2.6",
-        "survos/barcode-bundle": "1.2.6",
-        "survos/bootstrap-bundle": "1.2.6",
-        "survos/core-bundle": "1.2.6",
-        "survos/crawler-bundle": "1.2.6",
-        "survos/doc-bundle": "1.2.6",
-        "survos/faker-bundle": "1.2.6",
-        "survos/first-package": "1.2.6",
-        "survos/grid-bundle": "1.2.6",
-        "survos/html-prettify-bundle": "1.2.6",
-        "survos/inspection-bundle": "1.2.6",
-        "survos/maker-bundle": "1.2.6",
-        "survos/second-package": "1.2.6",
-        "survos/tree-bundle": "1.2.6",
-        "survos/workflow-helper-bundle": "1.2.6"
+        "survos/api-grid-bundle": "1.2.7",
+        "survos/auth-bundle": "1.2.7",
+        "survos/barcode-bundle": "1.2.7",
+        "survos/bootstrap-bundle": "1.2.7",
+        "survos/core-bundle": "1.2.7",
+        "survos/crawler-bundle": "1.2.7",
+        "survos/doc-bundle": "1.2.7",
+        "survos/faker-bundle": "1.2.7",
+        "survos/first-package": "1.2.7",
+        "survos/grid-bundle": "1.2.7",
+        "survos/html-prettify-bundle": "1.2.7",
+        "survos/inspection-bundle": "1.2.7",
+        "survos/location-bundle": "self.version",
+        "survos/maker-bundle": "1.2.7",
+        "survos/second-package": "1.2.7",
+        "survos/tree-bundle": "1.2.7",
+        "survos/workflow-helper-bundle": "1.2.7"
     },
     "scripts": {
         "auto-scripts": {

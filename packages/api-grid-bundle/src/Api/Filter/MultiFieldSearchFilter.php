@@ -2,17 +2,13 @@
 
 namespace Survos\ApiGrid\Api\Filter;
 
-//use ApiPlatform\Doctrine\Orm\Filter\AbstractContextAwareFilter;
-//use ApiPlatform\Doctrine\Orm\Filter\AbstractContextAwareFilter;
+use ApiPlatform\Api\FilterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\PropertyInfo\Type;
-use ApiPlatform\Api\FilterInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use ApiPlatform\Exception\InvalidArgumentException;
 
@@ -42,17 +38,24 @@ class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
 
 
     /** {@inheritdoc} */
-    protected function filterProperty(string                      $property, $value, QueryBuilder $queryBuilder,
-                                      QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass,
-                                      Operation                   $operation = null, array $context = []): void
-    {
+    protected function filterProperty(
+        string $property,
+        $value,
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+        string $resourceClass,
+        Operation $operation = null,
+        array $context = []
+    ): void {
         if (null === $value || $property !== $this->searchParameterName) {
             return;
         }
 
         $words = explode(' ', $value);
         foreach ($words as $word) {
-            if (empty($word)) continue;
+            if (empty($word)) {
+                continue;
+            }
             $this->addWhere($queryBuilder, $word, $queryNameGenerator->generateParameterName($property));
         }
     }
@@ -80,16 +83,15 @@ class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
                 ->setParameter($parameterName, strtolower($word) . '%');
         }
 
-
         // if the field is a full text field, apply tsquery
 
-//        dd($queryBuilder->getQuery()->getSQL());
+        //        dd($queryBuilder->getQuery()->getSQL());
     }
 
-    /** {@inheritdoc} */
+
     public function getDescription(string $resourceClass): array
     {
-//        assert(false, $resourceClass);
+        //        assert(false, $resourceClass);
         $props = $this->getProperties();
         if (null === $props) {
             throw new \InvalidArgumentException('Properties must be specified');
@@ -101,9 +103,8 @@ class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
                 'required' => false,
                 'swagger' => [
                     'description' => 'Selects entities where each search term is found somewhere in at least one of the specified properties',
-                ]
-            ]
+                ],
+            ],
         ];
     }
-
 }

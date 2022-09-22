@@ -7,7 +7,7 @@ use App\Entity\Scorecard;
 use App\Repository\BillRepository;
 use App\Repository\BuildingRepository;
 use App\Repository\JurisdictionRepository;
-use Survos\BaseBundle\Menu\AdminMenuTrait;
+use Survos\BootstrapBundle\Menu\AdminMenuTrait;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;

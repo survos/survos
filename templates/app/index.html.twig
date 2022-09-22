@@ -12,6 +12,17 @@
     <h1>Survos Bundles and Demos</h1>
 
     <ul>
+        {% for namespace, package in packages %}
+            <li>
+                {{ namespace }}
+
+                {{ dump(package) }}
+                {{ package.composerJson.name }}
+                {{ package.composerJson.shortName }}
+                {{ dump(package.classes) }}
+            </li>
+        {% endfor %}
+
         {% for bundle in ['tree','grid','api-grid'] %}
             <li>
                 <a href="//{{ bundle }}-demo.survos.wip">DEMO </a>

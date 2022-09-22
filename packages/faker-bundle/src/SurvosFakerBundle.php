@@ -11,10 +11,11 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class SurvosFakerBundle extends AbstractBundle
 {
-
     protected string $extensionAlias = 'survos_faker';
 
-    /** @param array<mixed> $config */
+    /**
+     * @param array<mixed> $config
+     */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $definition = $builder
@@ -35,5 +36,4 @@ class SurvosFakerBundle extends AbstractBundle
             ->end();
         ;
     }
-
 }

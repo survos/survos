@@ -10,21 +10,13 @@ parameters:
 #                - packages/*/vendor/*
                 - ./packages/*/vendor/*
                 - */cache/*
-#                - ./packages/maker-bundle/vendor
-#      - ./packages/*/vendor
-#      - ./packages/*/vendor
-#      - packages/*/vendor
-#      - vendor
-#      - 'src/Resources/skeleton'
 
     ignoreErrors:
-#            -
-#                message: '#.*NodeDefinition::children.*#'
-#                path: ./packages/
+            -
+                message: '#FrameworkConfig not found#'
+                path: packages/
+
             -
                 message: '#Should not use node with type "Stmt_Echo"#'
                 path: packages/maker-bundle/templates/skeleton/
 
-            -
-                message: '#FrameworkConfig not found#'
-                path: packages/

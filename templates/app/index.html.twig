@@ -9,6 +9,8 @@
 </style>
 
 <div class="example-wrapper">
+
+    {{ theme|default('theme not set') }}
     <h1>Survos Bundles and Demos</h1>
 
     <ul>
@@ -22,7 +24,7 @@
                 <i>{{ composer.description }}</i>
                 {{ composer.keywords|join(',') }}
                 <ul>
-                    {% for class in package.classes %}
+                    {% for class in package.classes() %}
                         <li>{{ class }}</li>
                     {% endfor %}
                 </ul>

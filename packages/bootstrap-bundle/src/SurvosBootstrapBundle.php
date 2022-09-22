@@ -10,6 +10,7 @@ use Survos\BootstrapBundle\Components\CardComponent;
 use Survos\BootstrapBundle\Components\DividerComponent;
 use Survos\BootstrapBundle\Components\MenuBreadcrumbComponent;
 use Survos\BootstrapBundle\Components\MenuComponent;
+use Survos\BootstrapBundle\DependencyInjection\Compiler\TwigPass;
 use Survos\BootstrapBundle\Event\KnpMenuEvent;
 use Survos\BootstrapBundle\Menu\MenuBuilder;
 use Survos\BootstrapBundle\Service\ContextService;
@@ -28,16 +29,47 @@ class SurvosBootstrapBundle extends AbstractBundle
 {
     //    protected string $extensionAlias = 'survos_bootstrap';
 
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+        $container->addCompilerPass(new TwigPass());
+    }
+
+//    public function process(ContainerBuilder $container): void
+//    {
+//        // in this method you can manipulate the service container:
+//        // for example, changing some container service:
+//        $twig = $container->getDefinition('twig');
+//        dd($twig);
+//        $twig->addGlobal('backend', array(
+//            'title' => 'test title'
+//        ));
+//
+//        // or processing tagged services:
+//        foreach ($container->findTaggedServiceIds('some_tag') as $id => $tags) {
+//            // ...
+//        }
+//    }
     /**
      * @param array<mixed> $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        //        if ($twig = $container->import('twig')) {
-        //            $twig->addGlobal('backend', array(
-        //                'title' => $this->container->getParameter('backend.title')
-        //            ));
-        //        }
+//        dd($config);
+//        assert($container->hasDefinition('twig'), "Missing twig");
+
+//        foreach ($config['globals'] as $key => $global) {
+//            if (isset($global['type']) && 'service' === $global['type']) {
+//                $def->addMethodCall('addGlobal', [$key, new Reference($global['id'])]);
+//            } else {
+//                $def->addMethodCall('addGlobal', [$key, $global['value']]);
+//            }
+//        }
+//  maybe in CompilerPass
+//        $container->import('twig');
+//        $twig = $container->get('twig');
+//        $twig = $builder->getDefinition('twig');
+
         assert(is_array($config['routes']), json_encode($config));
 
         //        $config = $this->getContextOptions($config);
@@ -107,7 +139,7 @@ class SurvosBootstrapBundle extends AbstractBundle
             ->children()
             ->append($this->getRouteAliasesConfig())
             ->append($this->getContextConfig())
-            ->scalarNode('auth_menu')->defaultValue(2)->end()
+            ->scalarNode('theme')->defaultValue('sneat')->end()
             ->arrayNode('menu_options')
 //            ->isRequired()
 //            ->requiresAtLeastOneElement()

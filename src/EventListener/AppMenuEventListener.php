@@ -1,14 +1,20 @@
-<?= "<?php\n" ?>
+<?php
 
-namespace <?= $namespace ?>;
+namespace App\EventListener;
 
-<?= $use_statements; ?>
+use Knp\Menu\ItemInterface;
+use Survos\BootstrapBundle\Event\KnpMenuEvent;
+use Survos\BootstrapBundle\Menu\MenuBuilder;
+use Survos\BootstrapBundle\Traits\KnpMenuHelperInterface;
+use Survos\BootstrapBundle\Traits\KnpMenuHelperTrait;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-#[AsEventListener(event: KnpMenuEvent::SIDEBAR_MENU_EVENT, method: 'appSidebarMenu')]
-#[AsEventListener(event: KnpMenuEvent::SIDEBAR_MENU_EVENT, method: 'coreMenu')]
-#[AsEventListener(event: KnpMenuEvent::PAGE_MENU_EVENT, method: 'coreMenu')]
+#[AsEventListener(event: KnpMenuEvent::SIDEBAR_MENU_EVENT, method: 'onMenuEvent')]
 
-final class <?= $class_name ?> implements KnpMenuHelperInterface<?= "\n" ?>
+final class AppMenuEventListener implements KnpMenuHelperInterface
 {
     use KnpMenuHelperTrait;
 

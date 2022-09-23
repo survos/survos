@@ -33,6 +33,11 @@ class Package
         return ClassFinder::getClassesInNamespace($this->getNamespace(), $recursive ? ClassFinder::RECURSIVE_MODE: ClassFinder::STANDARD_MODE);
     }
 
+    public function getShortName()
+    {
+        return $this->getComposerJson()->getShortName();
+    }
+
 
     /**
      * @return string

@@ -33,4 +33,12 @@ class AppController extends AbstractController
         ]);
     }
 
+    #[Route('/package/{packageCode}', name: 'app_bundle')]
+    public function package(string $packageCode): Response
+    {
+        return $this->render('app/index.html.twig', [
+            'controller_name' => 'AppController',
+        ]);
+    }
+
 }

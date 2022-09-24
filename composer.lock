@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2945156dad7d7eb6cea5a6f20acff939",
+    "content-hash": "d185c53df71bddf94669f5fbfe66637f",
     "packages": [
         {
             "name": "api-platform/core",
@@ -11135,12 +11135,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "ecbc17ac0817caed746a243e3805dd256be9fcdb"
+                "reference": "4a41ee934b351a6d88e75ab4e8367e908b190ee6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/ecbc17ac0817caed746a243e3805dd256be9fcdb",
-                "reference": "ecbc17ac0817caed746a243e3805dd256be9fcdb",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/4a41ee934b351a6d88e75ab4e8367e908b190ee6",
+                "reference": "4a41ee934b351a6d88e75ab4e8367e908b190ee6",
                 "shasum": ""
             },
             "conflict": {
@@ -11417,7 +11417,7 @@
                 "phpwhois/phpwhois": "<=4.2.5",
                 "phpxmlrpc/extras": "<0.6.1",
                 "pimcore/data-hub": "<1.2.4",
-                "pimcore/pimcore": "<10.5.6",
+                "pimcore/pimcore": "<=10.5.6",
                 "pocketmine/bedrock-protocol": "<8.0.2",
                 "pocketmine/pocketmine-mp": "<4.7.2|>= 4.0.0-BETA5, < 4.4.2",
                 "pressbooks/pressbooks": "<5.18",
@@ -11651,7 +11651,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-09-22T16:04:41+00:00"
+            "time": "2022-09-23T14:15:08+00:00"
         },
         {
             "name": "sebastian/cli-parser",

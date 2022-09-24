@@ -1,35 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello AppController!{% endblock %}
+{% block title %}{{ package }}{% endblock %}
 
 {% block body %}
 
-    {% component grid with {
-        data: packages,
-        columns: [
-            'shortName',
-            'description'
-        ]
-    } %}
-
-        {% block description %}
-        {{ row.composerJson.description }}
-        {% endblock %}
-
-    {% endcomponent %}
-
 <div class="row">
 
-    {{ theme|default('theme not set') }}
-    <h1>Survos Bundles and Demos</h1>
-
-    <ul>
-        {% for namespace, package in packages %}
-            <li>
                 {% set composer = package.composerJson %}
 {#                {{ namespace }}#}
 {#                {{ package.composerJson.name }}#}
                 <b>{{ composer.shortName }}</b>
+
+    {{ dump(composer) }}
 
                 <i>{{ composer.description }}</i>
                 {{ composer.keywords|join(',') }}
@@ -39,16 +21,6 @@
                     {% endfor %}
                 </ul>
             </li>
-        {% endfor %}
 
-        {% for bundle in ['tree','grid','api-grid'] %}
-            <li>
-                <a href="//{{ bundle }}-demo.survos.wip">DEMO </a>
-                <a href="{{ path('app_bundle', {bundlePrefix: bundle}) }}">{{ bundle }}-bundle</a>
-
-            </li>
-        {% endfor %}
-
-    </ul>
 </div>
 {% endblock %}

@@ -25,6 +25,7 @@ class PackageService
 
 /*
  * return the psr-4 registered packages
+ * @return <int, Package[]>
  */
     public function getPackages(bool $recursive=false): array
     {

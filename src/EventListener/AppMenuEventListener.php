@@ -2,6 +2,8 @@
 
 namespace App\EventListener;
 
+use App\Model\Package;
+use App\Service\PackageService;
 use Knp\Menu\ItemInterface;
 use Survos\BootstrapBundle\Event\KnpMenuEvent;
 use Survos\BootstrapBundle\Menu\MenuBuilder;
@@ -18,7 +20,9 @@ final class AppMenuEventListener implements KnpMenuHelperInterface
 {
     use KnpMenuHelperTrait;
 
-    public function __construct(private ?AuthorizationCheckerInterface $security=null)
+    public function __construct(
+        private PackageService $packageService,
+        private ?AuthorizationCheckerInterface $security=null)
     {
     }
 
@@ -34,6 +38,16 @@ final class AppMenuEventListener implements KnpMenuHelperInterface
             // $this->addMenuItem($nestedMenu, ['route' => 'survos_base_credits', 'rp' => ['type' => $type], 'label' => ucfirst($type)]);
             $this->addMenuItem($nestedMenu, ['uri' => "#$type" , 'label' => ucfirst($type)]);
         }
+
+        $this->addHeading($menu, "Bundles");
+        /** @var Package $package */
+        foreach ($this->packageService->getPackages() as $package) {
+            $this->add($menu, 'app_package', rp: ['packageCode' => $package->getPackageCode()]);
+        }
+        $this->add($menu, uri: 'https://github.com/survos/survos', label: "Survos Bundles", external: true);
+
+        $this->addHeading($menu, "External Links");
+        $this->add($menu, uri: 'https://github.com/survos/survos', label: "Survos Bundles", external: true);
 
     }
 

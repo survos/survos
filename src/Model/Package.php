@@ -11,11 +11,20 @@ use Symplify\ComposerJsonManipulator\ValueObject\ComposerJson;
 class Package
 {
     public function __construct(
+        public string $packageCode,
         public string $packageDir,
         public string $namespace,
         public ComposerJson $composerJson
     )
     {
+    }
+
+    /**
+     * @return string
+     */
+    public function getPackageCode(): string
+    {
+        return $this->packageCode;
     }
 
     /**

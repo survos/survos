@@ -8,7 +8,7 @@ namespace App\Model;
 use HaydenPierce\ClassFinder\ClassFinder;
 use Symplify\ComposerJsonManipulator\ValueObject\ComposerJson;
 
-class Package
+class Package implements \Stringable
 {
     public function __construct(
         public string $packageCode,
@@ -63,6 +63,12 @@ class Package
     {
         return $this->composerJson;
     }
+
+    public function __toString()
+    {
+        return $this->getPackageCode();
+    }
+
 
 }
 

@@ -16,28 +16,32 @@ class PackageService
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%/')]
-        private $projectDir,
-        private KernelInterface $kernel,
-
+        private                     $projectDir,
+//        private KernelInterface $kernel,
         private ComposerJsonFactory $composerJsonFactory)
     {
     }
 
-/*
- * return the psr-4 registered packages
- * @return <int, Package[]>
- */
-    public function getPackages(bool $recursive=false): array
+    /*
+     * return the psr-4 registered packages
+     * @return <int, Package[]>
+     */
+    public function getPackages(bool $recursive = false): array
     {
-        $composerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir  .  'composer.json');
+        $composerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . 'composer.json');
         $packages = [];
 
 //        dd($this->kernel->getBundles());
 
         foreach ($composerJson->getAutoload()['psr-4'] as $nameSpace => $packagePath) {
-            if (str_contains($packagePath, 'packages')) {
-                $packages[$nameSpace] = $this->getPackage($packagePath, $nameSpace, $recursive);
+            if (!str_contains($packagePath, 'packages')) {
+                continue;
             }
+            // overkill, but load it here until we need to optimize.
+            $packageComposerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . $packagePath . '../composer.json');
+//                $packages[$nameSpace] = $this->getPackage($packagePath, $nameSpace, $recursive);
+            $package = new Package($packageComposerJson->getShortName(), $packagePath, $nameSpace, $packageComposerJson);
+            $packages[$package->getShortName()] = $package;
         }
         return $packages;
     }
@@ -47,12 +51,12 @@ class PackageService
         return $this->composerJsonFactory->createFromFilePath($this->projectDir . '/composer.json');
     }
 
-    public function getPackage(string $packagePath, string $nameSpace, bool $recursive=false)
+    public function getPackage(string $packageCode)
     {
-        $packageComposerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . '/' . $packagePath  .  '/../composer.json');
+        return $this->getPackages()[$packageCode];
+//        $packageComposerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . 'packages/' . $packagePath . '/composer.json');
 //                dd($packageComposerJson);
 
-        $package = new Package($packagePath, $nameSpace, $packageComposerJson);
 
         return $package;
 //        try {

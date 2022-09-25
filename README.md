@@ -6,12 +6,21 @@
 
 Although the bundles often work together, they can be used independently.  SurvosBootstrapBundle is an opinionated way to quickly integrated Bootstrap with several Twig Components and implementing the Sneat theme.  It leverages KnpMenuBundle to populate the sidebar, navbar, page header and footer.  See the [Build A Real Website in 10 minutes] tutorial.  Although no bundles have bootstrap-bundle as a dependent, some visually-oriented bundles, like grid-bundle and tree-bundle, require Boostrap to render as intended.  Not surprisingly, all the demos and projects use bootstrap-bundle/
 
+Demos
+-----
+
+See the bundles in actions, and/or build them locally, with these demos (using bootstrap-bundle)
+
+* [sneat-demo](https://github.com/survos/bootstrap-bundle-demo) faker, auth. <a target="_blank" href="https://sneat-demo.herokuapp.com/">Demo</a>
+* [tree-demo](https://github.com/survos/tree-demo) tree, auth [Demo](https://tree-bundle-demo.herokuapp.com/)
+* [grid-demo](https://github.com/survos/dt-demos) grid, api-grid [Demo](https://survos-grid-demo.herokuapp.com/)
+
+
 Getting Started
 ---------------
 
-* [Install Symfony 6.1+][4] with Composer (see [requirements details][3]), using the --webapp flag.  
-* Install webpack-encore, so that stimulus components work.
-* 
+* Install Symfony 6.1+
+* Install webpack-encore, so that stimulus components work, and run yarn install
 
 A collection of bundles to faciliate rapid development of Symfony applications.
 
@@ -57,13 +66,6 @@ These bundles are usable, but not ready for prime-time.
 
 * [doc-bundle](packages/doc-bundle/README.md) Write your documentation in twig and generate Sphinx documentation.
 * [auth-bundle](packages/auth-bundle/README.md) Rapidly integrate authentication, including social media login (built on top of Symfony security-bundle and knp/oauth2).
-
-Demos
------
-
-* [sneat-demo](https://github.com/survos/bootstrap-bundle-demo) bundles: bootstrap, faker, auth. <a target="_blank" href="https://sneat-demo.herokuapp.com/">Demo</a>
-* [tree-demo](https://github.com/survos/tree-demo) bundles: bootstrap, tree, auth [Demo](https://tree-bundle-demo.herokuapp.com/)
-* [grid-demo](https://github.com/survos/grid-demo) bundles: bootstrap, grid, api-grid [Demo](https://survos-grid-demo.herokuapp.com/)
 
 
 ## Coding Standards

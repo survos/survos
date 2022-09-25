@@ -42,7 +42,7 @@ final class AppMenuEventListener implements KnpMenuHelperInterface
         $this->addHeading($menu, "Bundles");
         /** @var Package $package */
         foreach ($this->packageService->getPackages() as $package) {
-            $this->add($menu, 'app_package', rp: ['packageCode' => $package->getPackageCode()]);
+            $this->add($menu, 'app_package', label: $package->getPackageCode(), rp: ['packageCode' => $package->getPackageCode()]);
         }
         $this->add($menu, uri: 'https://github.com/survos/survos', label: "Survos Bundles", external: true);
 

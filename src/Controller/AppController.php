@@ -12,6 +12,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class AppController extends AbstractController
 {
+    public function __construct(private PackageService $packageService) {
+
+    }
 
     #[Route('/', name: 'app_homepage')]
     public function index(PackageService $packageService): Response
@@ -33,10 +36,12 @@ class AppController extends AbstractController
         ]);
     }
 
-    #[Route('/package/{packageCode}', name: 'app_bundle')]
+    #[Route('/package/{packageCode}', name: 'app_package')]
     public function package(string $packageCode): Response
     {
-        return $this->render('app/index.html.twig', [
+
+        return $this->render('app/package.html.twig', [
+            'package' => $this->packageService->getPackage($packageCode),
             'controller_name' => 'AppController',
         ]);
     }

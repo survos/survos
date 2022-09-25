@@ -112,7 +112,7 @@
             "Survos\\AuthBundle\\": "packages/auth-bundle/src/",
             "Survos\\BarcodeBundle\\": "packages/barcode-bundle/src/",
             "Survos\\BootstrapBundle\\": "packages/bootstrap-bundle/src/",
-            "Survos\\Bundle\\MakerBundle\\": "packages/maker-bundle/src",
+            "Survos\\Bundle\\MakerBundle\\": "packages/maker-bundle/src/",
             "Survos\\CoreBundle\\": "packages/core-bundle/src/",
             "Survos\\CrawlerBundle\\": "packages/crawler-bundle/src/",
             "Survos\\DocBundle\\": "packages/doc-bundle/src/",
@@ -120,7 +120,7 @@
             "Survos\\Grid\\": "packages/grid-bundle/src/",
             "Survos\\HtmlPrettifyBundle\\": "packages/html-prettify-bundle/src/",
             "Survos\\InspectionBundle\\": "packages/inspection-bundle/src/",
-            "Survos\\LocationBundle\\": "packages/location-bundle/src",
+            "Survos\\LocationBundle\\": "packages/location-bundle/src/",
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/"
         }

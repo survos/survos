@@ -19,20 +19,41 @@ use Survos\BootstrapBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class SurvosBootstrapBundle extends AbstractBundle
+
+class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterface
 {
     //    protected string $extensionAlias = 'survos_bootstrap';
+
+//    public function build(ContainerBuilder $container): void
+//    {
+//        parent::build($container);
+//        $container->addCompilerPass(new TwigPass());
+//    }
 
     public function build(ContainerBuilder $container): void
     {
         parent::build($container);
-        $container->addCompilerPass(new TwigPass());
+
+        // Register this class as a pass, to eliminate the need for the extra DI class
+        // https://stackoverflow.com/questions/73814467/how-do-i-add-a-twig-global-from-a-bundle-config
+        $container->addCompilerPass($this);
+    }
+    // The compiler pass
+    public function process(ContainerBuilder $container)
+    {
+        if (false === $container->hasDefinition('twig')) {
+            return;
+        }
+        $theme = $container->getParameter('my.theme');
+        $def = $container->getDefinition('twig');
+        $def->addMethodCall('addGlobal', ['theme', $theme]);
     }
 
 //    public function process(ContainerBuilder $container): void
@@ -55,6 +76,10 @@ class SurvosBootstrapBundle extends AbstractBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        $container->parameters()
+            ->set('my.theme', $config['theme']);
+
 //        dd($config);
 //        assert($container->hasDefinition('twig'), "Missing twig");
 

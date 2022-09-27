@@ -1,0 +1,14 @@
+survos_bootstrap:
+  theme: tabler
+  routes:
+    login: app_login
+    logout: app_logout
+    register: app_register
+    offcanvas: app_settings
+  options:
+    allow_login: false
+    offcanvas:
+  menu_options:
+    package: null
+
+

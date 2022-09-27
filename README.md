@@ -12,7 +12,7 @@ Demos
 See the bundles in actions, and/or build them locally, with these demos (using bootstrap-bundle)
 
 * [sneat-demo](https://github.com/survos/bootstrap-bundle-demo) faker, auth. <a target="_blank" href="https://sneat-demo.herokuapp.com/">Demo</a>
-* [tree-demo](https://github.com/survos/tree-demo) tree, auth [Demo](https://tree-bundle-demo.herokuapp.com/)
+* [tree-demo](https://github.com/survos/dt-demos) tree, auth [Demo](https://tree-bundle-demo.herokuapp.com/)
 * [grid-demo](https://github.com/survos/dt-demos) grid, api-grid [Demo](https://survos-grid-demo.herokuapp.com/)
 
 

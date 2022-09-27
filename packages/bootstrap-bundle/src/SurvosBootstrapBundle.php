@@ -29,13 +29,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterface
 {
-    //    protected string $extensionAlias = 'survos_bootstrap';
-
-//    public function build(ContainerBuilder $container): void
-//    {
-//        parent::build($container);
-//        $container->addCompilerPass(new TwigPass());
-//    }
+    // protected string $extensionAlias = 'survos_bootstrap';
 
     public function build(ContainerBuilder $container): void
     {
@@ -56,21 +50,6 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
         $def->addMethodCall('addGlobal', ['theme', $theme]);
     }
 
-//    public function process(ContainerBuilder $container): void
-//    {
-//        // in this method you can manipulate the service container:
-//        // for example, changing some container service:
-//        $twig = $container->getDefinition('twig');
-//        dd($twig);
-//        $twig->addGlobal('backend', array(
-//            'title' => 'test title'
-//        ));
-//
-//        // or processing tagged services:
-//        foreach ($container->findTaggedServiceIds('some_tag') as $id => $tags) {
-//            // ...
-//        }
-//    }
     /**
      * @param array<mixed> $config
      */
@@ -80,25 +59,8 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
         $container->parameters()
             ->set('my.theme', $config['theme']);
 
-//        dd($config);
-//        assert($container->hasDefinition('twig'), "Missing twig");
-
-//        foreach ($config['globals'] as $key => $global) {
-//            if (isset($global['type']) && 'service' === $global['type']) {
-//                $def->addMethodCall('addGlobal', [$key, new Reference($global['id'])]);
-//            } else {
-//                $def->addMethodCall('addGlobal', [$key, $global['value']]);
-//            }
-//        }
-//  maybe in CompilerPass
-//        $container->import('twig');
-//        $twig = $container->get('twig');
-//        $twig = $builder->getDefinition('twig');
-
         assert(is_array($config['routes']), json_encode($config));
 
-        //        $config = $this->getContextOptions($config);
-        //        dd($config);
         $builder->register(ContextService::class)
             ->setArgument('$options', $config['options'])
             ->setAutowired(true);
@@ -109,6 +71,7 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
         $builder->register(CardComponent::class)->setAutowired(true)->setAutoconfigured(true);
         $builder->register(ButtonComponent::class)->setAutowired(true)->setAutoconfigured(true);
         $builder->register(BadgeComponent::class)->setAutowired(true)->setAutoconfigured(true);
+
         foreach ([MenuComponent::class, MenuBreadcrumbComponent::class] as $c) {
             $builder->register($c)->setAutowired(true)->setAutoconfigured(true)
                 ->setArgument('$menuOptions', $config['menu_options'])
@@ -118,7 +81,7 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
             ;
         }
 
-        $definition = $builder
+        $builder
             ->autowire('survos.bootstrap_twig', TwigExtension::class)
             ->addTag('twig.extension')
             ->setArgument('$routes', $config['routes'])
@@ -133,28 +96,6 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
             ->setArgument('$authorizationChecker', new Reference('security.authorization_checker'))
         ;
 
-        //        $builder->register(MenuBuilder::class)
-        //            ->setArgument('$factory', new Reference('knp_menu.factory'))
-        //            ->setArgument('$eventDispatcher', new Reference('event_dispatcher'))
-        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createSidebarMenu', 'alias' => KnpMenuEvent::SIDEBAR_MENU_EVENT])
-        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createNavbarMenu', 'alias' => KnpMenuEvent::NAVBAR_MENU_EVENT])
-        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createAuthMenu', 'alias' => KnpMenuEvent::AUTH_MENU_EVENT])
-        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createFooterMenu', 'alias' => KnpMenuEvent::FOOTER_MENU_EVENT])
-        ////            ->addTag('knp_menu.menu_builder', ['method' => 'createMenu', 'alias' => KnpMenuEvent::PAGE_MENU_EVENT])
-        //            ->addTag('knp_menu.menu_builder', ['method' => 'createMenu', 'alias' => KnpMenuEvent::MENU_EVENT])
-        //        ;
-        //
-
-        //        Survos\BootstrapBundle\Menu\MenuBuilder:
-        //    class: Survos\BootstrapBundle\Menu\MenuBuilder
-        //    arguments:
-        //      - "@knp_menu.factory"
-        //      - "@event_dispatcher"
-        //    tags:
-        //      - { name: knp_menu.menu_builder, method: createSidebarMenu, alias: survos_sidebar_menu }
-        //      - { name: knp_menu.menu_builder, method: createPageMenu, alias: survos_page_menu }
-
-        //        dd($config['routes']);
     }
 
     public function configure(DefinitionConfigurator $definition): void

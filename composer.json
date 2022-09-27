@@ -28,10 +28,8 @@
         "picqer/php-barcode-generator": "^2.2",
         "sensio/framework-extra-bundle": "^6.2",
         "stof/doctrine-extensions-bundle": "^1.7",
-
         "survos/api-grid-bundle": "^1.2",
         "survos/grid-bundle": "^1.2",
-
         "symfony/config": "^6.1.0",
         "symfony/console": "^6.1.0",
         "symfony/dependency-injection": "^6.1.0",
@@ -138,23 +136,21 @@
         }
     },
     "replace": {
-        "survos/api-grid-bundle": "1.2.7",
-        "survos/auth-bundle": "1.2.7",
-        "survos/barcode-bundle": "1.2.7",
-        "survos/bootstrap-bundle": "1.2.7",
-        "survos/core-bundle": "1.2.7",
-        "survos/crawler-bundle": "1.2.7",
-        "survos/doc-bundle": "1.2.7",
-        "survos/faker-bundle": "1.2.7",
-        "survos/first-package": "1.2.7",
-        "survos/grid-bundle": "1.2.7",
-        "survos/html-prettify-bundle": "1.2.7",
-        "survos/inspection-bundle": "1.2.7",
-        "survos/location-bundle": "self.version",
-        "survos/maker-bundle": "1.2.7",
-        "survos/second-package": "1.2.7",
-        "survos/tree-bundle": "1.2.7",
-        "survos/workflow-helper-bundle": "1.2.7"
+        "survos/api-grid-bundle": "1.2.8",
+        "survos/auth-bundle": "1.2.8",
+        "survos/barcode-bundle": "1.2.8",
+        "survos/bootstrap-bundle": "1.2.8",
+        "survos/core-bundle": "1.2.8",
+        "survos/crawler-bundle": "1.2.8",
+        "survos/doc-bundle": "1.2.8",
+        "survos/faker-bundle": "1.2.8",
+        "survos/grid-bundle": "1.2.8",
+        "survos/html-prettify-bundle": "1.2.8",
+        "survos/inspection-bundle": "1.2.8",
+        "survos/location-bundle": "1.2.8",
+        "survos/maker-bundle": "1.2.8",
+        "survos/tree-bundle": "1.2.8",
+        "survos/workflow-helper-bundle": "1.2.8"
     },
     "scripts": {
         "auto-scripts": {

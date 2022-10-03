@@ -12,7 +12,7 @@
         "symfony/process": "^6.1.0",
         "symfony/workflow": "^6.1.0",
         "symfony/yaml": "^6.1.0",
-        "survos/core-bundle": "^1.2"
+        "survos/core-bundle": "^1.2.13"
     },
     "require-dev": {
         "ekino/phpstan-banned-code": "^1.0",
@@ -57,21 +57,21 @@
         }
     },
     "conflict": {
-        "survos/maker-bundle": "<1.2.12",
-        "survos/html-prettify-bundle": "<1.2.12",
-        "survos/barcode-bundle": "<1.2.12",
-        "survos/api-grid-bundle": "<1.2.12",
+        "survos/maker-bundle": "<1.2.13",
+        "survos/html-prettify-bundle": "<1.2.13",
+        "survos/barcode-bundle": "<1.2.13",
+        "survos/api-grid-bundle": "<1.2.13",
         "survos/second-package": "<1.2.7",
-        "survos/bootstrap-bundle": "<1.2.12",
-        "survos/inspection-bundle": "<1.2.12",
-        "survos/faker-bundle": "<1.2.12",
-        "survos/doc-bundle": "<1.2.12",
-        "survos/auth-bundle": "<1.2.12",
-        "survos/grid-bundle": "<1.2.12",
-        "survos/crawler-bundle": "<1.2.12",
-        "survos/tree-bundle": "<1.2.12",
+        "survos/bootstrap-bundle": "<1.2.13",
+        "survos/inspection-bundle": "<1.2.13",
+        "survos/faker-bundle": "<1.2.13",
+        "survos/doc-bundle": "<1.2.13",
+        "survos/auth-bundle": "<1.2.13",
+        "survos/grid-bundle": "<1.2.13",
+        "survos/crawler-bundle": "<1.2.13",
+        "survos/tree-bundle": "<1.2.13",
         "survos/first-package": "<1.2.7",
-        "survos/location-bundle": "<1.2.12"
+        "survos/location-bundle": "<1.2.13"
     },
     "minimum-stability": "beta",
     "prefer-stable": true

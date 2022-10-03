@@ -23,9 +23,6 @@
         }
     },
     "extra": {
-        "symfony": {
-            "require": "^6.1"
-        }
     },
     "conflict": {
         "survos/maker-bundle": "<1.2.14",

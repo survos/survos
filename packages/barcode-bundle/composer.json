@@ -28,11 +28,9 @@
         }
     },
     "conflict": {
-        "survos/second-package": "<1.2.7",
         "survos/faker-bundle": "<1.2.20",
         "survos/core-bundle": "<1.2.20",
         "survos/tree-bundle": "<1.2.20",
-        "survos/first-package": "<1.2.7",
         "survos/maker-bundle": "<1.2.20",
         "survos/html-prettify-bundle": "<1.2.20",
         "survos/api-grid-bundle": "<1.2.20",

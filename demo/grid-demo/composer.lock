@@ -2703,7 +2703,6 @@
                 "survos/html-prettify-bundle": "<1.2.16",
                 "survos/location-bundle": "<1.2.16",
                 "survos/maker-bundle": "<1.2.16",
-                "survos/second-package": "<1.2.7",
                 "survos/tree-bundle": "<1.2.16",
                 "survos/workflow-helper-bundle": "<1.2.16"
             },
@@ -2797,7 +2796,6 @@
                 "survos/inspection-bundle": "<1.2.16",
                 "survos/location-bundle": "<1.2.16",
                 "survos/maker-bundle": "<1.2.16",
-                "survos/second-package": "<1.2.7",
                 "survos/tree-bundle": "<1.2.16",
                 "survos/workflow-helper-bundle": "<1.2.16"
             },
@@ -2872,7 +2870,6 @@
                 "survos/inspection-bundle": "<1.2.16",
                 "survos/location-bundle": "<1.2.16",
                 "survos/maker-bundle": "<1.2.16",
-                "survos/second-package": "<1.2.7",
                 "survos/tree-bundle": "<1.2.16",
                 "survos/workflow-helper-bundle": "<1.2.16"
             },
@@ -2954,7 +2951,6 @@
                 "survos/inspection-bundle": "<1.2.16",
                 "survos/location-bundle": "<1.2.16",
                 "survos/maker-bundle": "<1.2.16",
-                "survos/second-package": "<1.2.7",
                 "survos/tree-bundle": "<1.2.16",
                 "survos/workflow-helper-bundle": "<1.2.16"
             },
@@ -3042,7 +3038,6 @@
                 "survos/html-prettify-bundle": "<1.2.16",
                 "survos/location-bundle": "<1.2.16",
                 "survos/maker-bundle": "<1.2.16",
-                "survos/second-package": "<1.2.7",
                 "survos/tree-bundle": "<1.2.16",
                 "survos/workflow-helper-bundle": "<1.2.16"
             },
@@ -10744,7 +10739,6 @@
                 "survos/html-prettify-bundle": "<1.2.16",
                 "survos/inspection-bundle": "<1.2.16",
                 "survos/location-bundle": "<1.2.16",
-                "survos/second-package": "<1.2.7",
                 "survos/tree-bundle": "<1.2.16",
                 "survos/workflow-helper-bundle": "<1.2.16"
             },

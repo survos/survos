@@ -3785,7 +3785,6 @@
                 "survos/html-prettify-bundle": "<1.2.6",
                 "survos/inspection-bundle": "<1.2.6",
                 "survos/maker-bundle": "<1.2.6",
-                "survos/second-package": "<1.2.6",
                 "survos/tree-bundle": "<1.2.6",
                 "survos/workflow-helper-bundle": "<1.2.6"
             },
@@ -3855,7 +3854,6 @@
                 "survos/html-prettify-bundle": "<1.2.6",
                 "survos/inspection-bundle": "<1.2.6",
                 "survos/maker-bundle": "<1.2.6",
-                "survos/second-package": "<1.2.6",
                 "survos/tree-bundle": "<1.2.6",
                 "survos/workflow-helper-bundle": "<1.2.6"
             },

@@ -30,19 +30,19 @@
     "conflict": {
         "survos/second-package": "<1.2.7",
         "survos/first-package": "<1.2.7",
-        "survos/barcode-bundle": "<1.2.19",
-        "survos/core-bundle": "<1.2.19",
-        "survos/tree-bundle": "<1.2.19",
-        "survos/maker-bundle": "<1.2.19",
-        "survos/html-prettify-bundle": "<1.2.19",
-        "survos/api-grid-bundle": "<1.2.19",
-        "survos/bootstrap-bundle": "<1.2.19",
-        "survos/inspection-bundle": "<1.2.19",
-        "survos/doc-bundle": "<1.2.19",
-        "survos/grid-bundle": "<1.2.19",
-        "survos/auth-bundle": "<1.2.19",
-        "survos/workflow-helper-bundle": "<1.2.19",
-        "survos/crawler-bundle": "<1.2.19",
-        "survos/location-bundle": "<1.2.19"
+        "survos/barcode-bundle": "<1.2.20",
+        "survos/core-bundle": "<1.2.20",
+        "survos/tree-bundle": "<1.2.20",
+        "survos/maker-bundle": "<1.2.20",
+        "survos/html-prettify-bundle": "<1.2.20",
+        "survos/api-grid-bundle": "<1.2.20",
+        "survos/bootstrap-bundle": "<1.2.20",
+        "survos/inspection-bundle": "<1.2.20",
+        "survos/doc-bundle": "<1.2.20",
+        "survos/grid-bundle": "<1.2.20",
+        "survos/auth-bundle": "<1.2.20",
+        "survos/workflow-helper-bundle": "<1.2.20",
+        "survos/crawler-bundle": "<1.2.20",
+        "survos/location-bundle": "<1.2.20"
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "survos/doc-bundle",
-    "description": "Build Sphinx documentation for a Symfony project",
+    "description": "Build Sphinx documentation for a Symfony project, using Twig templates",
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [

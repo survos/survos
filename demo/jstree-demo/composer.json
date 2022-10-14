@@ -140,13 +140,7 @@
         "symfony": {
             "allow-contrib": true,
             "require": "^6.1",
-            "endpoint": ["/home/tac/survos/survos/packages/recipes/index.json", "flex://defaults"]
-        }
-    },
-    "repositories": {
-        "crawler": {
-            "type": "path",
-            "url": "//home/tac/survos/survos/packages/crawler-bundle"
+            "endpoint": ["/home/tac/g/survos/survos/packages/recipes/index.json", "flex://defaults"]
         }
     },
     "prefer-stable": true

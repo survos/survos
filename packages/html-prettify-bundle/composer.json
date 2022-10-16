@@ -48,7 +48,6 @@
         "survos/grid-bundle": "<1.2.20",
         "survos/core-bundle": "<1.2.20",
         "survos/tree-bundle": "<1.2.20",
-
         "survos/auth-bundle": "<1.2.20",
         "survos/workflow-helper-bundle": "<1.2.20",
         "survos/crawler-bundle": "<1.2.20",

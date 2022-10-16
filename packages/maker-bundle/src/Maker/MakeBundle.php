@@ -101,8 +101,10 @@ class MakeBundle extends AbstractMaker implements MakerInterface
         $json = json_decode(file_get_contents("composer.json"));  // object, not array (no second arg)
         $bundleNamespace = "$vendor\\$name\\";
         $psr = $json->autoload->{'psr-4'};
-        if (!property_exists($psr, $bundleNamespace)) {
-            // @todo: use jq from cli instead
+        if (! property_exists($psr, $bundleNamespace)) {
+            // @todo: use jq from cli instead.  https://github.com/symplify/composer-json-manipulator
+            dd($bundleNamespace, $this->bundlePath);
+
             $json->{"autoload"}->{"psr-4"}->{$bundleNamespace} = $this->bundlePath;  // object properties, not array indexes
             file_put_contents("composer.json", $newjson = json_encode($json, JSON_PRETTY_PRINT && JSON_UNESCAPED_SLASHES && JSON_UNESCAPED_UNICODE));
             $io->write("Please run composer dump-autoload to create a bundle structure for $bundleNamespace\nTHEN add services, then run ");

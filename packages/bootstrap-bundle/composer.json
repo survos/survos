@@ -20,7 +20,7 @@
         "symfony/ux-twig-component": "^2.3",
         "twig/string-extra": "^3.4",
         "twig/twig": "^3.4",
-        "survos/core-bundle": "^1.2"
+        "survos/core-bundle": "^1.2.21"
     },
     "autoload": {
         "psr-4": {
@@ -43,18 +43,19 @@
         "phpstan/phpstan": "^1.8"
     },
     "conflict": {
-        "survos/maker-bundle": "<1.2.20",
-        "survos/html-prettify-bundle": "<1.2.20",
-        "survos/barcode-bundle": "<1.2.20",
-        "survos/api-grid-bundle": "<1.2.20",
-        "survos/inspection-bundle": "<1.2.20",
-        "survos/faker-bundle": "<1.2.20",
-        "survos/doc-bundle": "<1.2.20",
-        "survos/grid-bundle": "<1.2.20",
-        "survos/tree-bundle": "<1.2.20",
-        "survos/auth-bundle": "<1.2.20",
-        "survos/workflow-helper-bundle": "<1.2.20",
-        "survos/crawler-bundle": "<1.2.20",
-        "survos/location-bundle": "<1.2.20"
+        "survos/maker-bundle": "<1.2.21",
+        "survos/html-prettify-bundle": "<1.2.21",
+        "survos/barcode-bundle": "<1.2.21",
+        "survos/api-grid-bundle": "<1.2.21",
+        "survos/inspection-bundle": "<1.2.21",
+        "survos/faker-bundle": "<1.2.21",
+        "survos/doc-bundle": "<1.2.21",
+        "survos/grid-bundle": "<1.2.21",
+        "survos/tree-bundle": "<1.2.21",
+        "survos/auth-bundle": "<1.2.21",
+        "survos/workflow-helper-bundle": "<1.2.21",
+        "survos/crawler-bundle": "<1.2.21",
+        "survos/location-bundle": "<1.2.21",
+        "survos/command-bundle": "<1.2.21"
     }
 }

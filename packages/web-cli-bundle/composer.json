@@ -1,0 +1,23 @@
+{
+    "name": "survos/web-cli-bundle",
+    "description": "test bundle with Symfony 6.1",
+    "type": "symfony-bundle",
+    "require": {
+        "php": "^8.1",
+        "symfony/config": "^6.1",
+        "symfony/dependency-injection": "^6.1",
+        "symfony/http-kernel": "^6.1"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Survos\\WebCliBundle\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tac Tacelosky",
+            "email": "tacman@gmail.com"
+        }
+    ]
+}

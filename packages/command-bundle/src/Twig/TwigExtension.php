@@ -1,8 +1,7 @@
 <?php
 
-namespace Survos\WebCliBundle\Twig;
+namespace Survos\CommandBundle\Twig;
 
-use Picqer\Barcode\BarcodeGeneratorSVG;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;

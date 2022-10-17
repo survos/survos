@@ -33,7 +33,7 @@ class SurvosWorkflowBundle extends AbstractBundle
 
         $workflowHelperId = 'survos_workflow_bundle.workflow_helper';
         $container->services()->alias(WorkflowHelperService::class, $workflowHelperId);
-        $builder->autowire($workflowHelperId, WorkflowHelperService::class)
+        $builder->autowire( WorkflowHelperService::class)
             ->addArgument($config['direction'])
             ->addArgument(new Reference('doctrine.orm.entity_manager'))
             ->addArgument(new Reference('workflow.registry'))

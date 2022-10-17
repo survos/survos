@@ -101,11 +101,8 @@ class MakeBundle extends AbstractMaker implements MakerInterface
         $name = $input->getArgument('name');
 
         // if the namespace doesn't exist, die and prompt user to reload the map
-        $json = json_decode(file_get_contents($composerJsonFilepath = "composer.json"));  // object, not array (no second arg)
+//        $json = json_decode(file_get_contents($composerJsonFilepath = "composer.json"));  // object, not array (no second arg)
         $bundleNamespace = "$vendor\\$name\\";
-//        $psr = $json->autoload->{'psr-4'};
-
-
         // ↓ instance of \Symplify\ComposerJsonManipulator\ValueObject\ComposerJson
         $composerJson = $this->composerJsonFactory->createFromFilePath(getcwd() . '/composer.json');
         $autoLoad = $composerJson->getAutoload();
@@ -117,6 +114,16 @@ class MakeBundle extends AbstractMaker implements MakerInterface
         $bundlePath = $this->bundlePath . '/' . $snake . '/src/';
         $snakeName = strtolower($vendor) . '/' . $snake;
 
+        /*
+        *      // Full class names can also be passed. Imagine the user has an autoload
+        *      // rule where Cool\Stuff lives in a "lib/" directory
+        *      // Cool\Stuff\BalloonController
+        *      $gen->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
+        */
+        $details = $generator->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
+        dd($details->getFullName());
+
+        if (0)
         if (! array_key_exists($bundleNamespace, $autoLoad['psr-4'])) {
 
 //            "Survos\\ApiGrid\\": "packages/api-grid-bundle/src/",
@@ -164,10 +171,16 @@ class MakeBundle extends AbstractMaker implements MakerInterface
         // after generation, remove this line and tell user to load bundle from new directory
 
         $extensionClassNameDetails = $generator->createClassNameDetails(
-            $nameWithVendor = '\\' . $vendor . '\\' . $name,
-            $vendor,
+            $nameWithVendor = $vendor . '\\' . $name,
+'',
+//            $name,
+//            '\\' . $vendor,
+//            '',
             'Bundle'
         );
+//        assert($extensionClassNameDetails->getRelativeName())
+        dump($extensionClassNameDetails->getFullName(), $vendor, $name, $nameWithVendor, __LINE__, __FILE__);
+//        assert(false);
 
         $useStatements = new UseStatementGenerator([
             DefinitionConfigurator::class,
@@ -177,16 +190,17 @@ class MakeBundle extends AbstractMaker implements MakerInterface
             Bundle::class,
         ]);
 
-        dump($extensionClassNameDetails->getFullName(), $vendor, $name, $nameWithVendor, __LINE__);
         $classPath = $generator->generateClass(
-//            $nameWithVendor, //
-             $extensionClassNameDetails->getFullName() . '\\',
+            $nameWithVendor, //
+//             $extensionClassNameDetails->getFullName(),
             $this->templatePath . 'bundle/src/Bundle.tpl.php',
             [
                 'use_statements' => $useStatements,
             ]
         );
-        $classDir = pathinfo($classPath, PATHINFO_DIRNAME);
+
+        // hack, because something is wrong with the classmap lookup
+        $classDir = str_replace('/.php', '', pathinfo($classPath, PATHINFO_DIRNAME));
         // composer belongs above src
 //        dd($classDir, $extensionClassNameDetails->getFullName(), $vendor, $name, $nameWithVendor, __LINE__);
 //        dd($snakeName, $snake, __LINE__, $classDir, $extensionClassNameDetails);

@@ -52,8 +52,8 @@ class MakeBundle extends AbstractMaker implements MakerInterface
         private string              $templatePath,
         private string              $bundlePath,
         private string              $bundleName,
-//        private JsonFileManager     $jsonFileManager,
-//        private ComposerJsonFactory $composerJsonFactory
+        private JsonFileManager     $jsonFileManager,
+        private ComposerJsonFactory $composerJsonFactory
     )
     {
 
@@ -131,10 +131,9 @@ class MakeBundle extends AbstractMaker implements MakerInterface
         *      // Cool\Stuff\BalloonController
         *      $gen->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
         */
-        $details = $generator->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
-        dd($details->getFullName());
+//        $details = $generator->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
+//        dd($details->getFullName());
 
-        if (0)
         if (! array_key_exists($bundleNamespace, $autoLoad['psr-4'])) {
 
 //            "Survos\\ApiGrid\\": "packages/api-grid-bundle/src/",
@@ -161,7 +160,6 @@ class MakeBundle extends AbstractMaker implements MakerInterface
 //            $composerJson = $this->composerJsonFactory->createFromArray((array)$json);
 
             $this->jsonFileManager->printComposerJsonToFilePath($composerJson, $composerJsonFilepath = $composerJson->getFileInfo()->getRealPath());
-            dd($composerJsonFilepath);
 
             $message = sprintf(
                 '"%s" was updated to use %s, run composer dump to reload the class map ',

@@ -125,7 +125,8 @@
             "Survos\\LocationBundle\\": "packages/location-bundle/src/",
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/",
-            "Survos\\RulerBundle\\": "packages/ruler-bundle/src/"
+            "Survos\\RulerBundle\\": "packages/ruler-bundle/src/",
+            "Survos\\StripeProduct\\": "packages/stripe-product/src/"
         }
     },
     "autoload-dev": {

@@ -67,14 +67,21 @@ trait KnpMenuHelperTrait
         ?string $uri = null,
         ?string $id = null,
         ?string $icon = null,
+        string|int|null $badge = null,
         bool $external = false,
         bool $returnItem = false,
     ): self|ItemInterface { // for nesting.  Leaves only, requires route or uri.
+
         assert(! ($route && $uri));
         $options = [];
         if ($route) {
             $options['route'] = $route;
         }
+
+        if ($badge) {
+            $options['badge'] = $badge;
+        }
+
         if ($rp) {
             $options['routeParameters'] = is_array($rp) ? $rp : $rp->getrp();
         }
@@ -98,6 +105,9 @@ trait KnpMenuHelperTrait
         // now add the various classes based on the style.  Unfortunately, this happens in the menu_get, not the render.
         $child->setLabel($label);
 
+        $options = $this->menuOptions($options);
+        $this->setChildOptions($child, $options);
+
         return $returnItem ? $child : $this;
     }
 
@@ -108,12 +118,19 @@ trait KnpMenuHelperTrait
         // must pass in either route, icon or menu_code
 
         // especially for collapsible menus.  Cannot start with a digit.
-        if (! $options['id']) {
+        if (!$options['id']) {
             $options['id'] = 'id_' . (new AsciiSlugger())->slug($options['label'])->toString() . '_' . md5(json_encode($options));
         }
 
         $child = $menu->addChild($options['id'], $options);
+        $this->setChildOptions($child, $options);
+        return $child;
         //        $child->setChildrenAttribute('class', 'branch');
+
+    }
+
+    private function setChildOptions(ItemInterface $child, array $options)
+    {
 
         if ($options['external']) {
             $child->setLinkAttribute('target', '_blank');
@@ -154,6 +171,10 @@ trait KnpMenuHelperTrait
             ]);
         }
 
+        if ($routes = $options['routes']) {
+            $child->setExtra('routes', $routes);
+        }
+
         if ($style = $options['style']) {
             $child->setAttribute('style', $style);
         }
@@ -173,6 +194,8 @@ trait KnpMenuHelperTrait
                 'id' => null,
                 'route' => null,
                 'rp' => null,
+                'routeParameters' => [],
+                'routes' => null,
                 'external' => false,
                 '_fragment' => null,
                 'label' => null,

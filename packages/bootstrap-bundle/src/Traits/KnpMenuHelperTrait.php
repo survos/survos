@@ -271,7 +271,9 @@ trait KnpMenuHelperTrait
         //        }
 
         if ($options['style'] === 'header') {
-            $options['attributes']['class'] = 'menu-header';
+            // @warning: will probably break sneat!
+//            $options['attributes']['class'] = 'menu-header menu-title';
+            $options['attributes']['class'] = 'menu-title';
         }
 
         if (! $options['id']) {

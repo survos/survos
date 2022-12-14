@@ -42,6 +42,7 @@ jobs:
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'providence-bundle', split_repository: 'SurvosProvidenceBundle'}
           - {local_path: 'tree-bundle', split_repository: 'SurvosTreeBundle'}
+          - {local_path: 'wiki-bundle', split_repository: 'SurvosWikiBundle'}
           - {local_path: 'workflow-helper-bundle', split_repository: 'SurvosWorkflowHelperBundle'}
 
 

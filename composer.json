@@ -127,7 +127,8 @@
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/",
             "Survos\\RulerBundle\\": "packages/ruler-bundle/src/",
             "Survos\\StripeProduct\\": "packages/stripe-product/src/",
-            "Survos\\WikiBundle\\": "packages/wiki-bundle/src/"
+            "Survos\\WikiBundle\\": "packages/wiki-bundle/src/",
+            "Survos\\ImportBridge\\": "packages/import-bridge/src/"
         }
     },
     "autoload-dev": {

@@ -36,6 +36,7 @@ jobs:
           - {local_path: 'doc-bundle', split_repository: 'SurvosDocBundle'}
           - {local_path: 'faker-bundle', split_repository: 'SurvosFakerBundle'}
           - {local_path: 'grid-bundle', split_repository: 'SurvosGridBundle'}
+          - {local_path: 'grid-group-bundle', split_repository: 'SurvosGridGroupBundle'}
           - {local_path: 'html-prettify-bundle', split_repository: 'HtmlPrettifyBundle'}
           - {local_path: 'inspection-bundle', split_repository: 'SurvosInspectionBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}

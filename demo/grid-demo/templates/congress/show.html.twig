@@ -34,4 +34,25 @@
         </tbody>
     </table>
 
+    {% component grid with {
+        data: official.terms,
+        columns: [
+            'type',
+            'party',
+            {name: 'stateAbbreviation', title: 'State' },
+            'district',
+            {name: 'startDatex'},
+            {name: 'endDatex'}
+        ]
+    } %}
+        {% block startDatex %}
+            {{ row.startDate|date('Y-m-d') }}
+        {% endblock %}
+        {% block endDatex %}
+            {{ row.endDate|date('Y-m-d') }}
+        {% endblock %}
+
+
+    {% endcomponent %}
+
 {% endblock %}

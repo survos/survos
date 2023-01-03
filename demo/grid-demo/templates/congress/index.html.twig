@@ -10,13 +10,22 @@
 
     {% component grid with {
         data: officials,
-        columns: ['id', 'officialName']|merge(is_granted('ROLE_ADMIN')?['actions']:['birthday'])
+        columns: [
+            'id',
+            'firstName',
+            'lastName',
+            {name: 'actions', condition: is_granted('ROLE_ADMIN')},
+            'officialName',
+            'birthday',
+            'terms'
+        ]
+
     } %}
 
         {% block officialName %}
-        <a href="{{ path('app_congress_show', {'id': row.id}) }}">
-            {{ row.officialName }}
-        </a>
+            <a href="{{ path('app_congress_show', {'id': row.id}) }}">
+                {{ row.officialName }}
+            </a>
         {% endblock %}
 
         {% block birthday %}

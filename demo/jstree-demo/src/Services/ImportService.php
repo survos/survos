@@ -311,7 +311,6 @@ class ImportService
             // $con->commit();
         } catch (\Exception $e) {
             //var_dump($e);
-            dump($d);
             // die($e->getMessage() . "\n");
         }
         $progress->finish();

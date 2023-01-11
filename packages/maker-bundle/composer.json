@@ -26,7 +26,6 @@
         "haydenpierce/class-finder": "^0.4.3",
         "phpstan/phpstan": "^1.8",
         "rector/rector": "^0.13.9",
-        "sensio/framework-extra-bundle": "^6.2",
         "squizlabs/php_codesniffer": "^3.7",
         "symfony/form": "^6.1.0",
         "symfony/http-client": "^6.1.0",

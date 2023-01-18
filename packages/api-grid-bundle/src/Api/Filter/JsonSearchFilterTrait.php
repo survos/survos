@@ -31,6 +31,7 @@ trait JsonSearchFilterTrait
                 continue;
             }
 
+//            $description += $this->getFilterDescription($property, null);
             $description += $this->getFilterDescription($property, self::PARAMETER_OPERATIOR);
             $description += $this->getFilterDescription($property, self::PARAMETER_EQUALS);
             $description += $this->getFilterDescription($property, self::PARAMETER_BETWEEN);
@@ -48,17 +49,30 @@ trait JsonSearchFilterTrait
     /**
      * Gets filter description.
      */
-    protected function getFilterDescription(string $fieldName, string $operator): array
+    protected function getFilterDescription(string $fieldName, ?string $operator): array
     {
         $propertyName = $this->normalizePropertyName($fieldName);
 
-        return [
-            sprintf('%s[%s]', $propertyName, $operator) => [
-                'property' => $propertyName,
-                'type' => 'string',
-                'required' => false,
-            ],
-        ];
+        if ($operator) {
+            return [
+                sprintf('%s[%s]', $propertyName, $operator) => [
+                    'property' => $propertyName,
+                    'type' => 'string',
+                    'required' => false,
+                ],
+            ];
+
+        } else {
+//            return [
+//                sprintf('%s', $propertyName) => [
+//                    'property' => $propertyName,
+//                    'type' => 'string',
+//                    'required' => false,
+//                ],
+//            ];
+
+        }
+
     }
 
     private function normalizeValues(array $values, string $property): ?array

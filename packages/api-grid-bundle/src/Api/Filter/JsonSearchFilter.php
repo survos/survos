@@ -50,7 +50,7 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
     ): void {
 
 
-        dd($property, $values, $this->searchParameterName, $this->isPropertyEnabled($property, $resourceClass), $this->isPropertyMapped($property, $resourceClass));
+//        dd($property, $values, $this->searchParameterName, $this->isPropertyEnabled($property, $resourceClass), $this->isPropertyMapped($property, $resourceClass));
 
         if (
             !\is_array($values) ||
@@ -61,15 +61,15 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
         }
 
         // @todo: make sure it's a valid property, etc.
-        dd($property, $values, $this->searchParameterName, $this->isPropertyEnabled($property, $resourceClass), $this->isPropertyMapped($property, $resourceClass));
+//        dd($property, $values, $this->searchParameterName, $this->isPropertyEnabled($property, $resourceClass), $this->isPropertyMapped($property, $resourceClass));
         foreach ($values as $value) {
             [$attribute, $operator, $attrValue] = explode(',', $value, 3);
 
         }
         $this->addJsonWhere($queryBuilder, $property, $attribute, $operator, $attrValue);
-        dd($queryBuilder->getQuery()->getSQL());
+//        dd($queryBuilder->getQuery()->getSQL());
 
-        $values = $this->normalizeValues($values, $property);
+//        $values = $this->normalizeValues($values, $property);
 
 
         if (null === $value || $property !== $this->searchParameterName) {
@@ -88,15 +88,27 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
 
 
 
+        $attrValue = [$attribute => $value];
         $queryBuilder
-            ->andWhere(sprintf("JSON_GET_FIELD_AS_TEXT(%s.%s, '%s') = :attrValue", $alias, $property, $attribute))
+            ->andWhere($where = sprintf(" (CONTAINS(%s.%s, :attrValue)=TRUE)",
+                $alias,
+                $property,
+                json_encode($attrValue),
+                json_encode($attrValue),
+            ))
+//        dd($where, json_encode($attrValue));
+
+//            ->andWhere(sprintf("JSON_GET_FIELD_AS_TEXT(%s.%s, '%s') = :attrValue", $alias, $property, $attribute))
 //            ->andWhere('JSON_GET_OBJECT(s.notes, :attr) = :attrValue')
 //            ->setParameter('attr', sprintf("{'%s'}", $attribute))
-            ->setParameter('attrValue', $value);
+            ->setParameter('attrValue', $attrValue, 'json');
 
+        $query = $queryBuilder->getQuery();
 
-//        dd($queryBuilder->getQuery()->getDQL(), $queryBuilder->getQuery()->getSQL());
-
+//        dd($queryBuilder->getQuery()->getDQL(),
+//            $query->getParameters(), $query->getParameter('attrValue'),
+//            $queryBuilder->getQuery()->getSQL());
+//
         return;
 
         $queryBuilder

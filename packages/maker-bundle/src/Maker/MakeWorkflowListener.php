@@ -18,8 +18,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Workflow\Registry;
 
+use Symfony\Component\Workflow\WorkflowInterface;
 use function Symfony\Component\String\u;
 
 final class MakeWorkflowListener extends AbstractMaker implements MakerInterface
@@ -27,7 +27,8 @@ final class MakeWorkflowListener extends AbstractMaker implements MakerInterface
     public function __construct(
         private DoctrineHelper $doctrineHelper,
         private Generator $generator,
-        private ?Registry $registry = null
+        /** @var WorkflowInterface[] */
+        private iterable $workflows,
     ) {
     }
 
@@ -69,7 +70,7 @@ final class MakeWorkflowListener extends AbstractMaker implements MakerInterface
 
         $fullClassName = $listererClassDetails->getFullName();
         // to get the workflow name from the workflows
-        $workflow = $this->registry->get(new ($entityClassDetails->getFullName())());
+//        $workflow = $this->registry->get(new ($entityClassDetails->getFullName())());
         //        dd($workflow->getName());
         $workflowName = constant($entityClassDetails->getFullName() . '::WORKFLOW');
 

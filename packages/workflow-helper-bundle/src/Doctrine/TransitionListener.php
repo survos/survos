@@ -31,7 +31,9 @@ class TransitionListener
 //        if (method_exists($entity, 'setEnabledTransitions')) {
             // skip the ones that being with _, those are system-only
             // ugh, ugh, ugh.
-            $workflowName = $this->workflowHelperService->getWorkflowsGroupedByClass()[$entity::class][0];
+            $realClass = (\Doctrine\Common\Util\ClassUtils::getRealClass($entity::class));
+
+            $workflowName = $this->workflowHelperService->getWorkflowsGroupedByClass()[$realClass][0];
 
             foreach ($this->workflows as $workflow) {
                 if ($workflow->getName() == $workflowName) {

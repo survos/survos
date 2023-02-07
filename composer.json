@@ -89,7 +89,7 @@
         "symfony/web-profiler-bundle": "^6.1.0",
         "symplify/config-transformer": "^11.1",
         "symplify/easy-coding-standard": "^11.1",
-        "symplify/monorepo-builder": "^11.1"
+        "symplify/monorepo-builder": "11.2.2.72"
     },
     "config": {
         "allow-plugins": {
@@ -145,21 +145,21 @@
         }
     },
     "replace": {
-        "survos/api-grid-bundle": "1.2.57",
-        "survos/auth-bundle": "1.2.57",
-        "survos/barcode-bundle": "1.2.57",
-        "survos/bootstrap-bundle": "1.2.57",
-        "survos/core-bundle": "1.2.57",
-        "survos/crawler-bundle": "1.2.57",
-        "survos/doc-bundle": "1.2.57",
-        "survos/faker-bundle": "1.2.57",
-        "survos/grid-bundle": "1.2.57",
-        "survos/html-prettify-bundle": "1.2.57",
-        "survos/inspection-bundle": "1.2.57",
-        "survos/location-bundle": "1.2.57",
-        "survos/maker-bundle": "1.2.57",
-        "survos/tree-bundle": "1.2.57",
-        "survos/workflow-helper-bundle": "1.2.57"
+        "survos/api-grid-bundle": "1.2.58",
+        "survos/auth-bundle": "1.2.58",
+        "survos/barcode-bundle": "1.2.58",
+        "survos/bootstrap-bundle": "1.2.58",
+        "survos/core-bundle": "1.2.58",
+        "survos/crawler-bundle": "1.2.58",
+        "survos/doc-bundle": "1.2.58",
+        "survos/faker-bundle": "1.2.58",
+        "survos/grid-bundle": "1.2.58",
+        "survos/html-prettify-bundle": "1.2.58",
+        "survos/inspection-bundle": "1.2.58",
+        "survos/location-bundle": "1.2.58",
+        "survos/maker-bundle": "1.2.58",
+        "survos/tree-bundle": "1.2.58",
+        "survos/workflow-helper-bundle": "1.2.58"
     },
     "scripts": {
         "auto-scripts": {

@@ -24,6 +24,13 @@ use function Symfony\Component\String\u;
 
 final class MakeWorkflowListener extends AbstractMaker implements MakerInterface
 {
+
+
+    static public function getCommandDescription(): string
+    {
+        return "Create a workflow subscriber service to handle trannsitions";
+    }
+
     public function __construct(
         private DoctrineHelper $doctrineHelper,
         private Generator $generator,
@@ -45,11 +52,9 @@ final class MakeWorkflowListener extends AbstractMaker implements MakerInterface
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $io->success('Workflow is now listening for events, open .. to react.');
-
-        return Command::SUCCESS;
     }
 
     public function configureDependencies(DependencyBuilder $dependencies)

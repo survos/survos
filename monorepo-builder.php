@@ -28,12 +28,22 @@ return static function (MBConfig $mbConfig): void {
 
     $mbConfig->workers([
         // release workers - in order to execute
+
         UpdateReplaceReleaseWorker::class,
         SetCurrentMutualDependenciesReleaseWorker::class,
+        \Symplify\MonorepoBuilder\Release\ReleaseWorker\AddTagToChangelogReleaseWorker::class,
         TagVersionReleaseWorker::class,
         PushTagReleaseWorker::class,
         SetNextMutualDependenciesReleaseWorker::class,
         UpdateBranchAliasReleaseWorker::class,
         PushNextDevReleaseWorker::class,
+
+//        UpdateReplaceReleaseWorker::class,
+//        SetCurrentMutualDependenciesReleaseWorker::class,
+//        TagVersionReleaseWorker::class,
+//        PushTagReleaseWorker::class,
+//        SetNextMutualDependenciesReleaseWorker::class,
+//        UpdateBranchAliasReleaseWorker::class,
+//        PushNextDevReleaseWorker::class,
     ]);
 };

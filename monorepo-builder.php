@@ -14,6 +14,7 @@ use Symplify\MonorepoBuilder\Release\ReleaseWorker\UpdateReplaceReleaseWorker;
 
 return static function (MBConfig $mbConfig): void {
     $mbConfig->packageDirectories([__DIR__ . '/packages']);
+    $mbConfig->defaultBranch('main');
 
     // release workers - in order to execute
     $mbConfig->workers([

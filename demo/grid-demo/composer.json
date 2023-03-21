@@ -121,5 +121,9 @@
         "symplify/easy-coding-standard": "^11.0"
     },
     "repositories": {
+        "api-grid": {
+            "type": "path",
+            "url": "//home/tac/g/survos/survos/packages/api-grid-bundle"
+        }
     }
 }

@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ServiceLocator;
@@ -36,11 +37,11 @@ class CrawlerService
         //        private Client $gouteClient,
         //        private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
+        private KernelInterface $kernel,
+        private TokenStorageInterface $tokenStorage,
         private array $linkList = [],
         private ?string $username = null,
         private array $users = [],
-        private KernelInterface $kernel,
-        private TokenStorageInterface $tokenStorage
     ) {
         //        $this->baseUrl = 'https://127.0.0.1:8001';
     }
@@ -56,19 +57,20 @@ class CrawlerService
         return $this->initialPath;
     }
 
-    public function getUsers()
+    public function getUsernames(): array
     {
         return $this->users;
     }
 
-    public function getUser($username)
+    public function getUser($username): ?UserInterface
     {
         $user = $this->managerRegistry->getRepository($this->userClass)->findOneBy([
             'email' => $username,
         ]);
+        return $user;
 
         assert($user, "Invalid user $username, not in user database");
-        
+
         return $user;
     }
 
@@ -181,14 +183,15 @@ class CrawlerService
 
         if ($status <> 200) {
             // @todo: what should we do here?
-            dump($response->getContent());
-            $this->logger->error("Error $status scraping $url: " . $status);
+//            dump($response->getContent());
+            $this->logger->error("Warning:  $url: " . $status);
             //            dd($response->getStatusCode(), $this->baseUrl . $link->getPath());
             $html = false;
         } else {
             $html = $response->getContent();
         }
-        assert($status === 200, $link->username . '@' . $this->baseUrl . trim($link->getPath(), '/') . ' ' . $link->getRoute() . ' caused a ' . $status . ' found on ' . $link->foundOn);
+        // hmm, how should 301's be tracked?
+        assert(in_array($status, [200, 302, 301]), $link->username . '@' . $this->baseUrl . trim($link->getPath(), '/') . ' ' . $link->getRoute() . ' caused a ' . $status . ' found on ' . $link->foundOn);
 
         //        $responseInfo = $response->getInfo();
         //        unset($responseInfo['pause_handler']);

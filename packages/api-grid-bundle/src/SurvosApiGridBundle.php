@@ -4,7 +4,9 @@ namespace Survos\ApiGrid;
 
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
+use Survos\ApiGrid\Paginator\SlicePaginationExtension;
 use Survos\ApiGrid\Twig\TwigExtension;
+use Survos\GridGroupBundle\Service\GridGroupService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -29,12 +31,29 @@ class SurvosApiGridBundle extends AbstractBundle
         //            ->setPublic(false)
         //        ;
 
+//        api_platform.doctrine.orm.query_extension.pagination:
+//        class: App\Paginator\SlicePaginationExtension
+//        tags:
+//          - {name : api_platform.doctrine.orm.query_extension.collection, priority: -65}
+//        autowire: true
+//    App\Paginator\SlicePaginationExtension:
+//        alias: api_platform.doctrine.orm.query_extension.pagination
+
+        $builder->register('api_platform.doctrine.orm.query_extension.pagination',SlicePaginationExtension::class)
+            ->setAutowired(true)
+            ->addTag('api_platform.doctrine.orm.query_extension.collection', ['priority' => -60])
+        ;
+        $services = $container->services();
+        $services->set(SlicePaginationExtension::class)
+            ->tag('api_platform.doctrine.orm.query_extension.collection', ['priority' => -60])
+        ;
+        $container->services()->alias(SlicePaginationExtension::class,'api_platform.doctrine.orm.query_extension.pagination');
+
         if (class_exists(Environment::class) && class_exists(StimulusTwigExtension::class)) {
             $builder
                 ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
                 ->addTag('twig.extension')
-                ->setPublic(false)
-            ;
+                ->setPublic(false);
         }
 
         $builder->register(ApiGridComponent::class)
@@ -42,8 +61,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
             ->setArgument('$logger', new Reference('logger'))
-            ->setArgument('$stimulusController', $config['stimulus_controller'])
-        ;
+            ->setArgument('$stimulusController', $config['stimulus_controller']);
         $builder->register(MultiFieldSearchFilter::class)
             ->addArgument(new Reference('doctrine.orm.default_entity_manager'))
             ->addArgument(new Reference('request_stack'))
@@ -67,9 +85,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->scalarNode('widthFactor')->defaultValue(2)->end()
             ->scalarNode('height')->defaultValue(30)->end()
             ->scalarNode('foregroundColor')->defaultValue('green')->end()
-            ->end();
-
-        ;
+            ->end();;
     }
 
     public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void

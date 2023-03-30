@@ -485,30 +485,31 @@ export default class extends Controller {
                             recordsFiltered: total, //  itemsReturned,
                         }
 
-                        if (next && (params.start > 0)) // && itemsReturned !== params.length
-                        {
-
-                            console.log('fetching second page ' + next);
-                            axios.get(next, {
-                                headers: apiPlatformHeaders,
-                            })
-                                .then(response => response.data)
-                                .then(json => {
-                                    d = d.concat(json['hydra:member']);
-
-                                    this.debug && console.log(d.map(obj => obj.id));
-                                    if (this.debug && console && console.log) {
-                                        console.log(`  ${itemsReturned} (of ${total}) returned, page ${apiOptions.page}, ${apiOptions.itemsPerPage}/page first: ${first} :`, d);
-                                    }
-                                    d = d.slice(params.start - first, (params.start - first) + params.length);
-                                    callbackValues.data = d;
-
-                                    itemsReturned = d.length;
-
-                                    console.log(`2-page callback with ${total} records (${itemsReturned} items)`);
-                                    console.log(d);
-                                });
-                        }
+                        console.log('NOT fetching second page ' + next);
+                        // if (next && (params.start > 0)) // && itemsReturned !== params.length
+                        // {
+                        //
+                        //     console.log('NOT fetching second page ' + next);
+                        //     axios.get(next, {
+                        //         headers: apiPlatformHeaders,
+                        //     })
+                        //         .then(response => response.data)
+                        //         .then(json => {
+                        //             d = d.concat(json['hydra:member']);
+                        //
+                        //             this.debug && console.log(d.map(obj => obj.id));
+                        //             if (this.debug && console && console.log) {
+                        //                 console.log(`  ${itemsReturned} (of ${total}) returned, page ${apiOptions.page}, ${apiOptions.itemsPerPage}/page first: ${first} :`, d);
+                        //             }
+                        //             d = d.slice(params.start - first, (params.start - first) + params.length);
+                        //             callbackValues.data = d;
+                        //
+                        //             itemsReturned = d.length;
+                        //
+                        //             console.log(`2-page callback with ${total} records (${itemsReturned} items)`);
+                        //             console.log(d);
+                        //         });
+                        // }
                         callback(callbackValues);
                     })
                     .catch(function (error) {
@@ -671,12 +672,17 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
     dataTableParamsToApiPlatformParams(params) {
         let columns = params.columns; // get the columns passed back to us, sanity.
-        var apiData = {
-            page: 1
-        };
+        // var apiData = {
+        //     page: 1
+        // };
+        // console.error(params);
 
+        // apiData.start = params.start; // ignored?s
+
+        let apiData = {};
         if (params.length) {
-            apiData.itemsPerPage = params.length;
+            // was apiData.itemsPerPage = params.length;
+            apiData.limit = params.length;
         }
 
         // same as #[ApiFilter(MultiFieldSearchFilter::class, properties: ["label", "code"], arguments: ["searchParameterName"=>"search"])]
@@ -733,8 +739,10 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         if (params.start) {
             // was apiData.page = Math.floor(params.start / params.length) + 1;
-            apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
+            // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
+        apiData.offset = params.start;
+        // console.error(apiData);
 
         // add our own filters
         // apiData['marking'] = ['fetch_success'];

@@ -174,11 +174,15 @@ class CrawlerService
         $crawlerClient = $this->crawlerClient;
         assert($crawlerClient, "no crawlerClient");
         $crawlerClient->followRedirects();
+        $startTime = floor(microtime(true) * 1000);
         $crawlerClient->request('GET', $url);
+        $endTime = floor(microtime(true) * 1000);
+        $link->setDuration($endTime - $startTime);  
         $response = $crawlerClient->getResponse();
-
+        
         //        dd($response->getStatusCode(), $request, $this->goutteClient);
         $status = $response->getStatusCode();
+        $link->setMemory();
         $link
 //            ->setDuration($response->getInfo('total_time'))
             ->setStatusCode($status);

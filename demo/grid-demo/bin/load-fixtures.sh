@@ -9,3 +9,5 @@ bin/console doctrine:schema:update --complete --force
 
 bin/console doctrine:fixtures:load -n
 
+
+wget https://www.kaggle.com/datasets/imls/museum-directory/download?datasetVersionNumber=1

@@ -28,7 +28,6 @@ class BarcodeTwigExtension extends AbstractExtension
             ]),
         ];
     }
-
     public function getFunctions(): array
     {
         return [

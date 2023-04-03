@@ -186,7 +186,7 @@ class CrawlerService
         
         //        dd($response->getStatusCode(), $request, $this->goutteClient);
         $status = $response->getStatusCode();
-        $link->setMemory();
+        //$link->setMemory();
         $link
 //            ->setDuration($response->getInfo('total_time'))
             ->setStatusCode($status);

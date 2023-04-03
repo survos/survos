@@ -16,8 +16,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use function Symfony\Component\String\u;
-
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+
 class CrawlerService
 {
     private ?CrawlerClient $crawlerClient = null;
@@ -42,6 +42,7 @@ class CrawlerService
         private array $linkList = [],
         private ?string $username = null,
         private array $users = [],
+        private int $maxDepth = 1
     ) {
         //        $this->baseUrl = 'https://127.0.0.1:8001';
     }
@@ -87,7 +88,11 @@ class CrawlerService
             $this->linkList[$username] = [];
         }
         if (! array_key_exists($path, $this->linkList[$username])) {
-            $this->linkList[$username][$path] = new Link(username: $username, path: $path, foundOn: $foundOn);
+            $depth = 0;
+            if(isset($this->linkList[$username][$foundOn])) {
+                $depth = $this->linkList[$username][$foundOn]->getDepth() + 1;
+            }
+            $this->linkList[$username][$path] = new Link(username: $username, path: $path, foundOn: $foundOn, depth: $depth);
         }
         $link = $this->linkList[$username][$path];
         return $link;
@@ -149,8 +154,7 @@ class CrawlerService
     {
         //        $this->logger->info("Scraping " . $link->getPath());
         $link->setSeen(true);
-
-        if ($depth && ($link->getDepth() > $depth)) {
+        if ($link->getDepth() > $this->maxDepth) {
             return;
         }
 
@@ -235,7 +239,7 @@ class CrawlerService
                     }
                 }
                 $pageLink = $this->addLink($link->username, $cleanHref, foundOn: $link->getPath());
-                $pageLink->setDepth($depth + 1);
+                //$pageLink->setDepth($depth + 1);
             }
         );
     }

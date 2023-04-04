@@ -27,10 +27,13 @@ class GridGroupService
     static public function fetchRow(string $filename, string $separator = ","): \Generator
     {
         static $headers=null;
-        static $headrsCount=null;
+        static $headersCount=null;
         $buffer = fopen($filename, 'r+');
         while ($row = fgetcsv($buffer, separator: $separator)) {
             if (empty($headers)) {
+                // https://stackoverflow.com/questions/54145035/cant-remove-ufeff-from-a-string
+//                $row[0] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $row[0]);
+                $row[0]= trim($row[0], "\xEF\xBB\xBF");
                 $headers = $row;
                 $headersCount = count($headers);
                 continue;

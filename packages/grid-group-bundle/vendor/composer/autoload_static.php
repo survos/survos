@@ -63,9 +63,9 @@ class ComposerStaticInit141147ee9669a39a3b393e737bbe8bb6
         array (
             'Masterminds\\' => 12,
         ),
-        'E' => 
+        'F' => 
         array (
-            'EasyCSV\\' => 8,
+            'Flintstone\\' => 11,
         ),
     );
 
@@ -206,9 +206,9 @@ class ComposerStaticInit141147ee9669a39a3b393e737bbe8bb6
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
         ),
-        'EasyCSV\\' => 
+        'Flintstone\\' => 
         array (
-            0 => __DIR__ . '/..' . '/jwage/easy-csv/lib/EasyCSV',
+            0 => __DIR__ . '/..' . '/fire015/flintstone/src',
         ),
     );
 

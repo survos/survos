@@ -40,5 +40,5 @@ return array(
     'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
     'Psr\\Cache\\' => array($vendorDir . '/psr/cache/src'),
     'Masterminds\\' => array($vendorDir . '/masterminds/html5/src'),
-    'EasyCSV\\' => array($vendorDir . '/jwage/easy-csv/lib/EasyCSV'),
+    'Flintstone\\' => array($vendorDir . '/fire015/flintstone/src'),
 );

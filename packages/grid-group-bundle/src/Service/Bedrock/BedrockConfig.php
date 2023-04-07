@@ -10,7 +10,7 @@ use SplTempFileObject;
 class BedrockConfig extends Config
 {
 
-    private bool $useMd5 = false;
+    private bool $hash = false;
     private string $keyName;
     private array $fields = [];
     private array $headers = [];
@@ -34,16 +34,16 @@ class BedrockConfig extends Config
             array_unshift($headers, $this->keyName);
         }
         $this->setHeaders($headers);
-        $this->setUseMd5($this->config['hashKey']??false);
+        $this->setHash($this->config['hashKey']??false);
 
     }
 
     /**
      * @return bool
      */
-    public function isUseMD5(): bool
+    public function isHash(): bool
     {
-        return $this->useMD5;
+        return $this->hash;
     }
 
     public function getHeaders(): array
@@ -81,11 +81,11 @@ class BedrockConfig extends Config
     }
 
     /**
-     * @param bool $useMd5
+     * @param bool $hash
      */
-    public function setUseMd5(bool $useMd5): void
+    public function setHash(bool $hash): void
     {
-        $this->useMd5 = $useMd5;
+        $this->hash = $hash;
     }
 
     /**

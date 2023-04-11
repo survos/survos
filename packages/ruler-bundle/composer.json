@@ -1,7 +1,10 @@
 {
     "name": "survos/ruler-bundle",
     "type": "symfony-bundle",
-    "keywords": ["symfony-ux", "symfony6"],
+    "keywords": [
+        "symfony-ux",
+        "symfony6"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.1",

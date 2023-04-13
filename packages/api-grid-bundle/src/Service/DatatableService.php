@@ -80,7 +80,7 @@ class DatatableService
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
-            dd($attribute);
+            // dd($attribute);
 
             $filter = $attribute->getArguments()[0];
             if (u($filter)->endsWith('OrderFilter')) {

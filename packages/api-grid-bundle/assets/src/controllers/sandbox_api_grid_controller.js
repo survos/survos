@@ -83,14 +83,14 @@ export default class extends Controller {
         apiCall: {type: String, default: ''},
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
-        sortableFields: {type: String, default: '[]'},
-        searchableFields: {type: String, default: '[]'},
-        searchBuilderFields: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
         dom: {type: String, default: 'Plfrtip'},
         filter: String
     }
     // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
+    // sortableFields: {type: String, default: '[]'},
+    // searchableFields: {type: String, default: '[]'},
+    // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
         let x = this.columns.map(c => {
@@ -135,9 +135,9 @@ export default class extends Controller {
         console.assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
-        this.sortableFields = JSON.parse(this.sortableFieldsValue);
-        this.searchableFields = JSON.parse(this.searchableFieldsValue);
-        this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+        // this.sortableFields = JSON.parse(this.sortableFieldsValue);
+        // this.searchableFields = JSON.parse(this.searchableFieldsValue);
+        // this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
 
         this.locale = this.localeValue;
 
@@ -166,7 +166,7 @@ export default class extends Controller {
                 axios.get(this.searchPanesDataUrlValue, {})
                     .then((response) => {
                             // handle success
-                            // console.log(response.data);
+                            console.log(response.data);
                             this.dt = this.initDataTable(this.tableElement, response.data);
                         }
                     );
@@ -329,9 +329,18 @@ export default class extends Controller {
     initDataTable(el, fields) {
 
         let lookup = [];
-        fields.forEach((field, index) => {
-            lookup[field.jsonKeyCode] = field;
-        });
+        console.error(fields);
+        // for (const property in fields) {
+        //     lookup[property] = field;
+        //     console.error(property, fields[property]);
+        //     console.log(`${property}: ${fields[property]}`);
+        // }
+        // fields = Array.from(fields);
+        // fields.forEach((field, index) => {
+        //     console.error(field);
+        //     lookup[field.jsonKeyCode] = field;
+        // });
+        // console.error(lookup);
         let searchFieldsByColumnNumber = [];
         let options = [];
         this.columns.forEach((column, index) => {
@@ -340,26 +349,29 @@ export default class extends Controller {
                 console.error(index);
                 searchFieldsByColumnNumber.push(index);
             }
-            if (column.browsable && (column.name in lookup)) {
-                let field = lookup[column.name];
-                options[field.jsonKeyCode] = [];
-                for (const label in field.valueCounts) {
-                    let count = field.valueCounts[label];
-                    //     console.log(field.valueCounts);
-                    // field.valueCounts.protoforEach( (label, count) =>
-                    // {
-                    options[field.jsonKeyCode].push({
-                        label: label,
-                        count: field.distinctValuesCount,
-                        value: label,
-                        total: count
-                    });
-                }
-            } else {
-                // console.warn("Missing " + column.name, Object.keys(lookup));
-            }
+            options = fields;
+            // this is specific to museado, but needs to be generalized with a field structure.
+            // if (column.browsable && (column.name in fields)) {
+            //     let fieldName = column.name; //  lookup[column.name];
+            //     // options[field.jsonKeyCode] = [];
+            //     for (const label in field.valueCounts) {
+            //         let count = field.valueCounts[label];
+            //         //     console.log(field.valueCounts);
+            //         // field.valueCounts.protoforEach( (label, count) =>
+            //         // {
+            //         options[fieldName].push({
+            //             label: label,
+            //             count: field.distinctValuesCount,
+            //             value: label,
+            //             total: count
+            //         });
+            //     }
+            // } else {
+            //     // console.warn("Missing " + column.name, Object.keys(lookup));
+            // }
         });
-        console.error('searchFields', searchFieldsByColumnNumber);
+        console.error(options);
+        // console.error('searchFields', searchFieldsByColumnNumber);
 
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
@@ -382,7 +394,7 @@ export default class extends Controller {
         let setup = {
             // let dt = new DataTable(el, {
             language: {
-                searchPlaceholder: 'srch: ' + this.searchableFields.join(',')
+                searchPlaceholder: 'srch: '// + this.searchableFields.join(',')
             },
             createdRow: this.createdRow,
             // paging: true,
@@ -612,7 +624,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             title: label,
             data: propertyName || '',
             render: render,
-            sortable: this.sortableFields.includes(propertyName)
+            sortable: false, // this.sortableFields.includes(propertyName)
         }
         // ...function body...
     }

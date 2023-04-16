@@ -484,6 +484,14 @@ export default class extends Controller {
                         if (d.length) {
                             console.log(d[0]);
                         }
+                        let searchPanes = {};
+                        if(typeof hydraData['hydra:facets'] !== "undefined") {
+                            searchPanes = hydraData['hydra:facets']['searchPanes'];
+                        } else {
+                            searchPanes = {
+                                options: options
+                            };
+                        }
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:
                         //     pagination_client_items_per_page: true
@@ -491,9 +499,7 @@ export default class extends Controller {
                         // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
                         let next = hydraData["hydra:view"]['hydra:next'];
                         // we need the searchpanes options, too.
-                        let searchPanes = {
-                            options: options
-                        };
+
 
 
                         let callbackValues = {
@@ -683,11 +689,10 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             apiData['search'] = params.search.value;
         }
 
+        let order = {};
         if (params.searchBuilder) {
             apiData['searchBuilder'] = params.searchBuilder;
         }
-
-        let order = {};
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];

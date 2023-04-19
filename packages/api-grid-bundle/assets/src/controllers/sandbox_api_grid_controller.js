@@ -161,18 +161,7 @@ export default class extends Controller {
         //     console.error('A table element is required.');
         // }
         if (this.tableElement) {
-            // get the (cached) fields first, then load the datatable
-            if (this.searchPanesDataUrlValue) {
-                axios.get(this.searchPanesDataUrlValue, {})
-                    .then((response) => {
-                            // handle success
-                            console.log(response.data);
-                            this.dt = this.initDataTable(this.tableElement, response.data);
-                        }
-                    );
-            } else {
-                this.dt = this.initDataTable(this.tableElement, []);
-            }
+            this.dt = this.initDataTable(this.tableElement, []);
             this.initialized = true;
         }
     }
@@ -509,6 +498,7 @@ export default class extends Controller {
                             recordsTotal: total,
                             recordsFiltered: total, //  itemsReturned,
                         }
+                        console.log(callbackValues);
                         callback(callbackValues);
                     })
                     .catch(function (error) {

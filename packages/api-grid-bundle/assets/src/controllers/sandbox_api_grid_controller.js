@@ -359,8 +359,6 @@ export default class extends Controller {
             //     // console.warn("Missing " + column.name, Object.keys(lookup));
             // }
         });
-        console.error(options);
-        // console.error('searchFields', searchFieldsByColumnNumber);
 
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
@@ -393,7 +391,7 @@ export default class extends Controller {
             // pageLength: 15,
             orderCellsTop: true,
             fixedHeader: true,
-
+            cascadePanes  : true,
             deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,
@@ -608,8 +606,22 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                     if (modal_route) {
                         return `<button data-modal-route="${modal_route}" class="btn btn-success">${modal_route}</button>`;
                     } else {
-                        // console.log(propertyName, row[propertyName], row);
-                        return row[propertyName];
+                        // if nested, explode...
+                        let elements = propertyName.split('.');
+                        if (elements.length === 3) {
+                            let x1 = elements[0];
+                            let x2 = elements[1];
+                            let x3 = elements[2];
+                            return row[x1][x2][x3];
+                        } else if (elements.length === 2) {
+                            // hack, only one level deep, etc.  ugh
+                            let x1 = elements[0];
+                            let x2 = elements[1];
+                            return row[x1][x2];
+                        } else {
+                            return row[propertyName];
+                        }
+
                     }
                 }
 

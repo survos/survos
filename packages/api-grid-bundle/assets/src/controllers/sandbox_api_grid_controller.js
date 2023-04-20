@@ -424,6 +424,7 @@ export default class extends Controller {
             buttons: [], // this.buttons,
             columns: this.cols(),
             searchPanes: {
+                viewTotal: true,
                 layout: 'columns-1',
             },
             searchBuilder: {

@@ -437,6 +437,9 @@ export default class extends Controller {
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
+                console.log("==============");
+                console.log(callback);
+                console.log("==============");
                 let apiParams = this.dataTableParamsToApiPlatformParams(params);
                 // this.debug &&
                 // console.error(params, apiParams);
@@ -731,7 +734,18 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[c.origData + '[]'] = c.value1;
             });
         }
+        let facets = [];
+        this.columns.forEach((column) => {
+            if (column.searchable || column.browsable ) {
+                console.error(column.name);
+                facets.push(column.name);
+            }
+        });
+        apiData.facets = facets;
         params.columns.forEach(function (column, index) {
+            // if(col) {
+
+            // }
             if (column.search && column.search.value) {
                 // console.error(column);
                 let value = column.search.value;
@@ -747,6 +761,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
         apiData.offset = params.start;
+        
         // console.error(apiData);
 
         // add our own filters

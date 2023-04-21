@@ -47,16 +47,18 @@ final class MeiliCollectionNormalizer extends AbstractCollectionNormalizer
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
+        //dd($object);
+        //if(instanceof $object)
         if (!isset($context['resource_class']) || isset($context['api_sub_level'])) {
             return $this->normalizeRawCollection($object, $format, $context);
         }
 
         $facets = [];
-        if(isset($object['facetDistribution'])) {
+        if(is_array($object) && isset($object['facetDistribution'])) {
             $facets = $this->getFacetsData($object['facetDistribution']);
         }
 
-        if(isset($object['hits'])) {
+        if(is_array($object) && isset($object['hits'])) {
             $object = $object['hits'];
         }
         $resourceClass = $this->resourceClassResolver->getResourceClass($object, $context['resource_class']);

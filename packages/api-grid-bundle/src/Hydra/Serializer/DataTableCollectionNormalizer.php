@@ -11,9 +11,9 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
+use MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Arr;
 
-
-final class MeiliCollectionNormalizer extends AbstractCollectionNormalizer
+final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 {
     use JsonLdContextTrait;
 
@@ -45,10 +45,8 @@ final class MeiliCollectionNormalizer extends AbstractCollectionNormalizer
      *
      * @param iterable $object
      */
-    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    public function normalize(mixed  $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
-        //dd($object);
-        //if(instanceof $object)
         if (!isset($context['resource_class']) || isset($context['api_sub_level'])) {
             return $this->normalizeRawCollection($object, $format, $context);
         }
@@ -61,6 +59,25 @@ final class MeiliCollectionNormalizer extends AbstractCollectionNormalizer
         if(is_array($object) && isset($object['hits'])) {
             $object = $object['hits'];
         }
+
+        if ($object instanceof PaginatorInterface) {
+            parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
+            $em = $object->getQuery()->getEntityManager();
+            $metadata = $em->getClassMetadata($context['operation']->getClass());
+
+            $repo = $em->getRepository($context['operation']->getClass());
+
+            if(isset($params['facets']) && count($params['facets'])) {
+                $doctrineFacets = [];
+                foreach($params['facets'] as $facet) {
+                    if(in_array($facet,$metadata->getColumnNames())) {
+                        $doctrineFacets[$facet] = $repo->getCounts($facet);
+                    }                    
+                }
+                $facets = $this->getFacetsData($doctrineFacets);
+            }
+        }
+
         $resourceClass = $this->resourceClassResolver->getResourceClass($object, $context['resource_class']);
         $context = $this->initContext($resourceClass, $context);
         $data = [];

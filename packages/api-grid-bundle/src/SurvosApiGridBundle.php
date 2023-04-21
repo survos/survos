@@ -20,7 +20,7 @@ use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
 use Survos\ApiGrid\State\MeilliSearchStateProvider;
-use Survos\ApiGrid\Hydra\Serializer\MeiliCollectionNormalizer;
+use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
 use ApiPlatform\Hydra\Serializer\PartialCollectionViewNormalizer;
 
 class SurvosApiGridBundle extends AbstractBundle
@@ -55,7 +55,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->addTag('api_platform.state_provider')
             ->setPublic(true);
 
-        $builder->register('api_platform.hydra.normalizer.collection', MeiliCollectionNormalizer::class)
+        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
                 ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
                 ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
                 ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))

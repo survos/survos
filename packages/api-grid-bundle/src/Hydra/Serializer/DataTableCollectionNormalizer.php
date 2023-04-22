@@ -64,13 +64,13 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
             $em = $object->getQuery()->getEntityManager();
             $metadata = $em->getClassMetadata($context['operation']->getClass());
-
             $repo = $em->getRepository($context['operation']->getClass());
 
             if(isset($params['facets']) && count($params['facets'])) {
                 $doctrineFacets = [];
                 foreach($params['facets'] as $facet) {
-                    if(in_array($facet,$metadata->getColumnNames())) {
+                    $keyArray = array_keys($metadata->getReflectionProperties());
+                    if(in_array($facet, $keyArray)) {
                         $doctrineFacets[$facet] = $repo->getCounts($facet);
                     }                    
                 }

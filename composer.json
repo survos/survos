@@ -26,6 +26,7 @@
         "haydenpierce/class-finder": "^0.4.3",
         "knplabs/knp-menu-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.10",
+        "meilisearch/search-bundle": "^0.11.0",
         "picqer/php-barcode-generator": "^2.2",
         "roave/better-reflection": "^6.0",
         "sabre/xml": "^3.0 || ^4.0",
@@ -60,7 +61,7 @@
         "symfony/workflow": "^6.1.0",
         "symfony/yaml": "^6.1.0",
         "symplify/composer-json-manipulator": "^11.1",
-        "tacman/twig-tree-tag": "^v3.0.0",
+        "tacman/twig-tree-tag": "^3.0.1",
         "twig/extra-bundle": "^3.4",
         "twig/string-extra": "^3.4",
         "twig/twig": "^3.4",
@@ -100,7 +101,8 @@
             "composer/package-versions-deprecated": true,
             "symfony/flex": true,
             "symfony/runtime": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "php-http/discovery": true
         },
         "optimize-autoloader": true,
         "preferred-install": {

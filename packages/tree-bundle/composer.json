@@ -1,7 +1,10 @@
 {
     "name": "survos/tree-bundle",
     "description": "incorporate jstree, using twig and stimulus and api-platform",
-    "keywords": ["symfony-ux", "symfony6"],
+    "keywords": [
+        "symfony-ux",
+        "symfony6"
+    ],
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
@@ -24,7 +27,7 @@
         "symfony/http-kernel": "^6.1.0",
         "symfony/options-resolver": "^6.1.0",
         "symfony/ux-twig-component": "^2.3",
-        "tacman/twig-tree-tag": "^3.0",
+        "tacman/twig-tree-tag": "^3.0.1",
         "twig/twig": "^3.4"
     },
     "autoload": {

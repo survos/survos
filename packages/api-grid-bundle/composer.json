@@ -1,7 +1,10 @@
 {
     "name": "survos/api-grid-bundle",
     "description": "incorporate DatatablesNet, using twig and stimulus, twig_component requires ^2.2",
-    "keywords": ["symfony-ux", "symfony6"],
+    "keywords": [
+        "symfony-ux",
+        "symfony6"
+    ],
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
@@ -22,7 +25,8 @@
         "symfony/http-kernel": "^6.1.0",
         "symfony/options-resolver": "^6.1.0",
         "symfony/ux-twig-component": "^2.3",
-        "twig/twig": "^3.4"
+        "twig/twig": "^3.4",
+        "meilisearch/search-bundle": "^0.11.0"
     },
     "autoload": {
         "psr-4": {
@@ -48,5 +52,10 @@
         "symfony/webpack-encore-bundle": "^1.11"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
 }

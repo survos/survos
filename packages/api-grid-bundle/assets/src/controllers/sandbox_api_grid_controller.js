@@ -43,8 +43,8 @@ import Twig from 'twig/twig.min';
 
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
-
-        delete routeParams._keys; // seems to be added by twigjs
+        console.log(routeParams);
+        //delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);
@@ -498,7 +498,11 @@ export default class extends Controller {
                             recordsTotal: total,
                             recordsFiltered: total, //  itemsReturned,
                         }
+
+                        console.log("============================================================");
                         console.log(callbackValues);
+                        console.log("============================================================");
+
                         callback(callbackValues);
                     })
                     .catch(function (error) {

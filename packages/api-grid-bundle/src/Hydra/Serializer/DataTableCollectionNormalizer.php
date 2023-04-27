@@ -192,9 +192,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             }
             $facetsData['searchPanes']['options'][$key] = $data;        
         }
-        if(!isset($facetsData['searchPanes']['options'])) {
-            $facetsData['searchPanes']['options'] = false;
-        }
+
         // Add facets that are not return from meilisearch
         foreach ($params as $param) {
             if (!isset($facetsData['searchPanes']['options'][$param])) {

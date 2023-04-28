@@ -693,24 +693,17 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             }
             // console.error(c, order, o.column, o.dir);
         });
+
+        let facetsFilter = "";
         for (const [key, value] of Object.entries(params.searchPanes)) {
-            // console.log(value, key, Object.values(value)); // "a 5", "b 7", "c 9"
-
-            // if ($attr = $request->get('a')) {
-            //     $filter['attribute_search']['operator'] = sprintf("%s,%s,%s", $attr, '=', $request->get('v'));
-            // }
-
             if (Object.values(value).length) {
-                Object.values(value).forEach((vvv) => apiData['attributes[operator]'] = key + ',=,' + vvv);
-                console.warn(apiData);
+                facetsFilter +=" "+ key + ',in,' + Object.values(value).join('|');
             }
         }
-        // if (params.searchPanes.length) {
-        //     params.searchPanes.forEach((c, index) => {
-        //         console.warn(c);
-        //         // apiData[c.origData + '[]'] = c.value1;
-        //     });
-        // }
+        facetsFilter.replace(/^\s+|\s+$/g, '');
+        if(facetsFilter != "") {
+            apiData['facets[open]'] = facetsFilter;
+        }
 
         if (params.searchBuilder && params.searchBuilder.criteria) {
             params.searchBuilder.criteria.forEach((c, index) => {

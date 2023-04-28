@@ -694,15 +694,14 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // console.error(c, order, o.column, o.dir);
         });
 
-        let facetsFilter = "";
+        let facetsFilter = [];
         for (const [key, value] of Object.entries(params.searchPanes)) {
             if (Object.values(value).length) {
-                facetsFilter +=" "+ key + ',in,' + Object.values(value).join('|');
+                facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
             }
         }
-        facetsFilter.replace(/^\s+|\s+$/g, '');
-        if(facetsFilter != "") {
-            apiData['facets[open]'] = facetsFilter;
+        if(facetsFilter.length > 0) {
+            apiData['facet_filter'] = facetsFilter;
         }
 
         if (params.searchBuilder && params.searchBuilder.criteria) {

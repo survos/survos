@@ -32,32 +32,26 @@ class MultiFieldSearchFilter  extends AbstractSearchFilter implements FilterInte
 
     public function apply(array $clauseBody, string $resourceClass, ?Operation $operation = null, array $context = []): array {
 
-        dd($context);
-        $words = explode(' ', $value);
-        foreach ($words as $word) {
-            if (empty($word)) {
-                continue;
-            }
-            $this->addWhere($queryBuilder, $word, $queryNameGenerator->generateParameterName($property));
+        if(!isset($context['filters']['facet_filter'])) {
+            return $clauseBody;
         }
-        if(isset($context['filters']['attributes'])) {
-            $filterAttributes = "";
-            foreach($context['filters']['attributes'] as $attribute) {
-                $filterAttributes .= " ".str_replace(",", " ", $attribute)." AND";
+        //return $clauseBody;
+        $facetFilter = isset($clauseBody['filter'])?$clauseBody['filter']:"";
+        foreach($context['filters']['facet_filter'] as $filter) {
+            $words = explode(',', $filter);
+            if(count($words) < 3) {
+                return $clauseBody;
             }
-            $clauseBody['filter'] = rtrim($filterAttributes, "AND");
-        }
-
-        if(isset($context['filters']['searchBuilder'])) {
-            $filter = isset($clauseBody['filter'])? $clauseBody['filter'] :"";
-
-            $searchBuilder = $context['filters']['searchBuilder'];
-            if(isset($searchBuilder['logic']) && isset($searchBuilder['criteria'])) {
-                $dataTablefilter = $this->criteria($searchBuilder['logic'], $searchBuilder['criteria']);
-                $clauseBody['filter'] = ($filter != "")?$filter." AND ".$dataTablefilter:$filter.$dataTablefilter;
+            $key = $words[0];
+            $values = explode('|', $words[2]);
+            $contition = "";
+            foreach ($values as $value) {
+                $contition .= " ".$key." = ".$value." OR ";
             }
+            $facetFilter .=" ( ".rtrim($contition,"OR "). " ) AND";
         }
 
+        $clauseBody['filter'] = rtrim($facetFilter, "AND");
         return $clauseBody;
     }
 
@@ -73,6 +67,7 @@ class MultiFieldSearchFilter  extends AbstractSearchFilter implements FilterInte
                 'property' => implode(', ', array_keys($props)),
                 'type' => 'string',
                 'required' => false,
+                'is_collection' => true,
                 'swagger' => [
                     'description' => 'Selects entities where each search term is found somewhere in at least one of the specified properties',
                 ],

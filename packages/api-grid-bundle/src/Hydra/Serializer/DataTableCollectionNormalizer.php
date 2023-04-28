@@ -77,7 +77,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                         $doctrineFacets[$facet] = $repo->getCounts($facet);
                     }                    
                 }
-                $facets = $this->getFacetsData($doctrineFacets);
+                $facets = $this->getFacetsData($doctrineFacets,$params['facets']);
             }
         }
 

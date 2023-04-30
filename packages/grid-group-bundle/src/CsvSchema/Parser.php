@@ -250,7 +250,7 @@ class Parser
      */
     protected function guardAgainstNonNumeric($value, $targetType)
     {
-        if (!is_numeric($value)) {
+        if (!is_numeric($value) && $value != '') {
             throw new CastException("Unable to cast value '$value' to type $targetType.");
         }
     }

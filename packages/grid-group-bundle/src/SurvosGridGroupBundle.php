@@ -23,6 +23,7 @@ class SurvosGridGroupBundle extends AbstractBundle
         $builder
             ->autowire($grid_group_service_id, GridGroupService::class)
             ->setPublic(true)
+            ->setArgument('$slugger', new Reference('slugger'))
         ;
         $container->services()->alias(GridGroupService::class, $grid_group_service_id);
 

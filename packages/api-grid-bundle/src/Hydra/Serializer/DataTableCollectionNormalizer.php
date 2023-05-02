@@ -54,8 +54,8 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $facets = [];
         if(is_array($object) && isset($object['facetDistribution'])) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
-            if(isset($params['facets'])) {
-                $facets = $this->getFacetsData($object['facetDistribution'], $params['facets']);
+            if(isset($params['facets']) && is_array($facets = json_decode($params['facets'],true))) {
+                $facets = $this->getFacetsData($object['facetDistribution'], $facets);
             }
         }
 
@@ -69,15 +69,15 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $metadata = $em->getClassMetadata($context['operation']->getClass());
             $repo = $em->getRepository($context['operation']->getClass());
 
-            if(isset($params['facets']) && count($params['facets'])) {
+            if(isset($params['facets']) && is_array($facets = json_decode($params['facets'],true))) {
                 $doctrineFacets = [];
-                foreach($params['facets'] as $facet) {
+                foreach($facets as $facet => $value) {
                     $keyArray = array_keys($metadata->getReflectionProperties());
                     if(in_array($facet, $keyArray)) {
                         $doctrineFacets[$facet] = $repo->getCounts($facet);
                     }                    
                 }
-                $facets = $this->getFacetsData($doctrineFacets,$params['facets']);
+                $facets = $this->getFacetsData($doctrineFacets,$facets);
             }
         }
 
@@ -190,22 +190,46 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $fdata["count"] =  $facetValue;
                 $data[] = $fdata;
             }
-            $facetsData['searchPanes']['options'][$key] = $data;        
+            $facetsData[$key] = $data;
         }
 
-        // Add facets that are not return from meilisearch
-        foreach ($params as $param) {
-            if (!isset($facetsData['searchPanes']['options'][$param])) {
-                $data = [];
-                $fdata["label"] =  $param;
-                $fdata["total"] =  0;
-                $fdata["value"] =  $param;
-                $fdata["count"] =  0;
-                $data[] = $fdata;
-                $facetsData['searchPanes']['options'][$param] = $data;
+        $labels = [];
+        foreach ($facetsData as $key => $subArray) {
+            $labels[$key] = array_column($subArray, 'label');
+        }
+
+        foreach ($params as $key => $subArray) {
+            foreach ($subArray as $bItem) {
+                $label = $bItem['label'];
+                if (!in_array($label, $labels[$key])) {
+                    $facetsData[$key][] = [
+                        'label' => $label,
+                        'total' => 0,
+//                        'total' => $bItem['total'],
+                        'value' => $label,
+                        'count' => 0,
+                    ];
+                }
             }
         }
-        return $facetsData;
+        $returnData['searchPanes']['options'] = $facetsData;
+        $returnData['searchPanes']["threshold"] = -1;
+        $returnData['searchPanes']["hideCount"] = false;
+        $returnData['searchPanes']["emptyPanes"] = false;
+        $returnData['searchPanes']["showZeroCounts"] = true;
+        return $returnData;
+    }
+
+    private function createAllSearchPanesRecords(array $params) {
+        $data = [];
+        foreach ($params as $param) {
+            $data[] = $this->createSearchPanesArray($param["label"] , 0);
+        }
+        return $data;
+    }
+
+    private function createSearchPanesArray($key,$count) {
+        return ["label" => $key, "total" => $count , "value" => $key,  "count" => $count];
     }
 
 }

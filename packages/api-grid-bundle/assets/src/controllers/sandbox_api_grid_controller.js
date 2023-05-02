@@ -332,11 +332,14 @@ export default class extends Controller {
         // console.error(lookup);
         let searchFieldsByColumnNumber = [];
         let options = [];
+        let rawFacets = {};
+
         this.columns.forEach((column, index) => {
             console.log(column);
             if (column.searchable || column.browsable ) {
                 console.error(index);
                 searchFieldsByColumnNumber.push(index);
+                rawFacets[column.name] = {};
             }
             options = fields;
             // this is specific to museado, but needs to be generalized with a field structure.
@@ -359,6 +362,7 @@ export default class extends Controller {
             //     // console.warn("Missing " + column.name, Object.keys(lookup));
             // }
         });
+        let searchPanesRaw = rawFacets;
         console.error(options);
         // console.error('searchFields', searchFieldsByColumnNumber);
 
@@ -393,7 +397,7 @@ export default class extends Controller {
             // pageLength: 15,
             orderCellsTop: true,
             fixedHeader: true,
-
+            cascadePanes  : true,
             deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,
@@ -425,6 +429,9 @@ export default class extends Controller {
             columns: this.cols(),
             searchPanes: {
                 layout: 'columns-1',
+                show: true,
+                cascadePanes: true,
+                viewTotal: true
             },
             searchBuilder: {
                 columns: this.searchBuilderFields,
@@ -438,7 +445,7 @@ export default class extends Controller {
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
-                let apiParams = this.dataTableParamsToApiPlatformParams(params);
+                let apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(params, apiParams);
                 // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
@@ -475,12 +482,14 @@ export default class extends Controller {
                         }
                         let searchPanes = {};
                         if(typeof hydraData['hydra:facets'] !== "undefined") {
-                            searchPanes = hydraData['hydra:facets']['searchPanes'];
+                           searchPanes = hydraData['hydra:facets']['searchPanes'];
+                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                         } else {
-                            searchPanes = {
+                           searchPanes = {
                                 options: options
-                            };
+                           };
                         }
+
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:
                         //     pagination_client_items_per_page: true
@@ -498,7 +507,6 @@ export default class extends Controller {
                             recordsTotal: total,
                             recordsFiltered: total, //  itemsReturned,
                         }
-                        console.log(callbackValues);
                         callback(callbackValues);
                     })
                     .catch(function (error) {
@@ -609,7 +617,21 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                         return `<button data-modal-route="${modal_route}" class="btn btn-success">${modal_route}</button>`;
                     } else {
                         // console.log(propertyName, row[propertyName], row);
-                        return row[propertyName];
+                        // if nested, explode...
+                        let elements = propertyName.split('.');
+                        if (elements.length === 3) {
+                            let x1 = elements[0];
+                            let x2 = elements[1];
+                            let x3 = elements[2];
+                            return row[x1][x2][x3];
+                        } else if (elements.length === 2) {
+                            // hack, only one level deep, etc.  ugh
+                            let x1 = elements[0];
+                            let x2 = elements[1];
+                            return row[x1][x2];
+                        } else {
+                            return row[propertyName];
+                        }
                     }
                 }
 
@@ -659,7 +681,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         return obj;
     }
 
-    dataTableParamsToApiPlatformParams(params) {
+    dataTableParamsToApiPlatformParams(params, searchPanesRaw) {
+
         let columns = params.columns; // get the columns passed back to us, sanity.
         // var apiData = {
         //     page: 1
@@ -710,7 +733,14 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[c.origData + '[]'] = c.value1;
             });
         }
+        let facets = [];
+        this.columns.forEach(function (column, index) {
+            if (column.searchable || column.browsable ) {
+                facets.push(column.name);
+            }
+        });
         params.columns.forEach(function (column, index) {
+
             if (column.search && column.search.value) {
                 // console.error(column);
                 let value = column.search.value;
@@ -726,14 +756,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
         apiData.offset = params.start;
-        let facets = [];
-        this.columns.forEach((column) => {
-            if (column.searchable || column.browsable ) {
-                console.error(column.name);
-                facets.push(column.name);
-            }
-        });
-        apiData.facets = facets;
+
+        apiData.facets = searchPanesRaw;
 
         // console.error(apiData);
 

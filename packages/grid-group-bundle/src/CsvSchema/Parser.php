@@ -98,20 +98,34 @@ class Parser
      */
     public function parseRow(array $columns)
     {
-        $zipper = collect($columns)->zip($this->config['schema']);
-        dump($columns, $this->config['schema'], $zipper);
-        $flat = $zipper->flatMap(function ($pair, $index) {
+        $schema = $this->config['schema'];
+        if (count($schema) <> count($columns)) {
+            dd($schema, $columns);
+        }
+        assert(count($schema) == count($columns), "mismatch %d %d", );
+
+        $zipper = collect($columns)->zip($schema);
+        $valueRules = $this->config['valueRules']??[];
+        $flat = $zipper->flatMap(function ($pair, $index) use ($valueRules, $schema) {
             list($value, $type) = $pair;
-            dump($value, $type, $pair);
+            foreach ($valueRules as $valueRule => $newValue) {
+                if ($value == $valueRule) {
+                    $value = $newValue;
+                }
+            }
+            if ($value == '\N') {
+                dd($value, $type, $pair, $valueRules);
+            }
+
 
             $parsed = $this->getValue($type, $value);
 
-            $key = array_keys($this->config['schema'])[$index];
+
+            $key = array_keys($schema)[$index];
 
             return [$key => $parsed];
         });
         $all = $flat->all();
-        dd($all);
         return $all;
     }
 
@@ -129,7 +143,11 @@ class Parser
 //        $reader->setInputEncoding($this->getConfigValue('encoding', $this->defaultEncoding));
 
         $rows =  new Collection($reader);
-        foreach ($rows as $row) {
+        foreach ($rows as $idx => $row) {
+            if ($idx == 0 && ($this->getConfigValue('skipTitle', $this->skipTitle))) {
+                continue;
+            }
+
 //            dd($this->config['schema']);
             $parsedRow = $this->parseRow($row);
             dd($row, $parsedRow);
@@ -167,13 +185,28 @@ class Parser
      *
      * @throws UnsupportedTypeException
      */
-    protected function getValue($type, $value)
+
+    protected function getValueOrig($type, $value)
     {
         list($type, $parameters) = $this->parseType($type);
-        $methodName = $this->getMethodName($type);
-        if ($methodName == 'parseInt') {
-            dd($methodName, $type, $parameters, $value, $parameters);
+
+        if (method_exists($this, $this->getMethodName($type))) {
+            $method = [$this, $this->getMethodName($type)];
+        } elseif ($this->hasCustomType($type)) {
+            $method = static::$customTypes[$type];
+        } else {
+            throw new UnsupportedTypeException($type);
         }
+
+        return call_user_func_array($method, [$value, $parameters]);
+    }
+    protected function getValue($type, $value)
+    {
+        if ($type == '') {
+            $type = 'string';
+        }
+        list($type, $parameters) = $this->parseType($type);
+        $methodName = $this->getMethodName($type);
         if (method_exists($this, $methodName)) {
             $method = [$this, $this->getMethodName($type)];
         } elseif ($this->hasCustomType($type)) {
@@ -181,6 +214,8 @@ class Parser
         } else {
             throw new UnsupportedTypeException($type);
         }
+        assert($methodName <> 'parse', join('/', [$methodName, $type]));
+        dump($methodName, $method, $type, $value, $parameters);
 
         return call_user_func_array($method, [$value, $parameters]);
     }
@@ -234,6 +269,12 @@ class Parser
 
         return (int) $value;
     }
+
+    protected function parseBool(string|int $value): bool
+    {
+        return (bool) $value;
+    }
+
 
     /**
      * @param string $value

@@ -98,15 +98,21 @@ class Parser
      */
     public function parseRow(array $columns)
     {
-        return collect($columns)->zip($this->config['schema'])->flatMap(function ($pair, $index) {
+        $zipper = collect($columns)->zip($this->config['schema']);
+        dump($columns, $this->config['schema'], $zipper);
+        $flat = $zipper->flatMap(function ($pair, $index) {
             list($value, $type) = $pair;
+            dump($value, $type, $pair);
 
             $parsed = $this->getValue($type, $value);
 
             $key = array_keys($this->config['schema'])[$index];
 
             return [$key => $parsed];
-        })->all();
+        });
+        $all = $flat->all();
+        dd($all);
+        return $all;
     }
 
     /**
@@ -123,14 +129,23 @@ class Parser
 //        $reader->setInputEncoding($this->getConfigValue('encoding', $this->defaultEncoding));
 
         $rows =  new Collection($reader);
+        foreach ($rows as $row) {
+//            dd($this->config['schema']);
+            $parsedRow = $this->parseRow($row);
+            dd($row, $parsedRow);
+        }
 
         if ($this->getConfigValue('skipTitle', $this->skipTitle)) {
             $rows->shift();
         }
 
-        return $rows->map(function ($row) {
+        $rowCollection = $rows->map(function ($row) {
             return (object) $this->parseRow($row);
-        })->all();
+        });
+        $all = $rowCollection->all();
+        dd($all);
+        return $all;
+//        yield $rows;
     }
 
     /**
@@ -155,8 +170,11 @@ class Parser
     protected function getValue($type, $value)
     {
         list($type, $parameters) = $this->parseType($type);
-
-        if (method_exists($this, $this->getMethodName($type))) {
+        $methodName = $this->getMethodName($type);
+        if ($methodName == 'parseInt') {
+            dd($methodName, $type, $parameters, $value, $parameters);
+        }
+        if (method_exists($this, $methodName)) {
             $method = [$this, $this->getMethodName($type)];
         } elseif ($this->hasCustomType($type)) {
             $method = static::$customTypes[$type];
@@ -251,6 +269,7 @@ class Parser
     protected function guardAgainstNonNumeric($value, $targetType)
     {
         if (!is_numeric($value) && $value != '') {
+            assert(false, "Unable to cast value '$value' to type $targetType.");
             throw new CastException("Unable to cast value '$value' to type $targetType.");
         }
     }

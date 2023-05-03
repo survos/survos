@@ -257,7 +257,7 @@ class CsvDatabase
         if (file_exists($existingFile)) {
             $reader = new Reader($existingFile, strict: false);
             foreach ($reader->getRow() as $row) {
-                dd($row, $existingFile);
+//                dd($row, $existingFile);
                 try {
                     // this could be a trait, too.
 //                    AppService::assertKeyExists($this->getKeyName(), $row);

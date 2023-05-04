@@ -71,6 +71,21 @@ class Parser
         static::$customTypes[$type] = $callback;
     }
 
+    // https://stackoverflow.com/questions/22539633/parse-string-containing-dots-in-php
+    // since parse_str can't handle .
+
+    static public function parseQueryString($data): array
+    {
+        $data = preg_replace_callback('/(?:^|(?<=&))[^=[]+/', function ($match) {
+            return bin2hex(urldecode($match[0]));
+        }, $data);
+
+        parse_str($data, $values);
+
+        return array_combine(array_map('hex2bin', array_keys($values)), $values);
+    }
+
+
     /**
      * @param $input
      *
@@ -81,12 +96,7 @@ class Parser
         return $this->parse(Reader::createFromString($input));
     }
 
-    /**
-     * @param string $filename
-     *
-     * @return array
-     */
-    public function fromFile($filename)
+    public function fromFile(string $filename): \Generator
     {
         return $this->parse(Reader::createFromPath($filename));
     }
@@ -113,16 +123,9 @@ class Parser
                     $value = $newValue;
                 }
             }
-            if ($value == '\N') {
-                dd($value, $type, $pair, $valueRules);
-            }
-
-
-            $parsed = $this->getValue($type, $value);
-
 
             $key = array_keys($schema)[$index];
-
+            $parsed = $this->getValue($type, $value, $key);
             return [$key => $parsed];
         });
         $all = $flat->all();
@@ -134,7 +137,7 @@ class Parser
      *
      * @return array
      */
-    protected function parse(Reader $reader)
+    protected function parse(Reader $reader): \Generator
     {
         $reader->setDelimiter($this->getConfigValue('delimiter', $this->defaultDelimiter));
         $reader->setEnclosure($this->getConfigValue('enclosure', $this->defaultEnclosure));
@@ -142,28 +145,18 @@ class Parser
         // All conversion methods are removed in favor of conversion classes, use League\Csv\CharsetConverter
 //        $reader->setInputEncoding($this->getConfigValue('encoding', $this->defaultEncoding));
 
-        $rows =  new Collection($reader);
-        foreach ($rows as $idx => $row) {
+//        $rows =  new Collection($reader);
+        foreach ($reader->getIterator() as $idx=>$row) {
+//        foreach ($rows as $idx => $row) {
             if ($idx == 0 && ($this->getConfigValue('skipTitle', $this->skipTitle))) {
                 continue;
             }
 
 //            dd($this->config['schema']);
             $parsedRow = $this->parseRow($row);
-            dd($row, $parsedRow);
+            yield $parsedRow;
         }
 
-        if ($this->getConfigValue('skipTitle', $this->skipTitle)) {
-            $rows->shift();
-        }
-
-        $rowCollection = $rows->map(function ($row) {
-            return (object) $this->parseRow($row);
-        });
-        $all = $rowCollection->all();
-        dd($all);
-        return $all;
-//        yield $rows;
     }
 
     /**
@@ -186,25 +179,22 @@ class Parser
      * @throws UnsupportedTypeException
      */
 
-    protected function getValueOrig($type, $value)
+    protected function getValue($config, $value, $key)
     {
-        list($type, $parameters) = $this->parseType($type);
 
-        if (method_exists($this, $this->getMethodName($type))) {
-            $method = [$this, $this->getMethodName($type)];
-        } elseif ($this->hasCustomType($type)) {
-            $method = static::$customTypes[$type];
-        } else {
-            throw new UnsupportedTypeException($type);
+        if (!str_contains($config, '?')) {
+            $config .= '?';
         }
-
-        return call_user_func_array($method, [$value, $parameters]);
-    }
-    protected function getValue($type, $value)
-    {
+        [$dottedConfig, $settingsString] = explode('?', $config);
+        $settings = self::parseQueryString($settingsString);
+        $values = explode('.', $dottedConfig);
+        $type = array_shift($values);
         if ($type == '') {
             $type = 'string';
         }
+        dd($type, $value, $key, $settings, $values);
+        assert($type);
+
         list($type, $parameters) = $this->parseType($type);
         $methodName = $this->getMethodName($type);
         if (method_exists($this, $methodName)) {
@@ -214,9 +204,6 @@ class Parser
         } else {
             throw new UnsupportedTypeException($type);
         }
-        assert($methodName <> 'parse', join('/', [$methodName, $type]));
-        dump($methodName, $method, $type, $value, $parameters);
-
         return call_user_func_array($method, [$value, $parameters]);
     }
 

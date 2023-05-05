@@ -204,18 +204,14 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 if (!in_array($label, $labels[$key])) {
                     $facetsData[$key][] = [
                         'label' => $label,
-                        'total' => 0,
-//                        'total' => $bItem['total'],
+                        'total' => "show",
                         'value' => $label,
-                        'count' => 0,
+                        'count' => "show"
                     ];
                 }
             }
         }
         $returnData['searchPanes']['options'] = $facetsData;
-        $returnData['searchPanes']["threshold"] = -1;
-        $returnData['searchPanes']["hideCount"] = false;
-        $returnData['searchPanes']["emptyPanes"] = false;
         $returnData['searchPanes']["showZeroCounts"] = true;
         return $returnData;
     }

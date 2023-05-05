@@ -110,7 +110,7 @@ class Parser
     {
         $schema = $this->config['schema'];
         if (count($schema) <> count($columns)) {
-            dd($schema, $columns);
+            dd('columns mismatch', $schema, $columns);
         }
         assert(count($schema) == count($columns), "mismatch %d %d", );
 
@@ -181,21 +181,38 @@ class Parser
 
     protected function getValue($config, $value, $key)
     {
-
+        // format: [fieldname:][dottedConfig]?settings
         if (!str_contains($config, '?')) {
             $config .= '?';
         }
         [$dottedConfig, $settingsString] = explode('?', $config);
+        if (str_contains($dottedConfig, ':')) {
+            [$header, $dottedConfig] = explode(':', $dottedConfig);
+        } else {
+            $header = $key;
+        }
+
         $settings = self::parseQueryString($settingsString);
-        $values = explode('.', $dottedConfig);
-        $type = array_shift($values);
+//        if (count($settings)) {
+//            dd($settings);
+//        }
+        if (str_contains($dottedConfig, '.')) {
+            [$type, $values] = explode('.', $dottedConfig, 2);
+            $parameters = $values; // what's after the .
+        } else {
+            $type = $dottedConfig; // no params, native type, like string, which is really att.string?
+            $parameters = null;
+        }
+//        $values = explode('.', $dottedConfig);
+//        $type = array_shift($values);
         if ($type == '') {
             $type = 'string';
         }
-        dd($type, $value, $key, $settings, $values);
+//        dd($header, $config, $value, $key, $settings, $values, $type);
         assert($type);
 
-        list($type, $parameters) = $this->parseType($type);
+//        list($type, $parameters) = $this->parseType($type);
+//        dd($type, $values, $parameters);
         $methodName = $this->getMethodName($type);
         if (method_exists($this, $methodName)) {
             $method = [$this, $this->getMethodName($type)];
@@ -204,7 +221,7 @@ class Parser
         } else {
             throw new UnsupportedTypeException($type);
         }
-        return call_user_func_array($method, [$value, $parameters]);
+        return call_user_func_array($method, [$value, $parameters, $settings]);
     }
 
     /**

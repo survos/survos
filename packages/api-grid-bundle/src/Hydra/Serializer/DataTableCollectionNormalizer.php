@@ -188,29 +188,31 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $fdata["total"] =  $facetValue;
                 $fdata["value"] =  $facetKey;
                 $fdata["count"] =  $facetValue;
+                foreach($params[$key] as $param) {
+                    if($param['label'] === $facetKey) {
+                        $fdata['total'] = $param['total'];
+                        break;
+                    }
+                }
                 $data[] = $fdata;
             }
             $facetsData[$key] = $data;
         }
 
-        $labels = [];
-        foreach ($facetsData as $key => $subArray) {
-            $labels[$key] = array_column($subArray, 'label');
-        }
-
         foreach ($params as $key => $subArray) {
             foreach ($subArray as $bItem) {
                 $label = $bItem['label'];
-                if (!in_array($label, $labels[$key])) {
+                if (!in_array($label, array_column($facetsData[$key], 'label'))) {
                     $facetsData[$key][] = [
                         'label' => $label,
-                        'total' => "show",
+                        'total' => $bItem['total'],
                         'value' => $label,
-                        'count' => "show"
+                        'count' => 0
                     ];
                 }
             }
         }
+
         $returnData['searchPanes']['options'] = $facetsData;
         $returnData['searchPanes']["showZeroCounts"] = true;
         return $returnData;

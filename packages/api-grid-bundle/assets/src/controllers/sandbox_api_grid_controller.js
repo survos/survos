@@ -224,12 +224,6 @@ export default class extends Controller {
         return this.application.getControllerForElementAndIdentifier(this.modalTarget, "modal_form")
     }
 
-    addSearchPaneClickListener(dt) {
-        dt.on('searchPanes.rebuildPane', function() {
-            // This function will run after the user selects a value from the SearchPane
-            console.log('A selection has been made and the table has been updated.');
-        });
-    }
     addButtonClickListener(dt) {
         console.log("Listening for button.transition and button .btn-modal clicks events");
 
@@ -425,7 +419,6 @@ export default class extends Controller {
                 // let xapi = new DataTable.Api(obj);
                 // console.log(xapi);
                 // console.log(xapi.table);
-                this.addSearchPaneClickListener(dt);
                 // this.addRowClickListener(dt);
                 this.addButtonClickListener(dt);
             },
@@ -440,13 +433,9 @@ export default class extends Controller {
             searchPanes: {
                 layout: 'columns-1',
                 show: true,
-                cascadePanes: true,
+//                cascadePanes: true,
                 viewTotal: true,
-                showZeroCounts: true,
-                threshold: 0,
-                hideCount: false,
-                showEmptyPanes: true,
-                emptyPanes: false
+                showZeroCounts: true
             },
             searchBuilder: {
                 columns: this.searchBuilderFields,

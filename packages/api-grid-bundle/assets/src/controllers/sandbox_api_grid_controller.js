@@ -487,9 +487,10 @@ export default class extends Controller {
                             console.log(d[0]);
                         }
                         let searchPanes = {};
-                        if(typeof hydraData['hydra:facets'] !== "undefined") {
+                        if(typeof hydraData['hydra:facets'] !== "undefined" && hydraData['hydra:facets'].length > 0) {
                            searchPanes = hydraData['hydra:facets']['searchPanes'];
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+
                         } else {
                            searchPanes = {
                                 options: options

@@ -16,9 +16,15 @@
         "league/csv": "^9.9",
         "illuminate/collections": "^10.9"
     },
+    "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse",
+        "coverage": "php -d xpcov.enabled=1 vendor/bin/phpunit tests --coverage-html public/coverage",
+        "tests": "vendor/bin/phpunit tests"
+    },
     "autoload": {
         "psr-4": {
-            "Survos\\GridGroupBundle\\": "src/"
+            "Survos\\GridGroupBundle\\": "src/",
+            "Survos\\GridGroupBundle\\Tests\\": "tests/"
         }
     },
     "require-dev": {

@@ -5,6 +5,7 @@ namespace Survos\GridGroupBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Survos\GridGroupBundle\CsvSchema\Parser;
 use Symfony\Component\Yaml\Yaml;
+use function PHPUnit\Framework\assertEquals;
 
 class ParserTest extends TestCase
 {
@@ -24,9 +25,13 @@ class ParserTest extends TestCase
         $expects = $test['expects'] ?? null;
 
         $actual = $parser->fromString($data);
+        foreach ($parser->fromString($data) as $actual) {
+            $expects = json_decode($test['expects'], true);
+            $this->assertSame($expects, $actual);
+            assert($expects, "invalid json: " . $test['expects']);
+        }
 
-        $this->assertTrue(true);
-        $this->assertSame($expects, $actual);
+
     }
 
     public static function csvSteps()

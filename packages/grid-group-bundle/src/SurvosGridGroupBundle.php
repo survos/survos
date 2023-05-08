@@ -2,7 +2,6 @@
 
 namespace Survos\GridGroupBundle;
 
-use League\Csv\Reader;
 use Survos\GridGroupBundle\Service\CsvCacheAdapter;
 use Survos\GridGroupBundle\Service\CsvDatabase;
 use Survos\GridGroupBundle\Service\CsvWriter;
@@ -30,10 +29,6 @@ class SurvosGridGroupBundle extends AbstractBundle
         $builder
             ->autowire(CsvWriter::class)
             ->setPublic(true);
-        $builder
-            ->autowire(Reader::class)
-            ->setPublic(true);
-
         $container->services()->alias(GridGroupService::class, $grid_group_service_id);
 
 //        $grid_group_service_id = 'survos.grid_group_csv_database';

@@ -24,7 +24,6 @@ class ParserTest extends TestCase
         $data = $test['source'] ?? null;
         $expects = $test['expects'] ?? null;
 
-        $actual = $parser->fromString($data);
         foreach ($parser->fromString($data) as $actual) {
             $expects = json_decode($test['expects'], true);
             $this->assertSame($expects, $actual);

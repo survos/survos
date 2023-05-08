@@ -18,6 +18,7 @@
     },
     "autoload": {
         "psr-4": {
+            "Survos\\GridGroupBundle\\Tests": "tests/",
             "Survos\\GridGroupBundle\\": "src/"
         }
     },
@@ -28,7 +29,8 @@
         "symfony/phpunit-bridge": "^6.1.0",
         "symfony/twig-bundle": "^6.1.0",
         "symfony/var-dumper": "^6.1.0",
-        "symfony/webpack-encore-bundle": "^1.11"
+        "symfony/webpack-encore-bundle": "^1.11",
+        "phpunit/phpunit": "^10.1"
     },
     "conflict": {
         "survos/barcode-bundle": "<1.2.57",

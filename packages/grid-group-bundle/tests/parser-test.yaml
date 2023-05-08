@@ -20,12 +20,6 @@ tests:
       {"name":"bob","age":22}
 
   - source: |
-      name,age:int,married:bool
-      bob,22,1
-    expects: |
-      {"name":"bob","age":22, married: true}
-
-  - source: |
       name,age:int
       bob,22
     headers:

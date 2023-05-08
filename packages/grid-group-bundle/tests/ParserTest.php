@@ -5,6 +5,7 @@ namespace Survos\GridGroupBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Survos\GridGroupBundle\CsvSchema\Parser;
 use Symfony\Component\Yaml\Yaml;
+
 use function PHPUnit\Framework\assertEquals;
 
 class ParserTest extends TestCase
@@ -29,8 +30,6 @@ class ParserTest extends TestCase
             $this->assertSame($expects, $actual);
             assert($expects, "invalid json: " . $test['expects']);
         }
-
-
     }
 
     public static function csvSteps()

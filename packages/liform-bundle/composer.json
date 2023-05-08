@@ -1,0 +1,30 @@
+{
+  "name": "survos/liform-bundle",
+  "description": "Bundle for Liform: Transform Symfony Forms into Json Schema, forked from answear",
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nacho Martín",
+      "email": "nacho@limenius.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Limenius\\LiformBundle\\": ""
+    }
+  },
+  "require": {
+    "answear/liform": "^0.20",
+    "symfony/dependency-injection": "^6.1",
+    "symfony/config": "^6.1",
+    "symfony/http-kernel": "^6.1"
+  },
+  "minimum-stability": "stable",
+  "replace": {
+    "limenius/liform-bundle": "*"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.8"
+  }
+}

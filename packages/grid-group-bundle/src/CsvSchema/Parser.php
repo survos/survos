@@ -111,7 +111,7 @@ class Parser
         return $this->parse(Reader::createFromPath($filename));
     }
 
-    static public function createSchemaFromMap(array $map, $headers): array    {
+    static public function createConfigFromMap(array $map, $headers): array    {
         $csvSchema = [];
         $fieldNameDelimiter = ':'; // e.g. age:int
 
@@ -133,7 +133,7 @@ class Parser
                 {
                     // this may be outdated
                     if (str_contains($rule, $fieldNameDelimiter)) { // } && !str_starts_with($rule, 'array:')) {
-                        [$newColumn, $rule] = explode($fieldNameDelimiter, $rule, 2);
+                        [$column, $rule] = explode($fieldNameDelimiter, $rule, 2);
                     }
 
                     $columnType = $rule; // for now
@@ -179,6 +179,10 @@ class Parser
                         'bool' => CheckboxType::class,
                         'int' => NumberType::class,
                         'float' => NumberType::class,
+                        'attr' => match ($internalCode) {
+                            'int' => NumberType::class,
+                            default => assert(false, $internalCode)
+                        },
                         default => assert(false, $type)
                     };
 //                    if ($type == 'array|') {
@@ -209,7 +213,7 @@ class Parser
                     if ($propertyType == CollectionType::class) {
                         $options['allow_add'] = true;
                     }
-                    $outputSchema[$newColumn] = array_merge([
+                    $outputSchema[$column] = array_merge([
                         'type' => $dottedConfig,
                     ],
                         $settings);
@@ -224,7 +228,10 @@ class Parser
             }
             $csvSchema[$column] = $columnType;
         }
-        return $csvSchema;
+        return [
+            'schema' => $csvSchema,
+            'outputSchema' => $outputSchema
+            ];
     }
 
 

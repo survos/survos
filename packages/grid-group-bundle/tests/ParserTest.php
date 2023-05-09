@@ -24,16 +24,28 @@ class ParserTest extends TestCase
         $parser = new Parser([
             'schema' => $schema
         ]);
+        $yaml = Yaml::parseFile(__DIR__ . '/parser-test.yaml');
+        foreach ($yaml['tests'] as $test) {
+            $csvString = $test['source'];
+            $csvReader = Reader::createFromString($csvString)->setHeaderOffset(0);
+            $schema = Parser::createSchemaFromMap($test['map'] ?? [], $csvReader->getHeader());
+            $config['schema'] = $schema;
+            $config['valueRules'] = $test['valueRules'] ?? [];
+            $parser = new Parser($config);
 
-        $expectsJson = $test['expects'] ?? null;
+            $expectsJson = $test['expects'] ?? null;
 
-        foreach ($parser->fromString($data) as $actual) {
-            $expects = json_decode($expectsJson, true);
-            assert($expects, "invalid json string: " . $expectsJson);
-            $this->assertSame($expects, $actual);
-            assert($expects, "invalid json: " . $test['expects']);
+            foreach ($parser->fromString($data) as $actual) {
+                $expects = json_decode($expectsJson, true);
+                assert($expects, "invalid json string: " . $expectsJson);
+                $this->assertSame($expects, $actual);
+                assert($expects, "invalid json: " . $test['expects']);
+            }
         }
+
     }
+
+
 
     public static function csvTests()
     {

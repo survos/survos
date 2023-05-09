@@ -26,5 +26,14 @@ class ParserTest extends TestCase
                 assertEquals($expects, $row, json_encode($expects) . '<>' . json_encode($row));
             }
         }
+
+    }
+
+    public static function csvTests()
+    {
+        $data = Yaml::parseFile(__DIR__ . '/parser-test.yaml');
+        foreach ($data['tests'] as $key => $test) {
+            yield [$key => $test];
+        }
     }
 }

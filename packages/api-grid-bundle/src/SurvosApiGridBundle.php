@@ -2,6 +2,7 @@
 
 namespace Survos\ApiGrid;
 
+use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
@@ -45,6 +46,13 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->addTag('meilli_search_filter')
         ;
+
+        $builder->register(FacetsFieldSearchFilter::class)
+            ->setAutowired(true)
+            ->addTag('meilli_search_filter')
+        ;
+
+
         $builder->register(SortFilter::class)
             ->setAutowired(true)
             ->addTag('meilli_search_filter')
@@ -56,6 +64,8 @@ class SurvosApiGridBundle extends AbstractBundle
                     return new Reference($serviceId);
                 }, array_keys($services))
             )
+            ->setArgument('$meiliHost',$config['meiliHost'])
+            ->setArgument('$meiliKey',$config['meiliKey'])
             ->setAutowired(true)
             ->addTag('api_platform.state_provider')
             ->setPublic(true);
@@ -67,6 +77,7 @@ class SurvosApiGridBundle extends AbstractBundle
                 ->setArgument('$resourceMetadataCollectionFactory', null)
                 ->addTag('serializer.normalizer', ['priority' => -985]);
 
+//        $container->services()->alias(MeiliCollectionNormalizer::class,'api_platform.hydra.normalizer.collection');
         // $builder->register('api_platform.hydra.normalizer.partial_collection_view', PartialCollectionViewNormalizer::class)
         //     ->setArgument('$collectionNormalizer', new Reference('api_platform.hydra.normalizer.partial_collection_view.inner'))
         //     ->setArgument('$pageParameterName', new Reference('api_platform.collection.pagination.page_parameter_name'))
@@ -125,6 +136,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->scalarNode('widthFactor')->defaultValue(2)->end()
             ->scalarNode('height')->defaultValue(30)->end()
             ->scalarNode('foregroundColor')->defaultValue('green')->end()
+            ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
+            ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
             ->end();;
     }
 

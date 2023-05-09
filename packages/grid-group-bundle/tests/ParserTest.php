@@ -2,6 +2,7 @@
 
 namespace Survos\GridGroupBundle\Tests;
 
+use League\Csv\Reader;
 use PHPUnit\Framework\TestCase;
 use Survos\GridGroupBundle\CsvSchema\Parser;
 use Symfony\Component\Yaml\Yaml;
@@ -11,28 +12,30 @@ use function PHPUnit\Framework\assertEquals;
 class ParserTest extends TestCase
 {
     /**
-     * @dataProvider csvSteps
+     * @dataProvider csvTests
      */
     public function testParser(array $test)
     {
-        $header = $test['headers'];
-        $schema = Parser::createSchemaFromMap($test['map'] ?? [], $header);
+        $data = $test['source'] ?? null;
+        $csvString = $test['source'];
+        $csvReader = Reader::createFromString($csvString)->setHeaderOffset(0);
+        $schema = Parser::createSchemaFromMap($test['map']??[], $csvReader->getHeader());
 
         $parser = new Parser([
             'schema' => $schema
         ]);
 
-        $data = $test['source'] ?? null;
-        $expects = $test['expects'] ?? null;
+        $expectsJson = $test['expects'] ?? null;
 
         foreach ($parser->fromString($data) as $actual) {
-            $expects = json_decode($test['expects'], true);
+            $expects = json_decode($expectsJson, true);
+            assert($expects, "invalid json string: " . $expectsJson);
             $this->assertSame($expects, $actual);
             assert($expects, "invalid json: " . $test['expects']);
         }
     }
 
-    public static function csvSteps()
+    public static function csvTests()
     {
         $data = Yaml::parseFile(__DIR__ . '/parser-test.yaml');
         foreach ($data['tests'] as $key => $test) {

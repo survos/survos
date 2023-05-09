@@ -1,30 +1,30 @@
 {
-  "name": "survos/liform-bundle",
-  "description": "Bundle for Liform: Transform Symfony Forms into Json Schema",
-  "type": "symfony-bundle",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Nacho Martín",
-      "email": "nacho@limenius.com"
+    "name": "survos/liform-bundle",
+    "description": "Bundle for Liform: Transform Symfony Forms into Json Schema",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nacho Martín",
+            "email": "nacho@limenius.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Limenius\\LiformBundle\\": ""
+        }
+    },
+    "require": {
+        "answear/liform": "^0.20",
+        "symfony/dependency-injection": "^5.4|^6.0",
+        "symfony/config": "^5.4|^6.0",
+        "symfony/http-kernel": "^5.4|^6.0"
+    },
+    "minimum-stability": "stable",
+    "replace": {
+        "limenius/liform-bundle": "*"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.8"
     }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Limenius\\LiformBundle\\": ""
-    }
-  },
-  "require": {
-    "answear/liform": "^0.20",
-    "symfony/dependency-injection": "^5.4|^6.0",
-    "symfony/config": "^5.4|^6.0",
-    "symfony/http-kernel": "^5.4|^6.0"
-  },
-  "minimum-stability": "stable",
-  "replace": {
-    "limenius/liform-bundle": "*"
-  },
-  "require-dev": {
-    "phpstan/phpstan": "^1.8"
-  }
 }

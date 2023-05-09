@@ -39,6 +39,7 @@ jobs:
           - {local_path: 'grid-group-bundle', split_repository: 'SurvosGridGroupBundle'}
           - {local_path: 'html-prettify-bundle', split_repository: 'HtmlPrettifyBundle'}
           - {local_path: 'inspection-bundle', split_repository: 'SurvosInspectionBundle'}
+          - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'providence-bundle', split_repository: 'SurvosProvidenceBundle'}

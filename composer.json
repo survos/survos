@@ -138,6 +138,7 @@
             "Survos\\Providence\\": "packages/providence-bundle/src/",
             "Survos\\RulerBundle\\": "packages/ruler-bundle/src/",
             "Survos\\StripeProduct\\": "packages/stripe-product/src/",
+            "Survos\\Scraper\\": "packages/scraper-bundle/src/",
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WikiBundle\\": "packages/wiki-bundle/src/",
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/"

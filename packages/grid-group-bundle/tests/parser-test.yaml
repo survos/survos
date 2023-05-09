@@ -13,7 +13,7 @@ tests:
     valueRules:
       '\N': null
     expects: |
-      {"name":"bob","age":22, "spouse": null}
+      {"name":"bob","age":22, "spouse": ""}
 
   - source: |
       name,age:int,married:bool,employed:bool

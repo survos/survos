@@ -12,7 +12,6 @@ tests:
       /age/: int
     valueRules:
       '\N': null
-
     expects: |
       {"name":"bob","age":22, "spouse": null}
 

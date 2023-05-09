@@ -16,16 +16,7 @@ class ParserTest extends TestCase
      */
     public function testParser(array $test)
     {
-        $data = $test['source'] ?? null;
-        $csvString = $test['source'];
-        $csvReader = Reader::createFromString($csvString)->setHeaderOffset(0);
-        $schema = Parser::createSchemaFromMap($test['map']??[], $csvReader->getHeader());
 
-        $parser = new Parser([
-            'schema' => $schema
-        ]);
-        $yaml = Yaml::parseFile(__DIR__ . '/parser-test.yaml');
-        foreach ($yaml['tests'] as $test) {
             $csvString = $test['source'];
             $csvReader = Reader::createFromString($csvString)->setHeaderOffset(0);
             $schema = Parser::createSchemaFromMap($test['map'] ?? [], $csvReader->getHeader());
@@ -35,13 +26,12 @@ class ParserTest extends TestCase
 
             $expectsJson = $test['expects'] ?? null;
 
-            foreach ($parser->fromString($data) as $actual) {
+            foreach ($parser->fromString($csvString) as $actual) {
                 $expects = json_decode($expectsJson, true);
                 assert($expects, "invalid json string: " . $expectsJson);
-                $this->assertSame($expects, $actual);
+                $this->assertSame($expects, $actual, json_encode($expects) . '<>' . json_encode($actual));
                 assert($expects, "invalid json: " . $test['expects']);
             }
-        }
 
     }
 

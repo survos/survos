@@ -16,11 +16,6 @@
         "symfony/cache": "^6.1",
         "symfony/http-client": "^6.1.0"
     },
-    "scripts": {
-        "phpstan": "vendor/bin/phpstan analyse",
-        "coverage": "php -d xpcov.enabled=1 vendor/bin/phpunit --coverage-html coverage && cd coverage && php -S localhost:8900 -d .\n",
-        "tests": "vendor/bin/phpunit"
-    },
     "autoload": {
         "psr-4": {
             "Survos\\Scraper\\Tests\\": "tests/",

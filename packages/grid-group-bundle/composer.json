@@ -19,11 +19,6 @@
         "symfony/form": "^6.1.0",
         "symfony/dotenv": "^6.2"
     },
-    "scripts": {
-        "phpstan": "vendor/bin/phpstan analyse",
-        "coverage": "php -d xpcov.enabled=1 vendor/bin/phpunit --coverage-html coverage\n",
-        "tests": "vendor/bin/phpunit"
-    },
     "autoload": {
         "psr-4": {
             "Survos\\GridGroupBundle\\Tests\\": "tests/",

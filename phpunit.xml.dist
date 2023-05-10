@@ -25,7 +25,10 @@
 
     <coverage processUncoveredFiles="true">
         <include>
-            <directory suffix=".php">src</directory>
+<!--            <directory suffix=".php">src</directory>-->
+            <directory suffix=".php">packages/grid-group-bundle/src</directory>
+            <directory suffix=".php">packages/scraper-bundle/src</directory>
+            <directory suffix=".php">packages/doc-bundle/src</directory>
         </include>
     </coverage>
 

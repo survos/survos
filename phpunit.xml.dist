@@ -29,6 +29,7 @@
             <directory suffix=".php">packages/grid-group-bundle/src</directory>
             <directory suffix=".php">packages/scraper-bundle/src</directory>
             <directory suffix=".php">packages/doc-bundle/src</directory>
+            <directory suffix=".php">packages/command-bundle/src</directory>
         </include>
     </coverage>
 

@@ -30,19 +30,17 @@ final class DumpTranslationsCommand extends InvokableServiceCommand
 
     private Application $application;
 
-    public function __construct(private KernelInterface $kernel, private array $namespaces, string $name = null
-    )
+    public function __construct(private KernelInterface $kernel, private array $namespaces, string $name = null)
     {
         $this->application = new Application($this->kernel);
         parent::__construct($name);
     }
 
     public function __invoke(
-        IO     $io,
+        IO $io,
         #[Option(description: 'The namespace(s) to dump (defaults to config value)')]
         string $namespace = 'app',
-    ): void
-    {
+    ): void {
 
         $commands = [];
         foreach ($this->namespaces as $namespace) {
@@ -55,7 +53,8 @@ final class DumpTranslationsCommand extends InvokableServiceCommand
             }
         }
 
-        file_put_contents($fn = $this->kernel->getProjectDir() . sprintf('/translations/commands.%s.yaml', 'en'), Yaml::dump($messages));
+        $fn = $this->kernel->getProjectDir();
+        file_put_contents($fn . sprintf('/translations/commands.%s.yaml', 'en'), Yaml::dump($messages));
 
         $io->success(sprintf('File %s written', $fn));
     }

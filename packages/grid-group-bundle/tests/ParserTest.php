@@ -19,8 +19,7 @@ class ParserTest extends TestCase
 
             $csvString = $test['source'];
             $csvReader = Reader::createFromString($csvString)->setHeaderOffset(0);
-            $schema = Parser::createSchemaFromMap($test['map'] ?? [], $csvReader->getHeader());
-            $config['schema'] = $schema;
+            $config = Parser::createConfigFromMap($test['map'] ?? [], $csvReader->getHeader());
             $config['valueRules'] = $test['valueRules'] ?? [];
             $parser = new Parser($config);
 

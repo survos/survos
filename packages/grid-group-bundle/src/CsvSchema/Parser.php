@@ -113,6 +113,7 @@ class Parser
 
     static public function createConfigFromMap(array $map, $headers): array    {
         $csvSchema = [];
+        $outputSchema = [];
         $fieldNameDelimiter = ':'; // e.g. age:int
 
         // create the map from the headers
@@ -309,6 +310,32 @@ class Parser
         return isset($this->config[$key]) ? $this->config[$key] : $default;
     }
 
+    // parse header:dotted.config to [header, dotted.config]
+    // header to [header, null]
+    static public function parseDottedConfig(string $dottedConfig): array
+    {
+        if (str_contains($dottedConfig, ':')) {
+            [$header, $dottedConfig] = explode(':', $dottedConfig);
+        } else {
+            $header = $dottedConfig;
+            $dottedConfig = null;
+        }
+        return [$header, $dottedConfig];
+
+    }
+    static public function parseConfigHeader(string $config): array
+    {
+        if (!str_contains($config, '?')) {
+            $config .= '?';
+        }
+        [$dottedConfig, $settingsString] = explode('?', $config);
+        [$header, $dottedConfig] = self::parseDottedConfig($dottedConfig);
+
+        $settings = self::parseQueryString($settingsString);
+        return [$header, $dottedConfig, $settings];
+
+    }
+
     /**
      * @param string $type
      * @param string $value
@@ -321,21 +348,11 @@ class Parser
     protected function getValue($config, $value, $key)
     {
         // format: [fieldname:][dottedConfig]?settings
-        if (!str_contains($config, '?')) {
-            $config .= '?';
-        }
-        [$dottedConfig, $settingsString] = explode('?', $config);
-        if (str_contains($dottedConfig, ':')) {
-            [$header, $dottedConfig] = explode(':', $dottedConfig);
-        } else {
-            $header = $key;
-        }
-
-        $settings = self::parseQueryString($settingsString);
 //        if (count($settings)) {
 //            dd($settings);
 //        }
-        if (str_contains($dottedConfig, '.')) {
+        [$header, $dottedConfig, $settings] = self::parseConfigHeader($config);
+        if ($dottedConfig && str_contains($dottedConfig, '.')) {
             [$type, $values] = explode('.', $dottedConfig, 2);
             $parameters = $values; // what's after the .
         } else {

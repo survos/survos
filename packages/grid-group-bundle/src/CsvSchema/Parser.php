@@ -243,8 +243,12 @@ class Parser
      */
     public function parseRow(array $columns)
     {
+        if (empty($this->config)) {
+
+        }
         if (!$schema = $this->config['schema']??false) {
-            $this->createSchemaFromMap($this->config['map'], $columns);
+            // ugh!
+            $schema = self::createConfigFromMap($this->config['map'], $columns)['schema'];
         }
 
 //        if (count($schema) <> count($columns)) {

@@ -72,7 +72,9 @@
         "codeception/module-phpbrowser": "^3.0",
         "codeception/module-symfony": "^3.0 | *@dev",
         "ekino/phpstan-banned-code": "^1.0",
+        "php-parallel-lint/php-parallel-lint": "^1.3",
         "phpdocumentor/reflection-docblock": "*",
+        "phpro/grumphp": "^1.16",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^1.8",
         "phpunit/phpunit": "^9.5",
@@ -100,7 +102,8 @@
             "symfony/flex": true,
             "symfony/runtime": true,
             "phpstan/extension-installer": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "phpro/grumphp": true
         },
         "optimize-autoloader": true,
         "preferred-install": {

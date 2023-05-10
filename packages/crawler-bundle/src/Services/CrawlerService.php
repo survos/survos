@@ -53,7 +53,7 @@ class CrawlerService
         return $this->baseUrl;
     }
 
-    public function getUserClass(): string
+    public function getUserClass(): ?string
     {
         return $this->userClass;
     }
@@ -152,6 +152,13 @@ class CrawlerService
         }
         //        $this->router = $container->get('router');
         //        $this->cache = $container->get('cache.app');
+    }
+
+    public function checkIfCrawlerClient()
+    {
+        if(!$this->crawlerClient) {
+            $this->crawlerClient = $this->createClient();
+        }
     }
 
     private function getKey($path): string

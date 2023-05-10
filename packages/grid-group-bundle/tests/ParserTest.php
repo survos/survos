@@ -34,6 +34,21 @@ class ParserTest extends TestCase
 
     }
 
+    public function testDottedConfig()
+    {
+        $this->assertEquals(Parser::parseDottedConfig('header'), ['header', null]);
+        $this->assertEquals(Parser::parseDottedConfig('header:int'), ['header', 'int']);
+        $this->assertEquals(Parser::parseDottedConfig('header:rel.per'), ['header', 'rel.per']);
+
+        $this->assertEquals(Parser::parseConfigHeader('header:rel.per'), ['header', 'rel.per', []]);
+        $this->assertEquals(Parser::parseConfigHeader('header:rel.per?'), ['header', 'rel.per', []]);
+        $this->assertEquals(
+            $actual=Parser::parseConfigHeader('header:rel.per?max=10'),
+            ['header', 'rel.per', ['max' => 10]],
+            json_encode($actual));
+
+    }
+
 
 
     public static function csvTests()

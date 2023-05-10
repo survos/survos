@@ -182,13 +182,13 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $data = [];
             foreach($facet as $facetKey => $facetValue) {
                 $fdata["label"] =  $facetKey;
-                $fdata["total"] =  (int) $facetValue;
+                $fdata["total"] =  $facetValue;
                 $fdata["value"] =  $facetKey;
-                $fdata["count"] =  (int) $facetValue;
+                $fdata["count"] =  $facetValue;
                 if(isset($params[$key]) && is_array($params[$key])) {
                     foreach($params[$key] as $param) {
                         if(isset($param['label']) && $param['label'] === $facetKey) {
-                            $fdata['total'] = $param['total'];
+                            $fdata['total'] = (int) $param['total'];
                             break;
                         }
                     }

@@ -1,2 +1,5 @@
 grumphp:
-    tasks: { yamllint: null }
+    tasks: {
+        yamllint: null,
+        phplint: null
+    }

@@ -25,5 +25,4 @@ return [
     Survos\BootstrapBundle\SurvosBootstrapBundle::class => ['all' => true],
     Survos\InspectionBundle\SurvosInspectionBundle::class => ['all' => true],
     Survos\ApiGrid\SurvosApiGridBundle::class => ['all' => true],
-    Meilisearch\Bundle\MeilisearchBundle::class => ['all' => true],
 ];

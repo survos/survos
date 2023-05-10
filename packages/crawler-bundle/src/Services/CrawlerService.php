@@ -25,7 +25,7 @@ class CrawlerService
     public function __construct(
         private array $config,
         private string $baseUrl,
-        private string $userClass,
+        private ?string $userClass,
         private string $loginPath,
         private string $submitButtonSelector,
         private string $plaintextPassword,

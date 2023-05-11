@@ -44,6 +44,17 @@ class MenuServiceTest extends TestCase
         $this->assertInstanceOf(ItemInterface::class, $item);
     }
 
+    public function testSetAuthorizationChecker()
+    {
+        $menuService = $this->mockMenuService();
+
+        $authorization = $this->createMock(AuthorizationCheckerInterface::class);
+
+        $menuService->setAuthorizationChecker($authorization);
+
+        $this->assertInstanceOf(AuthorizationCheckerInterface::class, $menuService->getAuthorizationChecker());
+    }
+
     protected function mockMenuService(): MenuService
     {
         return new MenuService($this->createMock(AuthorizationCheckerInterface::class));

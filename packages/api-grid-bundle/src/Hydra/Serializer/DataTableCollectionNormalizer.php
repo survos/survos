@@ -188,7 +188,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 if(isset($params[$key]) && is_array($params[$key])) {
                     foreach($params[$key] as $param) {
                         if(isset($param['label']) && $param['label'] === $facetKey) {
-                            $fdata['total'] = $param['total'];
+                            $fdata['total'] = (int) $param['total'];
                             break;
                         }
                     }
@@ -206,7 +206,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                     if (!in_array($label, array_column($facetsData[$key], 'label'))) {
                         $facetsData[$key][] = [
                             'label' => $label,
-                            'total' => $bItem['total'],
+                            'total' => (int) $bItem['total'],
                             'value' => $label,
                             'count' => 0
                         ];
@@ -216,7 +216,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         $returnData['searchPanes']['options'] = $facetsData;
-        $returnData['searchPanes']["showZeroCounts"] = true;
+
         return $returnData;
     }
 

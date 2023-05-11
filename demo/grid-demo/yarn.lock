@@ -2111,6 +2111,11 @@ datatables.net-datetime@^1.1.2:
   resolved "https://registry.yarnpkg.com/datatables.net-datetime/-/datatables.net-datetime-1.4.0.tgz#cfa46778106786453e77c35f424908a2b4a32dd5"
   integrity sha512-mPyq8QEDyXAG3JUCS4ch9OeafvkubVqO+066x3/Y7ZWwp5kA4Dhv00Z1+U6/N9RZScdrxbd53LKW+qgg0Los1w==
 
+datatables.net-datetime@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/datatables.net-datetime/-/datatables.net-datetime-1.4.1.tgz#ad8ab71167cac80323c94267f1d20c9d3f6d74ef"
+  integrity sha512-/76pAXUx4qHN5612CFRLJDRXxoQarMJdV9Iaxd4IOaMNAgakiTggFeXdjxHzLCzXIeAoQy4/I0kjaN7F/zHBhQ==
+
 datatables.net-fixedcolumns-bs5@^4.0.0:
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/datatables.net-fixedcolumns-bs5/-/datatables.net-fixedcolumns-bs5-4.2.2.tgz#5cd0e5d2c9ab7d681381185faa045f3788e01ca8"

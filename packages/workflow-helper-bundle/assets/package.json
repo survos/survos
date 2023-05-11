@@ -2,7 +2,7 @@
   "name": "@survos/workflow-helper-bundle",
   "description": "display workflow digraph using stimulus",
   "license": "MIT",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "symfony": {
     "controllers": {
       "workflow": {

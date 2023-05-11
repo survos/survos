@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d4070ec6905d8ed38b39134a800b4a7e",
+    "content-hash": "4b9d0284212712b08ecf955c8c995405",
     "packages": [
         {
             "name": "api-platform/core",
@@ -3591,6 +3591,79 @@
                 "source": "https://github.com/survos/BootstrapBundle/tree/1.4.41"
             },
             "time": "2023-05-10T16:42:41+00:00"
+        },
+        {
+            "name": "survos/command-bundle",
+            "version": "1.4.41",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/survos/SurvosCommandBundle.git",
+                "reference": "cce2141888b2edf21f56c367f031fd64f2a472b6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/survos/SurvosCommandBundle/zipball/cce2141888b2edf21f56c367f031fd64f2a472b6",
+                "reference": "cce2141888b2edf21f56c367f031fd64f2a472b6",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/config": "^6.1.0",
+                "symfony/console": "^6.1.0",
+                "symfony/dependency-injection": "^6.1.0",
+                "symfony/form": "^6.1.0",
+                "symfony/framework-bundle": "^6.1.0",
+                "symfony/http-kernel": "^6.1.0",
+                "zenstruck/console-extra": "^1.1"
+            },
+            "conflict": {
+                "survos/api-grid-bundle": "<1.2.57",
+                "survos/auth-bundle": "<1.2.57",
+                "survos/barcode-bundle": "<1.2.57",
+                "survos/bootstrap-bundle": "<1.2.57",
+                "survos/core-bundle": "<1.2.57",
+                "survos/crawler-bundle": "<1.2.57",
+                "survos/doc-bundle": "<1.2.57",
+                "survos/faker-bundle": "<1.2.57",
+                "survos/grid-bundle": "<1.2.57",
+                "survos/grid-group-bundle": "<1.2.57",
+                "survos/html-prettify-bundle": "<1.2.57",
+                "survos/import-bridge": "<1.2.57",
+                "survos/inspection-bundle": "<1.2.57",
+                "survos/location-bundle": "<1.2.57",
+                "survos/maker-bundle": "<1.2.57",
+                "survos/providence-bundle": "<1.2.57",
+                "survos/ruler-bundle": "<1.2.57",
+                "survos/stripe-product": "<1.2.57",
+                "survos/tree-bundle": "<1.2.57",
+                "survos/wiki-bundle": "<1.2.57",
+                "survos/workflow-helper-bundle": "<1.2.57"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.8"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Survos\\CommandBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tac Tacelosky",
+                    "email": "tacman@gmail.com"
+                }
+            ],
+            "description": "Run Symfony console commands from a web interface",
+            "support": {
+                "issues": "https://github.com/survos/SurvosCommandBundle/issues",
+                "source": "https://github.com/survos/SurvosCommandBundle/tree/1.4.41"
+            },
+            "time": "2023-04-24T17:40:52+00:00"
         },
         {
             "name": "survos/core-bundle",
@@ -9556,6 +9629,128 @@
                 "source": "https://github.com/willdurand/Negotiation/tree/3.1.0"
             },
             "time": "2022-01-30T20:08:53+00:00"
+        },
+        {
+            "name": "zenstruck/callback",
+            "version": "v1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zenstruck/callback.git",
+                "reference": "eed9a532fd8974368e60c4a2550ed65eab7e5432"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zenstruck/callback/zipball/eed9a532fd8974368e60c4a2550ed65eab7e5432",
+                "reference": "eed9a532fd8974368e60c4a2550ed65eab7e5432",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/polyfill-php80": "^1.14"
+            },
+            "require-dev": {
+                "symfony/phpunit-bridge": "^5.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Zenstruck\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Bond",
+                    "email": "kevinbond@gmail.com"
+                }
+            ],
+            "description": "Callable wrapper to validate and inject arguments.",
+            "homepage": "https://github.com/zenstruck/callback",
+            "keywords": [
+                "callable",
+                "callback",
+                "utility"
+            ],
+            "support": {
+                "issues": "https://github.com/zenstruck/callback/issues",
+                "source": "https://github.com/zenstruck/callback/tree/v1.5.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/kbond",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-08-31T14:56:15+00:00"
+        },
+        {
+            "name": "zenstruck/console-extra",
+            "version": "v1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zenstruck/console-extra.git",
+                "reference": "a3252e6589da3378f1ecfee36171e9fc863eb457"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zenstruck/console-extra/zipball/a3252e6589da3378f1ecfee36171e9fc863eb457",
+                "reference": "a3252e6589da3378f1ecfee36171e9fc863eb457",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0",
+                "symfony/console": "^5.4|^6.0",
+                "symfony/deprecation-contracts": "^2.2|^3.0",
+                "symfony/string": "^5.4|^6.0",
+                "zenstruck/callback": "^1.4.2"
+            },
+            "require-dev": {
+                "phpdocumentor/reflection-docblock": "^5.2",
+                "phpstan/phpstan": "^1.4",
+                "phpunit/phpunit": "^9.5",
+                "symfony/framework-bundle": "^5.4|^6.0",
+                "symfony/phpunit-bridge": "^6.2",
+                "symfony/process": "^5.4|^6.0",
+                "symfony/var-dumper": "^5.4|^6.0",
+                "zenstruck/console-test": "^1.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Zenstruck\\Console\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Bond",
+                    "email": "kevinbond@gmail.com"
+                }
+            ],
+            "description": "A modular set of features to reduce configuration boilerplate for your Symfony commands.",
+            "homepage": "https://github.com/zenstruck/console-extra",
+            "keywords": [
+                "command",
+                "console",
+                "symfony"
+            ],
+            "support": {
+                "issues": "https://github.com/zenstruck/console-extra/issues",
+                "source": "https://github.com/zenstruck/console-extra/tree/v1.2.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/kbond",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-03-23T15:35:54+00:00"
         }
     ],
     "packages-dev": [
@@ -12817,128 +13012,6 @@
                 }
             ],
             "time": "2021-07-28T10:34:58+00:00"
-        },
-        {
-            "name": "zenstruck/callback",
-            "version": "v1.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/zenstruck/callback.git",
-                "reference": "eed9a532fd8974368e60c4a2550ed65eab7e5432"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/zenstruck/callback/zipball/eed9a532fd8974368e60c4a2550ed65eab7e5432",
-                "reference": "eed9a532fd8974368e60c4a2550ed65eab7e5432",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2.5",
-                "symfony/polyfill-php80": "^1.14"
-            },
-            "require-dev": {
-                "symfony/phpunit-bridge": "^5.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Zenstruck\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Kevin Bond",
-                    "email": "kevinbond@gmail.com"
-                }
-            ],
-            "description": "Callable wrapper to validate and inject arguments.",
-            "homepage": "https://github.com/zenstruck/callback",
-            "keywords": [
-                "callable",
-                "callback",
-                "utility"
-            ],
-            "support": {
-                "issues": "https://github.com/zenstruck/callback/issues",
-                "source": "https://github.com/zenstruck/callback/tree/v1.5.0"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/kbond",
-                    "type": "github"
-                }
-            ],
-            "time": "2022-08-31T14:56:15+00:00"
-        },
-        {
-            "name": "zenstruck/console-extra",
-            "version": "v1.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/zenstruck/console-extra.git",
-                "reference": "a3252e6589da3378f1ecfee36171e9fc863eb457"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/zenstruck/console-extra/zipball/a3252e6589da3378f1ecfee36171e9fc863eb457",
-                "reference": "a3252e6589da3378f1ecfee36171e9fc863eb457",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.0",
-                "symfony/console": "^5.4|^6.0",
-                "symfony/deprecation-contracts": "^2.2|^3.0",
-                "symfony/string": "^5.4|^6.0",
-                "zenstruck/callback": "^1.4.2"
-            },
-            "require-dev": {
-                "phpdocumentor/reflection-docblock": "^5.2",
-                "phpstan/phpstan": "^1.4",
-                "phpunit/phpunit": "^9.5",
-                "symfony/framework-bundle": "^5.4|^6.0",
-                "symfony/phpunit-bridge": "^6.2",
-                "symfony/process": "^5.4|^6.0",
-                "symfony/var-dumper": "^5.4|^6.0",
-                "zenstruck/console-test": "^1.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Zenstruck\\Console\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Kevin Bond",
-                    "email": "kevinbond@gmail.com"
-                }
-            ],
-            "description": "A modular set of features to reduce configuration boilerplate for your Symfony commands.",
-            "homepage": "https://github.com/zenstruck/console-extra",
-            "keywords": [
-                "command",
-                "console",
-                "symfony"
-            ],
-            "support": {
-                "issues": "https://github.com/zenstruck/console-extra/issues",
-                "source": "https://github.com/zenstruck/console-extra/tree/v1.2.0"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/kbond",
-                    "type": "github"
-                }
-            ],
-            "time": "2023-03-23T15:35:54+00:00"
         }
     ],
     "aliases": [],

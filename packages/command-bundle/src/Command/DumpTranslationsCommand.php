@@ -30,7 +30,9 @@ final class DumpTranslationsCommand extends InvokableServiceCommand
 
     private Application $application;
 
-    public function __construct(private KernelInterface $kernel, private array $namespaces, string $name = null)
+    public function __construct(private KernelInterface $kernel,
+                                private array $namespaces, // injected from the bundle config
+                                string $name = null)
     {
         $this->application = new Application($this->kernel);
         parent::__construct($name);
@@ -44,8 +46,9 @@ final class DumpTranslationsCommand extends InvokableServiceCommand
 
         $commands = [];
         $messages = [];
-        foreach ($this->namespaces as $namespace_d) {
-            $commands[$namespace] = $this->application->all($namespace_d);
+        $namespaces = $namespace ? [$namespace] : $this->namespaces;
+        foreach ($namespaces as $namespace) {
+            $commands[$namespace] = $this->application->all($namespace);
             foreach ($commands[$namespace] as $command) {
                 $messages[$command->getName()] = [
                     'description' => $command->getDescription(),

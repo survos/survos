@@ -30,6 +30,7 @@
             <directory suffix=".php">packages/scraper-bundle/src</directory>
             <directory suffix=".php">packages/doc-bundle/src</directory>
             <directory suffix=".php">packages/command-bundle/src</directory>
+            <directory suffix=".php">packages/bootstrap-bundle/src</directory>
         </include>
     </coverage>
 

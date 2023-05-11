@@ -20,4 +20,5 @@ return [
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
     Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle::class => ['all' => true],
     Meilisearch\Bundle\MeilisearchBundle::class => ['all' => true],
+    Survos\CommandBundle\SurvosCommandBundle::class => ['dev' => true, 'test' => true]
 ];

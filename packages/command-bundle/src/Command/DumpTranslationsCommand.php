@@ -43,8 +43,9 @@ final class DumpTranslationsCommand extends InvokableServiceCommand
     ): void {
 
         $commands = [];
-        foreach ($this->namespaces as $namespace) {
-            $commands[$namespace] = $this->application->all($namespace);
+        $messages = [];
+        foreach ($this->namespaces as $namespace_d) {
+            $commands[$namespace] = $this->application->all($namespace_d);
             foreach ($commands[$namespace] as $command) {
                 $messages[$command->getName()] = [
                     'description' => $command->getDescription(),

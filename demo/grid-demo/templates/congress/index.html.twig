@@ -8,9 +8,8 @@
         This page uses the <code>grid</code> component, and generates HTML from the query.
     </p>
 
-    {% component grid with {
-        data: officials,
-        columns: [
+    {% set columns =
+        [
             'id',
             'firstName',
             'lastName',
@@ -18,24 +17,50 @@
             'officialName',
             'birthday',
             'terms'
-        ]
+        ] %}
 
-    } %}
+    <twig:grid
+            :data="officials"
+            :columns="columns"
+    >
 
-        {% block officialName %}
+        <twig:block name="officialName">
             <a href="{{ path('app_congress_show', {'id': row.id}) }}">
                 {{ row.officialName }}
             </a>
-        {% endblock %}
+        </twig:block>
 
-        {% block birthday %}
+        <twig:block name="birthday">
             {{ row.birthday|date('Y-m-d') }}
-        {% endblock %}
+        </twig:block>
+
 
         {% block actions %}
             <a href="{{ path('app_congress_edit', {'id': row.id}) }}">edit</a>
         {% endblock %}
 
-    {% endcomponent %}
+
+    </twig:grid>
+
+    {#    {% component grid with { #}
+    {#        data: officials, #}
+
+    {#    } %} #}
+
+    {#        {% block officialName %} #}
+    {#            <a href="{{ path('app_congress_show', {'id': row.id}) }}"> #}
+    {#                {{ row.officialName }} #}
+    {#            </a> #}
+    {#        {% endblock %} #}
+
+    {#        {% block birthday %} #}
+    {#            {{ row.birthday|date('Y-m-d') }} #}
+    {#        {% endblock %} #}
+
+    {#        {% block actions %} #}
+    {#            <a href="{{ path('app_congress_edit', {'id': row.id}) }}">edit</a> #}
+    {#        {% endblock %} #}
+
+    {#    {% endcomponent %} #}
 
 {% endblock %}

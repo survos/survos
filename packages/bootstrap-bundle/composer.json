@@ -25,7 +25,7 @@
     "autoload": {
         "psr-4": {
             "Survos\\BootstrapBundle\\": "src/",
-            "Survos\\BootstrapBundle\\Tests": "tests/"
+            "Survos\\BootstrapBundle\\Tests\\": "tests/"
         }
     },
     "extra": {

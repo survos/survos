@@ -39,43 +39,35 @@ class MeilliSearchStateProvider implements ProviderInterface
 
             $searchQuery = isset($context['filters']['search'])?$context['filters']['search']:"";
 
-            $body['hitsPerPage'] = $body['hitsPerPage'] ??= $this->pagination->getLimit($operation, $context);
-            $body['offset'] = $body['offset'] ??= $this->pagination->getOffset($operation, $context);
-            $objectData = $this->getSearchIndexObject($operation->getClass())->search($searchQuery, $body);
+            $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
+            $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
 
-//            $objectData = $this->searchService->search($operation->getClass(), $searchQuery, $body);
-            return $objectData;
-            //return  $this->returnObject($objectData, $operation->getClass());
+//            dd($uriVariables, $context);
+            $locale = $context['filters']['_locale'] ?? null;
+            $index = $this->getSearchIndexObject($operation->getClass(), $locale);
+            try {
+                $data = $index->search($searchQuery, $body);
+            } catch (\Exception $exception) {
+                throw new \Exception($index->getUid() . ' ' . $exception->getMessage());
+            }
+            unset($body['filter']);
+            $body['limit'] = 0;
+            $body['offset'] = 0;
+            $facets = $index->search('', $body);
+
+            return ['data' => $data, 'facets' => $facets];
         }
+
         return null;
-        // Retrieve the state from somewhere
-        //return $this->em->getRepository($operation->getClass())->find($uriVariables['imdbId']);
     }
 
-    private function getSearchIndexObject(string $class) {
+    private function getSearchIndexObject(string $class, ?string $locale=null) {
         $client = new Client($this->meiliHost, $this->meiliKey);
         $class = explode("\\",$class);
         $lastKey = strtolower(end($class));
-        return $client->index($lastKey);
-    }
-
-    private function returnObject(array $objectData, string $class) : object|array|null{
-        $returnObject = [];
-        foreach($objectData['hits'] as $hit) {
-            $oject = new $class($hit);
-            $methods = get_class_methods($oject);
-            foreach ($methods as $method) {
-                if (strpos($method, 'set') === 0) {
-                    $variableName = strtolower(substr($method, 3));
-                    $data = isset($hit[$variableName])?$hit[$variableName]:"";
-                    if($variableName == 'imdbid' || $variableName == 'runtimeminutes') {
-                        $data = (int) $data;
-                    }
-                    $oject->$method($data);
-                }
-            }
-            $returnObject[] = $oject;
+        if ($locale) {
+            $lastKey .= '-' . $locale;
         }
-        return $returnObject;
+        return $client->index($lastKey);
     }
 }

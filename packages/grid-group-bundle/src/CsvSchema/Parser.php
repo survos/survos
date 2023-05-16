@@ -8,10 +8,12 @@ use Survos\GridGroupBundle\CsvSchema\Exceptions\CastException;
 use Survos\GridGroupBundle\CsvSchema\Exceptions\UnsupportedTypeException;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Yaml\Yaml;
 use function Symfony\Component\String\u;
 
@@ -168,7 +170,7 @@ class Parser
                             'code' => TextType::class,
                             'label' => TextareaType::class,
                             'description' => TextareaType::class,
-                            default => assert(false, $internalCode)
+                            default => assert(false, $internalCode . '/' . $type)
 
                         },
                         'array,',
@@ -180,8 +182,12 @@ class Parser
                         'bool' => CheckboxType::class,
                         'int' => NumberType::class,
                         'float' => NumberType::class,
+                        'att',
                         'attr' => match ($internalCode) {
                             'int' => NumberType::class,
+                            'string' => TextType::class,
+                            'url' => UrlType::class,
+                            'date' => DateType::class,
                             default => assert(false, $internalCode)
                         },
                         default => assert(false, $type)
@@ -191,8 +197,14 @@ class Parser
 //                    }
 
                     $options = [];
+
                     $settings['propertyType'] = $type;
                     $settings['internalCode'] = $internalCode;
+                    // ack! Terrible names.
+                    $settings['formType'] = $propertyType;
+//                    $settings['type'] = $type;
+//                    $settings['propertyType'] = $type; // for liForm
+//                    $settings['internalCode'] = $internalCode;
 
                     if (count($settings)) {
                         $options['attr'] = $settings;
@@ -215,6 +227,7 @@ class Parser
                         $options['allow_add'] = true;
                     }
                     $outputSchema[$column] = array_merge([
+                        'column' => $column,
                         'type' => $dottedConfig,
                     ],
                         $settings);
@@ -251,10 +264,10 @@ class Parser
             $schema = self::createConfigFromMap($this->config['map'], $columns)['schema'];
         }
 
-//        if (count($schema) <> count($columns)) {
+        if (count($schema) <> count($columns)) {
 //            dd('columns mismatch', $schema, $columns);
-//        }
-        assert(count($schema) == count($columns), "mismatch %d %d", );
+        }
+        assert(count($schema) == count($columns), sprintf("mismatch %d %d", count($schema), count($columns)));
 
         $zipper = collect($columns)->zip($schema);
         $valueRules = $this->config['valueRules']??[];

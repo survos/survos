@@ -4,12 +4,13 @@
 
 namespace Survos\GridGroupBundle\Service;
 
-use \Exception;
+use Exception;
 use SplFileObject;
 use SplTempFileObject;
 use Survos\GridGroupBundle\Service\CountableArrayCache;
 use Survos\GridGroupBundle\Service\Reader;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use League\Csv\Reader as LeagueCsvReader;
 
 class CsvDatabase
 {
@@ -66,10 +67,15 @@ class CsvDatabase
     private CountableArrayCache $aliases;
     private int $currentSize = 0;
 
-    public function __construct(private string $filename, private ?string $keyName=null, private array $headers = [], private bool $useGZip = false)
-    {
+    public function __construct(
+        private string $filename,
+        private ?string $keyName = null,
+        private array $headers = [],
+        private bool $useGZip = false
+    ) {
         $this->offsetCache = new CountableArrayCache();
         $this->aliases = new CountableArrayCache();
+
         if (!in_array($this->keyName, $this->headers)) {
             array_unshift($this->headers, $this->keyName);
         }
@@ -110,9 +116,9 @@ class CsvDatabase
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getKeyName(): string
+    public function getKeyName(): ?string
     {
         return $this->keyName;
     }
@@ -147,6 +153,9 @@ class CsvDatabase
 
     public function addHeader(string $label): self
     {
+        //Something like this
+        //something_like_this
+
         // @todo: define column schema
         $slugger = new AsciiSlugger();
         $header = $slugger->slug($label)->toString();
@@ -154,6 +163,16 @@ class CsvDatabase
         if ($header <> $label) {
             $this->addAlias($label, $header);
         }
+
+        $tempCsv = $this->createCopy();
+        $this->flushFile();
+
+        foreach ($tempCsv->readFromFile() as $row) {
+            $this->appendToFile($row[$this->getKeyName()], $row);
+        }
+
+        $tempCsv->purge();
+
         return $this;
     }
 
@@ -176,9 +195,14 @@ class CsvDatabase
         $file = $this->openFile(static::FILE_APPEND);
         $file->fseek(0, SEEK_END);
         $pos = $file->ftell();
+        $keyName = $this->getKeyName();
+
+        if (!isset($data[$keyName])) {
+            $data = [$keyName => $key] + $data;
+        }
 
         // if it's empty, first write the headers
-        if (count($headers) == 0 || ($headers = [$this->getKeyName()])) {
+        if (count($headers) == 1) {
             $headers = array_keys($data);
             $this->setHeaders($headers);
         }
@@ -197,9 +221,7 @@ class CsvDatabase
         } else {
             $dataValues = array_values($data);
         }
-        if (!array_key_exists($key, $data)) {
-            $data[$this->getKeyName()] = $key;
-        }
+
         // before writing the data, save the position in the offset cache.
         $position = $file->ftell();
 
@@ -256,6 +278,7 @@ class CsvDatabase
         if (file_exists($existingFile)) {
             $reader = new Reader($existingFile, strict: false);
             foreach ($reader->getRow() as $row) {
+//            foreach ($reader->getRecords() as $row) {
 //                dd($row, $existingFile);
                 try {
                     // this could be a trait, too.
@@ -264,6 +287,7 @@ class CsvDatabase
                     // only during dev
                 }
                 GridGroupService::assertKeyExists($this->getKeyName(), $row);
+//                dd($row, array_keys($row), $this->getKeyName());
                 $this->offsetCache->set($row[$this->getKeyName()], $reader->getRowOffset());
             }
         }
@@ -451,7 +475,6 @@ class CsvDatabase
         // Fetch the offset
         if ($position = $this->keyOffset($key)) {
             // @todo: move the buffer pointer using fseek and get the record there.
-
         }
 
         // Fetch the key from database
@@ -475,9 +498,36 @@ class CsvDatabase
         return !is_null($keyOffset); // 0 is a valid offset, though realistically that will always be the headers.
     }
 
-
-    public function set(string $key, $data): self
+    /**
+     * @param string|null $key
+     * @param array $data
+     * @return CsvDatabase
+     * @throws Exception
+     */
+    public function set(?string $key = null, array $data = []): self
     {
+        // Check if keyName was set and if not search for id field in data array
+        if (!$this->getKeyName()) {
+            $keyName = 'id';
+
+            if (array_key_exists($keyName, $data)) {
+                $this->setKeyName($keyName);
+            } else {
+                throw new Exception("You need to set 'keyName' parameter or provide id field in data array!");
+            }
+        }
+
+        $key = $data[$this->getKeyName()];
+
+        // Check if new headers provided and add them if so
+        if ($diff = array_diff(array_keys($data), $this->getHeaders())) {
+            if (file_exists($this->getFilename())) {
+                foreach ($diff as $header) {
+                    $this->addHeader($header);
+                }
+            }
+        }
+
         // If the key already exists we need to replace it
         if ($this->has($key)) {
             $this->replace($key, $data);
@@ -494,6 +544,7 @@ class CsvDatabase
      *
      * @param string $key
      * @param mixed $data
+     * @return CsvDatabase
      * @throws Exception
      */
     public function replace(string $key, mixed $data): self
@@ -537,4 +588,16 @@ class CsvDatabase
         return true;
     }
 
+    /**
+     * Create a copy of this csv database file
+     *
+     * @return self
+     */
+    protected function createCopy(): self
+    {
+        $tempFileName = md5(time() . $this->filename) . '.csv';
+        copy($this->getFilename(), $tempFileName);
+
+        return new self($tempFileName, $this->keyName, $this->headers, $this->useGZip);
+    }
 }

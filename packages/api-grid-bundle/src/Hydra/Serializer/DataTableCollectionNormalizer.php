@@ -52,13 +52,14 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             return $this->normalizeRawCollection($object, $format, $context);
         }
 
+        $paginationData = $this->getPaginationData($object, $context);
         $facets = [];
-        if($object instanceof SearchResult) {
+        if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
             if(isset($params['facets']) && is_array($params['facets'])) {
-                $facets = $this->getFacetsData($object->getFacetDistribution(), $params['facets']);
+                $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution());
             }
-            $object = $object->getHits();
+            $object = $object['data']->getHits();
         }
 
         if ($object instanceof PaginatorInterface) {
@@ -75,15 +76,13 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                     }
                 }
 
-                $facets = $this->getFacetsData($doctrineFacets,$params['facets']);
+                $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets);
             }
         }
 
         $resourceClass = $this->resourceClassResolver->getResourceClass($object, $context['resource_class']);
         $context = $this->initContext($resourceClass, $context);
         $data = [];
-
-        $paginationData = $this->getPaginationData($object, $context);
 
         if (($operation = $context['operation'] ?? null) && method_exists($operation, 'getItemUriTemplate')) {
             $context['item_uri_template'] = $operation->getItemUriTemplate();
@@ -124,6 +123,10 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         if (\is_array($object) || ($object instanceof \Countable && !$object instanceof PartialPaginatorInterface)) {
             $data['hydra:totalItems'] = \count($object);
+        }
+
+        if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
+            $data['hydra:totalItems'] = $object['data']->getEstimatedTotalHits();
         }
 
         return $data;
@@ -178,41 +181,19 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     private function getFacetsData(array $facets, ?array $params) :array {
         $facetsData = [];
 
-        foreach($facets as $key => $facet) {
+        foreach($params as $key => $facet) {
             $data = [];
             foreach($facet as $facetKey => $facetValue) {
                 $fdata["label"] =  $facetKey;
                 $fdata["total"] =  $facetValue;
                 $fdata["value"] =  $facetKey;
-                $fdata["count"] =  $facetValue;
-                if(isset($params[$key]) && is_array($params[$key])) {
-                    foreach($params[$key] as $param) {
-                        if(isset($param['label']) && $param['label'] === $facetKey) {
-                            $fdata['total'] = (int) $param['total'];
-                            break;
-                        }
-                    }
+                $fdata["count"] =  0;
+                if(isset($facets[$key][$facetKey])) {
+                    $fdata["count"] = $facets[$key][$facetKey];
                 }
-
                 $data[] = $fdata;
             }
             $facetsData[$key] = $data;
-        }
-
-        foreach ($params as $key => $subArray) {
-            if(is_array($subArray)) {
-                foreach ($subArray as $bItem) {
-                    $label = $bItem['label'];
-                    if (!in_array($label, array_column($facetsData[$key], 'label'))) {
-                        $facetsData[$key][] = [
-                            'label' => $label,
-                            'total' => (int) $bItem['total'],
-                            'value' => $label,
-                            'count' => 0
-                        ];
-                    }
-                }
-            }
         }
 
         $returnData['searchPanes']['options'] = $facetsData;

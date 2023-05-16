@@ -1,6 +1,28 @@
 given:
 
 cache:
+  - db: no-headers-and-key.csv
+    steps:
+      - operation: set
+        data: { id: 'nj', label: 'New Jersey' }
+        csv: |
+          id,label
+          nj,"New Jersey"
+
+      - operation: set
+        data: { id: 'va', label: 'Virginia' }
+        csv: |
+          id,label
+          nj,"New Jersey"
+          va,Virginia
+
+      - operation: set
+        data: { id: 'nj', label: 'New Jersey', population: 10 }
+        csv: |
+          id,label,population
+          nj,"New Jersey",10
+          va,Virginia,
+
   - db: no-key.csv
     key: code
     headers: [code,label]

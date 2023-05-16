@@ -499,13 +499,35 @@ class CsvDatabase
     }
 
     /**
-     * @param string $key
+     * @param string|null $key
      * @param array $data
      * @return CsvDatabase
      * @throws Exception
      */
-    public function set(?string $key, array $data): self
+    public function set(?string $key = null, array $data = []): self
     {
+        // Check if keyName was set and if not search for id field in data array
+        if (!$this->getKeyName()) {
+            $keyName = 'id';
+
+            if (array_key_exists($keyName, $data)) {
+                $this->setKeyName($keyName);
+            } else {
+                throw new Exception("You need to set 'keyName' parameter or provide id field in data array!");
+            }
+        }
+
+        $key = $data[$this->getKeyName()];
+
+        // Check if new headers provided and add them if so
+        if ($diff = array_diff(array_keys($data), $this->getHeaders())) {
+            if (file_exists($this->getFilename())) {
+                foreach ($diff as $header) {
+                    $this->addHeader($header);
+                }
+            }
+        }
+
         // If the key already exists we need to replace it
         if ($this->has($key)) {
             $this->replace($key, $data);

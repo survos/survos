@@ -69,12 +69,13 @@ class CsvDatabase
 
     public function __construct(
         private string $filename,
-        private string $keyName,
+        private ?string $keyName = null,
         private array $headers = [],
         private bool $useGZip = false
     ) {
         $this->offsetCache = new CountableArrayCache();
         $this->aliases = new CountableArrayCache();
+
         if (!in_array($this->keyName, $this->headers)) {
             array_unshift($this->headers, $this->keyName);
         }
@@ -115,9 +116,9 @@ class CsvDatabase
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getKeyName(): string
+    public function getKeyName(): ?string
     {
         return $this->keyName;
     }
@@ -152,6 +153,9 @@ class CsvDatabase
 
     public function addHeader(string $label): self
     {
+        //Something like this
+        //something_like_this
+
         // @todo: define column schema
         $slugger = new AsciiSlugger();
         $header = $slugger->slug($label)->toString();
@@ -159,6 +163,16 @@ class CsvDatabase
         if ($header <> $label) {
             $this->addAlias($label, $header);
         }
+
+        $tempCsv = $this->createCopy();
+        $this->flushFile();
+
+        foreach ($tempCsv->readFromFile() as $row) {
+            $this->appendToFile($row[$this->getKeyName()], $row);
+        }
+
+        $tempCsv->purge();
+
         return $this;
     }
 
@@ -484,8 +498,13 @@ class CsvDatabase
         return !is_null($keyOffset); // 0 is a valid offset, though realistically that will always be the headers.
     }
 
-
-    public function set(string $key, $data): self
+    /**
+     * @param string $key
+     * @param array $data
+     * @return CsvDatabase
+     * @throws Exception
+     */
+    public function set(?string $key, array $data): self
     {
         // If the key already exists we need to replace it
         if ($this->has($key)) {
@@ -503,6 +522,7 @@ class CsvDatabase
      *
      * @param string $key
      * @param mixed $data
+     * @return CsvDatabase
      * @throws Exception
      */
     public function replace(string $key, mixed $data): self
@@ -544,5 +564,18 @@ class CsvDatabase
         }
 
         return true;
+    }
+
+    /**
+     * Create a copy of this csv database file
+     *
+     * @return self
+     */
+    protected function createCopy(): self
+    {
+        $tempFileName = md5(time() . $this->filename) . '.csv';
+        copy($this->getFilename(), $tempFileName);
+
+        return new self($tempFileName, $this->keyName, $this->headers, $this->useGZip);
     }
 }

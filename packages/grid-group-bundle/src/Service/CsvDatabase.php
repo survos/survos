@@ -134,6 +134,14 @@ class CsvDatabase
     }
 
     /**
+     * @return string|false|int
+     */
+    public function getKeyAlias(): string|false|int
+    {
+        return array_search($this->getKeyName(), $this->aliases->getCache());
+    }
+
+    /**
      * @return array
      */
     public function getHeaders(): array
@@ -153,10 +161,6 @@ class CsvDatabase
 
     public function addHeader(string $label): self
     {
-        //Something like this
-        //something_like_this
-
-        // @todo: define column schema
         $slugger = new AsciiSlugger();
         $header = $slugger->slug($label)->toString();
         $this->headers[] = $header;
@@ -510,6 +514,11 @@ class CsvDatabase
         if (!$this->getKeyName()) {
             foreach (array_keys($data) as $item) {
                 if (preg_match('(id|Id|ID)', $item)) {
+                    if ($this->aliases->contains($item)) {
+                        $this->setKeyName($this->aliases->get($item));
+                        break;
+                    }
+
                     $this->setKeyName($item);
                     break;
                 }
@@ -524,7 +533,7 @@ class CsvDatabase
 
         // Check if new headers provided and add them if so
         if ($diff = array_diff(array_keys($data), $this->getHeaders())) {
-            if (file_exists($this->getFilename())) {
+            if (file_exists($this->getFilename()) && !empty($diff)) {
                 foreach ($diff as $header) {
                     $this->addHeader($header);
                 }

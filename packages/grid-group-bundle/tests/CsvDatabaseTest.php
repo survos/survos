@@ -28,6 +28,8 @@ class CsvDatabaseTest extends TestCase
                 'replace' => $csvDatabase->replace($key, $data),
                 'set' => $csvDatabase->set($key, (array)$data),
                 'add_header' => $csvDatabase->addHeader($step['header']),
+                'get_key_alias' => $csvDatabase->getKeyAlias(),
+                'get_key_name' => $csvDatabase->getKeyName(),
 
                 default =>
                 assert(false, "Operation not supported " . $operation)

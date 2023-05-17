@@ -36,7 +36,6 @@ class CsvDatabaseTest extends TestCase
                 $this->assertSame($expects, $actual);
             }
             if (!is_null($csv)) {
-
                 $this->assertSame($csv, file_get_contents($csvDatabase->getFilename()));
             }
         }

@@ -101,6 +101,8 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = (data, type, row, meta) => {
+                    console.log(row);
+                    row.locale = this.localeValue;
                     return template.render({data: data, row: row, field_name: c.name})
                 }
             }
@@ -651,7 +653,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
             }
         }
-        
+
         return {
             title: label,
             data: propertyName || '',

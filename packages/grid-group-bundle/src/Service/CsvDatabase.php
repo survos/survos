@@ -509,7 +509,7 @@ class CsvDatabase
         // Check if keyName was set and if not search for id field in data array
         if (!$this->getKeyName()) {
             foreach (array_keys($data) as $item) {
-                if (preg_match('(id|Id|ID)', $item)) {
+                if (preg_match('/id$/i', $item)) {
                     $this->setKeyName($item);
                     break;
                 }
@@ -520,6 +520,7 @@ class CsvDatabase
             throw new Exception("You need to set 'keyName' parameter or provide id field in data array!");
         }
 
+        assert(array_key_exists($this->getKeyName(), $data), sprintf("Missing key %s in %s", $this->getKeyName(), $this->getFilename()));
         $key = $data[$this->getKeyName()];
 
         // Check if new headers provided and add them if so

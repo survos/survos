@@ -47,6 +47,23 @@ cache:
         key: va
         expects: { id: 'va', label: 'Virginia', population: '' }
 
+  - db: headers.csv
+    steps:
+      - operation: set
+        data: { id: 'nj', label: 'New Jersey', population: '' }
+        csv: |
+          id,label,population
+          nj,"New Jersey",
+
+  - db: headers.csv
+    ignore_clear_db: true
+    steps:
+      - operation: headers
+        expects: ["id", "label", "population"]
+        csv: |
+          id,label,population
+          nj,"New Jersey",
+
   - db: no-key.csv
     key: code
     headers: [code,label]

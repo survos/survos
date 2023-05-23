@@ -76,8 +76,15 @@ class CsvDatabase
         $this->offsetCache = new CountableArrayCache();
         $this->aliases = new CountableArrayCache();
 
-        if (!in_array($this->keyName, $this->headers)) {
-            array_unshift($this->headers, $this->keyName);
+        if (file_exists($this->filename)) {
+            $reader = new Reader($this->getFilename());
+            $this->setHeaders($reader->getHeaders());
+        }
+
+        if (!is_null($this->keyName)) {
+            if (!in_array($this->keyName, $this->headers)) {
+                array_unshift($this->headers, $this->keyName);
+            }
         }
     }
 
@@ -277,7 +284,7 @@ class CsvDatabase
 
     public function loadOffsetCache()
     {
-        assert(count($this->headers), "missing headers");
+//        assert(count($this->headers), "missing headers");
         $existingFile = $this->getPath();
         if (file_exists($existingFile)) {
             $reader = new Reader($existingFile, strict: false);
@@ -514,10 +521,10 @@ class CsvDatabase
         if (!$this->getKeyName()) {
             foreach (array_keys($data) as $item) {
                 if (preg_match('/id$/i', $item)) {
-                    if ($this->aliases->contains($item)) {
-                        $this->setKeyName($this->aliases->get($item));
-                        break;
-                    }
+//                    if ($this->aliases->contains($item)) {
+//                        $this->setKeyName($this->aliases->get($item));
+//                        break;
+//                    }
 
                     $this->setKeyName($item);
                     break;

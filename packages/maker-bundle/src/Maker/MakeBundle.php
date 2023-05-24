@@ -154,7 +154,7 @@ class MakeBundle extends AbstractMaker implements MakerInterface
 //            $composerJson = $this->composerJsonFactory->createFromArray((array)$json);
 
             $composerJsonFilepath = $composerJson->getFileInfo()->getRealPath();
-            dd($bundleNamespace, $this->bundlePath, $bundlePath, $composerJson, $composerJsonFilepath);
+//            dd($bundleNamespace, $this->bundlePath, $bundlePath, $composerJson, $composerJsonFilepath);
             $this->jsonFileManager->printComposerJsonToFilePath($composerJson, $composerJsonFilepath);
 
             $message = sprintf(

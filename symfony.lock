@@ -176,6 +176,12 @@
             "config/packages/stof_doctrine_extensions.yaml"
         ]
     },
+    "survos/grid-bundle": {
+        "version": "1.4.64"
+    },
+    "survos/maker-bundle": {
+        "version": "1.4.64"
+    },
     "symfony/console": {
         "version": "6.2",
         "recipe": {

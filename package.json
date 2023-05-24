@@ -3,6 +3,7 @@
         "@babel/core": "^7.17.0",
         "@babel/preset-env": "^7.16.0",
         "@hotwired/stimulus": "^3.1.0",
+        "@survos/grid-bundle": "file:vendor/survos/grid-bundle/assets",
         "@symfony/stimulus-bridge": "^3.2.0",
         "@symfony/webpack-encore": "^4.2.0",
         "core-js": "^3.23.0",
@@ -19,5 +20,7 @@
         "watch": "encore dev --watch",
         "build": "encore production --progress"
     },
-    "dependencies": {}
+    "dependencies": {
+
+    }
 }

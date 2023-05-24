@@ -19,7 +19,7 @@ class AppController extends AbstractController
     #[Route('/', name: 'app_homepage')]
     public function index(PackageService $packageService): Response
     {
-        $packages = $packageService->getPackages();
+        $packages = []; // $packageService->getPackages();
 
         return $this->render('app/index.html.twig', [
             'packages' => $packages,

@@ -1,12 +1,8 @@
 <?php
 
 /*
- * This file is part of the Symfony MakerBundle package.
+ * This file follows the model of the Symfony MakerBundle package.
  *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
  */
 
 namespace Survos\Bundle\MakerBundle\Maker;
@@ -43,7 +39,6 @@ use Twig\Extension\AbstractExtension;
 use function Symfony\Component\String\u;
 
 /**
- * @author Sadicov Vladimir <sadikoff@gmail.com>
  * @author Tac Tacelosky <tacman@gmail.com>
  */
 class MakeBundle extends AbstractMaker implements MakerInterface
@@ -66,13 +61,13 @@ class MakeBundle extends AbstractMaker implements MakerInterface
 
     public static function getCommandDescription(): string
     {
-        return "Create a simple Symfony bundle";
+        return "Create a simple Symfony bundle in the survos monorepo.  Must be run from the main repository (survos/survos) ";
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
-            ->setDescription('Creates a Symfony 6.1 bundle in a new directory')
+            ->setDescription('Creates a Symfony 6.1} bundle in a new directory')
             // echo "maker: { root_namespace: Survos }" > config/packages/maker.yaml
 //            ->addArgument('action', InputArgument::REQUIRED, 'init or library or local-bundle or remote-bundle', null)
             ->addArgument('name', InputArgument::OPTIONAL, 'The bundle name part of the namespace')
@@ -144,7 +139,6 @@ class MakeBundle extends AbstractMaker implements MakerInterface
             $composerJson->setAutoload($autoLoad);
 
             // @todo: use jq from cli instead.  https://github.com/symplify/composer-json-manipulator
-            dump($bundleNamespace, $this->bundlePath, $bundlePath);
 //            dd($autoLoad);
 
 //            $io->write("Add the following to composer.json, then run composer dump-autoload to continue");
@@ -159,7 +153,9 @@ class MakeBundle extends AbstractMaker implements MakerInterface
 //            $json = json_decode(json_encode($json), true);
 //            $composerJson = $this->composerJsonFactory->createFromArray((array)$json);
 
-            $this->jsonFileManager->printComposerJsonToFilePath($composerJson, $composerJsonFilepath = $composerJson->getFileInfo()->getRealPath());
+            $composerJsonFilepath = $composerJson->getFileInfo()->getRealPath();
+            dd($bundleNamespace, $this->bundlePath, $bundlePath, $composerJson, $composerJsonFilepath);
+            $this->jsonFileManager->printComposerJsonToFilePath($composerJson, $composerJsonFilepath);
 
             $message = sprintf(
                 '"%s" was updated to use %s, run composer dump to reload the class map ',

@@ -32,6 +32,7 @@ final class AppMenuEventListener implements KnpMenuHelperInterface
         $options = $event->getOptions();
 
         $this->addMenuItem($menu, ['route' => 'app_homepage']);
+        $this->addMenuItem($menu, ['route' => 'survos_commands']);
         // for nested menus, don't add a route, just a label, then use it for the argument to addMenuItem
         $nestedMenu = $this->addMenuItem($menu, ['label' => 'Credits']);
         foreach (['bundles', 'javascript'] as $type) {
@@ -40,6 +41,7 @@ final class AppMenuEventListener implements KnpMenuHelperInterface
         }
 
         $this->addHeading($menu, "Bundles");
+        if (0)
         /** @var Package $package */
         foreach ($this->packageService->getPackages() as $package) {
             $this->add($menu, 'app_package', label: $package->getPackageCode(), rp: ['packageCode' => $package->getPackageCode()]);

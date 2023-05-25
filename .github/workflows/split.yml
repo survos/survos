@@ -42,6 +42,7 @@ jobs:
           - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
+          - {local_path: 'meili-admin-bundle', split_repository: 'SurvosMeiliAdminBundle'}
           - {local_path: 'providence-bundle', split_repository: 'SurvosProvidenceBundle'}
           - {local_path: 'tree-bundle', split_repository: 'SurvosTreeBundle'}
           - {local_path: 'scraper-bundle', split_repository: 'SurvosScraperBundle'}

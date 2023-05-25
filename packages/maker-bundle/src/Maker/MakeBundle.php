@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\MakerInterface;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\Console\Command\Command;
@@ -192,17 +193,22 @@ class MakeBundle extends AbstractMaker implements MakerInterface
             AbstractBundle::class,
             ContainerBuilder::class,
             ContainerConfigurator::class,
-            Bundle::class,
         ]);
+        $className = str_replace('\\', '', $nameWithVendor);
+//        dd($useStatements, $className, $nameWithVendor, Str::getShortClassName($className));
 
         $classPath = $generator->generateClass(
             $nameWithVendor . '\\', //
-//             $extensionClassNameDetails->getFullName(),
-            $this->templatePath . 'bundle/src/Bundle.tpl.php',
-            [
+             $templateName = realpath($this->templatePath . 'bundle/src/Bundle.tpl.php'),
+            variables: $vars = [
+                'templateName' => $templateName,
+//                'class_name' => $className,
+            'actualClassName' => $className,
                 'use_statements' => $useStatements,
             ]
         );
+//        dd($vars);
+        $generator->writeChanges();
 
         // hack, because something is wrong with the classmap lookup
         $classDir = str_replace('/.php', '', pathinfo($classPath, PATHINFO_DIRNAME));
@@ -234,6 +240,7 @@ class MakeBundle extends AbstractMaker implements MakerInterface
         $this->writeSuccessMessage($io);
 
         $io->text([
+            sprintf('vendor/bin/phpstan analyze packages/%s/', $this->bundleName),
             "modify $actualFilename to inject dependencies",
             'Develop the bundle here, but to use in another application use monorepo-split',
             'OR Remove psr-4 autoload and add to bundle path to composer, or composer req to get the recipes',

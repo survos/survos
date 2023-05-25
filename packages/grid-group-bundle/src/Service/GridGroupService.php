@@ -2,6 +2,8 @@
 
 namespace Survos\GridGroupBundle\Service;
 
+use App\Entity\Catalog;
+use App\Entity\Sheet;
 use Doctrine\Persistence\ManagerRegistry;
 use Goutte\Client;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -28,21 +30,26 @@ class GridGroupService
     {
     }
 
-    static public function missingKey($key, $array): string {
+    static public function missingKey($key, $array): string
+    {
         $keys = array_keys($array);
         return self::missingElement($key, $keys);
     }
 
-    static public function missingElement($key, $keys): string {
+    static public function missingElement($key, $keys): string
+    {
         sort($keys, SORT_STRING);
         return sprintf("Missing [%s]:\n%s", $key, join("\n", $keys));
     }
 
 
-    static public function assertKeyExists($key, array $array, string $message = '') {
+    static public function assertKeyExists($key, array $array, string $message = '')
+    {
         assert(array_key_exists($key, $array), self::missingKey($key, $array) . "\n$message");
     }
-    static public function assertInArray($key, array $array, string $message = '') {
+
+    static public function assertInArray($key, array $array, string $message = '')
+    {
         assert(in_array($key, $array), self::missingElement($key, $array) . "\n$message");
     }
 
@@ -52,7 +59,7 @@ class GridGroupService
     }
 
 
-    static public function createFromDirectory(string $groupDir, ?string $excludePattern=null): GridGroup
+    static public function createFromDirectory(string $groupDir, ?string $excludePattern = null): GridGroup
     {
         $finder = new Finder();
         $groupCode = pathinfo($groupDir, PATHINFO_FILENAME);
@@ -86,17 +93,61 @@ class GridGroupService
 
     }
 
-
-    static public function fetchRow(string $filename, string $separator = ",", int $limit=null, int $offset=null): \Generator
+    private function processSheetHeaders(mixed $row, Catalog $catalog, Sheet $sheet): ?int
     {
-        static $headers=null;
-        static $headersCount=null;
+        $headers = $row;
+//                    if ($catalog->getFieldCode()[0] ?? false) {
+//                        $codeColumn = array_search($catalog->getFieldCode()[0], $headers);
+//                    }
+//        dump($headers, $catalog->getFieldCode(), $catalog->getIdColumnRegex());
+//        dd($headers);
+        foreach ($headers as $idx => $header) {
+            if ($header) {
+            }
+        }
+        return null;
+    }
+
+
+    public static function trim(array $data, ?string $headerRegex = null)
+    {
+        // @todo: write a test for these
+        $firstEmptyRowCandidate = count($data);
+        $headerRowIndex = 0;
+        foreach ($data as $idx => $row) {
+            if ($headerRegex) {
+                if (preg_match($headerRegex, join(',', $row))) {
+                    // we have found the pattern
+                    $headerRowIndex = $idx;
+                    dd($headerRegex, $row, $headerRowIndex);
+                }
+
+                $isEmpty = count(array_filter($row)) == 0;
+                if (!$isEmpty) {
+                    $firstEmptyRowCandidate = $idx + 1;
+                } else {
+
+                }
+            }
+        }
+//        dd(firstEmptyRowCandidate: $firstEmptyRowCandidate, data: $data);
+            return array_slice($data, $headerRowIndex, $firstEmptyRowCandidate);
+
+
+            // no empty rows at the end, no empty columns at the end.
+        }
+
+
+        static public function fetchRow(string $filename, string $separator = ",", int $limit = null, int $offset = null): \Generator
+    {
+        static $headers = null;
+        static $headersCount = null;
         $buffer = fopen($filename, 'r+');
         while ($row = fgetcsv($buffer, separator: $separator)) {
             if (empty($headers)) {
                 // https://stackoverflow.com/questions/54145035/cant-remove-ufeff-from-a-string
 //                $row[0] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $row[0]);
-                $row[0]= trim($row[0], "\xEF\xBB\xBF");
+                $row[0] = trim($row[0], "\xEF\xBB\xBF");
                 $headers = $row;
                 $headersCount = count($headers);
                 continue;
@@ -107,7 +158,7 @@ class GridGroupService
             } elseif ($fieldCount < $headersCount) {
                 $row = array_pad($row, $headersCount, null);
             }
-            assert(count($row) == $headersCount, join(',', $headers) . "\n"  . join(',', $row));
+            assert(count($row) == $headersCount, join(',', $headers) . "\n" . join(',', $row));
             $data = array_combine($headers, $row);
             yield $data;
         }
@@ -186,7 +237,7 @@ class GridGroupService
 
 //Retrieve Highest Column (e.g AE)
         $highestColumn = $sheet->getHighestColumn();
-        $sheet->getStyle('A1:' . $highestColumn . '1' )->getFont()->setBold(true);
+        $sheet->getStyle('A1:' . $highestColumn . '1')->getFont()->setBold(true);
 
 //        $sheet->getStyle('B2')
 //            ->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);

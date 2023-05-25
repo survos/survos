@@ -86,6 +86,25 @@ class GridGroupService
 
     }
 
+    public static function trim(array $data)
+    {
+        // @todo: write a test for these
+        $firstEmptyRowCandidate = count($data);
+        foreach ($data as $idx => $row) {
+            $isEmpty = count(array_filter($row)) == 0;
+            if (!$isEmpty) {
+                $firstEmptyRowCandidate = $idx+1;
+            } else {
+
+            }
+        }
+//        dd(firstEmptyRowCandidate: $firstEmptyRowCandidate, data: $data);
+        return array_slice($data, 0, $firstEmptyRowCandidate);
+
+
+        // no empty rows at the end, no empty columns at the end.
+    }
+
 
     static public function fetchRow(string $filename, string $separator = ",", int $limit=null, int $offset=null): \Generator
     {

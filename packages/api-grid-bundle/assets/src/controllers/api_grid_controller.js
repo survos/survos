@@ -83,6 +83,7 @@ export default class extends Controller {
         apiCall: {type: String, default: ''},
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
+        globals: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
         index: {type: String, default: ''},
         dom: {type: String, default: 'Plfrtip'},
@@ -101,6 +102,8 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = (data, type, row, meta) => {
+                    Object.assign(row, JSON.parse(this.globalsValue));
+                    row.locale = this.localeValue;
                     return template.render({data: data, row: row, field_name: c.name})
                 }
             }
@@ -115,7 +118,8 @@ export default class extends Controller {
                 label: c.title,
                 route: c.route,
                 locale: c.locale,
-                render: render
+                render: render,
+                sortable: (typeof c.sortable)?c.sortable:false
             })
         });
         return x;
@@ -493,7 +497,7 @@ export default class extends Controller {
                         let searchPanes = {};
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                             searchPanes = hydraData['hydra:facets']['searchPanes'];
-                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+                           //searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                         } else {
                             searchPanes = {
                                 options: options
@@ -597,7 +601,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
           modal = false,
           render = null,
           locale = null,
-          renderType = 'string'
+          renderType = 'string',
+          sortable = false,
       } = {}) {
 
         if (render === null) {
@@ -652,7 +657,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             title: label,
             data: propertyName || '',
             render: render,
-            sortable: false, // this.sortableFields.includes(propertyName)
+            sortable: sortable
         }
         // ...function body...
     }

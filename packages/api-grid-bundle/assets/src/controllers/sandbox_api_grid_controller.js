@@ -44,7 +44,7 @@ import Twig from 'twig/twig.min';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
-        //delete routeParams._keys; // seems to be added by twigjs
+        delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);
@@ -83,6 +83,7 @@ export default class extends Controller {
         apiCall: {type: String, default: ''},
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
+        globals: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
         index: {type: String, default: ''},
         dom: {type: String, default: 'Plfrtip'},
@@ -101,7 +102,10 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = (data, type, row, meta) => {
-                    return template.render({data: data, row: row, field_name: c.name})
+                    let globals = JSON.parse(this.globalsValue);
+                    Object.assign(row, );
+                    row.locale = this.localeValue;
+                    return template.render({data: data, row: row, globals: globals, field_name: c.name})
                 }
             }
 
@@ -651,7 +655,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
             }
         }
-        
+
         return {
             title: label,
             data: propertyName || '',

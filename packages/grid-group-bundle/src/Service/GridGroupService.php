@@ -93,21 +93,6 @@ class GridGroupService
 
     }
 
-    private function processSheetHeaders(mixed $row, Catalog $catalog, Sheet $sheet): ?int
-    {
-        $headers = $row;
-//                    if ($catalog->getFieldCode()[0] ?? false) {
-//                        $codeColumn = array_search($catalog->getFieldCode()[0], $headers);
-//                    }
-//        dump($headers, $catalog->getFieldCode(), $catalog->getIdColumnRegex());
-//        dd($headers);
-        foreach ($headers as $idx => $header) {
-            if ($header) {
-            }
-        }
-        return null;
-    }
-
 
     public static function trim(array $data, ?string $headerRegex = null)
     {
@@ -119,26 +104,35 @@ class GridGroupService
                 if (preg_match($headerRegex, join(',', $row))) {
                     // we have found the pattern
                     $headerRowIndex = $idx;
-                    dd($headerRegex, $row, $headerRowIndex);
-                }
-
-                $isEmpty = count(array_filter($row)) == 0;
-                if (!$isEmpty) {
-                    $firstEmptyRowCandidate = $idx + 1;
-                } else {
-
                 }
             }
+
+            $isEmpty = count(array_filter($row)) == 0;
+            if (!$isEmpty) {
+                $firstEmptyRowCandidate = $idx + 1;
+            }
         }
+        $data = array_slice($data, $headerRowIndex, $firstEmptyRowCandidate);
+        return self::trimColumns($data);
 //        dd(firstEmptyRowCandidate: $firstEmptyRowCandidate, data: $data);
-            return array_slice($data, $headerRowIndex, $firstEmptyRowCandidate);
+        // no empty rows at the end, no empty columns at the end.
+    }
 
+    private static function trimColumns(array $data): array
+    {
+        $matrix = array_map(fn(...$col) => array_reverse($col), ...$data);
 
-            // no empty rows at the end, no empty columns at the end.
+        foreach ($matrix as $idx => $row) {
+            if (empty(end($row))) {
+                unset($matrix[$idx]);
+            }
         }
 
+        return array_reverse(array_map(null, ...$matrix));
+    }
 
-        static public function fetchRow(string $filename, string $separator = ",", int $limit = null, int $offset = null): \Generator
+
+    static public function fetchRow(string $filename, string $separator = ",", int $limit = null, int $offset = null): \Generator
     {
         static $headers = null;
         static $headersCount = null;
@@ -173,8 +167,6 @@ class GridGroupService
         }
 
     }
-
-
 
 
     /** @phpstan-ignore-next-line */

@@ -16,9 +16,9 @@ class GridGroupServiceTest extends KernelTestCase
      */
     public function testTrim(array $test)
     {
-        $result = GridGroupService::trim($test['raw']);
+        $result = GridGroupService::trim($test['raw'], $test['headerRegex'] ?? null);
 
-        $this->assertSame($result, $test['expected']);
+        $this->assertSame($test['expected'], $result);
     }
 
     public static function steps(): Generator

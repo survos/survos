@@ -1,4 +1,3 @@
-
 trim:
   - file: no-changes.csv
     steps:
@@ -28,3 +27,15 @@ trim:
       expected:
         cityId,label
         nj,"New Jersey"
+
+#  - file: headers-not-on-first-row.csv
+#    steps:
+#      headerRegex: cityId
+#      raw:
+#        City List
+#        (copyright) ABC Core
+#        cityId,label,,
+#        nj,"New Jersey",
+#      expected:
+#        cityId,label
+#        nj,"New Jersey"

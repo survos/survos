@@ -506,7 +506,19 @@ export default class extends Controller {
                                 options: options
                            };
                         }
-                        this.messageTarget.innerHTML = 'we are inside stimulus...';
+
+                        let targetMessage = "";
+                        if(typeof apiParams.facet_filter != 'undefined') {
+                            apiParams.facet_filter.forEach((index) => {
+                                let string = index.split(',');
+                                if(targetMessage != "") {
+                                    targetMessage += ", ";
+                                }
+                                targetMessage += string[0]+ " : "+ string[2];
+                            });
+                        }
+
+                        this.messageTarget.innerHTML = "Search Refinements: " + targetMessage;
 
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:

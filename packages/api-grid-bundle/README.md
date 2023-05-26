@@ -53,3 +53,12 @@ use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 #[ApiFilter(MultiFieldSearchFilter::class, properties: ['name', 'code'])]
 ```
 Here name and code are columns in which you need to search
+
+**4) Use below for doctrine searchpane filters
+```
+use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
+
+
+#[ApiFilter(FacetsFieldSearchFilter::class, properties: ['facet_filter'])]
+```
+Use above for searchpane filters

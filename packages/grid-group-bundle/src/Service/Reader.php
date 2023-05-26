@@ -63,6 +63,9 @@ class Reader //  extends \EasyCSV\Reader
             $headers = fgetcsv($this->buffer, separator: $this->delimiter);
             $this->rowOffset = $this->getCurrentBufferPosition();
             if (!$headers || count($headers) == 0) {
+                $this->headerCount = 0;
+                $this->headers = [];
+                return;
 
                 throw new \Exception($this->path . " Headers are emtpy " . $headers);
             }

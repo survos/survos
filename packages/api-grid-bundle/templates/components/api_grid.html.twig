@@ -16,7 +16,7 @@
 
 {% set locale = this.locale ?: (app.request.locale ?: 'xx') %}
 
-{% set apiCall = this.apiGetCollectionUrl %}
+{% set apiCall = this.apiGetCollectionUrl|default(false) %}
 {% if not apiCall %}
 {% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
 {% endif %}

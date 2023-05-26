@@ -45,3 +45,11 @@ For those columns you want to add searchPanes add browsable: true
 
 For those columns you want to add searchable: true
 
+**3) For search you need to inclide below **
+```
+use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+
+
+#[ApiFilter(MultiFieldSearchFilter::class, properties: ['name', 'code'])]
+```
+Here name and code are columns in which you need to search

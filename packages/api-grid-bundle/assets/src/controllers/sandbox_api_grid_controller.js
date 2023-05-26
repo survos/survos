@@ -506,6 +506,7 @@ export default class extends Controller {
                                 options: options
                            };
                         }
+                        this.messageTarget.innerHTML = 'we are inside stimulus...';
 
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:

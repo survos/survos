@@ -179,7 +179,7 @@ class CsvDatabase
         $this->flushFile();
 
         foreach ($tempCsv->readFromFile() as $row) {
-            $this->appendToFile($row[$this->getKeyName()], $row);
+            $this->appendToFile($this->getKeyName(), $row);
         }
 
         $tempCsv->purge();
@@ -257,8 +257,9 @@ class CsvDatabase
     public function readFromFile(): \Generator
     {
         if (file_exists($this->getPath())) {
-            $reader = new Reader($this->getPath());
-            foreach ($reader->getRow() as $data) {
+            $reader = \League\Csv\Reader::createFromPath($this->getPath())->setHeaderOffset(0);
+//            $reader = new Reader($this->getPath());
+            foreach ($reader->getIterator() as $data) {
                 yield $data;
             }
         }

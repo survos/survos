@@ -202,3 +202,26 @@ cache:
           va,Virginia,
           oh,Ohio,
           ma,Maine,
+
+  - db: new-header-in-between.csv
+    key: code
+    headers: [ code,label ]
+    steps:
+      - operation: set
+        data: {code: 'oh', label: 'Ohio'}
+        csv: |
+          code,label
+          oh,Ohio
+
+      - operation: set
+        data: { code: 'oh', population: 1, label: 'Ohio' }
+        csv: |
+          code,population,label
+          oh,1,Ohio
+
+      - operation: set
+        data: { code: 'ma', population: 1, label: 'Maine' }
+        csv: |
+          code,population,label
+          oh,1,Ohio
+          ma,1,Maine

@@ -130,6 +130,11 @@ class CsvDatabase
         return $this->keyName;
     }
 
+    static public function calculateKey($source): string
+    {
+        return hash('xxh3', $source);
+    }
+
     /**
      * @param string $keyName
      * @return CsvDatabase

@@ -80,7 +80,7 @@ class Reader //  extends \EasyCSV\Reader
      *
      * @return bool|array
      */
-    protected function getCsvRow(): bool|array
+    public function getCsvRow(): bool|array
     {
         $this->rowOffset = $this->getCurrentBufferPosition();
         return fgetcsv($this->buffer, separator: $this->delimiter);

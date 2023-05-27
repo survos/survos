@@ -71,14 +71,15 @@ class CsvDatabase
         private string $filename,
         private ?string $keyName = null,
         private array $headers = [],
-        private bool $useGZip = false
+        private bool $useGZip = false,
+        private ?Reader $reader = null,
     ) {
         $this->offsetCache = new CountableArrayCache();
         $this->aliases = new CountableArrayCache();
 
         if (file_exists($this->filename)) {
-            $reader = new Reader($this->getFilename());
-            $this->setHeaders($reader->getHeaders());
+            $this->reader = new Reader($this->getFilename());
+            $this->setHeaders($this->reader->getHeaders());
         }
 
         if (!is_null($this->keyName)) {
@@ -287,6 +288,14 @@ class CsvDatabase
         return $this->offsetCache->contains($key) ? $this->offsetCache->get($key) : null;
     }
 
+    private function getReader(): Reader
+    {
+        static $reader = null;
+        if (!$reader) {
+            return new Reader($this->getPath());
+        }
+
+    }
 
     public function loadOffsetCache()
     {
@@ -482,22 +491,18 @@ class CsvDatabase
      */
     public function get(string $key)
     {
-//        try {
-//            Validation::validateKey($key);
-//        } catch (\Exception $exception) {
-//            $key = md5($key);
-//        }
-
-
         // Fetch the offset
         if ($position = $this->keyOffset($key)) {
+            $this->reader->setCurrentBufferPosition($position);
+            $row = $this->reader->getCsvRow();
+            return array_combine($this->headers, $row);
             // @todo: move the buffer pointer using fseek and get the record there.
         }
+        assert(false, "maybe call has before get?  data does not exist");
 
         // Fetch the key from database
         $file = $this->readFromFile();
         $data = false;
-
 
         foreach ($file as $row) {
             if ($row[$this->getKeyName()] == $key) {
@@ -509,8 +514,12 @@ class CsvDatabase
         return $data;
     }
 
-    public function has(string $key): bool
+    public function has(string|array $key): bool
     {
+        // if we know the key name, we can simply pass the whole array
+        if (is_array($key)) {
+            $key = $key[$this->getKeyName()];
+        }
         $keyOffset = $this->keyOffset($key);
         return !is_null($keyOffset); // 0 is a valid offset, though realistically that will always be the headers.
     }
@@ -521,8 +530,20 @@ class CsvDatabase
      * @return CsvDatabase
      * @throws Exception
      */
-    public function set(?string $key = null, array $data = []): self
+    public function set(string|array|null $key = null, array $data = []): self
     {
+        if (is_array($key)) {
+            $data = $key;
+        } else {
+            if ($this->getKeyName()) {
+                assert($key = $this->getKeyName());
+            } else {
+                if (is_string($key)) {
+                    $this->setKeyName($key);
+                }
+            }
+            // throw deprecation?
+        }
         // Check if keyName was set and if not search for id field in data array
         if (!$this->getKeyName()) {
             foreach (array_keys($data) as $item) {
@@ -547,9 +568,14 @@ class CsvDatabase
 
         // Check if new headers provided and add them if so
         if ($diff = array_diff(array_keys($data), $this->getHeaders())) {
-            if (file_exists($this->getFilename()) && !empty($diff)) {
+//            if (file_exists($this->getFilename()) && !empty($diff)) {
+            if (!empty($diff)) {
                 foreach ($diff as $header) {
-                    $this->addHeader($header);
+                    if (file_exists($this->getFilename())) {
+                        $this->addHeader($header);
+                    } else {
+                        $this->headers[] = $header;
+                    }
                 }
             }
         }

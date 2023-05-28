@@ -144,7 +144,8 @@
             "Survos\\Scraper\\": "packages/scraper-bundle/src/",
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WikiBundle\\": "packages/wiki-bundle/src/",
-            "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/"
+            "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/",
+            "Survos\\MeiliAdminBundle\\": "packages/meili-admin-bundle/src/"
         }
     },
     "autoload-dev": {

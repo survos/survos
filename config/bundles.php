@@ -24,4 +24,5 @@ return [
     Survos\CommandBundle\SurvosCommandBundle::class => ['dev' => true, 'test' => true],
     Survos\Bundle\MakerBundle\SurvosMakerBundle::class => ['dev' => true, 'test' => true],
     Survos\Grid\SurvosGridBundle::class => ['all' => true],
+    Survos\CoreBundle\SurvosCoreBundle::class => ['all' => true],
 ];

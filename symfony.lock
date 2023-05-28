@@ -182,6 +182,9 @@
     "survos/command-bundle": {
         "version": "1.4.68"
     },
+    "survos/core-bundle": {
+        "version": "1.4.68"
+    },
     "survos/grid-bundle": {
         "version": "1.4.64"
     },

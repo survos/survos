@@ -176,6 +176,15 @@
             "config/packages/stof_doctrine_extensions.yaml"
         ]
     },
+    "survos/bootstrap-bundle": {
+        "version": "1.4.65"
+    },
+    "survos/command-bundle": {
+        "version": "1.4.68"
+    },
+    "survos/core-bundle": {
+        "version": "1.4.68"
+    },
     "survos/grid-bundle": {
         "version": "1.4.64"
     },
@@ -296,6 +305,19 @@
         },
         "files": [
             "config/packages/security.yaml"
+        ]
+    },
+    "symfony/translation": {
+        "version": "6.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "5.3",
+            "ref": "da64f5a2b6d96f5dc24914517c0350a5f91dee43"
+        },
+        "files": [
+            "config/packages/translation.yaml",
+            "translations/.gitignore"
         ]
     },
     "symfony/twig-bundle": {

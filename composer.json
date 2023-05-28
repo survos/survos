@@ -6,6 +6,10 @@
         {
             "name": "Tac Tacelosky",
             "email": "tacman@gmail.com"
+        },
+        {
+            "name": "Nacho Martín",
+            "email": "nacho@limenius.com"
         }
     ],
     "type": "project",
@@ -13,6 +17,7 @@
         "php": "^8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "answear/liform": "^0.20",
         "api-platform/core": "^3.1.11",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/doctrine-migrations-bundle": "^3.2",
@@ -24,6 +29,7 @@
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "gajus/dindent": "^2.0",
         "haydenpierce/class-finder": "^0.4.3",
+        "illuminate/collections": "^10.9",
         "knplabs/knp-menu-bundle": "^3.2",
         "knpuniversity/oauth2-client-bundle": "^2.10",
         "league/csv": "^9.9",
@@ -36,6 +42,7 @@
         "stof/doctrine-extensions-bundle": "^1.7",
         "survos/bootstrap-bundle": "^1.4",
         "survos/command-bundle": "^1.4",
+        "survos/composer-json-manipulator": "^11.2",
         "survos/grid-bundle": "^1.4",
         "symfony/cache": "^6.1",
         "symfony/config": "^6.1.0",
@@ -46,6 +53,7 @@
         "symfony/flex": "^2.0",
         "symfony/form": "^6.1.0",
         "symfony/framework-bundle": "^6.1.0",
+        "symfony/http-client": "^6.1.0",
         "symfony/http-kernel": "^6.1.0",
         "symfony/messenger": "^6.1.0",
         "symfony/options-resolver": "^6.1.0",
@@ -80,14 +88,15 @@
         "phpro/grumphp": "^1.16",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan": "^1.8",
+        "phpstan/phpstan-symfony": "^1.3",
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^0.15",
         "roave/security-advisories": "dev-latest",
+        "spaze/phpstan-disallowed-calls": "^2.14",
         "squizlabs/php_codesniffer": "^3.7",
         "survos/maker-bundle": "*@dev",
         "symfony/browser-kit": "^6.1.0",
         "symfony/debug-bundle": "^6.1.0",
-        "symfony/http-client": "^6.1.0",
         "symfony/maker-bundle": "^1.38",
         "symfony/phpunit-bridge": "^6.1.0",
         "symfony/polyfill-php80": "^1.16.0",
@@ -121,27 +130,41 @@
         ],
         "psr-4": {
             "App\\": "src/",
+            "Limenius\\LiformBundle\\": "packages/liform-bundle/",
             "Survos\\ApiGrid\\": "packages/api-grid-bundle/src/",
             "Survos\\AuthBundle\\": "packages/auth-bundle/src/",
             "Survos\\BarcodeBundle\\": "packages/barcode-bundle/src/",
             "Survos\\BootstrapBundle\\": "packages/bootstrap-bundle/src/",
+            "Survos\\BootstrapBundle\\Tests\\": "packages/bootstrap-bundle/tests/",
             "Survos\\Bundle\\MakerBundle\\": "packages/maker-bundle/src/",
             "Survos\\CommandBundle\\": "packages/command-bundle/src/",
+            "Survos\\CommandBundle\\Tests\\": "packages/command-bundle/tests/",
             "Survos\\CoreBundle\\": "packages/core-bundle/src/",
             "Survos\\CrawlerBundle\\": "packages/crawler-bundle/src/",
             "Survos\\DocBundle\\": "packages/doc-bundle/src/",
             "Survos\\FakerBundle\\": "packages/faker-bundle/src/",
+            "Survos\\FooBundle\\": [
+                "packages/import-bridge/src/",
+                "packages/ruler-bundle/src/",
+                "packages/stripe-product-bundle/src/"
+            ],
             "Survos\\GridGroupBundle\\": "packages/grid-group-bundle/src/",
+            "Survos\\GridGroupBundle\\Tests\\": [
+                "packages/doc-bundle/tests/",
+                "packages/grid-group-bundle/tests/"
+            ],
             "Survos\\GridGroup\\": "packages/grid-group/src/",
             "Survos\\Grid\\": "packages/grid-bundle/src/",
             "Survos\\HtmlPrettifyBundle\\": "packages/html-prettify-bundle/src/",
             "Survos\\ImportBridge\\": "packages/import-bridge/src/",
             "Survos\\InspectionBundle\\": "packages/inspection-bundle/src/",
             "Survos\\LocationBundle\\": "packages/location-bundle/src/",
+            "Survos\\MeiliAdminBundle\\": "packages/meili-admin-bundle/src/",
             "Survos\\Providence\\": "packages/providence-bundle/src/",
             "Survos\\RulerBundle\\": "packages/ruler-bundle/src/",
-            "Survos\\StripeProduct\\": "packages/stripe-product/src/",
             "Survos\\Scraper\\": "packages/scraper-bundle/src/",
+            "Survos\\Scraper\\Tests\\": "packages/scraper-bundle/tests/",
+            "Survos\\StripeProduct\\": "packages/stripe-product/src/",
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WikiBundle\\": "packages/wiki-bundle/src/",
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/"
@@ -160,24 +183,6 @@
         }
     },
     "replace": {
-        "survos/auth-bundle": "1.4.68",
-        "survos/barcode-bundle": "1.4.68",
-        "survos/bootstrap-bundle": "1.4.68",
-        "survos/command-bundle": "1.4.68",
-        "survos/core-bundle": "1.4.68",
-        "survos/crawler-bundle": "1.4.68",
-        "survos/doc-bundle": "1.4.68",
-        "survos/faker-bundle": "1.4.68",
-        "survos/html-prettify-bundle": "1.4.68",
-        "survos/import-bridge": "1.4.68",
-        "survos/inspection-bundle": "1.4.68",
-        "survos/location-bundle": "1.4.68",
-        "survos/providence-bundle": "1.4.68",
-        "survos/ruler-bundle": "1.4.68",
-        "survos/stripe-product": "1.4.68",
-        "survos/tree-bundle": "1.4.68",
-        "survos/wiki-bundle": "1.4.68",
-        "survos/workflow-helper-bundle": "1.4.68"
     },
     "scripts": {
         "auto-scripts": {
@@ -196,15 +201,11 @@
         "symfony/symfony": "*"
     },
     "repositories": {
-        "maker": {
-            "type": "path",
-            "url": "../survos/packages/maker-bundle"
-        },
         "velzon": {
             "type": "vcs",
             "url": "git@github.com:survos/velzon-bundle.git"
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }

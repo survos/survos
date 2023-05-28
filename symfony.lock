@@ -176,6 +176,12 @@
             "config/packages/stof_doctrine_extensions.yaml"
         ]
     },
+    "survos/bootstrap-bundle": {
+        "version": "1.4.65"
+    },
+    "survos/command-bundle": {
+        "version": "1.4.68"
+    },
     "survos/grid-bundle": {
         "version": "1.4.64"
     },

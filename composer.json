@@ -163,8 +163,6 @@
     "replace": {
         "survos/auth-bundle": "1.4.65",
         "survos/barcode-bundle": "1.4.65",
-        "survos/bootstrap-bundle": "1.4.65",
-        "survos/command-bundle": "1.4.65",
         "survos/core-bundle": "1.4.65",
         "survos/crawler-bundle": "1.4.65",
         "survos/doc-bundle": "1.4.65",

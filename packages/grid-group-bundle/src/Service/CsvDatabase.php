@@ -595,11 +595,12 @@ class CsvDatabase implements LoggerAwareInterface
         }
 
         // Check if new headers provided and add them if so
-        if ($diff = array_diff(array_keys($data), $this->getHeaders())) {
+        if (file_exists($this->getFilename()) && $diff = array_diff(array_keys($data), $this->getHeaders())) {
 //            if (file_exists($this->getFilename()) && !empty($diff)) {
             if (!empty($diff)) {
                 $existingReader = \League\Csv\Reader::createFromPath($this->getFilename());
                 $writer = \League\Csv\Writer::createFromPath($newFilename = $this->getFilename() . '-new', 'w+');
+                assert($this->logger, "call setLogger()");
                 $this->logger->warning("adding headers " . join(',', $diff) . ' to ' .  $this->getFilename());
                 foreach ($existingReader->getIterator() as $idx => $row)
                 {

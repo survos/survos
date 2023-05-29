@@ -309,12 +309,12 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
             $type = $io->askQuestion($question);
 
             if ('?' === $type) {
-                $io->writeln('Allowed types: ' . implode(',', self::TYPES));
+                $io->note('Allowed types: ' . implode(',', self::TYPES));
                 $io->writeln('');
 
                 $type = null;
             } elseif (!\in_array($type, self::TYPES)) {
-                $io->writeln('Allowed types: ' . implode(',', self::TYPES));
+                $io->note('Allowed types: ' . implode(',', self::TYPES));
                 $io->error(sprintf('Invalid type "%s".', $type));
                 $io->writeln('');
 

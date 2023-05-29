@@ -1,0 +1,6 @@
+#sudo su
+
+# See https://localheinz.com/blog/2020/05/16/quickly-switching-between-pcov-and-xdebug/
+# https://medium.com/@nicocabot/speed-up-phpunit-code-coverage-analysis-4e35345b3dad
+sudo phpenmod xdebug
+# symfony server:stop && symfony server:start -d && symfony run -d yarn run encore dev --watch

@@ -21,6 +21,6 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-
+        "datatables.net-datetime": "^1.4.1"
     }
 }

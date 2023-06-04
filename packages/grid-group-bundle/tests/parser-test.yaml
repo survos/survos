@@ -1,4 +1,10 @@
 tests:
+#  - source: |
+#      name,age:int,hobbies:array(|)
+#      bob,22,chess|frisbee
+#    expects: |
+#      {"name":"bob","age":22, "hobbies": ["chess","frisbee"]}
+
   - source: |
       name,age
       bob,22

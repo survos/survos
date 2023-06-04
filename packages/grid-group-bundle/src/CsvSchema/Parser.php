@@ -120,11 +120,19 @@ class Parser
 
         // create the map from the headers
         foreach ($headers as $column) {
+            // if the last character is a symbol, process it
             if (str_contains($column, ':')) {
                 [$newColumn, $rule] = explode(':', $column);
                 $map["/^$newColumn$/"] = $rule;
             } else {
                 $newColumn = u($column)->snake()->toString(); // default
+            }
+
+            $lastChar = substr($newColumn, -1);
+            if (in_array($lastChar, ['|', '$', ',', '/'])) {
+                $newColumn = rtrim($column, $lastChar);
+                $map["/^$newColumn$/"] = "array($lastChar)";
+
             }
             $columns[] = $newColumn;
         }
@@ -165,6 +173,12 @@ class Parser
 //                        dd($outputHeader);
                     }
                     $propertyType = TextType::class;
+                    if (preg_match('/(.*?)(\(.*?\))/', $type, $m)) {
+                        $type = $m[1];
+                        $params = $m[2];
+                    } else {
+                        $params = null;
+                    }
                     $propertyType = match($type) {
                         'db' => match($internalCode) {
                             'code' => TextType::class,
@@ -173,9 +187,8 @@ class Parser
                             default => assert(false, $internalCode . '/' . $type)
 
                         },
-                        'array,',
-                        'array|',
                         'rel'  =>  CollectionType::class,
+                        'array|',
                         'array' => TextType::class, // join values with delimiter in formatter for output
                         'string' => TextType::class,
                         'cat' => TextType::class, // really a relationship to the cat table -- choice?
@@ -202,7 +215,7 @@ class Parser
                     $settings['propertyType'] = $type;
                     $settings['internalCode'] = $internalCode;
                     // ack! Terrible names.
-                    $settings['formType'] = $propertyType;
+//                    $settings['formType'] = $propertyType;
 //                    $settings['type'] = $type;
 //                    $settings['propertyType'] = $type; // for liForm
 //                    $settings['internalCode'] = $internalCode;
@@ -211,6 +224,7 @@ class Parser
                         $options['attr'] = $settings;
 //                        $columnType = json_encode($settings);
 //                        $outputHeader .= ':' . $columnType;
+//                        dd($settings, $column, $type);
                         $outputHeader .= '?' . http_build_query($settings);
 //                        dd($outputHeader);
                     }
@@ -236,8 +250,7 @@ class Parser
                     $columnType = $outputHeader;
 //                    dd($type, $rule, $settings, $values, $columnType, $outputHeader);
                     assert($type);
-
-//                    dd($columnType, $rule);
+//                    dump($columnType, $rule);
 //                    break;
                 } else {
                 }
@@ -412,6 +425,7 @@ class Parser
         if (method_exists($this, $methodName)) {
             $method = [$this, $this->getMethodName($type)];
         } elseif ($this->hasCustomType($type)) {
+            dd($type);
             $method = static::$customTypes[$type];
         } else {
             throw new UnsupportedTypeException($type);

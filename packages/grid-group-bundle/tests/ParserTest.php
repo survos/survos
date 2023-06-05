@@ -31,6 +31,15 @@ class ParserTest extends TestCase
                 assert($expects, "invalid json: " . $test['expects']);
             }
 
+            if ($expectedSchema = $test['schema']??false) {
+                $actual = $config['schema'];
+                $expects = json_decode($expectedSchema, true);
+                assert($expects, "invalid json string: " . $expectsJson);
+                $this->assertSame($expects, $actual, json_encode($expects) . '<>' . json_encode($actual));
+                assert($expects, "invalid json: " . $test['expects']);
+
+            }
+
     }
 
     public function testDottedConfig()

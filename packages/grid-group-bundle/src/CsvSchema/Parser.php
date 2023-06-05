@@ -169,10 +169,11 @@ class Parser
                     if (count($settings)) {
 //                        $columnType = json_encode($settings);
 //                        $outputHeader .= ':' . $columnType;
-                        $outputHeader .= '?' . http_build_query($settings);
+//                        $outputHeader .= '?' . http_build_query($settings);
 //                        dd($outputHeader);
                     }
                     $propertyType = TextType::class;
+                    // consider https://symfony.com/doc/current/components/expression_language.html#extending-the-expressionlanguage
                     if (preg_match('/(.*?)(\(.*?\))/', $type, $m)) {
                         $type = $m[1];
                         $params = $m[2];
@@ -215,17 +216,17 @@ class Parser
                     $settings['propertyType'] = $type;
                     $settings['internalCode'] = $internalCode;
                     // ack! Terrible names.
-//                    $settings['formType'] = $propertyType;
-//                    $settings['type'] = $type;
-//                    $settings['propertyType'] = $type; // for liForm
-//                    $settings['internalCode'] = $internalCode;
+                    $settings['formType'] = $propertyType;
+                    $settings['type'] = $type;
+                    $settings['propertyType'] = $type; // for liForm
+                    $settings['internalCode'] = $internalCode;
 
                     if (count($settings)) {
                         $options['attr'] = $settings;
 //                        $columnType = json_encode($settings);
 //                        $outputHeader .= ':' . $columnType;
 //                        dd($settings, $column, $type);
-                        $outputHeader .= '?' . http_build_query($settings);
+//                        $outputHeader .= '?' . http_build_query($settings);
 //                        dd($outputHeader);
                     }
 
@@ -235,7 +236,8 @@ class Parser
                     }
                     if (count($settings)) {
                         $options['attr'] = $settings;
-                        $outputHeader .= '?' . http_build_query($settings);
+//                        dd($settings, $outputHeader);
+//                        $outputHeader .= '?' . http_build_query($settings);
                     }
 
                     if ($propertyType == CollectionType::class) {
@@ -261,6 +263,7 @@ class Parser
                 $columnType = 'att.string';
                 $settings = [];
                 $outputSchema[$column] = array_merge([
+                    'dottedConfig' => $dottedConfig,
                     'column' => $column,
                     'type' => $columnType,
                 ], $settings);
@@ -294,7 +297,7 @@ class Parser
 //            dd('columns mismatch', $schema, $columns);
         }
         if (count($schema) !== count($columns)) {
-            dd($schema, $columns, array_diff(array_keys($schema), array_keys($columns)));
+//            dd($schema, $columns, array_diff(array_keys($schema), array_keys($columns)));
         }
         assert(count($schema) == count($columns), sprintf("mismatch %d %d", count($schema), count($columns)));
 
@@ -337,9 +340,9 @@ class Parser
             if ($idx == 0 && ($this->getConfigValue('skipTitle', $this->skipTitle))) {
                 continue;
             }
-
-//            dd($this->config['schema']);
+//            dump($this->config['schema'], json_encode($this->config['schema']));
             $parsedRow = $this->parseRow($row);
+//            dd($parsedRow);
             yield $parsedRow;
         }
 
@@ -425,12 +428,18 @@ class Parser
         if (method_exists($this, $methodName)) {
             $method = [$this, $this->getMethodName($type)];
         } elseif ($this->hasCustomType($type)) {
-            dd($type);
             $method = static::$customTypes[$type];
         } else {
             throw new UnsupportedTypeException($type);
         }
-        return call_user_func_array($method, [$value, $parameters, $settings]);
+        try {
+//            dump($method, $value, $parameters, $settings);
+            return call_user_func_array($method, [$value, $parameters, $settings]);
+        } catch (\Exception $exception) {
+            assert(false, $exception->getMessage());
+//            dd($method, $value, $parameters, $settings);
+            return null;
+        }
     }
 
     /**
@@ -513,9 +522,14 @@ class Parser
      *
      * @return array
      */
-    protected function parseArray($string, $delimiter=",")
+    protected function parseArray($string, string $delimiter=","): array
     {
         return explode($delimiter, trim($string));
+    }
+
+    protected function parseDb($string, string $delimiter=","): string
+    {
+        return $string;
     }
 
     /**

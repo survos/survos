@@ -18,6 +18,7 @@ use League\Csv\Reader as LeagueCsvReader;
 class CsvDatabase implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
+
     /**
      * File read flag.
      *
@@ -72,31 +73,46 @@ class CsvDatabase implements LoggerAwareInterface
     private int $currentSize = 0;
 
     public function __construct(
-        private string $filename,
+        private string  $filename,
         private ?string $keyName = null,
-        private array $headers = [],
-        private bool $useGZip = false,
+        private array   $headers = [],
+        private bool $purge = false,
+        private bool    $useGZip = false,
         private ?Reader $reader = null,
-    ) {
+    )
+    {
         $this->offsetCache = new CountableArrayCache();
         $this->aliases = new CountableArrayCache();
-
-        $this->refresh();
+        if ($this->purge) {
+            $this->reset();
+        } else {
+            $this->refresh();
+        }
 
     }
 
-    public function reset()
+    // for debugging
+    public function getOffsetCache(): CountableArrayCache
+    {
+        return $this->offsetCache;
+    }
+
+    public function reset(): self
     {
         $filename = $this->getPath();
         if (file_exists($filename)) {
             unlink($filename);
         }
+        $this->refresh();
+        return $this;
     }
 
     public function refresh()
     {
         $this->offsetCache->flush();
         $this->aliases->flush();
+        $this->headers = [];
+
         if (file_exists($this->filename)) {
             $this->reader = new Reader($this->getFilename());
             $this->setHeaders($this->reader->getHeaders());
@@ -231,9 +247,6 @@ class CsvDatabase implements LoggerAwareInterface
         $file->fseek(0, SEEK_END);
         $pos = $file->ftell();
         $emptyFile = $pos == 0;
-        if ($emptyFile) {
-
-        }
         $keyName = $this->getKeyName();
 
         if (empty($data[$keyName])) {
@@ -255,8 +268,8 @@ class CsvDatabase implements LoggerAwareInterface
         if (array_keys($data) <> $headers) {
             // fix the order if the data keys don't match the headers
             $dataValues = [];
-            foreach ($headers as $key) {
-                $dataValues[] = $data[$key] ?? null;
+            foreach ($headers as $header) {
+                $dataValues[] = $data[$header] ?? null;
             }
         } else {
             $dataValues = array_values($data);
@@ -271,6 +284,11 @@ class CsvDatabase implements LoggerAwareInterface
         $file->fputcsv($dataValues);
         $this->currentSize = $file->ftell();
         $this->closeFile($file);
+
+        if ($emptyFile) {
+            $this->refresh();
+        }
+
     }
 
     public function getSize(): int
@@ -288,7 +306,7 @@ class CsvDatabase implements LoggerAwareInterface
         if (file_exists($this->getPath())) {
             $reader = \League\Csv\Reader::createFromPath($this->getPath())->setHeaderOffset(0);
 //            $reader = new Reader($this->getPath());
-            foreach ($reader->getIterator() as $data) {
+            foreach ($reader->getRecords() as $data) {
                 yield $data;
             }
         }
@@ -309,6 +327,55 @@ class CsvDatabase implements LoggerAwareInterface
             $this->loadOffsetCache();
         }
         return $this->offsetCache->contains($key) ? $this->offsetCache->get($key) : null;
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     * @throws \League\Csv\CannotInsertRecord
+     * @throws \League\Csv\Exception
+     * @throws \League\Csv\UnavailableStream
+     */
+    public function checkIfNewHeadersProvidedAndAddThemIfSo(array $data): void
+    {
+        if (file_exists($this->getFilename()) && $diff = array_diff(array_keys($data), $this->getHeaders())) {
+//            if (file_exists($this->getFilename()) && !empty($diff)) {
+            if (!empty($diff)) {
+                $existingReader = \League\Csv\Reader::createFromPath($this->getFilename());
+                $writer = \League\Csv\Writer::createFromPath($newFilename = $this->getFilename() . '-new', 'w+');
+//                assert($this->logger, "call setLogger()");
+                if ($this->logger) {
+                    $this->logger->warning("adding headers " . join(',', $diff) . ' to ' . $this->getFilename());
+                }
+                $newRows = [];
+                foreach ($existingReader->getIterator() as $idx => $row) {
+
+                    if ($idx == 0) {
+                        $newHeaders = array_merge($row, $diff);
+                        $writer->insertOne($newHeaders);
+                    } else {
+                        $row = array_pad($row, count($newHeaders), json_encode($diff));
+                        assert(count($row) == count($newHeaders));
+                        $newRows[] = $row;
+                    }
+                }
+                $writer->insertAll($newRows); // also does flush
+
+                // remove the original and rename the new one.
+                unlink($this->getFilename());
+                rename($newFilename, $this->getFilename());
+                $this->refresh();
+
+//                dd($diff, 'need to rewrite ' . $this->getFilename());
+//                foreach ($diff as $header) {
+//                    if (file_exists($this->getFilename())) {
+//                        $this->addHeader($header);
+//                    } else {
+//                        $this->headers[] = $header;
+//                    }
+//                }
+            }
+        }
     }
 
     private function getReader(): Reader
@@ -514,22 +581,23 @@ class CsvDatabase implements LoggerAwareInterface
      *
      * @return mixed
      */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         // Fetch the offset
         if ($position = $this->keyOffset($key)) {
-            assert($this->reader, $this->getFilename());
+//            assert($this->reader, $this->getFilename());
             $this->reader->setCurrentBufferPosition($position);
             $row = $this->reader->getCsvRow();
             $headers = $this->getHeaders();
             assert(count($headers) == count($row),
                 json_encode($row) .
-                sprintf(" %s mismatch at %d %d headers %d columns", $this->getFilename(),
+                sprintf("\nmismatch at %d %d headers %d columns\n%s",
                     $position,
-                    count($headers), count($row)));
+                    count($headers), count($row), $this->getFilename()));
             return array_combine($this->headers, $row);
             // @todo: move the buffer pointer using fseek and get the record there.
         }
+        return null;
         assert(false, "maybe call has before get?  data does not exist");
 
         // Fetch the key from database
@@ -562,31 +630,39 @@ class CsvDatabase implements LoggerAwareInterface
      * @return CsvDatabase
      * @throws Exception
      */
-    public function set(string|array|null $key = null, array $data = []): self
+    public function set(array|object|null $data = null, string $key = null): self
     {
-        if (is_array($key)) {
-            $data = $key;
-        } else {
-            if ($this->getKeyName()) {
-                assert($key = $this->getKeyName());
-            } else {
-                if (is_string($key)) {
-                    $this->setKeyName($key);
-                }
-            }
-            // throw deprecation?
+        if (!$key) {
+//            $key = $this->getKeyName();
         }
-        // Check if keyName was set and if not search for id field in data array
-        if (!$this->getKeyName()) {
-            foreach (array_keys($data) as $item) {
-                if (preg_match('/id$/i', $item)) {
-//                    if ($this->aliases->contains($item)) {
-//                        $this->setKeyName($this->aliases->get($item));
-//                        break;
-//                    }
+//        assert($key = $this->getKeyName());
 
-                    $this->setKeyName($item);
-                    break;
+//        if (is_array($key)) {
+//            assert(!array_is_list($key), "Must pass a hash as key, not a list");
+//            $data = $key;
+//            assert($this->getKeyName(), "missing keyname in " . $this->getFilename());
+//            $key = $data[$this->getKeyName()];
+//        } else {
+//            if ($this->getKeyName()) {
+//                assert($key = $this->getKeyName());
+//            } else {
+//                if (is_string($key)) {
+//                    $this->setKeyName($key);
+//                }
+//            }
+//            // throw deprecation?
+//        }
+//        assert($key <> 'inscription', "Bad key " . $key);
+        // Check if keyName was set and if not search for id field in data array
+
+        if (!$key) {
+            // we need a keyname.
+            if (!$keyName = $this->getKeyName()) {
+                foreach (array_keys($data) as $item) {
+                    if (preg_match('/id$/i', $item)) {
+                        $this->setKeyName($item);
+                        break;
+                    }
                 }
             }
         }
@@ -595,55 +671,25 @@ class CsvDatabase implements LoggerAwareInterface
             throw new Exception("You need to set 'keyName' parameter or provide id field in data array!");
         }
 
+
         assert(array_key_exists($this->getKeyName(), $data), sprintf("Missing key %s in %s", $this->getKeyName(), $this->getFilename()));
-        $key = $data[$this->getKeyName()];
+        $keyValue = $data[$this->getKeyName()];
 
         if (!$this->hasHeaders()) {
             $this->setHeaders(array_keys($data));
         }
 
         // Check if new headers provided and add them if so
-        if (file_exists($this->getFilename()) && $diff = array_diff(array_keys($data), $this->getHeaders())) {
-//            if (file_exists($this->getFilename()) && !empty($diff)) {
-            if (!empty($diff)) {
-                $existingReader = \League\Csv\Reader::createFromPath($this->getFilename());
-                $writer = \League\Csv\Writer::createFromPath($newFilename = $this->getFilename() . '-new', 'w+');
-                assert($this->logger, "call setLogger()");
-                $this->logger->warning("adding headers " . join(',', $diff) . ' to ' .  $this->getFilename());
-                foreach ($existingReader->getIterator() as $idx => $row)
-                {
-                    if ($idx == 0) {
-                        $row = array_merge($row, $diff);
-                        $writer->insertOne($row);
-                    } else {
-                        $row = array_pad($row, count($diff), null );
-                        $writer->insertOne($row);
-                    }
-                }
-                // remove the original and rename the new one.
-                unlink($this->getFilename());
-                rename($newFilename, $this->getFilename());
-                $this->refresh();
-
-//                dd($diff, 'need to rewrite ' . $this->getFilename());
-//                foreach ($diff as $header) {
-//                    if (file_exists($this->getFilename())) {
-//                        $this->addHeader($header);
-//                    } else {
-//                        $this->headers[] = $header;
-//                    }
-//                }
-            }
-        }
+        $this->checkIfNewHeadersProvidedAndAddThemIfSo($data);
 
         // If the key already exists we need to replace it
-        if ($this->has($key)) {
-            $this->replace($key, $data);
+        if ($this->has($keyValue)) {
+            $this->replace($keyValue, $data);
             return $this;
         }
 
         // Write the key to the database
-        $this->appendToFile($key, $data);
+        $this->appendToFile($keyValue, $data);
         return $this;
     }
 
@@ -708,4 +754,5 @@ class CsvDatabase implements LoggerAwareInterface
 
         return new self($tempFileName, $this->keyName, $this->headers, $this->useGZip);
     }
+
 }

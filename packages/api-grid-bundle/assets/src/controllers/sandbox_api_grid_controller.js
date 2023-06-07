@@ -49,7 +49,7 @@ import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
-        delete routeParams._keys; // seems to be added by twigjs
+        // delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);

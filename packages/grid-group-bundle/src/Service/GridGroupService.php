@@ -2,14 +2,9 @@
 
 namespace Survos\GridGroupBundle\Service;
 
-use App\Entity\Catalog;
-use App\Entity\Sheet;
 use Doctrine\Persistence\ManagerRegistry;
 use Goutte\Client;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Psr\Log\LoggerInterface;
-use Survos\CrawlerBundle\Model\Link;
 use Survos\GridGroupBundle\Model\Grid;
 use Survos\GridGroupBundle\Model\GridGroup;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -20,6 +15,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function Symfony\Component\String\u;
+use League\Csv\Reader;
 
 class GridGroupService
 {
@@ -66,8 +62,10 @@ class GridGroupService
         $gridGroup = (new GridGroup($groupCode, dir: $groupDir));
         foreach ($finder->in($groupDir) as $file) {
             assert(!$file->isDir(), "only files (csv, to create a grid or sheet), not " . $file->getRealPath());
+//            assert(false, "csvRader or our reader or csvDatabase? " . $groupDir);
 
-            $headers = (new Reader($file->getRealPath()))->getHeaders();
+//            $headers = (new Reader($file->getRealPath()))->getHeaders();
+            $headers = Reader::createFromPath($file->getRealPath())->setHeaderOffset(0)->getHeader();
             assert(is_array($headers), $file->getRealPath());
             $name = $file->getFilenameWithoutExtension();
             if ($excludePattern && preg_match($excludePattern, $file->getRealPath())) {
@@ -77,6 +75,57 @@ class GridGroupService
             $gridGroup->addGrid($grid);
         }
         return $gridGroup;
+    }
+
+    static public function validate(string $filename): ?array
+    {
+
+        if (!file_exists($filename)) {
+            return null;
+        }
+$row = 1;
+if (($handle = fopen($filename, "r")) !== FALSE) {
+    while (($data = fgetcsv($handle)) !== FALSE) {
+        if ($row == 1) {
+            $headers = $data;
+            $headerCount = count($headers);
+        } else {
+            if ($headerCount <> count($data)) {
+                dd(headers: $headers, row: $data, line: $row . ' of file ' . $filename);
+            }
+            assert($headerCount == count($data), ' mismatch, line ' . $row);
+        }
+        $row++;
+    }
+    fclose($handle);
+}
+        $reader = \League\Csv\Reader::createFromPath($filename)
+//            ->skipEmptyRecords()
+//            ->setHeaderOffset(0)
+        ;
+//        $headers = $reader->getHeader();
+        foreach ($reader->getIterator() as $idx => $record) {
+            if ($idx == 0) {
+                $headers = $record;
+                $headerCount = count($headers);
+            } else {
+//                $diff = array_diff($headers, $record);
+//                if (count($diff)) {
+//                    dd(diff: $diff, idx: $idx);
+//                }
+                if ($headerCount <> count($record)) {
+//                    dd(headers: $headers, row: $record, idx: $idx, msg: 'using csvReader getIterator');
+                    return [$headers, $record, $idx];
+                }
+
+                assert($headerCount == count($record), ' mismatch, line ' . $idx);
+            }
+//            dd($record, $headers);
+
+//            dump($idx, $record);
+        }
+
+        return null;
     }
 
 
@@ -213,6 +262,19 @@ class GridGroupService
         return $writer;
     }
 
+    public static function csvToArray(string $csv, bool $isFile=false): array
+    {
+        $reader = $isFile ? Reader::createFromPath($csv): Reader::createFromString($csv);
+        $reader->setHeaderOffset(0);
+        // @todo: replace with reduce?
+//        $rows = array_reduce($reader->getIterator(), fn($rows, $row) => $rows[] = $row, [] );
+        $rows = [];
+        foreach ($reader->getIterator() as $row) {
+            $rows = $row;
+        }
+        return $rows;
+
+    }
     /** @phpstan-ignore-next-line */
     private function cleanup(Worksheet $sheet, array $fieldNames = [])
     {
@@ -225,7 +287,6 @@ class GridGroupService
         foreach ($sheet->getColumnIterator() as $column) {
             $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
         }
-
 
 //Retrieve Highest Column (e.g AE)
         $highestColumn = $sheet->getHighestColumn();

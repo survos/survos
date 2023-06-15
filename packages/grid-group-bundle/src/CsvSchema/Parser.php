@@ -138,35 +138,50 @@ class Parser
             $columns[] = $newColumn;
         }
 
+        // the default;
         foreach ($columns as $column) {
-            $columnType = 'string';
-            $dottedConfig = 'att.string'; //?
+            $property = self::parseConfigHeader('att.string', $column);
             foreach ($map as $regEx => $rule) {
-                if (preg_match($regEx, $column))
-                {
+                if (preg_match($regEx, $column)) {
                     if (is_null($rule)) {
                         // ignore?
                     }
-                    // this may be outdated
-                    if (str_contains($rule, $fieldNameDelimiter)) { // } && !str_starts_with($rule, 'array:')) {
-                        [$column, $rule] = explode($fieldNameDelimiter, $rule, 2);
-                    }
+                    $property = self::parseConfigHeader($rule, $column);
+                    break;
+                    $outputHeader = (string)$property;
+                    // @todo: multiple rules based on pattern, like scurity?
+                    $outputSchema[$property->getCode()] = $property->__toString();
+                }
+            }
+            $csvSchema[$property->getCode()] = $property->__toString();
+        }
+//        assert(count($csvSchema) == count($columns));
+        return [
+            'schema' => $csvSchema,
+            'outputSchema' => $outputSchema
+        ];
 
-                    $columnType = $rule; // for now
+        return $outputSchema;
+        if (0)
+        {
+            {
+                if (0)
+                {
 
-                    if (!str_contains($rule, '?')) {
-                        $rule .= '?';
-                    }
-                    [$dottedConfig, $settingsString] = explode('?', $rule);
-                    $settings = Parser::parseQueryString($settingsString);
-                    $values = explode('.', $dottedConfig);
-                    $type = array_shift($values);
-                    $internalCode = array_shift($values);
-                    if ($type == '') {
-                        $type = 'string';
-                    }
-                    $outputHeader = $settings['header']??$column;
-                    $outputHeader .= $fieldNameDelimiter . $dottedConfig;
+//                    $columnType = $rule; // for now
+//                    if (!str_contains($rule, '?')) {
+//                        $rule .= '?';
+//                    }
+//                    [$dottedConfig, $settingsString] = explode('?', $rule);
+//                    $settings = Parser::parseQueryString($settingsString);
+//                    $values = explode('.', $dottedConfig);
+//                    $type = array_shift($values);
+//                    $internalCode = array_shift($values);
+//                    if ($type == '') {
+//                        $type = 'string';
+//                    }
+//                    $outputHeader = $settings['header']??$column;
+//                    $outputHeader .= $fieldNameDelimiter . $dottedConfig;
                     if ($columnType) {
 //                        $outputHeader .= ':' . $columnType;
                     }
@@ -177,14 +192,14 @@ class Parser
 //                        $outputHeader .= '?' . http_build_query($settings);
 //                        dd($outputHeader);
                     }
-                    $propertyType = TextType::class;
-                    // consider https://symfony.com/doc/current/components/expression_language.html#extending-the-expressionlanguage
-                    if (preg_match('/(.*?)(\(.*?\))/', $type, $m)) {
-                        $type = $m[1];
-                        $params = $m[2];
-                    } else {
-                        $params = null;
-                    }
+//                    $propertyType = TextType::class;
+//                    // consider https://symfony.com/doc/current/components/expression_language.html#extending-the-expressionlanguage
+//                    if (preg_match('/(.*?)(\(.*?\))/', $type, $m)) {
+//                        $type = $m[1];
+//                        $params = $m[2];
+//                    } else {
+//                        $params = null;
+//                    }
                     $propertyType = match($type) {
                         'db' => match($internalCode) {
                             'code' => TextType::class,
@@ -263,17 +278,18 @@ class Parser
                 }
             }
 
-            $csvSchema[$column] = $columnType;
-            if (!array_key_exists($column, $outputSchema)) {
-                $columnType = 'att.string';
-                $settings = [];
-                $outputSchema[$column] = array_merge([
-                    'dottedConfig' => $dottedConfig,
-                    'column' => $column,
-                    'type' => $columnType,
-                ], $settings);
+//            dd($property, $dottedConfig, $columnType, $settings);
 
-            }
+            $csvSchema[$column] = $columnType;
+//            if (!array_key_exists($column, $outputSchema)) {
+//                $columnType = 'att.string';
+//                $settings = [];
+//                $outputSchema[$column] = array_merge([
+//                    'dottedConfig' => $dottedConfig,
+//                    'column' => $column,
+//                    'type' => $columnType,
+//                ], $settings);
+//            }
 
         }
         return [
@@ -299,8 +315,8 @@ class Parser
         if (!$schema = $this->config['schema']??false) {
             // ugh!
             $schema = self::createConfigFromMap($this->config['map'], $columns)['schema'];
-//            dd($schema);
         }
+//        dd($schema, $columns);
 
         if (count($schema) <> count($columns)) {
 //            dd('columns mismatch', $schema, $columns);
@@ -308,11 +324,11 @@ class Parser
         if (count($schema) !== count($columns)) {
 //            dd($schema, $columns, array_diff(array_keys($schema), array_keys($columns)));
         }
-//        if (count($schema) != count($columns)) {
-//            dd(schema: $schema, columns: $columns,
-//                xdiff: array_diff(array_keys($columns), array_keys($schema)),
-//                diff: array_diff(array_keys($schema), array_keys($columns)));
-//        }
+        if (count($schema) != count($columns)) {
+            dd(schema: $schema, columns: $columns,
+                xdiff: array_diff(array_keys($columns), array_keys($schema)),
+                diff: array_diff(array_keys($schema), array_keys($columns)));
+        }
         assert(count($schema) == count($columns), sprintf("mismatch %d %d",
             count($schema), count($columns)));
 
@@ -389,12 +405,18 @@ class Parser
         return [$header, $dottedConfig];
 
     }
-    static public function parseConfigHeader(string $config): Property
+    static public function parseConfigHeader(?string $config, string $originalCode=null): ?Property
     {
+        if (empty($config)) {
+            return null;
+        }
         if (!str_contains($config, '?')) {
             $config .= '?';
         }
         [$dottedConfig, $settingsString] = explode('?', $config);
+        if (!str_contains($dottedConfig, ':')) {
+            $dottedConfig = $originalCode . ':' . $dottedConfig;
+        }
         [$header, $dottedConfig] = self::parseDottedConfig($dottedConfig);
 
         $settings = self::parseQueryString($settingsString);
@@ -425,10 +447,12 @@ class Parser
                 $type = $m[1];
             }
         }
+        if ($type == Property::TYPE_DATABASE) {
+//            $header = $parameters; // db types must be our internal codes
+        }
 
         $property = new Property($header, $type, $parameters, $settings);
         return $property;
-        return [$header, $dottedConfig, $settings];
 
     }
 
@@ -448,12 +472,11 @@ class Parser
 //            dd($settings);
 //        }
             $property = self::parseConfigHeader($config);
-            dd($property);
 //        [$header, $dottedConfig, $settings] =
 //        $values = explode('.', $dottedConfig);
 //        $type = array_shift($values);
-        if ($type == '') {
-            $type = 'string';
+        if (!$type = $property->getType()) {
+            $type = Property::PROPERTY_STRING;
         }
 //        dd($header, $config, $value, $key, $settings, $values, $type);
         assert($type);
@@ -471,7 +494,7 @@ class Parser
         }
         try {
 //            dump($method, $value, $parameters, $settings);
-            return call_user_func_array($method, [$value, $parameters, $settings]);
+            return call_user_func_array($method, [$value, $property->getSubType(), $property->getSettings()]);
         } catch (\Exception $exception) {
             assert(false, $exception->getMessage());
 //            dd($method, $value, $parameters, $settings);

@@ -61,6 +61,7 @@ class ParserTest extends TestCase
      */
     public function testDottedConfig(string $dottedConfig, Property $property)
     {
+
         $this->assertEquals(
             $property,
             $actual = Parser::parseConfigHeader($dottedConfig),
@@ -89,7 +90,12 @@ class ParserTest extends TestCase
             ['genre|', new Property(code: 'genre', type: Property::PROPERTY_ARRAY, settings: ['delim' => '|'])],
             ['actors,',new Property(code: 'actors', type: Property::PROPERTY_ARRAY, settings: ['delim' => ','])],
             ['label:db.label',new Property(code: 'label', type: Property::TYPE_DATABASE, subType: 'label')],
-            ['header', Parser::parseConfigHeader('header')],
+            ['header', new Property('header')],
+            ['author:rel.per', new Property('author', Property::TYPE_RELATION, 'per')],
+            // we need to pass the relative properties to the schema for this to work.
+//            ['author:per', new Property('author', Property::TYPE_RELATION, 'per')],
+
+
             ['header:int', new Property('header', Property::TYPE_ATTRIBUTE,  Property::PROPERTY_INT)],
             ['header:att.int', new Property('header', Property::TYPE_ATTRIBUTE,  Property::PROPERTY_INT)],
             ['header:att.int?max=4', new Property('header', Property::TYPE_ATTRIBUTE,  Property::PROPERTY_INT, ['max' => 4])],

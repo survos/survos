@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use League\Csv\Reader;
 use Survos\GridGroupBundle\CsvSchema\Exceptions\CastException;
 use Survos\GridGroupBundle\CsvSchema\Exceptions\UnsupportedTypeException;
+use Survos\GridGroupBundle\Model\Property;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -383,10 +384,12 @@ class Parser
             $header = $dottedConfig;
             $dottedConfig = null;
         }
+//        $property = new Property(code: $header);
+//        return $property;
         return [$header, $dottedConfig];
 
     }
-    static public function parseConfigHeader(string $config): array
+    static public function parseConfigHeader(string $config): Property
     {
         if (!str_contains($config, '?')) {
             $config .= '?';
@@ -395,6 +398,36 @@ class Parser
         [$header, $dottedConfig] = self::parseDottedConfig($dottedConfig);
 
         $settings = self::parseQueryString($settingsString);
+        if ($dottedConfig && str_contains($dottedConfig, '.')) {
+            [$type, $values] = explode('.', $dottedConfig, 2);
+            $parameters = $values; // what's after the .
+        } else {
+            $type = $dottedConfig; // no params, native type, like string, which is really att.string
+            $parameters = null;
+            if (in_array($type, Property::ATTRIBUTE_TYPES )) {
+                $parameters = $type;
+                $type = Property::TYPE_ATTRIBUTE;
+            }
+        }
+        // handle array shortcut
+        $lastChar = substr($header, -1);
+        if (in_array($lastChar, ['|', '$', ',', '/'])) {
+//            $parameters = null;
+            $type = "array$lastChar";
+            $header = rtrim($header, $lastChar);
+//            $map["/^$newColumn$/"] = "array($lastChar)";
+
+        }
+        if ($type) {
+            if (preg_match('/(array)(.)/', $type, $m)) {
+                $settings['delim'] = $m[2];
+//                $parameters = $m[2];
+                $type = $m[1];
+            }
+        }
+
+        $property = new Property($header, $type, $parameters, $settings);
+        return $property;
         return [$header, $dottedConfig, $settings];
 
     }
@@ -414,14 +447,9 @@ class Parser
 //        if (count($settings)) {
 //            dd($settings);
 //        }
-        [$header, $dottedConfig, $settings] = self::parseConfigHeader($config);
-        if ($dottedConfig && str_contains($dottedConfig, '.')) {
-            [$type, $values] = explode('.', $dottedConfig, 2);
-            $parameters = $values; // what's after the .
-        } else {
-            $type = $dottedConfig; // no params, native type, like string, which is really att.string?
-            $parameters = null;
-        }
+            $property = self::parseConfigHeader($config);
+            dd($property);
+//        [$header, $dottedConfig, $settings] =
 //        $values = explode('.', $dottedConfig);
 //        $type = array_shift($values);
         if ($type == '') {
@@ -432,11 +460,6 @@ class Parser
 
 //        list($type, $parameters) = $this->parseType($type);
 //        dd($type, $values, $parameters);
-        if (preg_match('/(array)(.)/', $type, $m)) {
-            $settings['delim'] = $m[2];
-            $parameters = $m[2];
-            $type = $m[1];
-        }
 
         $methodName = $this->getMethodName($type);
         if (method_exists($this, $methodName)) {

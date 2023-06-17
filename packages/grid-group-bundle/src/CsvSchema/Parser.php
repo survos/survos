@@ -414,7 +414,7 @@ class Parser
             $config .= '?';
         }
         [$dottedConfig, $settingsString] = explode('?', $config);
-        if (!str_contains($dottedConfig, ':')) {
+        if (!str_contains($dottedConfig, ':') && $originalCode) {
             $dottedConfig = $originalCode . ':' . $dottedConfig;
         }
         [$header, $dottedConfig] = self::parseDottedConfig($dottedConfig);

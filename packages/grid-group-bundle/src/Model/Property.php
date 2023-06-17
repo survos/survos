@@ -142,14 +142,20 @@ class Property implements \Stringable
     public function __toString(): string
     {
         $x = $this->getCode();
+        $settings = $this->getSettings();
         if ($type = $this->getType()) {
-            $x .= ':' . $type;
+            // if array, use the short form.
+            if ($type === self::PROPERTY_ARRAY) {
+                $x .= $settings['delim'];
+                unset($settings['delim']);
+            } else {
+                $x .= ':' . $type;
+            }
         }
-        // if the only setting is a delimiter, add it.
         if ($subType = $this->getSubType()) {
             $x .= '.'.$subType;
         }
-        if ( ($settings = $this->getSettings()) && !empty($settings)) {
+        if ( $settings && !empty($settings)) {
             $x .= '?' . http_build_query($settings);
         }
         return $x;

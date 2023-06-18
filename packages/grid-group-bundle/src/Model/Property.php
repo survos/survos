@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Survos\GridGroupBundle\Model;
 
+use App\Entity\Field\Field;
+use App\Entity\Instance;
+
 class Property implements \Stringable
 {
 
@@ -102,6 +105,12 @@ class Property implements \Stringable
         return $this->code == $this->schema->getIdName();
     }
 
+    // this should probably be at the field, not property, level, but this way we can translate before having fields.
+    public function isTranslatable(): bool
+    {
+        return $this->getType() == Field::TYPE_INTRINSIC && in_array($this->getSubType(), Instance::TRANSLATABLE_FIELDS);
+    }
+
     /**
      * @return string|null
      */
@@ -149,7 +158,11 @@ class Property implements \Stringable
                 $x .= $settings['delim'];
                 unset($settings['delim']);
             } else {
-                $x .= ':' . $type;
+                // hack -- they type is wrong!
+                if ($x <> $type) {
+                    assert($x <> $type);
+                    $x .= ':' . $type;
+                }
             }
         }
         if ($subType = $this->getSubType()) {
@@ -160,7 +173,6 @@ class Property implements \Stringable
         }
         return $x;
 
-        // TODO: Implement __toString() method.
     }
 }
 

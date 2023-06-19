@@ -23,58 +23,6 @@ class GridDatabase implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    /**
-     * File read flag.
-     *
-     * @var int
-     */
-    const FILE_READ = 1;
-
-    /**
-     * File write flag.
-     *
-     * @var int
-     */
-    const FILE_WRITE = 2;
-
-    /**
-     * File append flag.
-     *
-     * @var int
-     */
-    const FILE_APPEND = 3;
-
-    /**
-     * File access mode.
-     *
-     * @var array
-     */
-    protected $fileAccessMode = [
-        self::FILE_READ => [
-            'mode' => 'rb',
-            'operation' => LOCK_SH,
-        ],
-        self::FILE_WRITE => [
-            'mode' => 'wb',
-            'operation' => LOCK_EX,
-        ],
-        self::FILE_APPEND => [
-            'mode' => 'ab',
-            'operation' => LOCK_EX,
-        ],
-    ];
-
-    /**
-     * Database name.
-     *
-     * @var string
-     */
-    protected $name;
-
-
-    private CountableArrayCache $offsetCache;
-    private CountableArrayCache $aliases;
-    private int $currentSize = 0;
 
     public function __construct(
         private string  $filename,

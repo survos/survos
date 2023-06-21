@@ -21,10 +21,28 @@ class ScraperService
     public function __construct(
         private string              $dir,
         private HttpClientInterface $httpClient,
-        private CacheInterface      $cache,
+        private ?CacheInterface      $cache,
         LoggerInterface $logger = null,
     )
     {
+    }
+
+    /**
+     * @return CacheInterface
+     */
+    public function getCache(): CacheInterface
+    {
+        return $this->cache;
+    }
+
+    /**
+     * @param CacheInterface $cache
+     * @return ScraperService
+     */
+    public function setCache(?CacheInterface $cache): ScraperService
+    {
+        $this->cache = $cache;
+        return $this;
     }
 
     /**
@@ -76,9 +94,40 @@ class ScraperService
         return realpath($fullPath);
     }
 
+    private function fetchUrlUsingCache(string $url, array $parameters = [], array $headers = [], string $key = null)
+    {
+        if (empty($key)) {
+            $key = pathinfo($url, PATHINFO_FILENAME);
+        }
+
+        $value = $this->cache->get( $key, function (ItemInterface $item) use ($url, $parameters, $headers) {
+            try {
+                $this->logger->warning("Fetching " . $url);
+                $content = $this->httpClient->request('GET', $url, [
+                    'query' => $parameters,
+                    'timeout' => 10
+                ])->getContent();
+            } catch (\Exception $exception) {
+                // eventually this will be in a message handler, so will automatically retry
+                $this->logger->error($exception->getMessage());
+                return null;
+            }
+            return $content;
+        });
+        dd($url,  "using cache.  @todo: switch to PDO");
+        return $value;
+
+    }
+
     public function fetchUrl(string $url, array $parameters = [], array $headers = [], string $key = null)
     {
-        return file_get_contents($this->fetchUrlFilename($url, $parameters, $headers, $key));
+        // use the cache if it exists, otherwise, use the directory and prefix
+        if ($this->cache) {
+            return $this->fetchUrlUsingCache($url, $parameters, $headers, $key);
+
+        } else {
+            return file_get_contents($this->fetchUrlFilename($url, $parameters, $headers, $key));
+        }
     }
 
 }

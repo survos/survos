@@ -6,8 +6,10 @@ namespace Survos\Scraper\Service;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\Cache\Adapter\DoctrineDbalAdapter;
 use Symfony\Component\Cache\Adapter\PdoAdapter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -16,15 +18,32 @@ class ScraperService
 {
     use LoggerAwareTrait;
 
-    private string $prefix; // dir within cache
 
     public function __construct(
         private string              $dir,
         private HttpClientInterface $httpClient,
         private ?CacheInterface      $cache,
+        private string $prefix,
+        private string $sqliteFilename,
         LoggerInterface $logger = null,
     )
     {
+    }
+
+    /**
+     * @return string
+     */
+    public function getSqliteFilename(): string
+    {
+        return $this->sqliteFilename;
+    }
+
+    /**
+     * @param string $sqliteFilename
+     */
+    public function setSqliteFilename(string $sqliteFilename): void
+    {
+        $this->sqliteFilename = $sqliteFilename;
     }
 
     /**
@@ -50,7 +69,7 @@ class ScraperService
      */
     public function getDir(): string
     {
-        return $this->dir;
+        return rtrim($this->dir, '/') . '/';
     }
 
     /**
@@ -94,19 +113,47 @@ class ScraperService
         return realpath($fullPath);
     }
 
-    private function fetchUrlUsingCache(string $url, array $parameters = [], array $headers = [], string $key = null)
+    public function getFullFilename()
+    {
+        return $this->getDir() . $this->getPrefix() . $this->getSqliteFilename();
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrefix(): string
+    {
+        return $this->prefix;
+    }
+
+
+    public function fetchUrlUsingCache(string $url, array $parameters = [], array $headers = [], string $key = null)
     {
         if (empty($key)) {
             $key = pathinfo($url, PATHINFO_FILENAME);
         }
+        $sqliteFilename = $this->getFullFilename();
+        if ( ($dir = pathinfo($sqliteFilename, PATHINFO_DIRNAME)) && !file_exists($dir)) {
+            mkdir($dir, recursive: true);
+        }
+        $cache = new DoctrineDbalAdapter(
+            'sqlite:///' . $sqliteFilename,
+        );
 
-        $value = $this->cache->get( $key, function (ItemInterface $item) use ($url, $parameters, $headers) {
-            try {
+//        dd($sqliteFilename, file_exists($sqliteFilename));
+//        $cache = $this->cache;
+        $slugger = new AsciiSlugger();
+        $key = $slugger->slug($key)->toString();
+//        assert($cache->hasItem($key), 'missing '. $key);
+
+//        https://symfony.com/doc/current/components/cache/adapters/pdo_doctrine_dbal_adapter.html#using-doctrine-dbal
+        $value = $cache->get( $key, function (ItemInterface $item) use ($url, $parameters, $headers) {
                 $this->logger->warning("Fetching " . $url);
                 $content = $this->httpClient->request('GET', $url, [
                     'query' => $parameters,
                     'timeout' => 10
                 ])->getContent();
+            try {
             } catch (\Exception $exception) {
                 // eventually this will be in a message handler, so will automatically retry
                 $this->logger->error($exception->getMessage());
@@ -114,7 +161,6 @@ class ScraperService
             }
             return $content;
         });
-        dd($url,  "using cache.  @todo: switch to PDO");
         return $value;
 
     }
@@ -122,6 +168,7 @@ class ScraperService
     public function fetchUrl(string $url, array $parameters = [], array $headers = [], string $key = null)
     {
         // use the cache if it exists, otherwise, use the directory and prefix
+        // maybe don't allow for images and other binary files?
         if ($this->cache) {
             return $this->fetchUrlUsingCache($url, $parameters, $headers, $key);
 
@@ -129,6 +176,7 @@ class ScraperService
             return file_get_contents($this->fetchUrlFilename($url, $parameters, $headers, $key));
         }
     }
+
 
 }
 

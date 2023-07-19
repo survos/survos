@@ -123,6 +123,17 @@ END;
 //            });
 //
 //            dd($path, $source, $sourceContext);
+            $componentHtml = str_replace(['twig:', 'xmlns:twig="http://example.com/twig"'], '', $twigBlocks);
+
+            $crawler = new Crawler();
+            $crawler->addHtmlContent($componentHtml);
+            $allTwigBlocks = [];
+
+            if ($crawler->filterXPath('//block')->count() > 0) {
+                $allTwigBlocks = $crawler->filterXPath('//block')->each(function (Crawler $node, $i) {
+                    return [$node->attr('name') => $node->html()];
+                });
+            }
 
             if (preg_match_all('/{% block (.*?) %}(.*?){% endblock/ms', $twigBlocks, $mm, PREG_SET_ORDER)) {
                 foreach ($mm as $m) {
@@ -131,6 +142,8 @@ END;
                 }
             }
         }
+
+        $customColumnTemplates = array_merge($customColumnTemplates,$allTwigBlocks);
         return $customColumnTemplates;
     }
 

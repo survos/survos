@@ -91,14 +91,14 @@ END;
                     $crawler = new Crawler($componentHtml);
                     $crawler->registerNamespace('twig','fake');
                     foreach (['twig:block', 'alert', 'Alter', 'twig|alert', 'twig|block', 'twig', 'block'] as $hack) {
-                        $crawler->filterXPath($hack)->each(fn(Crawler $node) => dd($node, $node->nodeName(), $source));
+//                        $crawler->filterXPath($hack)->each(fn(Crawler $node) => dd($node, $node->nodeName(), $source));
                     }
 
-                    dd($componentHtml);
+//                    dd($componentHtml);
 //                    $componentHtml = "<html>$componentHtml</html>";
 
                 } else {
-                    dd($source);
+//                    dd($source);
                     $twigBlocks = $source;
                 }
 
@@ -142,8 +142,11 @@ END;
                 }
             }
         }
-
-        $customColumnTemplates = array_merge($customColumnTemplates,$allTwigBlocks);
+        foreach($allTwigBlocks as $allTwigBlock) {
+            foreach ($allTwigBlock as $key => $value) {
+                $customColumnTemplates[$key] = $value;
+            }
+        }
         return $customColumnTemplates;
     }
 

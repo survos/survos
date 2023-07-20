@@ -131,7 +131,7 @@ END;
 
             if ($crawler->filterXPath('//block')->count() > 0) {
                 $allTwigBlocks = $crawler->filterXPath('//block')->each(function (Crawler $node, $i) {
-                    return [$node->attr('name') => $node->html()];
+                    return [$node->attr('name') => urldecode($node->html())];
                 });
             }
 

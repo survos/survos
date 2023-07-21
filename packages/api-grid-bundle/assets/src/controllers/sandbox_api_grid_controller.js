@@ -100,7 +100,11 @@ export default class extends Controller {
     // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
-        let x = this.columns.map(c => {
+        let columns = this.columns.sort(function(a, b) {
+            return   a.order - b.order; // Sort in ascending order
+        });
+
+        let x = columns.map(c => {
             let render = null;
             if (c.twigTemplate) {
                 let template = Twig.twig({
@@ -602,13 +606,20 @@ export default class extends Controller {
             dt.search(this.filter.q).draw();
         }
         this.filter = [];
+
+        this.columns.forEach((column, index) => {
+            if(column.order == 0) {
+                dt.column(index).visible(false);
+            }
+        });
+
         // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
         return dt;
     }
 
     columnDefs(searchPanesColumns) {
-        console.error(searchPanesColumns);
+        //console.error(searchPanesColumns);
         return [
             {
                 searchPanes:

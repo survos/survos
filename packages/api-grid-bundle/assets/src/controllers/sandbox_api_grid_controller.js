@@ -365,7 +365,12 @@ export default class extends Controller {
             // console.log(column);
             if (column.browsable) {
                 // console.error(index);
-                searchFieldsByColumnNumber.push(index);
+                if(column.browseOrder) {
+                    searchFieldsByColumnNumber[index] = column.browseOrder;
+                } else {
+                    searchFieldsByColumnNumber[index] = 0;
+                }
+                //searchFieldsByColumnNumber.push(index);
                 //rawFacets.push(column.name);
             }
             //this.sortableFields.push(index);
@@ -390,8 +395,16 @@ export default class extends Controller {
             //     // console.warn("Missing " + column.name, Object.keys(lookup));
             // }
         });
-        let searchPanesRaw = [];
 
+        let searchPanesRaw = [];
+        searchFieldsByColumnNumber.sort(function (a, b) {
+            return a.browseOrder - b.browseOrder;
+        });
+
+        // Retrieve the sorted index values
+        searchFieldsByColumnNumber = searchFieldsByColumnNumber.map(function (item) {
+            return item.index;
+        });
         console.error(options);
         // console.error('searchFields', searchFieldsByColumnNumber);
 
@@ -480,7 +493,6 @@ export default class extends Controller {
                 viewTotal: true,
                 showZeroCounts: true,
                 preSelect: preSelectArray
-
             },
             searchBuilder: {
                 columns: this.searchBuilderFields,
@@ -596,12 +608,13 @@ export default class extends Controller {
     }
 
     columnDefs(searchPanesColumns) {
-        // console.error(searchPanesColumns);
+        console.error(searchPanesColumns);
         return [
             {
                 searchPanes:
                     {show: true},
-                    targets: searchPanesColumns
+                    order: searchPanesColumns
+
             },
             {targets: [0, 1], visible: true},
             // defaultContent is critical! Otherwise, lots of stuff fails.

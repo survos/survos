@@ -167,7 +167,8 @@
             "Survos\\StripeProduct\\": "packages/stripe-product/src/",
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WikiBundle\\": "packages/wiki-bundle/src/",
-            "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/"
+            "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/",
+            "Survos\\RevealBundle\\": "packages/reveal-bundle/src/"
         }
     },
     "autoload-dev": {
@@ -181,8 +182,6 @@
             "require": "^6.1",
             "allow-contrib": "true"
         }
-    },
-    "replace": {
     },
     "scripts": {
         "auto-scripts": {

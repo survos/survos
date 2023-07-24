@@ -1,0 +1,32 @@
+{
+  "name": "assets",
+  "version": "1.0.0",
+  "description": "a wrapper around reveal.js",
+  "main": "index.js",
+  "license": "MIT",
+  "peerDependencies": {
+    "@hotwired/stimulus": "^3.1.0"
+  },
+  "devDependencies": {
+    "@hotwired/stimulus": "^3.1.0"
+  },
+
+  "dependencies": {
+    "reveal.js": "^4.5.0"
+  },
+  "symfony": {
+    "controllers": {
+      "reveal": {
+        "main": "src/controllers/reveal_controller.js",
+        "webpackMode": "eager",
+        "fetch": "lazy",
+        "enabled": true,
+        "autoimport": {
+          "reveal.js/dist/reveal.js": true,
+          "reveal.js/dist/reveal.css": true,
+          "reveal.js/dist/theme/black.css": true
+        }
+      }
+    }
+  }
+}

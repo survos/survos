@@ -49,6 +49,7 @@ class DatatableService
             }
             if (is_string($c)) {
                 $c = [
+                    'order' => ($idx+1) * 10,
                     'name' => $c,
                 ];
             }
@@ -63,11 +64,13 @@ class DatatableService
             assert(is_array($c));
             unset($c['propertyConfig']);
 //            dd($c);
+
             $column = new Column(...$c);
             if (in_array($columnName, $settings)) {
                 $options = (new OptionsResolver())
                     ->setDefaults([
                         'searchable' => false,
+                        'order' => 100,
                         'sortable' => false,
                         'browsable' => false
                     ])->resolve($settings);
@@ -78,6 +81,8 @@ class DatatableService
             if ($column->condition) {
                 $normalizedColumns[] = $column;
             }
+//                            if ($c['name'] == 'image_count') dd($c, $column);
+
 
             //            $normalizedColumns[$column->name] = $column;
         }

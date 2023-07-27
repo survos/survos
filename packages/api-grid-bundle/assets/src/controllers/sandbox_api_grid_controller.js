@@ -362,8 +362,6 @@ export default class extends Controller {
             if (column.browsable) {
                 searchFieldsByColumnNumber.push(index);
             }
-        });
-        this.columns.forEach((column, index) => {
             let name = "";
             if(typeof column == 'string') {
                 name = column;
@@ -372,21 +370,27 @@ export default class extends Controller {
             }
             if (this.filter.hasOwnProperty(name)) {
                 preSelectArray.push({
-                    column : index,
+                    column : 1,
                     rows: this.filter[name].split("|")
                 });
+                console.log(index);
+                console.log(preSelectArray);
             }
+        });
+        this.columns.forEach((column, index) => {
+            let name = "";
+            if(typeof column == 'string') {
+                name = column;
+            } else {
+                name = column.name;
+            }
+
             // console.log(column);
-            // if (column.browsable) {
-            //     // console.error(index);
-            //     if(column.browseOrder) {
-            //         searchFieldsByColumnNumber[index] = column.browseOrder;
-            //     } else {
-            //         searchFieldsByColumnNumber[index] = 0;
-            //     }
-            //     // searchFieldsByColumnNumber.push(index);
-            //     //rawFacets.push(column.name);
-            // }
+            if (column.browsable) {
+                // console.error(index);
+                searchFieldsByColumnNumber.push(index);
+                //rawFacets.push(column.name);
+            }
             //this.sortableFields.push(index);
             options = fields;
             // this is specific to museado, but needs to be generalized with a field structure.
@@ -554,12 +558,12 @@ export default class extends Controller {
                         }
                         let searchPanes = {};
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
-                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
-                           searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
+                            searchPanes = hydraData['hydra:facets']['searchPanes'];
+                            //searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                         } else {
-                           searchPanes = {
+                            searchPanes = {
                                 options: options
-                           };
+                            };
                         }
 
                         let targetMessage = "";
@@ -610,9 +614,9 @@ export default class extends Controller {
         this.filter = [];
 
         this.columns.forEach((column, index) => {
-            if(column.order == 0) {
-                dt.column(index).visible(false);
-            }
+            // if(column.order == 0) {
+            //     dt.column(index).visible(false);
+            // }
         });
 
         // console.log('moving panes.');

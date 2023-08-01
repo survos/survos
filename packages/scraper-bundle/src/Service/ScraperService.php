@@ -186,8 +186,8 @@ class ScraperService
                 $request = $this->httpClient->request($method, $url, $options);
                 switch ($statusCode = $request->getStatusCode()) {
                     case 200: $content = $request->getContent(); break;
-                    case 403: $content = null;
-                    case 404: $content = null;
+                    case 403:
+                    case 404:
                     default: $content = null;
                 }
                 $this->logger->info(sprintf("received " . $statusCode. ' storing to #%s', $key));

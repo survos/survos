@@ -149,7 +149,11 @@ class ScraperService
     {
         if (empty($key)) {
             $key = pathinfo($url, PATHINFO_FILENAME);
+            if ($method == 'POST') {
+                $key .= '-' . hash('xxh3', json_encode($parameters));
+            }
         }
+        assert($this->getCache());
         if (!$cache = $this->getCache()) {
             $sqliteFilename = $this->getFullFilename();
             dd($sqliteFilename);

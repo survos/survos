@@ -62,6 +62,8 @@ class CommandController extends AbstractController
             }
         }
 
+//        dd($request);
+
         $cliString = $commandName;
 
         $form = $this->createForm(CommandFormType::class, $defaults, ['command' => $command]);
@@ -98,10 +100,14 @@ class CommandController extends AbstractController
 
             $cliString = join(' ', $cli);
 
-            CommandRunner::from($application, $cliString)
-                ->withOutput($output) // any OutputInterface
-                ->run();
-            $result = $output->fetch(); // string (the output)
+            $result = null;
+
+            if (!$form->get('dryRun')->getData()) {
+                CommandRunner::from($application, $cliString)
+                    ->withOutput($output) // any OutputInterface
+                    ->run();
+                $result = $output->fetch();
+            }
 
             try {
             } catch (\Exception $exception) {

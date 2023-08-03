@@ -60,9 +60,9 @@ class CommandFormType extends AbstractType
                     'required' => false,
                     'attr' => [
                         'placeholder' => $option->getDefault(),
+                        'style' => 'display:flex; gap: 1em;'
                     ],
                 ];
-
             } elseif (is_bool($option->getDefault())) {
                 $type = CheckboxType::class;
             } elseif (is_int($option->getDefault())) {
@@ -85,6 +85,13 @@ class CommandFormType extends AbstractType
                     ]);
             }
         }
+
+        $builder->add('dryRun', CheckboxType::class, [
+            'label' => 'Dry run',
+            'help' => 'Run Command in dry run mode',
+            'data' => false,
+            'required' => false,
+        ]);
 
         $builder->add('submit', SubmitType::class, [
             'label' => 'Run Command'

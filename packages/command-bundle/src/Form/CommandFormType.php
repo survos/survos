@@ -4,6 +4,7 @@ namespace Survos\CommandBundle\Form;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\ChoiceList\ChoiceList;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -45,21 +46,24 @@ class CommandFormType extends AbstractType
             } elseif ($option->isNegatable()) {
                 $type = ChoiceType::class;
                 $choiceValue = null;
+                $required = false;
 
                 if (is_bool($option->getDefault())) {
                     $choiceValue = ($option->getDefault() ? '--' . $option->getName() : '--no-' . $option->getName());
+                    $required = true;
                 }
+
                 $conf = [
                     'help' => $option->getDescription(),
                     'choices' => [
                         '--' . $option->getName() => true,
                         '--no-' . $option->getName() => false,
                     ],
+                    'data' => $option->getDefault(),
                     'expanded' => true,
-                    'choice_value' => $choiceValue,
-                    'required' => false,
+                    'required' => $required,
                     'attr' => [
-                        'placeholder' => $option->getDefault(),
+                        'placeholder' => $choiceValue,
                         'style' => 'display:flex; gap: 1em;'
                     ],
                 ];

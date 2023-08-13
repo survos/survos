@@ -566,7 +566,17 @@ export default class extends Controller {
                                 if(targetMessage != "") {
                                     targetMessage += ", ";
                                 }
-                                targetMessage += string[0]+ " : "+ string[2];
+                                let splitValue = string[2].split("|");
+                                let returnValue = [];
+                                splitValue.forEach((index) => {
+                                    searchPanes['options'][string[0]].forEach((array) => {
+                                        if(index == array.value) {
+                                            returnValue.push(array.label);
+                                            return false;
+                                        }
+                                    });
+                                });
+                                targetMessage += string[0]+ " : "+ returnValue.join('|');
                             });
                         }
 

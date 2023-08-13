@@ -40,6 +40,7 @@ jobs:
           - {local_path: 'html-prettify-bundle', split_repository: 'HtmlPrettifyBundle'}
           - {local_path: 'inspection-bundle', split_repository: 'SurvosInspectionBundle'}
           - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
+          - {local_path: 'libre-translate-bundle', split_repository: 'LibreTranslateBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'meili-admin-bundle', split_repository: 'SurvosMeiliAdminBundle'}

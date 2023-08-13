@@ -168,7 +168,8 @@
             "Survos\\Tree\\": "packages/tree-bundle/src/",
             "Survos\\WikiBundle\\": "packages/wiki-bundle/src/",
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/",
-            "Survos\\RevealBundle\\": "packages/reveal-bundle/src/"
+            "Survos\\RevealBundle\\": "packages/reveal-bundle/src/",
+            "Survos\\LibreTranslateBundle\\": "packages/libre-translate-bundle/src/"
         }
     },
     "autoload-dev": {

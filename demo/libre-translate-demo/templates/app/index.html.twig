@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AppController!{% endblock %}
+
+{% block body %}
+
+    {% for locale, lang in languages %}
+        <a href="{{ path('app_homepage', {target: locale}) }}">
+            {{ lang }}
+        </a>
+        |
+    {% endfor %}
+
+
+    <table>
+        <tbody>
+        {% for idx, headline in headlines.articles %}
+        <tr>
+            <td>
+                <img style="width: 100px" src="{{ headline.urlToImage }}" />
+            </td>
+            <td>
+                {{ headline.title }}
+                <br />
+                <i>
+                    {{ translations[idx] }}
+                </i>
+
+            </td>
+
+
+
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+
+{% endblock %}

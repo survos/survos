@@ -69,6 +69,11 @@ class Parser
     {
     }
 
+    public function getSchema(): Schema
+    {
+        return $this->schema;
+    }
+
     /**
      * Register a handler for a custom type. The handler will be called with
      * the value to parse.
@@ -135,27 +140,41 @@ class Parser
             $columns[] = $property;
         }
 
-        // the default;
+        // the default, ordered by the headers
         foreach ($columns as $property) {
             $header = $property->getCode();
+            if ($header == 'medidas') {
+//                dump($header);
+            }
             assert($property->getType() <> $header, $header);
             if (!$property->getType()) {
                 $property = self::parseConfigHeader('att.string', $property->getCode());
             }
 //            $property = self::parseConfigHeader('att.string', $column);
             // a map can overwrite a property, usually because the column headers are simply names.  We could combine this above.
+            $mapPosition = 0;
             foreach ($map as $regEx => $rule) {
                 $columnCode = $property->getCode();
-                if (preg_match($regEx, $columnCode)) {
-                    if (is_null($rule)) {
-                        // ignore?
+                try {
+                    if (preg_match($regEx, $columnCode)) {
+                        if (is_null($rule)) {
+                            // ignore?
+                        }
+                        $property = self::parseConfigHeader($rule, $columnCode);
+                        $property->setOrderIdx($mapPosition);
+//                        dd($mapPosition, $property);
+//                        $property->set(Property::SETTING_MAP_POSITION, $mapPosition);
+//                        dd($property, $mapPosition, $regEx, $columnCode);
+                        break;
+                        $outputHeader = (string)$property;
+                        // @todo: multiple rules based on pattern, like scurity?
+                        $outputSchema[$property->getCode()] = $property->__toString();
                     }
-                    $property = self::parseConfigHeader($rule, $columnCode);
-                    break;
-                    $outputHeader = (string)$property;
-                    // @todo: multiple rules based on pattern, like scurity?
-                    $outputSchema[$property->getCode()] = $property->__toString();
+                } catch (\Exception $exception) {
+                    assert(false, sprintf("Error matching %s to %s", $regEx, $columnCode));
+                    continue;
                 }
+                $mapPosition++;
             }
             $schema->addProperty($property);
         }
@@ -317,9 +336,9 @@ class Parser
 //            dd($schema, $columns, array_diff(array_keys($schema), array_keys($columns)));
         }
         if ($schema->getPropertyCount() !== count($columns)) {
-            dd(schema: $schema, columns: $columns,
-                xdiff: array_diff(array_keys($columns), array_keys($schema->getProperties())),
-                diff: array_diff(array_keys($schema->getProperties()), array_keys($columns)));
+            dd(message: sprintf("Schema has %d, columns has %d", $schema->getPropertyCount(), count($columns)), schema: $schema, columns: $columns,
+                xdiff: array_diff(array_keys($columns), $schema->getSortedPropertyCodes()),
+                diff: array_diff($schema->getSortedPropertyCodes(), array_keys($columns)));
         }
 //        assert(count($schema) == count($columns), sprintf("mismatch %d %d",
 //            count($schema), count($columns)));
@@ -337,6 +356,8 @@ class Parser
             }
 
             $key = $schema->getPropertyCodes()[$index];
+            if ($type == 'cat') dd($key, $type, $value);
+
             $parsed = $this->getValue($type, $value, $key);
             return [$key => $parsed];
         });
@@ -510,6 +531,7 @@ class Parser
         }
 //        dd($config,$value, $key, $type);
 //        dd($methodName, $type, $value, $property);
+//        dump($method, $value, $property);
         return call_user_func_array($method, [$value, $property]);
         try {
 //            dump($method, $value, $parameters, $settings);

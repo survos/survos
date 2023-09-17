@@ -6,7 +6,7 @@ import {default as axios} from "axios";
 import DataTables from "datatables.net-bs5";
 import 'datatables.net-select-bs5';
 import 'datatables.net-responsive';
-// import 'datatables.net-responsive-bs5';
+import 'datatables.net-responsive-bs5';
 import 'datatables.net-buttons-bs5';
 import 'datatables.net-searchpanes-bs5';
 import 'datatables.net-datetime';
@@ -14,11 +14,11 @@ import 'datatables.net-scroller-bs5';
 import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
 import 'datatables.net-buttons/js/buttons.print.min';
-
+import 'jszip';
+import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';
-// import 'datatables.net-datetime';
 // import 'datatables.net-searchbuilder-bs5';
 // import 'datatables.net-fixedheader-bs5';
 // import 'datatables.net-responsive-bs5';
@@ -34,12 +34,6 @@ let routes = false;
 // if live
 import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 routes = require('../../../../../public/js/fos_js_routes.json');
-import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
-import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
-import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
-import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
-import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
-import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 // if local
 // routes = require('../../public/js/fos_js_routes.json');
 // import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
@@ -47,17 +41,17 @@ import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Routing.setRoutingData(routes);
 
 import Twig from 'twig/twig.min';
-
+import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
+import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
+import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
+import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
+import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
+import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
-
+        // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
-        // if (route == 'category_show') {
-        //     console.error(route);
-        //     console.warn(routeParams);
-        //     console.log(path);
-        // }
         return path;
     });
 });
@@ -92,10 +86,12 @@ export default class extends Controller {
         columnConfiguration: {type: String, default: '[]'},
         globals: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
+        style: {type: String, default: 'spreadsheet'},
         index: {type: String, default: ''},
-        dom: {type: String, default: 'Plfrtip'},
+        dom: {type: String, default: 'BPlfrtip'},
         filter: String
     }
+
     // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
     // sortableFields: {type: String, default: '[]'},
     // searchableFields: {type: String, default: '[]'},
@@ -144,6 +140,9 @@ export default class extends Controller {
 
     connect() {
         super.connect(); //
+
+        this.apiParams = {}; // initialize
+        console.log(this.identifier);
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!'});
         window.dispatchEvent(event);
 
@@ -164,10 +163,6 @@ export default class extends Controller {
 
         console.log('hola from ' + this.identifier + ' locale: ' + this.localeValue);
 
-        // console.log(this.hasTableTarget ? 'table target exists' : 'missing table target')
-        // console.log(this.hasModalTarget ? 'target exists' : 'missing modalstarget')
-        // // console.log(this.fieldSearch ? 'target exists' : 'missing fieldSearch')
-        // console.log(this.sortableFieldsValue);
         console.assert(this.hasModalTarget, "Missing modal target");
         this.that = this;
         this.tableElement = false;
@@ -211,14 +206,12 @@ export default class extends Controller {
     }
 
     notify(message) {
-        console.log(message);
         this.messageTarget.innerHTML = message;
     }
 
 
     handleTrans(el) {
         let transitionButtons = el.querySelectorAll('button.transition');
-        // console.log(transitionButtons);
         transitionButtons.forEach(btn => btn.addEventListener('click', (event) => {
             const isButton = event.target.nodeName === 'BUTTON';
             if (!isButton) {
@@ -321,6 +314,7 @@ export default class extends Controller {
                 console.assert(data.rp, "missing rp, add @Groups to entity")
                 let formUrl = Routing.generate(modalRoute, data.rp);
 
+
                 axios({
                     method: 'get', //you can set what request you want to be
                     url: formUrl,
@@ -351,6 +345,7 @@ export default class extends Controller {
         //     lookup[field.jsonKeyCode] = field;
         // });
         // console.error(lookup);
+
         let searchFieldsByColumnNumber = [];
         let options = [];
         let preSelectArray = [];
@@ -411,10 +406,8 @@ export default class extends Controller {
             //     // console.warn("Missing " + column.name, Object.keys(lookup));
             // }
         });
+
         let searchPanesRaw = [];
-        // searchFieldsByColumnNumber.sort(function (a, b) {
-        //     return a.browseOrder - b.browseOrder;
-        // });
 
         // console.error('searchFields', searchFieldsByColumnNumber);
 
@@ -466,6 +459,7 @@ export default class extends Controller {
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
+            responsive: true,
             // scroller: {
             //     // rowHeight: 90, // @WARNING: Problematic!!
             //     // displayBuffer: 10,
@@ -480,6 +474,12 @@ export default class extends Controller {
                     console.log('A selection has been made and the table has been updated.');
                 });
                 this.handleTrans(el);
+
+                const box = document.getElementsByClassName('dtsp-title');
+                if (box.length) {
+                    box[0].style.display = "none";
+                }
+
                 // let xapi = new DataTable.Api(obj);
                 // console.log(xapi);
                 // console.log(xapi.table);
@@ -494,16 +494,32 @@ export default class extends Controller {
 
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
-            buttons: [], // this.buttons,
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print',
+                {
+                    extend: 'excelHtml5',
+                    autoFilter: true,
+                    sheetName: 'Exported data'
+                },
+                'pdf',
+                {
+                    text: 'labels',
+                    action:  ( e, dt, node, config ) =>  {
+                        console.log("calling API " + this.apiCallValue, this.apiParams);
+                        const event = new CustomEvent("changeSearchEvent", {detail: this.apiParams});
+                        window.dispatchEvent(event);
+                    }
+                }
+                ],
             columns: this.cols(),
             searchPanes: {
+                initCollapsed: true,
                 layout: 'columns-1',
                 show: true,
 //                cascadePanes: true,
                 viewTotal: true,
                 showZeroCounts: true,
                 preSelect: preSelectArray
-
             },
             searchBuilder: {
                 columns: this.searchBuilderFields,
@@ -519,24 +535,28 @@ export default class extends Controller {
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
-                let apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
+                this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(params, apiParams);
                 // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
 
-                Object.assign(apiParams, this.filter);
+                Object.assign(this.apiParams, this.filter);
                 // yet another locale hack
                 if (this.locale !== '') {
-                    apiParams['_locale'] = this.locale;
+                    this.apiParams['_locale'] = this.locale;
                 }
                 if (this.indexValue) {
-                    apiParams['_index'] = this.indexValue;
+                    this.apiParams['_index'] = this.indexValue;
+                }
+                if (this.styleValue) {
+                    this.apiParams['_style'] = this.styleValue;
+                    console.error(this.style, this.apiParams);
                 }
 
                 // console.warn(apiPlatformHeaders);
-                console.log("calling API " + this.apiCallValue, apiParams);
+
                 axios.get(this.apiCallValue, {
-                    params: apiParams,
+                    params: this.apiParams,
                     headers: apiPlatformHeaders
                 })
                     .then((response) => {
@@ -559,22 +579,32 @@ export default class extends Controller {
                         }
                         let searchPanes = {};
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
-                           searchPanes = hydraData['hydra:facets']['searchPanes'];
-                           //searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+                           searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
                         } else {
-                            searchPanes = {
+                           searchPanes = {
                                 options: options
-                            };
+                           };
                         }
 
                         let targetMessage = "";
-                        if(typeof apiParams.facet_filter != 'undefined') {
-                            apiParams.facet_filter.forEach((index) => {
+                        if(typeof this.apiParams.facet_filter != 'undefined') {
+                            this.apiParams.facet_filter.forEach((index) => {
                                 let string = index.split(',');
                                 if(targetMessage != "") {
                                     targetMessage += ", ";
                                 }
-                                targetMessage += string[0]+ " : "+ string[2];
+                                let splitValue = string[2].split("|");
+                                let returnValue = [];
+                                splitValue.forEach((index) => {
+                                    searchPanes['options'][string[0]].forEach((array) => {
+                                        if(index == array.value) {
+                                            returnValue.push(array.label);
+                                            return false;
+                                        }
+                                    });
+                                });
+                                targetMessage += string[0]+ " : "+ returnValue.join('|');
                             });
                         }
 
@@ -609,7 +639,6 @@ export default class extends Controller {
         };
         let dt = new DataTables(el, setup);
         dt.searchPanes();
-
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }
@@ -623,20 +652,23 @@ export default class extends Controller {
 
         // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
-
+        const contentContainer = document.getElementsByClassName('search-panes');
+        if (contentContainer.length > 0) {
+            const ps = new PerfectScrollbar(contentContainer[0]);
+        }
         return dt;
     }
 
     columnDefs(searchPanesColumns) {
-        // console.error(searchPanesColumns);
         return [
             {
                 searchPanes:
                     {show: true},
-                    target: searchPanesColumns,
+                    target: searchPanesColumns
 
             },
             {targets: [0, 1], visible: true},
+            // {targets: '_all',  order:  },
             // defaultContent is critical! Otherwise, lots of stuff fails.
             {targets: '_all', visible: true, sortable: false, "defaultContent": "~~"}
         ];
@@ -813,10 +845,12 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         if (params.searchBuilder) {
             apiData['searchBuilder'] = params.searchBuilder;
         }
+        if (params.style) {
+            apiData['_style'] = params.style;
+        }
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];
-            // console.log(c);
             if (c.data && c.orderable && c.orderable == true) {
                 order[c.data] = o.dir;
                 // apiData.order = order;
@@ -841,7 +875,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         }
 
         for (const [key, value] of Object.entries(this.filter)) {
-            if(key != 'q') {
+            if(key !== 'q') {
                 facetsFilter.push(key + ',in,' + value);
             }
             facetsUrl.push(key + '=' + value);
@@ -870,42 +904,63 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 facets.push(column.name);
             }
         });
+        // we don't do anything with facets!  So we probably don't need the above.
         params.columns.forEach(function (column, index) {
 
             if (column.search && column.search.value) {
-                // console.error(column);
-                let value = column.search.value;
                 // check the first character for a range filter operator
-
                 // data is the column field, at least for right now.
-                apiData[column.data] = value;
+                apiData[column.data] = column.search.value;
             }
         });
 
-        if (params.start) {
-            // was apiData.page = Math.floor(params.start / params.length) + 1;
-            // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
-        }
         apiData.offset = params.start;
-        console.log(searchPanesRaw.length);
-        if(searchPanesRaw.length == 0) {
-            apiData.facets = {};
-            this.columns.forEach((column, index) => {
-                if ( column.browsable ) {
-                    apiData.facets[column.name] = 1;
-                    // apiData['facets'][column.name][0]['total'] = 0;
-                }
-            });
-        } else {
-            apiData.facets = searchPanesRaw;
-        }
-
-        // console.error(apiData);
-
-        // add our own filters
-        // apiData['marking'] = ['fetch_success'];
+        apiData.facets = [];
+        // this could be replaced with sending a list of facets and skipping this =1, it'd be cleaner
+        this.columns.forEach((column, index) => {
+            if (column.browsable) {
+                apiData.facets.push(column.name);
+                // apiData.facets[column.name] = 1; // old way
+                // this seems odd, it should be a pipe-delimited list
+            }
+        });
 
         return apiData;
+    }
+
+    sequenceSearchPanes(data) {
+        let newOrderdata = [];
+        let searchPanesOrder = this.columns.filter(function(columnConfig) {
+            return columnConfig.browsable === true;
+        });
+
+        searchPanesOrder = searchPanesOrder.sort(function (a, b) {
+            if(a.browseOrder != b.browseOrder) {
+                return a.browseOrder - b.browseOrder;
+            }
+            let aData = 0;
+            let bData = 0;
+
+            if(typeof data[a.name] != 'undefined') {
+                aData = data[a.name].length;
+            }
+
+            if(typeof data[b.name] != 'undefined') {
+                bData = data[b.name].length;
+            }
+
+            return  bData - aData;
+        });
+
+        searchPanesOrder.forEach(function (index){
+           if(typeof data[index.name] != 'undefined') {
+               newOrderdata[index.name] =  data[index.name];
+           }
+        });
+
+        let newOptionOrderData = [];
+        newOptionOrderData['options'] = newOrderdata;
+        return newOptionOrderData;
     }
 
     initFooter(el) {
@@ -979,6 +1034,5 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         // see http://live.datatables.net/giharaka/1/edit for moving the footer to below the header
     }
-
 
 }

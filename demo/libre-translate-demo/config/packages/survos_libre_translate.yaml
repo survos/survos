@@ -1,0 +1,4 @@
+survos_libre_translate:
+  host: https://museado.org
+  port: 5000
+  apikey: 'MasterKey'

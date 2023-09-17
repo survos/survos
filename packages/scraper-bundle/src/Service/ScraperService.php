@@ -18,14 +18,12 @@ class ScraperService
 {
     use LoggerAwareTrait;
 
-
     public function __construct(
         private string              $dir,
         private HttpClientInterface $httpClient,
-        private ?CacheInterface      $cache,
-        private string $prefix,
-        private string $sqliteFilename,
-        LoggerInterface $logger = null,
+        private ?CacheInterface     $cache,
+        private string              $prefix,
+        private string              $sqliteFilename,
     )
     {
     }
@@ -91,7 +89,13 @@ class ScraperService
         return $this;
     }
 
-    public function fetchUrlFilename(string $url, array $parameters = [], array $headers = [], string $key = null): string
+    public function fetchUrlFilename(
+        string $url,
+        array $parameters = [],
+        array $headers = [],
+        string $key = null,
+        string $method = 'GET'
+    ): string
     {
         if (empty($key)) {
             $key = pathinfo($url, PATHINFO_FILENAME);
@@ -103,11 +107,19 @@ class ScraperService
         }
 
         if (!file_exists($fullPath)) {
-            $this->logger && $this->logger->info("Fetching $url to " . $fullPath);
-            $content = $this->httpClient->request('GET', $url, [
-                'query' => $parameters,
+            $options = [
                 'timeout' => 10
-            ])->getContent();
+            ];
+            if ($method == 'POST') {
+                $options['json'] = $parameters;
+            } else {
+                $options['query'] = $parameters;
+            }
+
+            $options['headers'] = $headers;
+
+            $this->logger && $this->logger->info("Fetching $url to " . $fullPath);
+            $content = $this->httpClient->request($method, $url, $options)->getContent();
             file_put_contents($fullPath, $content);
         }
         return realpath($fullPath);
@@ -127,11 +139,19 @@ class ScraperService
     }
 
 
-    public function fetchUrlUsingCache(string $url, array $parameters = [], array $headers = [], string $key = null)
+    public function fetchUrlUsingCache(
+        string $url,
+        array $parameters = [],
+        array $headers = [],
+        string $key = null,
+        string $method = 'GET'
+    )
     {
         if (empty($key)) {
-            $key = pathinfo($url, PATHINFO_FILENAME);
+            $key = pathinfo($url, PATHINFO_FILENAME); // sanity
+            $key .= '-' . hash('xxh3', $url . json_encode($parameters));
         }
+        assert($this->getCache());
         if (!$cache = $this->getCache()) {
             $sqliteFilename = $this->getFullFilename();
             dd($sqliteFilename);
@@ -142,33 +162,52 @@ class ScraperService
                 'sqlite:///' . $sqliteFilename,
             );
         }
-//        dd(self::getFilename($cache));
 
+        $options = [
+            'timeout' => 30
+        ];
+        if ($method == 'POST') {
+            $options['json'] = $parameters;
+        } else {
+            $options['query'] = $parameters;
+        }
+
+        $options['headers'] = $headers;
+
+//        dd(self::getFilename($cache));
 //        dd($sqliteFilename, file_exists($sqliteFilename));
 //        $cache = $this->cache;
         $slugger = new AsciiSlugger();
         $key = $slugger->slug($key)->toString();
 //        assert($cache->hasItem($key), 'missing '. $key);
-
 //        https://symfony.com/doc/current/components/cache/adapters/pdo_doctrine_dbal_adapter.html#using-doctrine-dbal
-        $value = $cache->get( $key, function (ItemInterface $item) use ($url, $parameters, $headers, $cache, $key) {
-            try {
-                $this->logger->info("Fetching " . $url);
-                $request = $this->httpClient->request('GET', $url, [
-                    'query' => $parameters,
-                    'timeout' => 30,
-//                    'retry_failed' => [
-//                        'max_retries' => 5,
-//                        'delay' => 2000,
-//                        'multiplier'=> 5,
-//                    ]
 
-                ]);
-                switch ($statusCode = $request->getStatusCode()) {
-                    case 200: $content = $request->getContent(); break;
-                    case 403: $content = null;
-                    case 404: $content = null;
-                    default: $content = null;
+        // we need better logic for handling errors. For now, retry empty
+        $item = $cache->getItem($key);
+        if ($item->isHit()) {
+            $value = $item->get();
+            if (empty($value)) {
+                $cache->delete($key);
+            }
+        }
+
+        $value = $cache->get( $key, function (ItemInterface $item) use ($url, $options, $key, $method) {
+
+            $this->logger->info("Missing $key, Fetching " . $url);
+            $request = $this->httpClient->request($method, $url, $options);
+            try {
+                $statusCode = $request->getStatusCode();
+            } catch (\Exception $exception) {
+                return null;
+                // network error
+            }
+
+            try {
+                switch ($statusCode) {
+                    case 200: $content = $request->getContent(); break; // this could fail.
+                    case 403:
+                    case 404:
+                    default: $content = json_encode(['statusCode' => $statusCode]);
                 }
                 $this->logger->info(sprintf("received " . $statusCode. ' storing to #%s', $key));
             } catch (\Exception $exception) {
@@ -178,6 +217,14 @@ class ScraperService
             }
             return $content;
         });
+        if (empty($value)) {
+//            assert(false, $key . "\n" . self::getFilename($cache) );
+        }
+        if (is_array($value)) {
+            // status codes?
+        }
+
+
         if (empty($value)) {
 //            assert(false, $key . "\n" . self::getFilename($cache) );
         }
@@ -246,18 +293,16 @@ class ScraperService
     }
 
 
-    public function fetchUrl(string $url, array $parameters = [], array $headers = [], string $key = null)
+    public function fetchUrl(string $url, array $parameters = [], array $headers = [], string $key = null, string $method = 'GET')
     {
         // use the cache if it exists, otherwise, use the directory and prefix
         // maybe don't allow for images and other binary files?
         if ($this->cache) {
-            return $this->fetchUrlUsingCache($url, $parameters, $headers, $key);
+            return $this->fetchUrlUsingCache($url, $parameters, $headers, $key, $method);
 
         } else {
-            return file_get_contents($this->fetchUrlFilename($url, $parameters, $headers, $key));
+            return file_get_contents($this->fetchUrlFilename($url, $parameters, $headers, $key, $method));
         }
     }
-
-
 }
 

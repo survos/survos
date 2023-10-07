@@ -11,13 +11,13 @@ V+=$P
 V+='" }'
 
 echo $V;
-lb() {
-  composer config "repositories.$1" '
-    {
-      "type": "path",
-      "url": "$P"
-    }'
-}
+#lb() {
+#  composer config "repositories.$1" '
+#    {
+#      "type": "path",
+#      "url": "$P"
+#    }'
+#}
 composer config repositories.$1 "$V"
 composer req $ORG/$1-bundle:*@dev -W
-yarn dev
+# yarn dev

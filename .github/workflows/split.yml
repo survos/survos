@@ -48,6 +48,7 @@ jobs:
           - {local_path: 'tree-bundle', split_repository: 'SurvosTreeBundle'}
           - {local_path: 'reveal-bundle', split_repository: 'SurvosRevealBundle'}
           - {local_path: 'scraper-bundle', split_repository: 'SurvosScraperBundle'}
+          - {local_path: 'simple-datatables-bundle', split_repository: 'SurvosSimpleDatatablesBundle'}
           - {local_path: 'wiki-bundle', split_repository: 'SurvosWikiBundle'}
           - {local_path: 'workflow-helper-bundle', split_repository: 'SurvosWorkflowHelperBundle'}
 

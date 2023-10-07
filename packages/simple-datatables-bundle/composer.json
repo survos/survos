@@ -1,6 +1,6 @@
 {
     "name": "survos/simple-datatables-bundle",
-    "description": "incorporate , using twig and stimulus, twig_component requires ^2.3",
+    "description": "incorporate simple datatables, using twig and stimulus",
     "keywords": [
         "symfony-ux",
         "symfony6"
@@ -40,8 +40,7 @@
         "phpstan": "vendor/bin/phpstan analyse"
     },
     "suggest": {
-        "monolog/monolog": "Allows more advanced logging of the application flow",
-        "survos/api-grid-bundle": "For javascript-based grid rendering"
+        "monolog/monolog": "Allows more advanced logging of the application flow"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

@@ -9,10 +9,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
-        "symfony/flex": "^2",
         "symfony/config": "^6.3.0",
         "symfony/dependency-injection": "^6.3.0",
-        "symfony/http-kernel": "^6.3.0",
         "twig/twig": "^3.7"
     },
     "flex-require": {
@@ -24,7 +22,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Survos\\FooBundle\\": "src/"
+            "Survos\\RevealBundle\\": "src/"
         }
     },
     "require-dev": {

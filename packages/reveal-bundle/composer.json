@@ -13,16 +13,9 @@
         "symfony/dependency-injection": "^6.3.0",
         "twig/twig": "^3.7"
     },
-    "flex-require": {
-        "symfony/console": "*",
-        "symfony/dotenv": "*",
-        "symfony/framework-bundle": "*",
-        "symfony/runtime": "*",
-        "symfony/yaml": "*"
-    },
     "autoload": {
         "psr-4": {
-            "Survos\\RevealBundle\\": "src/"
+            "Survos\\Reveal\\": "src/"
         }
     },
     "require-dev": {

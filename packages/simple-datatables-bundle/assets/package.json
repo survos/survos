@@ -1,0 +1,27 @@
+{
+  "name": "@survos/ux-simple-datatables",
+  "description": "integrate php and javascript helpers for Simple Datatables",
+  "license": "MIT",
+  "version": "1.0.3",
+  "symfony": {
+    "controllers": {
+      "simple-datatables": {
+        "main": "src/controllers/simple_datatables_controller.js",
+        "webpackMode": "eager",
+        "fetch": "lazy",
+        "enabled": true,
+        "autoimport": {
+        }
+      }
+    }
+  },
+  "peerDependencies": {
+    "@hotwired/stimulus": "^3.1.0"
+  },
+  "devDependencies": {
+    "@hotwired/stimulus": "^3.1.0"
+  },
+  "dependencies": {
+    "simple-datatables": "^1.7.9"
+  }
+}

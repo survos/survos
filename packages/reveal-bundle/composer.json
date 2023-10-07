@@ -9,10 +9,18 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
-        "symfony/config": "^6.1.0",
-        "symfony/dependency-injection": "^6.1.0",
-        "symfony/http-kernel": "^6.1.0",
-        "twig/twig": "^3.4"
+        "symfony/flex": "^2",
+        "symfony/config": "^6.3.0",
+        "symfony/dependency-injection": "^6.3.0",
+        "symfony/http-kernel": "^6.3.0",
+        "twig/twig": "^3.7"
+    },
+    "flex-require": {
+        "symfony/console": "*",
+        "symfony/dotenv": "*",
+        "symfony/framework-bundle": "*",
+        "symfony/runtime": "*",
+        "symfony/yaml": "*"
     },
     "autoload": {
         "psr-4": {
@@ -21,11 +29,11 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^1.7",
-        "symfony/browser-kit": "^6.1.0",
-        "symfony/framework-bundle": "^6.1.0",
-        "symfony/phpunit-bridge": "^6.1.0",
-        "symfony/twig-bundle": "^6.1.0",
-        "symfony/var-dumper": "^6.1.0",
+        "symfony/browser-kit": "^6.3.0",
+        "symfony/framework-bundle": "^6.3.0",
+        "symfony/phpunit-bridge": "^6.3.0",
+        "symfony/twig-bundle": "^6.3.0",
+        "symfony/var-dumper": "^6.3.0",
         "symfony/webpack-encore-bundle": "^1.11"
     }
 }

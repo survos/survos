@@ -222,7 +222,7 @@ class CrawlerService
         }
         // hmm, how should 301's be tracked?
         if (!in_array($status, [200, 302, 301])) {
-            $msg = $link->username . '@' . $this->baseUrl .
+            $msg = ($link->username ? $link->username . '@' : '') . $this->baseUrl .
                 trim($link->getPath(), '/') . ' ' .
                 $link->getRoute() . ' caused a ' . $status . ' found on '
                 . $link->foundOn;

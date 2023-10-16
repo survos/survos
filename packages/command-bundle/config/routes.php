@@ -5,7 +5,7 @@ use Survos\CommandBundle\Controller\CommandController;
 
 return function (RoutingConfigurator $routes) {
     $routes->add('survos_commands', '/commands')
-        ->controller([\Survos\CommandBundle\Controller\CommandController::class, 'commands'])
+        ->controller([CommandController::class, 'commands'])
     ;
 
     $routes->add('survos_command', '/run-command/{commandName}')

@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Survos\\Reveal\\": "src/"
+            "Survos\\RevealBundle\\": "src/"
         }
     },
     "require-dev": {
@@ -24,7 +24,6 @@
         "symfony/framework-bundle": "^6.3.0",
         "symfony/phpunit-bridge": "^6.3.0",
         "symfony/twig-bundle": "^6.3.0",
-        "symfony/var-dumper": "^6.3.0",
-        "symfony/webpack-encore-bundle": "^1.11"
+        "symfony/var-dumper": "^6.3.0"
     }
 }

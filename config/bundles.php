@@ -25,5 +25,6 @@ return [
     Survos\Bundle\MakerBundle\SurvosMakerBundle::class => ['dev' => true, 'test' => true],
     Survos\Grid\SurvosGridBundle::class => ['all' => true],
     Survos\CoreBundle\SurvosCoreBundle::class => ['all' => true],
-    Survos\LibreTranslateBundle\SurvosLibreTranslateBundle::class => ['all' => true]
+    Survos\LibreTranslateBundle\SurvosLibreTranslateBundle::class => ['all' => true],
+    Symfony\UX\StimulusBundle\StimulusBundle::class => ['all' => true],
 ];

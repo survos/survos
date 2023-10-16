@@ -1,5 +1,4 @@
 <?php
-/** generated from /home/tac/g/survos/survos/packages/maker-bundle/templates/skeleton/bundle/src/Bundle.tpl.php */
 
 namespace Survos\RevealBundle;
 
@@ -7,7 +6,6 @@ use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
 
 class SurvosRevealBundle extends AbstractBundle
 {
@@ -26,7 +24,6 @@ $definition->setArgument('$widthFactor', $config['widthFactor']);
 $definition->setArgument('$height', $config['height']);
 $definition->setArgument('$foregroundColor', $config['foregroundColor']);
 */
-
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -42,5 +39,4 @@ $definition->setArgument('$foregroundColor', $config['foregroundColor']);
 //            ->integerNode('min_sunshine')->defaultValue(3)->end()
             ->end();
     }
-
 }

@@ -6,8 +6,6 @@
                 "fetch": "lazy",
                 "autoimport": {
                     "datatables.net-bs5/js/dataTables.bootstrap5.min.js": true,
-                    "datatables.net-datetime/dist/dataTables.dateTime.min.css": true,
-                    "datatables.net-datetime/dist/dataTables.dateTime.min.js": true,
                     "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,
                     "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css": true,
                     "datatables.net-scroller-bs5/js/scroller.bootstrap5.min.js": true,

@@ -22,6 +22,8 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "datatables.net-datetime": "^1.4.1"
+        "@tabler/core": "^1.0.0-beta20",
+        "datatables.net-datetime": "^1.4.1",
+        "simple-datatables": "^8.0.0"
     }
 }

@@ -25,6 +25,6 @@ return [
     Survos\InspectionBundle\SurvosInspectionBundle::class => ['all' => true],
     Survos\ApiGrid\SurvosApiGridBundle::class => ['all' => true],
     Survos\CrawlerBundle\SurvosCrawlerBundle::class => ['all' => true],
-    Survos\CommandBundle\SurvosCommandBundle::class => ['all' => true],
     Symfony\UX\StimulusBundle\StimulusBundle::class => ['all' => true],
+    Survos\CommandBundle\SurvosCommandBundle::class => ['all' => true],
 ];

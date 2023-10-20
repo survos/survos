@@ -45,19 +45,19 @@ final class AppLoadDataCommand extends InvokableServiceCommand
 
 //        dd($json);
 
-        foreach (json_decode($json, true) as $record) {
+        foreach (json_decode($json) as $record) {
 
-            $official = $serializer->denormalize(
-                $record,
-                Official::class,
-                null
-            );
-            dd($official);
-
-
-
-            $normalizers = [new ObjectNormalizer()];
-            $serializer = new Serializer($normalizers, []);
+//            $official = $serializer->denormalize(
+//                $record,
+//                Official::class,
+//                null
+//            );
+//            dd($official);
+//
+//
+//
+//            $normalizers = [new ObjectNormalizer()];
+//            $serializer = new Serializer($normalizers, []);
 
             $name = $record->name;
             $bio = $record->bio;

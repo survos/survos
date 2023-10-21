@@ -2,6 +2,7 @@
 
 namespace Survos\Datatables;
 
+use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\Datatables\Components\GridComponent;
 use Survos\Datatables\Components\ItemGridComponent;
 use Survos\Datatables\Twig\TwigExtension;
@@ -12,12 +13,12 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\UX\StimulusBundle\Twig\StimulusTwigExtension;
-use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Twig\Environment;
 
 class SurvosDatatablesBundle extends AbstractBundle
 {
-    // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
+    use HasAssetMapperTrait;
+
     /**
      * @param array<mixed> $config
      */
@@ -67,7 +68,7 @@ class SurvosDatatablesBundle extends AbstractBundle
             return;
         }
 
-        $dir = realpath(__DIR__.'/../assets/src/controllers');
+        $dir = realpath(__DIR__ . '/../assets/');
         assert(file_exists($dir), $dir);
 
         $builder->prependExtensionConfig('framework', [
@@ -77,32 +78,5 @@ class SurvosDatatablesBundle extends AbstractBundle
                 ],
             ],
         ]);
-
-        // https://stackoverflow.com/questions/72507212/symfony-6-1-get-another-bundle-configuration-data/72664468#72664468
-        //        // iterate in reverse to preserve the original order after prepending the config
-        //        foreach (array_reverse($configs) as $config) {
-        //            $container->prependExtensionConfig('my_maker', [
-        //                'root_namespace' => $config['root_namespace'],
-        //            ]);
-        //        }
-    }
-
-    private function isAssetMapperAvailable(ContainerBuilder $container): bool
-    {
-        if (!interface_exists(AssetMapperInterface::class)) {
-            assert(false, 'for now, add the asset mapper component');
-            return false;
-        }
-
-        // check that FrameworkBundle 6.3 or higher is installed
-        $bundlesMetadata = $container->getParameter('kernel.bundles_metadata');
-        if (!isset($bundlesMetadata['FrameworkBundle'])) {
-            assert(false, 'symfony framework 6.3+ required.');
-            return false;
-        }
-
-        $file = $bundlesMetadata['FrameworkBundle']['path'].'/Resources/config/asset_mapper.php';
-        assert(is_file($file), $file);
-        return is_file($file);
     }
 }

@@ -1,5 +1,6 @@
 import {Controller} from "@hotwired/stimulus";
-import {DataTable} from "simple-datatables"
+import DataTable from 'datatables.net';
+
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
@@ -28,9 +29,6 @@ export default class extends Controller {
         // super.connect();
         console.error('hello from ' + this.identifier);
         const dataTable = new DataTable(this.element, {
-            searchable: this.searchValue,
-            fixedHeight: this.fixedHeightValue,
-            perPage: this.perPageValue,
         });
         this.initialized = true;
     }

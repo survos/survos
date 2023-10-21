@@ -15,8 +15,10 @@ symfony new simple-datatables-demo --webapp && cd simple-datatables-demo
 # composer config prefer-stable true
 composer req symfony/asset-mapper
 composer req symfony/stimulus-bundle:2.x-dev
-composer req survos/simple-datatables-bundle
+composer req survos/datatables-bundle
+
 bin/console importmap:require bootstrap
+bin/console importmap:require datatables
 bin/console make:controller AppController
 sed -i "s|Route('/app'|Route('/'|" src/Controller/AppController.php
 

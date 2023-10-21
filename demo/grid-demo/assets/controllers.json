@@ -22,6 +22,7 @@
                 "enabled": true,
                 "fetch": "lazy",
                 "autoimport": {
+                    "bootstrap/dist/css/bootstrap.min.css": true,
                     "datatables.net-bs5/js/dataTables.bootstrap5.min.js": true,
                     "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,
                     "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css": true,

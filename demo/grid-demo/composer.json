@@ -21,7 +21,7 @@
         "survos/command-bundle": "^1.5",
         "survos/core-bundle": "^1.4.41",
         "survos/crawler-bundle": "^1.4",
-        "survos/grid-bundle": "^1.4.41",
+        "survos/grid-bundle": "*@dev",
         "survos/inspection-bundle": "^1.4.41",
         "symfony/asset": "^6.4",
         "symfony/asset-mapper": "^6.4",
@@ -113,7 +113,6 @@
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4.4",
         "phpunit/phpunit": "^9.6.7",
-        "survos/maker-bundle": "*@dev",
         "symfony/browser-kit": "^6.4",
         "symfony/css-selector": "^6.4",
         "symfony/debug-bundle": "^6.4",
@@ -124,6 +123,10 @@
         "symplify/easy-coding-standard": "^11.3.4"
     },
     "repositories": {
+        "grid": {
+            "type": "path",
+            "url": "../../../survos/packages/grid-bundle"
+        },
         "api-grid": {
             "type": "path",
             "url": "../../../survos/packages/api-grid-bundle"

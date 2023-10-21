@@ -1,16 +1,16 @@
 # Survos Simple Datatables Bundle
 
-Integrate the Simple Datatables library from https://github.com/fiduswriter/simple-datatables/ as a stimulus component.
+Integrate the Datatables library from https://datatables.net as a stimulus component.
 
 
 ```bash
-composer req survos/simple-datatables-bundle
+composer req survos/datatables-bundle
 ```
 
 ## 
 
 ## Complete project
-symfony new simple-datatables-demo --webapp && cd simple-datatables-demo
+symfony new datatables-demo --webapp --version=next && cd datatables-demo
 # composer config minimum-stability dev
 # composer config prefer-stable true
 composer req symfony/asset-mapper
@@ -18,7 +18,6 @@ composer req symfony/stimulus-bundle:2.x-dev
 composer req survos/datatables-bundle
 
 bin/console importmap:require bootstrap
-bin/console importmap:require datatables
 bin/console make:controller AppController
 sed -i "s|Route('/app'|Route('/'|" src/Controller/AppController.php
 
@@ -26,7 +25,7 @@ cat > templates/app/index.html.twig <<END
 {% extends 'base.html.twig' %}
 
 {% block body %}
-     <table class="table" {{ stimulus_controller('@survos/simple-datatables-bundle/table', {perPage: 5, sortable: true}) }}>
+     <table class="table" {{ stimulus_controller('@survos/datatables-bundle/table', {perPage: 5, sortable: true}) }}>
         <thead>
         <tr>
             <th>abbr</th>
@@ -46,7 +45,7 @@ cat > templates/app/index.html.twig <<END
 {% endblock %}
 END
 symfony server:start -d
-
+symfony open:local
 
 ## Ideas
 

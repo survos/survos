@@ -21,7 +21,7 @@
         "survos/command-bundle": "^1.5",
         "survos/core-bundle": "^1.4.41",
         "survos/crawler-bundle": "^1.4",
-        "survos/grid-bundle": "*@dev",
+        "survos/grid-bundle": "^1.6@dev",
         "survos/inspection-bundle": "^1.4.41",
         "symfony/asset": "^6.4",
         "symfony/asset-mapper": "^6.4",

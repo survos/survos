@@ -26,7 +26,7 @@
         "fabpot/goutte": "^4.0",
         "fakerphp/faker": "^1.20",
         "freearhey/wikidata": "^3.6",
-        "friendsofsymfony/jsrouting-bundle": "^3.2",
+        "friendsofsymfony/jsrouting-bundle": "^3.3",
         "gajus/dindent": "^2.0",
         "haydenpierce/class-finder": "^0.4.3",
         "illuminate/collections": "^10.9",

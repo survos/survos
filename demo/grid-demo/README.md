@@ -1,4 +1,4 @@
-Demo for survos/grid-bundle
+fDemo for survos/grid-bundle
 
 ## Quick Start: Download and run
 git clone git@github.com:survos/grid-demo
@@ -23,7 +23,7 @@ yarn add bootstrap @popperjs/core
 ```
 bin/console make:fixtures CongressFixtures
 See the Fixtures file.
-bin/console doctrine:fixtures:load -n 
+bin/console doctrine:fixtures:load -n f
 ```
 
 ## Symfony Crud

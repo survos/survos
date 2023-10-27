@@ -42,7 +42,6 @@ final class AppLoadDataCommand extends InvokableServiceCommand
 
         $url = 'https://theunitedstates.io/congress-legislators/legislators-current.json';
         $json = $this->cache->get(md5($url), fn(CacheItem $cacheItem) => file_get_contents($url));
-
 //        dd($json);
 
         foreach (json_decode($json) as $record) {

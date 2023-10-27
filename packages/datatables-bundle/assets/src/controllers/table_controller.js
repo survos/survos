@@ -1,5 +1,6 @@
 import {Controller} from "@hotwired/stimulus";
-import DataTable from 'datatables.net';
+// import DataTable from 'datatables.net';
+import DataTable from 'https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.mjs'
 
 
 /* stimulusFetch: 'lazy' */
@@ -27,10 +28,11 @@ export default class extends Controller {
 
     connect() {
         // super.connect();
-        console.error('hello from ' + this.identifier);
-        const dataTable = new DataTable(this.element, {
-        });
-        this.initialized = true;
+        if (!this.initialized) {
+            console.error('hello from ' + this.identifier);
+            const dataTable = new DataTable(this.element, {});
+            this.initialized = true;
+        }
     }
 
     disconnect() {

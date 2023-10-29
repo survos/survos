@@ -114,7 +114,8 @@
             "symfony/flex": true,
             "symfony/runtime": true,
             "phpstan/extension-installer": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "phpro/grumphp": true
         },
         "optimize-autoloader": true,
         "preferred-install": {
@@ -204,6 +205,6 @@
             "url": "git@github.com:survos/velzon-bundle.git"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }

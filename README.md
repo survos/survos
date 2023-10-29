@@ -6,10 +6,15 @@
 
 Although the bundles often work together, they can be used independently.  SurvosBootstrapBundle is an opinionated way to quickly integrated Bootstrap with several Twig Components and implementing the Sneat theme.  It leverages KnpMenuBundle to populate the sidebar, navbar, page header and footer.  See the [Build A Real Website in 10 minutes] tutorial.  Although no bundles have bootstrap-bundle as a dependent, some visually-oriented bundles, like grid-bundle and tree-bundle, require Boostrap to render as intended.  Not surprisingly, all the demos and projects use bootstrap-bundle/
 
+## Bundles and Dependencies
+
+* simple-datatables-bundle: 
+
 Demos
 -----
 
 See the bundles in actions, and/or build them locally, with these demos (using bootstrap-bundle)
+
 
 * [sneat-demo](https://github.com/survos/bootstrap-bundle-demo) faker, auth. <a target="_blank" href="https://sneat-demo.herokuapp.com/">Demo</a>
 * [tree-demo](https://github.com/survos/dt-demos) tree, auth [Demo](https://tree-bundle-demo.herokuapp.com/)

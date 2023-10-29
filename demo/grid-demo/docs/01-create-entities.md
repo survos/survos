@@ -6,6 +6,7 @@ git clean -f src
 bin/console doctrine:database:drop --force 
 bin/console c:c
 composer dump
+composer req api
 echo "firstName,string,16,yes," | sed "s/,/\n/g"  | bin/console -a make:entity Official
 echo "lastName,string,32,no," | sed "s/,/\n/g"  | bin/console make:entity Official
 echo "officialName,string,48,no," | sed "s/,/\n/g"  | bin/console make:entity Official

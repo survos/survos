@@ -18,12 +18,14 @@ yarn add bootstrap @popperjs/core
 
 ## Create the entities 
 
-[Create The Entity Classes](01-create-entities.md)
+[Create The Entity Classes](docs/01-create-entities.md)
 
 ```
+composer require orm-fixtures --dev       
 bin/console make:fixtures CongressFixtures
+
 See the Fixtures file.
-bin/console doctrine:fixtures:load -n f
+bin/console doctrine:fixtures:load -n 
 ```
 
 ## Symfony Crud
@@ -59,7 +61,7 @@ If you already have an HTML table with a header and body (thead and tbody), then
 
     <table class="table" {{ stimulus_controller('@survos/datatables-bundle/datatables') }}>
 
-Now if we go back and add fields to the entity, we have to edit this file and add a new row heading PLUS the new row data.  If we want to re-order the columns, or remove some, we have two places to do that, making it somewhat error prone.
+Now if we go back and add fields to the entity, we have to edit this file and add a new row heading PLUS the new row data.  If we want to re-order the columns, or remove some, we have two places to do that, making it somewhat error-prone.
 
 So the next way to use the bundle is to generate the datable from the data.  Change congress/index.html.twig to 
 ```twig

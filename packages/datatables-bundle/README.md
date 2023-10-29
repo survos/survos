@@ -10,6 +10,7 @@ composer req survos/datatables-bundle
 ## 
 
 ## Complete project
+```bash
 symfony new datatables-demo --webapp --version=next && cd datatables-demo
 # composer config minimum-stability dev
 # composer config prefer-stable true
@@ -46,6 +47,7 @@ cat > templates/app/index.html.twig <<END
 END
 symfony server:start -d
 symfony open:local
+```
 
 ## Ideas
 

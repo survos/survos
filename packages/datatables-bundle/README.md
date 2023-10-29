@@ -16,9 +16,9 @@ symfony new datatables-demo --webapp --version=next && cd datatables-demo
 # composer config prefer-stable true
 composer req symfony/asset-mapper
 composer req symfony/stimulus-bundle:2.x-dev
-composer req survos/datatables-bundle
-
-bin/console importmap:require bootstrap
+../lb.sh datatables
+# composer req survos/datatables-bundle
+# bin/console importmap:require bootstrap
 bin/console make:controller AppController
 sed -i "s|Route('/app'|Route('/'|" src/Controller/AppController.php
 

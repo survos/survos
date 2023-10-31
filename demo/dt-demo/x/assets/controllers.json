@@ -1,0 +1,26 @@
+{
+    "controllers": {
+        "@survos/datatables-bundle": {
+            "table": {
+                "enabled": true,
+                "fetch": "lazy"
+            }
+        },
+        "@survos/grid-bundle": {
+            "grid": {
+                "enabled": true,
+                "fetch": "lazy",
+                "autoimport": {
+                    "axios": "^1.5.1"
+                }
+            }
+        },
+        "@survos/html-prettify-bundle": {
+            "prettify": {
+                "enabled": true,
+                "fetch": "eager"
+            }
+        }
+    },
+    "entrypoints": []
+}

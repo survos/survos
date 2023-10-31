@@ -43,7 +43,6 @@
         "stof/doctrine-extensions-bundle": "^1.7",
         "survos/bootstrap-bundle": "^1.4",
         "survos/command-bundle": "^1.4",
-        "survos/composer-json-manipulator": "^11.2",
         "survos/grid-bundle": "^1.4",
         "symfony/cache": "^6.1",
         "symfony/config": "^6.1.0",
@@ -69,7 +68,6 @@
         "symfony/validator": "^6.1.0",
         "symfony/workflow": "^6.1.0",
         "symfony/yaml": "^6.1.0",
-        "symplify/composer-json-manipulator": "^11.1",
         "tacman/twig-tree-tag": "^3.0.1",
         "twig/extra-bundle": "^3.4",
         "twig/string-extra": "^3.4",
@@ -106,7 +104,8 @@
         "symfony/web-profiler-bundle": "^6.1.0",
         "symplify/config-transformer": "^11.1",
         "symplify/easy-coding-standard": "^11.1",
-        "symplify/monorepo-builder": "11.2.2.72"
+        "symplify/monorepo-builder": "11.2.2.72",
+        "tacman//composer-json-manipulator": "^11.1"
     },
     "config": {
         "allow-plugins": {

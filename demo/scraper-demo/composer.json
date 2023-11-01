@@ -12,6 +12,7 @@
         "doctrine/orm": "^2.16",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpstan/phpdoc-parser": "^1.24",
+        "survos/scraper-bundle": "*@dev",
         "symfony/asset": "6.4.*",
         "symfony/console": "6.4.*",
         "symfony/doctrine-messenger": "6.4.*",
@@ -98,5 +99,11 @@
         "symfony/phpunit-bridge": "^6.3",
         "symfony/stopwatch": "6.4.*",
         "symfony/web-profiler-bundle": "6.4.*"
+    },
+    "repositories": {
+        "scraper": {
+            "type": "path",
+            "url": "../../../survos/packages/scraper-bundle"
+        }
     }
 }

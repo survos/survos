@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AppController!{% endblock %}
+
+{% block body %}
+
+    {% set url = 'https://jsonplaceholder.typicode.com/users' %}
+    {% set users = request_data(url) %}
+    <ul>
+        {% for row in users %}
+            <li>{{ row.name }} / {{ row.website }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

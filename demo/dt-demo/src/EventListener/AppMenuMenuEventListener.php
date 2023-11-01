@@ -41,7 +41,7 @@ final class AppMenuMenuEventListener implements KnpMenuHelperInterface
         foreach ([CongressController::class, TermCrudController::class] as $controllerClass) {
             $controllerMenu = $this->addSubmenu($menu,
                 label: (new \ReflectionClass($controllerClass))->getShortName());
-            foreach (['index','new'] as $controllerRoute) {
+            foreach (['index','new','browse'] as $controllerRoute) {
                 $this->add($controllerMenu, $controllerClass.'::'.$controllerRoute,
                     label: $controllerRoute);
             }

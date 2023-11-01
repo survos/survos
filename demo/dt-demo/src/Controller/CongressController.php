@@ -22,6 +22,15 @@ class CongressController extends AbstractController
         ]);
     }
 
+    #[Route('/browse',  methods: ['GET'], options: ['label' => "Browse (simple-dt)"])]
+    public function browse(): Response
+    {
+        return $this->render('congress/browse.html.twig', [
+            'class' => Official::class
+        ]);
+    }
+
+
     #[Route('/new', name: 'app_congress_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -49,6 +58,7 @@ class CongressController extends AbstractController
             'official' => $official,
         ]);
     }
+
 
     #[Route('/{id}/edit', name: 'app_congress_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Official $official, EntityManagerInterface $entityManager): Response

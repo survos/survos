@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Official;
 use App\Entity\Term;
 use App\Form\TermType;
 use App\Repository\TermRepository;
@@ -39,6 +40,14 @@ class TermCrudController extends AbstractController
         return $this->render('term_crud/new.html.twig', [
             'term' => $term,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/browse',  methods: ['GET'], options: ['label' => "Browse (simple-dt)"])]
+    public function browse(): Response
+    {
+        return $this->render('term/browse.html.twig', [
+            'class' => Official::class
         ]);
     }
 

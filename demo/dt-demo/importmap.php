@@ -41,7 +41,7 @@ return [
         'version' => '3.7.1',
     ],
     'datatables.net' => [
-        'version' => '1.13.6',
+        'version' => '2.1.1',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
         'version' => '1.13.6',
@@ -59,5 +59,12 @@ return [
     ],
     'html-prettify' => [
         'version' => '1.0.7',
+    ],
+    'datatables.net-dt' => [
+        'version' => '1.13.6',
+    ],
+    'datatables.net-dt/css/jquery.dataTables.min.css' => [
+        'version' => '1.13.6',
+        'type' => 'css',
     ],
 ];

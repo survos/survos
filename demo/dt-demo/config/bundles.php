@@ -25,4 +25,7 @@ return [
     Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['dev' => true, 'test' => true],
     KnpU\OAuth2ClientBundle\KnpUOAuth2ClientBundle::class => ['all' => true],
     Survos\AuthBundle\SurvosAuthBundle::class => ['all' => true],
+    Survos\InspectionBundle\SurvosInspectionBundle::class => ['all' => true],
+    FOS\JsRoutingBundle\FOSJsRoutingBundle::class => ['all' => true],
+    Survos\ApiGrid\SurvosApiGridBundle::class => ['all' => true],
 ];

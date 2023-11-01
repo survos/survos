@@ -28,4 +28,5 @@ return [
     Survos\InspectionBundle\SurvosInspectionBundle::class => ['all' => true],
     FOS\JsRoutingBundle\FOSJsRoutingBundle::class => ['all' => true],
     Survos\ApiGrid\SurvosApiGridBundle::class => ['all' => true],
+    Survos\Scraper\SurvosScraperBundle::class => ['all' => true],
 ];

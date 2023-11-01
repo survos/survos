@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01218ac9a8a1c68a2b0a6e5a74750316",
+    "content-hash": "bb16fb387784e6b4975c47ea43cc5fb4",
     "packages": [
         {
             "name": "api-platform/core",
@@ -3649,7 +3649,7 @@
         },
         {
             "name": "survos/api-grid-bundle",
-            "version": "dev-main",
+            "version": "dev-sy64",
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/api-grid-bundle",
@@ -4392,6 +4392,52 @@
                 "crud",
                 "generator",
                 "symfony"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "survos/scraper-bundle",
+            "version": "dev-sy64",
+            "dist": {
+                "type": "path",
+                "url": "../../../survos/packages/scraper-bundle",
+                "reference": "bf9de66014a41eaded456a8426298aa9163ff226"
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/config": "^6.3 || ^7.0",
+                "symfony/dependency-injection": "^6.3 || ^7.0",
+                "symfony/http-client": "^6.3 || ^7.0",
+                "symfony/http-kernel": "^6.3 || ^7.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.8",
+                "phpunit/phpunit": "^9.5",
+                "psr/log": "^3.0",
+                "symfony/browser-kit": "^6.3 || ^7.0",
+                "symfony/cache": "^6.3 || ^7.0",
+                "symfony/framework-bundle": "^6.3 || ^7.0",
+                "symfony/phpunit-bridge": "^6.3 || ^7.0",
+                "symfony/twig-bundle": "^6.3 || ^7.0",
+                "symfony/var-dumper": "^6.3 || ^7.0",
+                "twig/twig": "^3.4"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Survos\\Scraper\\Tests\\": "tests/",
+                    "Survos\\Scraper\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Scrape and cache web pages",
+            "keywords": [
+                "symfony-ux",
+                "symfony6"
             ],
             "transport-options": {
                 "relative": true
@@ -12876,6 +12922,7 @@
         "survos/grid-bundle": 20,
         "survos/html-prettify-bundle": 20,
         "survos/maker-bundle": 20,
+        "survos/scraper-bundle": 20,
         "symfony/stimulus-bundle": 20
     },
     "prefer-stable": true,

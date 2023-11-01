@@ -17,7 +17,18 @@
 
     Some Grid Demos
 
-    {% endblock %}
+    {% set url = 'https://jsonplaceholder.typicode.com/users' %}
+    {% set users = request_data(url) %}
+
+    {% set columns = users[0]|keys %}
+    <twig:grid :data="users" :columns="columns">
+        <twig:block name="id">
+            {{ row.id }}
+        </twig:block>
+    </twig:grid>
+
+
+{% endblock %}
 
 {% block demo %}
     {% for color in ['primary','warning'] %}

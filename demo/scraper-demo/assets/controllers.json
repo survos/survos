@@ -1,0 +1,20 @@
+{
+    "controllers": {
+        "@survos/grid-bundle": {
+            "grid": {
+                "enabled": true,
+                "fetch": "lazy",
+                "autoimport": {
+                    "axios": true
+                }
+            }
+        },
+        "@symfony/ux-chartjs": {
+            "chart": {
+                "enabled": true,
+                "fetch": "eager"
+            }
+        }
+    },
+    "entrypoints": []
+}

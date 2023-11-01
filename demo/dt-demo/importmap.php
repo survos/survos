@@ -41,14 +41,14 @@ return [
         'version' => '3.7.1',
     ],
     'datatables.net' => [
-        'version' => '2.1.1',
+        'version' => '1.13.6',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
         'version' => '1.13.6',
         'type' => 'css',
     ],
     'axios' => [
-        'version' => '1.5.1',
+        'version' => '1.6.0',
     ],
     'datatables.net-searchpanes-bs5' => [
         'version' => '2.2.0',

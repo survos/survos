@@ -126,6 +126,9 @@
             "tests/bootstrap.php"
         ]
     },
+    "survos/api-grid-bundle": {
+        "version": "dev-sy64"
+    },
     "survos/bootstrap-bundle": {
         "version": "dev-master"
     },

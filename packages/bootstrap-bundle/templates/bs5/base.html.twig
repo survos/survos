@@ -41,9 +41,7 @@
                 {% endblock %}
                 <div class="menu-inner-shadow"></div>
 
-
                 {% block sidebar %}
-                    (sidebar)
                     {{ component('menu', {type: 'sidebar'}) }}
                 {% endblock %}
             </aside>
@@ -52,9 +50,7 @@
             <div class="layout-page">
                 <!-- Navbar -->
                 {% block navbar %}
-_navbar
                     {% embed('@SurvosBootstrap/sneat/_navbar.html.twig') %}
-                        {#            {{ include('@SurvosBootstrap/_navbar.html.twig') }} #}
                     {% endembed %}
                 {% endblock %}
 
@@ -75,8 +71,7 @@ _navbar
                                     type: 'sidebar'}) }}
                             {% endblock %}
 
-                            {% block top_navbar_menu %}
-                                top_navbar_menu? should be top_page!
+                            {% block page_menu %}
                                 {{ component('menu', {
                                     wrapperClass: 'fw-bold py-3 mb-4 d-print-none',
                                     type: 'top_page'}) }}

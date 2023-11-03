@@ -49,17 +49,15 @@
         {% set menu = knp_menu_get(menuItem) %}
         {% if menu.children|length %}
             {% if wrapperClass|default(false) %}<div class="{{ wrapperClass }}">{% endif %}
-
             {{ knp_menu_render(menuItem, {
                 rootAttributes: {
                     class:"navbar-nav me-auto mb-2 mb-lg-0 list-group-horizontal"
                 },
                 currentClass  : "active",
-
                 template: '@SurvosBootstrap/knp_top_menu.html.twig',
                 style: 'navbar'}) }}
+            {% if wrapperClass|default(false) %}</div>{% endif %}
         {% endif %}
-        {% if wrapperClass|default(false) %}</div>>{% endif %}
     {% else %}
         <div class="text-danger">Invalid menu type: {{ type }}</div>
     {% endif %}

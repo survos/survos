@@ -4,7 +4,10 @@
             "api_grid": {
                 "enabled": true,
                 "fetch": "lazy",
-                "autoimport": []
+                "autoimport": {
+                    "datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css": true,
+                    "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
+                }
             }
         },
         "@survos/datatables-bundle": {
@@ -17,10 +20,7 @@
             "grid": {
                 "enabled": true,
                 "fetch": "lazy",
-                "autoimport": {
-                    "jquery": true,
-                    "datatables.net-bs5": true
-                }
+                "autoimport": []
             }
         },
         "@survos/html-prettify-bundle": {

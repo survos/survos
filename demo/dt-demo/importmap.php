@@ -74,4 +74,50 @@ return [
         'version' => '8.0.0',
         'type' => 'css',
     ],
+    'twig' => [
+        'version' => '1.16.0',
+    ],
+    'locutus/php/strings/sprintf' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/strings/vsprintf' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/math/round' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/math/max' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/math/min' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/strings/strip_tags' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/datetime/strtotime' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/datetime/date' => [
+        'version' => '2.0.16',
+    ],
+    'locutus/php/var/boolval' => [
+        'version' => '2.0.16',
+    ],
+    'datatables.net-responsive' => [
+        'version' => '2.5.0',
+    ],
+    'datatables.net-select-bs5' => [
+        'version' => '1.7.0',
+    ],
+    'datatables.net-select-bs5/css/select.bootstrap5.min.css' => [
+        'version' => '1.7.0',
+        'type' => 'css',
+    ],
+    'fos-routing' => [
+        'version' => '0.0.6',
+    ],
+    'datatables.net-plugins/i18n/en-GB.mjs' => [
+        'version' => '1.13.6',
+    ],
 ];

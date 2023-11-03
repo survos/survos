@@ -10,7 +10,7 @@ import './styles/app.css'
 import './bootstrap.js';
 
 // bootstrap 5
+// import 'bootstrap'; // when/where is the bootstrap js loaded?
 import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap';
 
 console.log('This log comes from assets/app.js, stimulus and bootstrap')

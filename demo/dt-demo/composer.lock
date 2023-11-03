@@ -3649,7 +3649,7 @@
         },
         {
             "name": "survos/api-grid-bundle",
-            "version": "dev-sy64",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/api-grid-bundle",
@@ -3715,7 +3715,7 @@
         },
         {
             "name": "survos/auth-bundle",
-            "version": "1.5.70",
+            "version": "1.5.71",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosAuthBundle.git",
@@ -3794,7 +3794,7 @@
             "description": "Helper commands and classes for symfony security",
             "support": {
                 "issues": "https://github.com/survos/SurvosAuthBundle/issues",
-                "source": "https://github.com/survos/SurvosAuthBundle/tree/1.5.70"
+                "source": "https://github.com/survos/SurvosAuthBundle/tree/1.5.71"
             },
             "time": "2023-11-01T18:34:13+00:00"
         },
@@ -4207,12 +4207,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosInspectionBundle.git",
-                "reference": "54325593a6a583955ae1459a001702b86443426a"
+                "reference": "43b8a77a0a39b01e7b98bd74f4e5dbb9550808fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/SurvosInspectionBundle/zipball/54325593a6a583955ae1459a001702b86443426a",
-                "reference": "54325593a6a583955ae1459a001702b86443426a",
+                "url": "https://api.github.com/repos/survos/SurvosInspectionBundle/zipball/43b8a77a0a39b01e7b98bd74f4e5dbb9550808fd",
+                "reference": "43b8a77a0a39b01e7b98bd74f4e5dbb9550808fd",
                 "shasum": ""
             },
             "require": {
@@ -4281,7 +4281,7 @@
                 "issues": "https://github.com/survos/SurvosInspectionBundle/issues",
                 "source": "https://github.com/survos/SurvosInspectionBundle/tree/main"
             },
-            "time": "2023-11-01T18:34:48+00:00"
+            "time": "2023-11-03T10:20:10+00:00"
         },
         {
             "name": "survos/maker-bundle",
@@ -4399,7 +4399,7 @@
         },
         {
             "name": "survos/scraper-bundle",
-            "version": "dev-sy64",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/scraper-bundle",

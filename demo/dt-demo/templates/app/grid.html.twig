@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block javascripts %}
-    {{ importmap('app') }}
-    <script type="module">
-        import DataTable from 'https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.mjs'
-        let el=document.getElementById('example');
-        let dt=new DataTable(el);
-    </script>
-{% endblock %}
+{#{% block javascripts %}#}
+{#    {{ importmap('app') }}#}
+{#    <script type="module">#}
+{#        import DataTable from 'https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.mjs'#}
+{#        let el=document.getElementById('example');#}
+{#        let dt=new DataTable(el);#}
+{#    </script>#}
+{#{% endblock %}#}
 
 {% block body %}
 
@@ -20,8 +20,13 @@
     {% set data = request_data(url) %}
 
     {% set columns = data[0]|keys %}
-    {{ dump(data[0]) }}
     <twig:grid :data="data" tableId="example" :columns="columns" useDatatables="false">
+        <twig:block name="id">
+            {{ row.id }}
+        </twig:block>
+    </twig:grid>
+
+    <twig:grid :data="data" :columns="columns|reverse" useDatatables="true">
         <twig:block name="id">
             {{ row.id }}
         </twig:block>

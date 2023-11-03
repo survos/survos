@@ -27,7 +27,7 @@ class AppController extends AbstractController
     #[Route('/grid', name: 'app_grid')]
     public function grid(): Response
     {
-        return $this->render('app/simple.html.twig', [
+        return $this->render('app/grid.html.twig', [
             'controllerClass' => self::class
         ]);
     }

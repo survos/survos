@@ -17,7 +17,7 @@
         columns: ['id',
             'firstName',
             'lastName',
-            'officialName']|merge(is_granted('ROLE_ADMIN')?['actions']:['birthday'])
+            'officialName']|merge(true or is_granted('ROLE_ADMIN')?['actions']:['birthday'])
     } %}
 
         {% block officialName %}

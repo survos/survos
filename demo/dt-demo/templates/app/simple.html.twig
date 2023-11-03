@@ -3,7 +3,7 @@
 {% block body %}
 
     {% set posts = request_data('https://jsonplaceholder.typicode.com/posts') %}
-    <twig:simple_datatables :data="posts" :perPage="15" :columns="posts[0]|keys">
+    <twig:simple_datatables :data="posts" :perPage="5" :columns="posts[0]|keys">
         <twig:block name="id">
             {{ row.id }}
         </twig:block>

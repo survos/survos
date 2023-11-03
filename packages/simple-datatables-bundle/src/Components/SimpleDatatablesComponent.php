@@ -9,7 +9,7 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Twig\Environment;
 
-#[AsTwigComponent('grid', template: '@SurvosSimpleDatatables/components/grid.html.twig')]
+#[AsTwigComponent('simple_grid', template: '@SurvosSimpleDatatables/components/grid.html.twig')]
 class GridComponent
 {
     public function __construct(
@@ -49,7 +49,7 @@ class GridComponent
             'tableId' => null,
             'tableClasses' => '',
             'scrollY' => '50vh',
-//            'stimulusController' => '@survos/grid-bundle/grid',
+            'stimulusController' => '@survos/simple-datatables-bundle/table',
             'search' => true,
             'info' => false,
             'condition' => true,

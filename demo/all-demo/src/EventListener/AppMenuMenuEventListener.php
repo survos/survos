@@ -38,5 +38,8 @@ final class AppMenuMenuEventListener implements KnpMenuHelperInterface
 
 public function pageMenu(KnpMenuEvent $event): void
 {
+    $menu = $event->getMenu();
+//    $this->add($menu, uri: 'https://github.com', label: 'git');
+
 }
 }

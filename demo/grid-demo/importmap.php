@@ -34,4 +34,7 @@ return [
     '@symfony/stimulus-bundle' => [
         'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
+    'axios' => [
+        'version' => '1.6.0',
+    ],
 ];

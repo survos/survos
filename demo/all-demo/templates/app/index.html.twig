@@ -1,37 +1,6 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-    ALL demo
 
-    {% set type = 'posts' %}
-    {% set url = 'https://jsonplaceholder.typicode.com/' ~ type %}
-    {% set users = request_data(url) %}
-
-    {% set columns = users[0]|keys %}
-    <twig:simple_datatables :data="users" :perPage="15" :columns="columns">
-        <twig:block name="id">
-            {{ row.id }}
-        </twig:block>
-        <twig:block name="title">
-            <i>{{ row.title }}</i>
-        </twig:block>
-    </twig:simple_datatables>
-
-{#    <table class="table" {{ stimulus_controller('@survos/simple-datatables-bundle/table', {perPage: 5, sortable: true}) }}>#}
-{#        <thead>#}
-{#        <tr>#}
-{#            <th>abbr</th>#}
-{#            <th>name</th>#}
-{#            <th>number</th>#}
-{#        </thead>#}
-{#        <tbody>#}
-{#        {% for j in 1..12 %}#}
-{#            <tr>#}
-{#                <td>{{ j |date('2023-' ~ j ~ '-01') |date('M') }}</td>#}
-{#                <td>{{ j |date('2023-' ~ j ~ '-01') |date('F') }}</td>#}
-{#                <td>{{ j }}</td>#}
-{#            </tr>#}
-{#        {% endfor %}#}
-{#        </tbody>#}
-{#    </table>#}
+    An explanation of the grids
 
 {% endblock %}

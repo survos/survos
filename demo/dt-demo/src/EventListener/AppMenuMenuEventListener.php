@@ -28,7 +28,9 @@ final class AppMenuMenuEventListener implements KnpMenuHelperInterface
         $menu = $event->getMenu();
         $options = $event->getOptions();
 
-//        $this->add($menu, 'app_homepage');
+        foreach (['app_homepage','app_simple','app_grid'] as $route) {
+            $this->add($menu, $route);
+        }
         // for nested menus, don't add a route, just a label, then use it for the argument to addMenuItem
 
         $nestedMenu = $this->addSubmenu($menu, 'Credits');

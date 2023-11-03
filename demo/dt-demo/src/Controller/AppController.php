@@ -15,4 +15,21 @@ class AppController extends AbstractController
             'controller_name' => 'AppController',
         ]);
     }
+
+    #[Route('/simple', name: 'app_simple')]
+    public function simple(): Response
+    {
+        return $this->render('app/simple.html.twig', [
+            'controllerClass' => self::class
+        ]);
+    }
+
+    #[Route('/grid', name: 'app_grid')]
+    public function grid(): Response
+    {
+        return $this->render('app/simple.html.twig', [
+            'controllerClass' => self::class
+        ]);
+    }
+
 }

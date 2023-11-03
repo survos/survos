@@ -6,9 +6,56 @@ Use 6.4 beta, add stimulus, api-platform, doctrine-futures
 Later we'll add the survos bundles
 
 ```bash
-symfony new datatables-demo --webapp --version=next && cd datatables-demo
-composer req symfony/asset-mapper api
+rm -rf all-demo
+symfony new all-demo --webapp --version=next && cd all-demo
+composer req symfony/asset-mapper api symfony/stimulus-bundle:^2.x-dev
+composer req survos/scraper-bundle survos/bootstrap-bundle
+composer req survos/maker-bundle --dev
+#composer config minimum-stability dev
+composer config extra.symfony.allow-contrib true
+#composer update 
+
+bin/console make:controller AppController
+sed -i "s|Route('/app'|Route('/'|" src/Controller/AppController.php
+sed -i "s|'app_app'|'app_homepage'|" src/Controller/AppController.php
+
+bin/console survos:make:menu 
+
+cat > templates/base.html.twig <<END
+{% extends "@SurvosBootstrap/%s/base.html.twig"|format(theme_option('theme')) %}
+{% block stylesheets %}
+    {{ ux_controller_link_tags() }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ importmap('app') }}
+{% endblock %}
+END
+
+# add bootstrap csss
+echo "import 'bootstrap/dist/css/bootstrap.min.css'" >> assets/app.js
+
+cat > templates/app/index.html.twig <<END
+{% extends 'base.html.twig' %}
+{% block body %}
+    Some Grid Demos
+
+    {% set url = 'https://jsonplaceholder.typicode.com/users' %}
+    {% set users = request_data(url) %}
+
+    {% set columns = users[0]|keys %}
+    {{ dump(users[0]) }}
+{#    <twig:grid :data="users" :columns="columns" useDatatables="false">#}
+{#        <twig:block name="id">#}
+{#            {{ row.id }}#}
+{#        </twig:block>#}
+{#    </twig:grid>#}
+{% endblock %}
+END
+
 composer req symfony/stimulus-bundle:2.x-dev
+
+
 composer require orm-fixtures --dev 
 
 echo "DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db" > .env.local

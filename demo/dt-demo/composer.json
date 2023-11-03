@@ -23,6 +23,7 @@
         "survos/html-prettify-bundle": "*@dev",
         "survos/maker-bundle": "*@dev",
         "survos/scraper-bundle": "*@dev",
+        "survos/simple-datatables-bundle": "*@dev",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
         "symfony/console": "6.4.*",
@@ -115,6 +116,10 @@
         "symfony/web-profiler-bundle": "6.4.*"
     },
     "repositories": {
+        "simple-datatables": {
+            "type": "path",
+            "url": "../../../survos/packages/simple-datatables-bundle"
+        },
         "scraper": {
             "type": "path",
             "url": "../../../survos/packages/scraper-bundle"

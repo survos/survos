@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6542eaf0867ad780adcd1abd9963e75e",
+    "content-hash": "e1def136e48a3bda207a9a7952f4801f",
     "packages": [
         {
             "name": "api-platform/core",
@@ -2778,72 +2778,6 @@
             "time": "2021-07-14T16:46:02+00:00"
         },
         {
-            "name": "survos/api-grid-bundle",
-            "version": "dev-sy64",
-            "dist": {
-                "type": "path",
-                "url": "../../../survos/packages/api-grid-bundle",
-                "reference": "6bd5c1da543bbbc351f8b11393fd3bd100019a2c"
-            },
-            "require": {
-                "api-platform/core": "^3.2",
-                "doctrine/doctrine-bundle": "^2.7",
-                "doctrine/orm": "^2.12",
-                "doctrine/persistence": "^2.0 || ^3.0",
-                "friendsofsymfony/jsrouting-bundle": "^3.2",
-                "php": "^8.1",
-                "survos/inspection-bundle": "^1.6",
-                "symfony/config": "^6.3 || ^7.0",
-                "symfony/dependency-injection": "^6.3 || ^7.0",
-                "symfony/http-kernel": "^6.3 || ^7.0",
-                "symfony/options-resolver": "^6.3 || ^7.0",
-                "symfony/ux-twig-component": "^2.8",
-                "twig/twig": "^3.4"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "^1.8",
-                "roave/security-advisories": "dev-latest",
-                "symfony/browser-kit": "^6.3 || ^7.0",
-                "symfony/framework-bundle": "^6.3 || ^7.0",
-                "symfony/phpunit-bridge": "^6.3 || ^7.0",
-                "symfony/twig-bundle": "^6.3 || ^7.0",
-                "symfony/var-dumper": "^6.3 || ^7.0"
-            },
-            "suggest": {
-                "api-platform/core": "For javascript-based grid rendering",
-                "friendsofsymfony/jsrouting-bundle": "use path() in javascript grid rendering",
-                "monolog/monolog": "Allows more advanced logging of the application flow"
-            },
-            "type": "symfony-bundle",
-            "autoload": {
-                "psr-4": {
-                    "Survos\\ApiGrid\\": "src/"
-                }
-            },
-            "scripts": {
-                "phpstan": [
-                    "vendor/bin/phpstan analyse"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Tac Tacelosky",
-                    "email": "tacman@gmail.com"
-                }
-            ],
-            "description": "incorporate DatatablesNet, using twig and stimulus, twig_component requires ^2.2",
-            "keywords": [
-                "symfony-ux",
-                "symfony6"
-            ],
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
             "name": "survos/bootstrap-bundle",
             "version": "dev-main",
             "source": {
@@ -3137,105 +3071,6 @@
                 "source": "https://github.com/survos/SurvosCrawlerBundle/tree/1.5.70"
             },
             "time": "2023-10-27T12:08:12+00:00"
-        },
-        {
-            "name": "survos/grid-bundle",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/survos/SurvosGridBundle.git",
-                "reference": "3a74b0b7bb45d84f64b91a85f7895544a1ca270d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/survos/SurvosGridBundle/zipball/3a74b0b7bb45d84f64b91a85f7895544a1ca270d",
-                "reference": "3a74b0b7bb45d84f64b91a85f7895544a1ca270d",
-                "shasum": ""
-            },
-            "require": {
-                "doctrine/doctrine-bundle": "^2.7",
-                "doctrine/orm": "^2.12",
-                "doctrine/persistence": "^2.0 || ^3.0",
-                "php": "^8.1",
-                "survos/core-bundle": "^1.6",
-                "symfony/config": "^6.3 || ^7.0",
-                "symfony/dependency-injection": "^6.3 || ^7.0",
-                "symfony/http-kernel": "^6.3 || ^7.0",
-                "symfony/options-resolver": "^6.3 || ^7.0",
-                "symfony/stimulus-bundle": "2.x-dev",
-                "symfony/ux-twig-component": "^2.9",
-                "twig/twig": "^3.4"
-            },
-            "conflict": {
-                "survos/api-grid-bundle": "<1.2.57",
-                "survos/auth-bundle": "<1.2.57",
-                "survos/barcode-bundle": "<1.2.57",
-                "survos/bootstrap-bundle": "<1.2.57",
-                "survos/command-bundle": "<1.2.57",
-                "survos/crawler-bundle": "<1.2.57",
-                "survos/doc-bundle": "<1.2.57",
-                "survos/faker-bundle": "<1.2.57",
-                "survos/grid-group-bundle": "<1.2.57",
-                "survos/html-prettify-bundle": "<1.2.57",
-                "survos/import-bridge": "<1.2.57",
-                "survos/inspection-bundle": "<1.2.57",
-                "survos/location-bundle": "<1.2.57",
-                "survos/maker-bundle": "<1.2.57",
-                "survos/providence-bundle": "<1.2.57",
-                "survos/ruler-bundle": "<1.2.57",
-                "survos/stripe-product": "<1.2.57",
-                "survos/tree-bundle": "<1.2.57",
-                "survos/wiki-bundle": "<1.2.57",
-                "survos/workflow-helper-bundle": "<1.2.57"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "^1.8",
-                "roave/security-advisories": "dev-latest",
-                "symfony/browser-kit": "^6.3 || ^7.0",
-                "symfony/framework-bundle": "^6.3 || ^7.0",
-                "symfony/phpunit-bridge": "^6.3 || ^7.0",
-                "symfony/twig-bundle": "^6.3 || ^7.0",
-                "symfony/var-dumper": "^6.3 || ^7.0"
-            },
-            "suggest": {
-                "monolog/monolog": "Allows more advanced logging of the application flow",
-                "survos/api-grid-bundle": "For javascript-based grid rendering"
-            },
-            "default-branch": true,
-            "type": "symfony-bundle",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "1.6-dev"
-                },
-                "symfony": {
-                    "require": "^6.3 || ^7.0"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Survos\\Grid\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Tac Tacelosky",
-                    "email": "tacman@gmail.com"
-                }
-            ],
-            "description": "incorporate DatatablesNet, using twig and stimulus, twig_component requires ^2.3",
-            "keywords": [
-                "symfony-ux",
-                "symfony6"
-            ],
-            "support": {
-                "issues": "https://github.com/survos/SurvosGridBundle/issues",
-                "source": "https://github.com/survos/SurvosGridBundle/tree/main"
-            },
-            "time": "2023-11-01T18:34:45+00:00"
         },
         {
             "name": "survos/inspection-bundle",
@@ -11745,8 +11580,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "survos/api-grid-bundle": 20,
-        "survos/grid-bundle": 20,
         "symfony/stimulus-bundle": 20
     },
     "prefer-stable": false,

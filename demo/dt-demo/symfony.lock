@@ -135,6 +135,9 @@
     "survos/scraper-bundle": {
         "version": "dev-sy64"
     },
+    "survos/simple-datatables-bundle": {
+        "version": "dev-main"
+    },
     "symfony/asset-mapper": {
         "version": "6.4",
         "recipe": {

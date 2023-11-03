@@ -18,7 +18,8 @@
                 "enabled": true,
                 "fetch": "lazy",
                 "autoimport": {
-                    "axios": "^1.5.1"
+                    "jquery": true,
+                    "datatables.net-bs5": true
                 }
             }
         },
@@ -26,6 +27,15 @@
             "prettify": {
                 "enabled": true,
                 "fetch": "eager"
+            }
+        },
+        "@survos/simple-datatables-bundle": {
+            "table": {
+                "enabled": true,
+                "fetch": "lazy",
+                "autoimport": {
+                    "@survos/simple-datatables/style.css": true
+                }
             }
         }
     },

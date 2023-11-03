@@ -126,9 +126,6 @@
             "tests/bootstrap.php"
         ]
     },
-    "survos/api-grid-bundle": {
-        "version": "dev-sy64"
-    },
     "survos/bootstrap-bundle": {
         "version": "dev-master"
     },
@@ -150,9 +147,6 @@
     },
     "survos/crawler-bundle": {
         "version": "1.4.41"
-    },
-    "survos/grid-bundle": {
-        "version": "dev-main"
     },
     "survos/inspection-bundle": {
         "version": "dev-main"

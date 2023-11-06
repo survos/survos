@@ -60,3 +60,23 @@ http://2016.padjo.org/tutorials/sqlite-data-starterpacks/#more-info-simplefolks-
 
 composer config repositories.survos_grid_bundle '{"type": "vcs", "url": "git@github.com:survos/SurvosSimpleDatatablesBundle.git"}'
 
+# Bug installing select-bs5
+
+```bash
+symfony new bug --webapp --version=next && cd bug
+composer req symfony/asset-mapper
+bin/console importmap:require datatables.net-bs5  datatables.net-select-bs5
+cat importmap.php
+bin/console make:controller AppController
+sed -i "s|Route('/app'|Route('/'|" src/Controller/AppController.php
+
+cat > assets/app.js <<'END'
+import jquery from 'jquery';
+
+import DataTables from 'datatables.net-bs5'
+import 'datatables.net-select-bs5';
+END
+symfony server:start -d 
+symfony open:local
+
+```

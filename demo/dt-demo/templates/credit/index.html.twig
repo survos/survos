@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ImportMap{% endblock %}
+
+{% block body %}
+    {% set columns = [
+        'key',
+        'packageLink',
+        'version'
+    ] %}
+
+    <twig:grid :data="data" :columns="columns" pageLength="25">
+        <twig:block name="packageLink">
+            <a href="{{ row.packageLink }}" target="_blank">on jsdelivr</a>
+        </twig:block>
+
+    </twig:grid>
+
+{% endblock %}

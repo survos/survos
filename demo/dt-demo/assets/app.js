@@ -14,3 +14,15 @@ import './bootstrap.js';
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 console.log('This log comes from assets/app.js, stimulus and bootstrap')
+
+
+import jquery from 'jquery';
+console.log('local jquery');
+const $ = jquery;
+
+import DataTables from 'datatables.net-bs5'
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+// import 'datatables.net-select';
+// import 'datatables.net-select-bs5';
+// import 'datatables.net-searchpanes';
+

@@ -28,7 +28,7 @@ final class AppMenuMenuEventListener implements KnpMenuHelperInterface
         $menu = $event->getMenu();
         $options = $event->getOptions();
 
-        foreach (['app_homepage','app_simple','app_grid'] as $route) {
+        foreach (['app_homepage','app_credit', 'app_simple','app_grid'] as $route) {
             $this->add($menu, $route);
         }
         // for nested menus, don't add a route, just a label, then use it for the argument to addMenuItem
@@ -40,10 +40,16 @@ final class AppMenuMenuEventListener implements KnpMenuHelperInterface
             $this->addMenuItem($nestedMenu, ['uri' => "#$type", 'label' => ucfirst($type)]);
         }
 
-        foreach ([CongressController::class, TermCrudController::class] as $controllerClass) {
+        foreach ([CongressController::class,
+//                     TermCrudController::class
+                 ] as $controllerClass) {
             $controllerMenu = $this->addSubmenu($menu,
                 label: (new \ReflectionClass($controllerClass))->getShortName());
-            foreach (['index','new','browse'] as $controllerRoute) {
+            foreach (['grid','api_grid','simple_datatables',
+//                         'index',
+                         'new',
+//                         'crud_index'
+                     ] as $controllerRoute) {
                 $this->add($controllerMenu, $controllerClass.'::'.$controllerRoute,
                     label: $controllerRoute);
             }

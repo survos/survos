@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\OfficialRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -11,6 +13,11 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OfficialRepository::class)]
 #[ApiResource]
+#[ApiFilter(OrderFilter::class, properties: ['id',
+    'firstName',
+    'lastName'
+])]
+
 class Official
 {
     #[ORM\Id]

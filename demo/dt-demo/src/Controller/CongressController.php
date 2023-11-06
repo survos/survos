@@ -14,16 +14,34 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/congress')]
 class CongressController extends AbstractController
 {
-    #[Route('/', name: 'app_congress_index', methods: ['GET'])]
-    public function index(OfficialRepository $officialRepository): Response
+    #[Route('/crud_index', name: 'congress_crud_index', methods: ['GET'])]
+    public function crud(OfficialRepository $officialRepository): Response
     {
-        return $this->render('congress/index.html.twig', [
+        return $this->render('congress/simple_datatables.html.twig', [
+            'officials' => $officialRepository->findAll(),
+            'useStimulus' => false
+        ]);
+    }
+
+    #[Route('/simple_datatables', methods: ['GET'])]
+    public function simple_datatables(OfficialRepository $officialRepository): Response
+    {
+        return $this->render('congress/simple_datatables.html.twig', [
             'officials' => $officialRepository->findAll(),
         ]);
     }
 
-    #[Route('/browse',  methods: ['GET'], options: ['label' => "Browse (simple-dt)"])]
-    public function browse(): Response
+    #[Route('/grid', methods: ['GET'])]
+    public function grid(OfficialRepository $officialRepository): Response
+    {
+        return $this->render('congress/grid.html.twig', [
+            'data' => $officialRepository->findAll(),
+        ]);
+    }
+
+
+    #[Route('/api_grid',  name: 'congress_api_grid', methods: ['GET'], options: ['label' => "Browse (api_grid)"])]
+    public function api_grid(): Response
     {
         return $this->render('congress/browse.html.twig', [
             'class' => Official::class
@@ -42,7 +60,7 @@ class CongressController extends AbstractController
             $entityManager->persist($official);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_congress_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('congress_crud_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('congress/new.html.twig', [
@@ -69,7 +87,7 @@ class CongressController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_congress_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('congress_crud_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('congress/edit.html.twig', [
@@ -86,6 +104,6 @@ class CongressController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_congress_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('congress_crud_index', [], Response::HTTP_SEE_OTHER);
     }
 }

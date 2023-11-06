@@ -11,9 +11,7 @@ symfony new all-demo --webapp --version=next && cd all-demo
 composer req symfony/asset-mapper api symfony/stimulus-bundle:^2.x-dev
 composer req survos/scraper-bundle survos/bootstrap-bundle
 composer req survos/maker-bundle --dev
-#composer config minimum-stability dev
 composer config extra.symfony.allow-contrib true
-#composer update 
 
 bin/console make:controller AppController
 sed -i "s|Route('/app'|Route('/'|" src/Controller/AppController.php
@@ -23,9 +21,6 @@ bin/console survos:make:menu
 
 cat > templates/base.html.twig <<END
 {% extends "@SurvosBootstrap/%s/base.html.twig"|format(theme_option('theme')) %}
-{% block stylesheets %}
-    {{ ux_controller_link_tags() }}
-{% endblock %}
 
 {% block javascripts %}
     {{ importmap('app') }}

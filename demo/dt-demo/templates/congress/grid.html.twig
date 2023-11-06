@@ -2,19 +2,31 @@
 
 {% block title %}Official index{% endblock %}
 
-{% block body %}
-    <h1>Browse Elected Officials</h1>
+<twig:block name="body">
+    <h1>Elected Officials (Grid Component)</h1>
     <p>
-        This page uses the <code>api_grid</code> component, and the datatable's AJAX call using API Platform.
+        This page uses the <code>grid</code> component to generate a table from a doctrine query ->findAll()
     </p>
 
-{#    <twig:hola />#}
-    {% set class = 'App\\Entity\\Official' %}
+    <code>{{ app.locale }}</code>
+    {% set _sc = 'locale_display' %}
+    {{ app.request.locale }}
 
-    {% component api_grid with {
-        class: class,
-        caller: _self,
+    <div class="dtsp-verticalContainer row">
+        <div class="search-panes col-3">
+        </div>
+        <div class="col-9">
+            {{ block('gridTable') }}
+        </div>
+    </div>
+</twig:block>
+
+<twig:block name="gridTable">
+
+    {% component grid with {
+        data: data,
         columns: ['id',
+            {name: 'gender', sortable: true, inSearchPane: true},
             {name: 'firstName', sortable: true},
             {name: 'lastName', sortable: true},
             'officialName']|merge(true or is_granted('ROLE_ADMIN')?['actions']:['birthday'])
@@ -36,4 +48,4 @@
 
     {% endcomponent %}
 
-{% endblock %}
+</twig:block>

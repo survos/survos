@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class TermCrudController extends AbstractController
 {
     #[Route('/', name: 'app_term_crud_index', methods: ['GET'])]
-    public function index(TermRepository $termRepository): Response
+    public function crud_index(TermRepository $termRepository): Response
     {
         return $this->render('term_crud/index.html.twig', [
             'terms' => $termRepository->findAll(),
@@ -44,7 +44,7 @@ class TermCrudController extends AbstractController
     }
 
     #[Route('/browse',  methods: ['GET'], options: ['label' => "Browse (simple-dt)"])]
-    public function browse(): Response
+    public function index(): Response
     {
         return $this->render('term/browse.html.twig', [
             'class' => Official::class

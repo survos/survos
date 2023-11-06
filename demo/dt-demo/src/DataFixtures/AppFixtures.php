@@ -8,6 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class AppFixtures extends Fixture
 {
@@ -20,7 +21,7 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $url = 'https://theunitedstates.io/congress-legislators/legislators-current.json';
-        $json = $this->cache->get(md5($url), fn(CacheItem $cacheItem) => file_get_contents($url));
+        $json = $this->cache->get(md5($url), fn(ItemInterface $cacheItem) => file_get_contents($url));
         foreach (json_decode($json) as $record) {
             $name = $record->name; // an object with name parts
             $bio = $record->bio; // a bio with gender, etc.

@@ -41,7 +41,7 @@ return [
         'version' => '3.7.1',
     ],
     'datatables.net' => [
-        'version' => '1.13.6',
+        'version' => '1.13.7',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
         'version' => '1.13.6',
@@ -61,10 +61,10 @@ return [
         'version' => '1.0.7',
     ],
     'datatables.net-dt' => [
-        'version' => '1.13.6',
+        'version' => '1.13.7',
     ],
     'datatables.net-dt/css/jquery.dataTables.min.css' => [
-        'version' => '1.13.6',
+        'version' => '1.13.7',
         'type' => 'css',
     ],
     'simple-datatables' => [
@@ -119,5 +119,25 @@ return [
     ],
     'datatables.net-plugins/i18n/en-GB.mjs' => [
         'version' => '1.13.6',
+    ],
+    'datatables.net-searchpanes' => [
+        'version' => '2.2.0',
+    ],
+    'datatables-select' => [
+        'version' => '1.1.0',
+    ],
+    'datatables' => [
+        'version' => '1.10.18',
+    ],
+    'datatables-select/dist/css/select.dataTables.min.css' => [
+        'version' => '1.1.0',
+        'type' => 'css',
+    ],
+    'datatables/media/css/jquery.dataTables.min.css' => [
+        'version' => '1.10.18',
+        'type' => 'css',
+    ],
+    'datatables.net-select' => [
+        'version' => '1.7.0',
     ],
 ];

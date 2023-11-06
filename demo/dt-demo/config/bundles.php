@@ -30,4 +30,5 @@ return [
     Survos\Scraper\SurvosScraperBundle::class => ['all' => true],
     Survos\SimpleDatatables\SurvosSimpleDatatablesBundle::class => ['all' => true],
     Survos\Grid\SurvosGridBundle::class => ['all' => true],
+    Stenope\Bundle\StenopeBundle::class => ['all' => true],
 ];

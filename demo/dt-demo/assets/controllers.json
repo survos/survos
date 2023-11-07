@@ -21,7 +21,10 @@
             "grid": {
                 "enabled": true,
                 "fetch": "lazy",
-                "autoimport": []
+                "autoimport": {
+                    "datatables/media/css/jquery.dataTables.min.css": true,
+                    "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
+                }
             }
         },
         "@survos/html-prettify-bundle": {

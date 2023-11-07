@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Official;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -15,7 +16,7 @@ class OfficialType extends AbstractType
             ->add('firstName')
             ->add('lastName')
             ->add('officialName')
-            ->add('birthday')
+            ->add('birthday', DateType::class, ['widget' => 'single_text'])
             ->add('gender')
         ;
     }

@@ -149,3 +149,16 @@ bin/console survos:create:user
 kbond p4ssw0rd -r ROLE_EDITOR -r ROLE_ADMIN
 
 composer req survos/datatables-bundle
+
+## Deploying to github pages
+
+bin/console asset-map:compile
+bin/console -e prod cache:clear
+bin/console -e prod stenope:build ./docs --base-url /dt-demo/
+rm public/assets/ -rf 
+
+bin/console -e prod cache:clear
+bin/console -e prod stenope:build ~/pages/dt-demo
+cd ~/pages/dt-demo
+php -S localhost:9000 -t=.
+

@@ -3866,7 +3866,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/api-grid-bundle",
-                "reference": "4a6cde1746315296816729046a7c4f9f9a89f5df"
+                "reference": "6bd5c1da543bbbc351f8b11393fd3bd100019a2c"
             },
             "require": {
                 "api-platform/core": "^3.2",
@@ -3875,7 +3875,7 @@
                 "doctrine/persistence": "^2.0 || ^3.0",
                 "friendsofsymfony/jsrouting-bundle": "^3.2",
                 "php": "^8.1",
-                "survos/inspection-bundle": "^1.5",
+                "survos/inspection-bundle": "^1.6",
                 "symfony/config": "^6.3 || ^7.0",
                 "symfony/dependency-injection": "^6.3 || ^7.0",
                 "symfony/http-kernel": "^6.3 || ^7.0",
@@ -3928,7 +3928,7 @@
         },
         {
             "name": "survos/auth-bundle",
-            "version": "1.5.71",
+            "version": "1.5.74",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosAuthBundle.git",
@@ -4007,7 +4007,7 @@
             "description": "Helper commands and classes for symfony security",
             "support": {
                 "issues": "https://github.com/survos/SurvosAuthBundle/issues",
-                "source": "https://github.com/survos/SurvosAuthBundle/tree/1.5.71"
+                "source": "https://github.com/survos/SurvosAuthBundle/tree/1.5.74"
             },
             "time": "2023-11-01T18:34:13+00:00"
         },
@@ -4017,12 +4017,12 @@
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/bootstrap-bundle",
-                "reference": "d776e088afb4e99024e90cf7db07ddd56d76c6c7"
+                "reference": "fe832debe49ce402de2308bfcee24e1cec63ab46"
             },
             "require": {
                 "knplabs/knp-menu-bundle": "^3.2",
                 "php": "^8.1",
-                "survos/core-bundle": "^1.5",
+                "survos/core-bundle": "^1.6",
                 "symfony/config": "^6.3 | ^7.0",
                 "symfony/dependency-injection": "^6.3 | ^7.0",
                 "symfony/http-kernel": "^6.3 | ^7.0",
@@ -4175,11 +4175,11 @@
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/datatables-bundle",
-                "reference": "00a8159fc6dc160c6ac99eafb1396e9c9dd0ae06"
+                "reference": "3af95bffd2fcaa7a2928b9b6346ea20dbdf25cd9"
             },
             "require": {
                 "php": "^8.1",
-                "survos/core-bundle": "^1.5",
+                "survos/core-bundle": "^1.6",
                 "symfony/config": "^6.4 || ^7.0",
                 "symfony/dependency-injection": "^6.4 || ^7.0",
                 "symfony/http-kernel": "^6.4 || ^7.0",
@@ -4243,14 +4243,14 @@
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/grid-bundle",
-                "reference": "bb56e3a10f6a1a979ab96ade8675114255175935"
+                "reference": "9db9d03c0cdd39e25d646f9f90370aefc3b11dba"
             },
             "require": {
                 "doctrine/doctrine-bundle": "^2.7",
                 "doctrine/orm": "^2.12",
                 "doctrine/persistence": "^2.0 || ^3.0",
                 "php": "^8.1",
-                "survos/core-bundle": "^1.5",
+                "survos/core-bundle": "^1.6",
                 "symfony/config": "^6.3 || ^7.0",
                 "symfony/dependency-injection": "^6.3 || ^7.0",
                 "symfony/http-kernel": "^6.3 || ^7.0",
@@ -4417,22 +4417,22 @@
         },
         {
             "name": "survos/inspection-bundle",
-            "version": "1.5.71",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosInspectionBundle.git",
-                "reference": "e53494cf83f590014c6df57952555c0f58ee790d"
+                "reference": "5008e6460be8ab9769b3222308c686593507cf2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/SurvosInspectionBundle/zipball/e53494cf83f590014c6df57952555c0f58ee790d",
-                "reference": "e53494cf83f590014c6df57952555c0f58ee790d",
+                "url": "https://api.github.com/repos/survos/SurvosInspectionBundle/zipball/5008e6460be8ab9769b3222308c686593507cf2c",
+                "reference": "5008e6460be8ab9769b3222308c686593507cf2c",
                 "shasum": ""
             },
             "require": {
                 "api-platform/core": "^3.2",
                 "php": "^8.1",
-                "survos/core-bundle": "^1.5.71",
+                "survos/core-bundle": "^1.6",
                 "symfony/config": "^6.3 || ^7.0",
                 "symfony/dependency-injection": "^6.3 || ^7.0",
                 "symfony/http-kernel": "^6.3 || ^7.0",
@@ -4465,6 +4465,7 @@
                 "phpstan/phpstan": "^1.8",
                 "roave/security-advisories": "dev-latest"
             },
+            "default-branch": true,
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
@@ -4492,9 +4493,9 @@
             "description": "Inspects Doctrine entities with APIPlatform attributes",
             "support": {
                 "issues": "https://github.com/survos/SurvosInspectionBundle/issues",
-                "source": "https://github.com/survos/SurvosInspectionBundle/tree/1.5.71"
+                "source": "https://github.com/survos/SurvosInspectionBundle/tree/main"
             },
-            "time": "2023-11-03T10:19:47+00:00"
+            "time": "2023-11-06T13:06:07+00:00"
         },
         {
             "name": "survos/maker-bundle",
@@ -4662,11 +4663,11 @@
             "dist": {
                 "type": "path",
                 "url": "../../../survos/packages/simple-datatables-bundle",
-                "reference": "f689658e9db3eb84fdf33bd651c3739183e09a2f"
+                "reference": "8435170abe68fb1cafad2f87db498cacaa11069f"
             },
             "require": {
                 "php": "^8.1",
-                "survos/core-bundle": "^1.5",
+                "survos/core-bundle": "^1.6",
                 "symfony/config": "^6.4",
                 "symfony/dependency-injection": "^6.4",
                 "symfony/http-kernel": "^6.4",

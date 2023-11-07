@@ -44,9 +44,10 @@ class TermCrudController extends AbstractController
     }
 
     #[Route('/browse',  methods: ['GET'], options: ['label' => "Browse (simple-dt)"])]
-    public function index(): Response
+    public function index(TermRepository $termRepository): Response
     {
-        return $this->render('term/browse.html.twig', [
+        return $this->render('term_crud/index.html.twig', [
+            'terms' => $termRepository->findAll(),
             'class' => Official::class
         ]);
     }

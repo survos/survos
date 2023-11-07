@@ -22,7 +22,7 @@ class AppFixtures extends Fixture
     {
         $url = 'https://theunitedstates.io/congress-legislators/legislators-current.json';
         $json = $this->cache->get(md5($url), fn(ItemInterface $cacheItem) => file_get_contents($url));
-        foreach (json_decode($json) as $record) {
+        foreach (json_decode($json) as $idx => $record) {
             $name = $record->name; // an object with name parts
             $bio = $record->bio; // a bio with gender, etc.
             $official = (new Official())
@@ -47,6 +47,10 @@ class AppFixtures extends Fixture
                 if (count($errors)) {
                     dd($errors);
                 }
+            }
+
+            if ($idx > 3) {
+                break;
             }
         }
         $manager->flush();

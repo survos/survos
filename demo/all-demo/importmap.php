@@ -48,10 +48,21 @@ return [
         'version' => '1.13.6',
     ],
     'datatables.net' => [
-        'version' => '1.13.6',
+        'version' => '1.13.7',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
         'version' => '1.13.6',
+        'type' => 'css',
+    ],
+    'datatables.net-select-bs5' => [
+        'version' => '1.7.0',
+    ],
+    'datatables.net-select-bs5/css/select.bootstrap5.min.css' => [
+        'version' => '1.7.0',
+        'type' => 'css',
+    ],
+    'datatables/media/css/jquery.dataTables.min.css' => [
+        'version' => '1.10.18',
         'type' => 'css',
     ],
 ];

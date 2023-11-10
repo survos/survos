@@ -35,7 +35,7 @@ return [
         'type' => 'css',
     ],
     'datatables.net-bs5' => [
-        'version' => '1.13.6',
+        'version' => '1.13.7',
     ],
     'jquery' => [
         'version' => '3.7.1',
@@ -44,11 +44,11 @@ return [
         'version' => '1.13.7',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
-        'version' => '1.13.6',
+        'version' => '1.13.7',
         'type' => 'css',
     ],
     'axios' => [
-        'version' => '1.6.0',
+        'version' => '1.6.1',
     ],
     'datatables.net-searchpanes-bs5' => [
         'version' => '2.2.0',

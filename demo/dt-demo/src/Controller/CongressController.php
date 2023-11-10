@@ -15,7 +15,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/congress')]
 class CongressController extends AbstractController
 {
-    #[Route('/crud_index', name: 'congress_crud_index', methods: ['GET'])]
+    #[Route('/crud_index', name: 'congress_crud_index', methods: ['GET'], options: ['label' => ['en' => 'Simple Datatables']])]
     public function crud(OfficialRepository $officialRepository): Response
     {
         return $this->render('congress/simple_datatables.html.twig', [

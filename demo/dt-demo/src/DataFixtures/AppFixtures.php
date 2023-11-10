@@ -34,6 +34,7 @@ class AppFixtures extends Fixture
             $manager->persist($official);
 
             foreach ($record->terms as $t) {
+
                 $term = (new Term())
                     ->setType($t->type)
                     ->setStateAbbreviation($t->state)
@@ -41,6 +42,7 @@ class AppFixtures extends Fixture
                     ->setDistrict($t->district ?? null)
                     ->setStartDate(new \DateTimeImmutable($t->start))
                     ->setEndDate(new \DateTimeImmutable($t->end));
+                $official->setCurrentParty($term->getParty());
                 $manager->persist($term);
                 $official->addTerm($term);
                 $errors = $this->validator->validate($term);
@@ -50,7 +52,7 @@ class AppFixtures extends Fixture
             }
 
             if ($idx > 3) {
-                break;
+//                break;
             }
         }
         $manager->flush();

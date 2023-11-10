@@ -43,6 +43,9 @@ class Official
     #[ORM\OneToMany(mappedBy: 'offical', targetEntity: Term::class, orphanRemoval: true)]
     private Collection $terms;
 
+    #[ORM\Column(length: 8, nullable: true)]
+    private ?string $currentParty = null;
+
     public function __construct()
     {
         $this->terms = new ArrayCollection();
@@ -146,5 +149,17 @@ class Official
     public function __toString(): string
     {
         return $this->getOfficialName();
+    }
+
+    public function getCurrentParty(): ?string
+    {
+        return $this->currentParty;
+    }
+
+    public function setCurrentParty(?string $currentParty): static
+    {
+        $this->currentParty = $currentParty;
+
+        return $this;
     }
 }

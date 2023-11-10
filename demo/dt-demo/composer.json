@@ -1,7 +1,7 @@
 {
     "type": "project",
     "license": "proprietary",
-    "minimum-stability": "dev",
+    "minimum-stability": "beta",
     "prefer-stable": true,
     "require": {
         "php": ">=8.1",
@@ -26,7 +26,7 @@
         "survos/scraper-bundle": "*@dev",
         "survos/simple-datatables-bundle": "*@dev",
         "symfony/asset": "6.4.*",
-        "symfony/asset-mapper": "6.4.*",
+        "symfony/asset-mapper": "6.4.x-dev",
         "symfony/console": "6.4.*",
         "symfony/doctrine-messenger": "6.4.*",
         "symfony/dotenv": "6.4.*",

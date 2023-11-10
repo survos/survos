@@ -140,4 +140,21 @@ return [
     'datatables.net-select' => [
         'version' => '1.7.0',
     ],
+    '@fortawesome/fontawesome-free' => [
+        'version' => '6.4.2',
+    ],
+    '@fortawesome/fontawesome-free/css/fontawesome.min.css' => [
+        'version' => '6.4.2',
+        'type' => 'css',
+    ],
+    '@fortawesome/free-solid-svg-icons' => [
+        'version' => '6.4.2',
+    ],
+    '@fortawesome/fontawesome-svg-core' => [
+        'version' => '6.4.2',
+    ],
+    '@fortawesome/fontawesome-svg-core/styles.min.css' => [
+        'version' => '6.4.2',
+        'type' => 'css',
+    ],
 ];

@@ -144,9 +144,6 @@
     "survos/inspection-bundle": {
         "version": "dev-main"
     },
-    "survos/maker-bundle": {
-        "version": "dev-main"
-    },
     "survos/scraper-bundle": {
         "version": "dev-sy64"
     },

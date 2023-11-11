@@ -30,4 +30,5 @@ return [
     Survos\SimpleDatatables\SurvosSimpleDatatablesBundle::class => ['all' => true],
     Survos\Grid\SurvosGridBundle::class => ['all' => true],
     Stenope\Bundle\StenopeBundle::class => ['all' => true],
+    Sentry\SentryBundle\SentryBundle::class => ['prod' => true],
 ];

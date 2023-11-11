@@ -157,4 +157,14 @@ return [
         'version' => '6.4.2',
         'type' => 'css',
     ],
+    'datatables.net-scroller-bs5' => [
+        'version' => '2.3.0',
+    ],
+    'datatables.net-scroller' => [
+        'version' => '2.3.0',
+    ],
+    'datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css' => [
+        'version' => '2.3.0',
+        'type' => 'css',
+    ],
 ];

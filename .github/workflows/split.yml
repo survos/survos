@@ -33,6 +33,7 @@ jobs:
           - {local_path: 'command-bundle', split_repository: 'SurvosCommandBundle'}
           - {local_path: 'core-bundle', split_repository: 'SurvosCoreBundle'}
           - {local_path: 'crawler-bundle', split_repository: 'SurvosCrawlerBundle'}
+          - {local_path: 'deployment-bundle', split_repository: 'SurvosDeploymentBundle'}
           - {local_path: 'doc-bundle', split_repository: 'SurvosDocBundle'}
           - {local_path: 'datatables-bundle', split_repository: 'SurvosDatatablesBundle'}
           - {local_path: 'faker-bundle', split_repository: 'SurvosFakerBundle'}

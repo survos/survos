@@ -5,7 +5,9 @@
                 "enabled": true,
                 "fetch": "lazy",
                 "autoimport": {
-                    "axios": true
+                    "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css": true,
+                    "datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css": true,
+                    "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
                 }
             }
         },

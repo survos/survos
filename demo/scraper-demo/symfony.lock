@@ -40,8 +40,14 @@
             "tests/bootstrap.php"
         ]
     },
+    "survos/command-bundle": {
+        "version": "dev-sy64"
+    },
     "survos/core-bundle": {
         "version": "dev-main"
+    },
+    "survos/deployment-bundle": {
+        "version": "dev-sy64"
     },
     "survos/grid-bundle": {
         "version": "dev-main"

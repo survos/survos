@@ -39,7 +39,6 @@
         "roave/better-reflection": "^6.0",
         "sabre/xml": "^3.0 || ^4.0",
         "sebastian/diff": "^4.0",
-        "sensio/framework-extra-bundle": "^6.2",
         "stof/doctrine-extensions-bundle": "^1.7",
         "survos/bootstrap-bundle": "^1.4",
         "survos/command-bundle": "^1.4",
@@ -167,7 +166,8 @@
             "Survos\\WikiBundle\\": "packages/wiki-bundle/src/",
             "Survos\\WorkflowBundle\\": "packages/workflow-helper-bundle/src/",
             "Survos\\RevealBundle\\": "packages/reveal-bundle/src/",
-            "Survos\\LibreTranslateBundle\\": "packages/libre-translate-bundle/src/"
+            "Survos\\LibreTranslateBundle\\": "packages/libre-translate-bundle/src/",
+            "Survos\\DeploymentBundle\\": "packages/deployment-bundle/src/"
         }
     },
     "autoload-dev": {

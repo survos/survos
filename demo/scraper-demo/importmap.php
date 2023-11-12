@@ -37,4 +37,38 @@ return [
     'chart.js/auto' => [
         'version' => '3.9.1',
     ],
+    'jquery' => [
+        'version' => '3.7.1',
+    ],
+    'datatables.net-bs5' => [
+        'version' => '1.13.7',
+    ],
+    'datatables.net' => [
+        'version' => '1.13.7',
+    ],
+    'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
+        'version' => '1.13.7',
+        'type' => 'css',
+    ],
+    'datatables.net-select-bs5' => [
+        'version' => '1.7.0',
+    ],
+    'datatables.net-select-bs5/css/select.bootstrap5.min.css' => [
+        'version' => '1.7.0',
+        'type' => 'css',
+    ],
+    'datatables.net-scroller-bs5' => [
+        'version' => '2.3.0',
+    ],
+    'datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css' => [
+        'version' => '2.3.0',
+        'type' => 'css',
+    ],
+    'datatables.net-searchpanes-bs5' => [
+        'version' => '2.2.0',
+    ],
+    'datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css' => [
+        'version' => '2.2.0',
+        'type' => 'css',
+    ],
 ];

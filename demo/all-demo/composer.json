@@ -17,6 +17,7 @@
         "survos/bootstrap-bundle": "*@dev",
         "survos/command-bundle": "*@dev",
         "survos/crawler-bundle": "^1.5",
+        "survos/deployment-bundle": "*@dev",
         "survos/grid-bundle": "*@dev",
         "survos/scraper-bundle": "^1.5",
         "survos/simple-datatables-bundle": "*@dev",
@@ -111,6 +112,10 @@
         "symfony/web-profiler-bundle": "6.4.*"
     },
     "repositories": {
+        "deployment": {
+            "type": "path",
+            "url": "../../../survos/packages/deployment-bundle"
+        },
         "command": {
             "type": "path",
             "url": "../../../survos/packages/command-bundle"

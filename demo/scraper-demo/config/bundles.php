@@ -17,4 +17,6 @@ return [
     Survos\CoreBundle\SurvosCoreBundle::class => ['all' => true],
     Survos\Grid\SurvosGridBundle::class => ['all' => true],
     Symfony\UX\Chartjs\ChartjsBundle::class => ['all' => true],
+    Survos\CommandBundle\SurvosCommandBundle::class => ['all' => true],
+    Survos\DeploymentBundle\SurvosDeploymentBundle::class => ['all' => true],
 ];

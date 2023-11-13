@@ -8,31 +8,34 @@
         This page uses the <code>api_grid</code> component, and the datatable's AJAX call using API Platform.
     </p>
 
-{#    <twig:hola />#}
+    {#    <twig:hola /> #}
     {% set class = 'App\\Entity\\Official' %}
 
     {% component api_grid with {
         class: class,
         caller: _self,
         columns: ['id',
+            {name: 'actions', condition: is_granted('ROLE_ADMIN')},
             {name: 'firstName', sortable: true},
             {name: 'lastName', sortable: true},
-            'officialName']|merge(true or is_granted('ROLE_ADMIN')?['actions']:['birthday'])
+            {name: 'birthday', sortable: true},
+        ]
     } %}
 
-        {% block officialName %}
-        <a href="{{ path('app_congress_show', {'id': row.id}) }}">
-            {{ row.officialName }}
-        </a>
-        {% endblock %}
+        <twig:block name="officialName">
+            <a href="{{ path('app_congress_show', {'id': row.id}) }}">
+                {{ row.officialName }}
+            </a>
+        </twig:block>
 
-        {% block birthday %}
+        <twig:block name="birthday">
             {{ row.birthday|date('Y-m-d') }}
-        {% endblock %}
+        </twig:block>
 
-        {% block actions %}
+        <twig:block name="actions">
+            <span class="fas fa-pencil"></span>
             <a href="{{ path('app_congress_edit', {'id': row.id}) }}">edit</a>
-        {% endblock %}
+        </twig:block>
 
     {% endcomponent %}
 

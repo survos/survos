@@ -167,4 +167,11 @@ return [
         'version' => '2.3.0',
         'type' => 'css',
     ],
+    'datatables.net-responsive-bs5' => [
+        'version' => '2.5.0',
+    ],
+    'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css' => [
+        'version' => '2.5.0',
+        'type' => 'css',
+    ],
 ];

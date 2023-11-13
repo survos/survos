@@ -19,5 +19,5 @@ echo $V;
 #    }'
 #}
 composer config repositories.$1 "$V"
-composer req $ORG/$1-bundle:*@dev -W
+composer req $ORG/$1-bundle:^1.6-dev -W
 # yarn dev

@@ -15,7 +15,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource]
 #[ApiFilter(OrderFilter::class, properties: ['id',
     'firstName',
-    'lastName'
+    'lastName',
+    'birthday'
 ])]
 
 class Official

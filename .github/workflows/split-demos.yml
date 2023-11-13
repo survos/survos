@@ -24,8 +24,8 @@ jobs:
       matrix:
         # define package to repository map
         package:
-          - {local_path: 'grid-demo', split_repository: 'grid-demo'}
-          - {local_path: 'dt-demo', split_repository: 'dt-demo'}
+#          - {local_path: 'grid-demo', split_repository: 'grid-demo'}
+#          - {local_path: 'dt-demo', split_repository: 'dt-demo'}
 
 
     steps:

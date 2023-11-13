@@ -65,7 +65,7 @@ composer config repositories.survos_grid_bundle '{"type": "vcs", "url": "git@git
 ```bash
 symfony new bug --webapp --version=next && cd bug
 composer req symfony/asset-mapper
-bin/console importmap:require datatables.net-bs5  datatables.net-select-bs5
+bin/console importmap:require datatables.net-bs5  datatables.net-buttons-bs5
 cat importmap.php
 bin/console make:controller AppController
 sed -i "s|Route('/app'|Route('/'|" src/Controller/AppController.php

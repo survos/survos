@@ -28,6 +28,10 @@
             </a>
         </twig:block>
 
+        {% block firstName %}
+        <b>{{ row.firstName }}</b>
+        {% endblock %}
+
         <twig:block name="birthday">
             {{ row.birthday|date('Y-m-d') }}
         </twig:block>

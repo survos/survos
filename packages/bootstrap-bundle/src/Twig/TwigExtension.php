@@ -16,6 +16,7 @@ class TwigExtension extends AbstractExtension // implements ServiceSubscriberInt
         private ComponentRenderer $componentRenderer,
         private array $routes,
         private array $options,
+        private array $config,
         private ContextService $contextService,
     ) {
     }

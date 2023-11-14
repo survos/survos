@@ -114,6 +114,7 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
         $builder
             ->autowire('survos.bootstrap_twig', TwigExtension::class)
             ->addTag('twig.extension')
+            ->setArgument('$config', $config)
             ->setArgument('$routes', $config['routes'])
             ->setArgument('$options', $config['options'])
             ->setArgument('$contextService', new Reference(ContextService::class))
@@ -139,6 +140,7 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
         // since the configuration is short, we can add it here
         $definition->rootNode()
             ->children()
+            ->append($this->getAppConfig())
             ->append($this->getRouteAliasesConfig())
             ->append($this->getContextConfig())
             ->arrayNode('menu_options')
@@ -154,6 +156,21 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
         $dir = realpath(__DIR__.'/../assets/');
         assert(file_exists($dir), 'asset path must exist for the assets in ' . __DIR__);
         return [$dir => '@survos/bootstrap'];
+    }
+
+    private function getAppConfig(): ArrayNodeDefinition
+    {
+        $treeBuilder = new TreeBuilder('app');
+        /** @var ArrayNodeDefinition $rootNode */
+        $rootNode = $treeBuilder->getRootNode();
+
+        $rootNode
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->scalarNode('code')->defaultValue('my-project')->info('project code, default for repo, dokku deployment, etc.')->end()
+                ->scalarNode('abbr')->defaultValue('my<b>Project</b>')->info('text abbreviation')->end()
+            ->end();
+        return $rootNode;
     }
 
 

@@ -49,6 +49,7 @@ class TwigExtension extends AbstractExtension // implements ServiceSubscriberInt
 
             new TwigFunction('bootstrap_theme_colors', fn () => ContextService::THEME_COLORS),
             new TwigFunction('theme_option', fn (string $option) => $this->contextService->getOption($option)),
+            new TwigFunction('config', fn () => $this->config),
             new TwigFunction('theme_options', fn () => $this->contextService->getOptions()),
             new TwigFunction('hasOffcanvas', fn () => false && $this->contextService->getOption('offcanvas')),
             new TwigFunction('admin_context_is_enabled', [$this, 'isEnabled']),

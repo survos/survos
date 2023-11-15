@@ -1,1 +1,0 @@
-{"base_url":"","routes":{"app_congress_show":{"tokens":[["variable","\/","[^\/]++","id",true],["text","\/congress"]],"defaults":[],"requirements":[],"hosttokens":[],"methods":["GET"],"schemes":[]}},"prefix":"","host":"localhost","port":"","scheme":"http","locale":""}

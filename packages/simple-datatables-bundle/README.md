@@ -69,8 +69,9 @@ symfony new simple-datatables-demo --webapp --version=next --php=8.2 && cd simpl
 rm .git -rf
 composer config extra.symfony.allow-contrib true
 composer req symfony/asset-mapper:^6.4
+composer req survos/simple-datatables-bundle survos/
+echo "import 'bootstrap/dist/css/bootstrap.min.css'" >> assets/app.js
 
-composer req survos/simple-datatables-bundle
 bin/console make:controller Simple -i
 cat > templates/simple.html.twig <<END
 {% extends 'base.html.twig' %}

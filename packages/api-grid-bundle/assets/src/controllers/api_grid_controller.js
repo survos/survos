@@ -4,12 +4,14 @@ import {Controller} from "@hotwired/stimulus";
 import $ from 'jquery';
 
 import {default as axios} from "axios";
+
 import DataTables from "datatables.net-bs5";
-import 'datatables.net-searchpanes-bs5';
-import 'datatables.net-select-bs5';
-import 'datatables.net-scroller-bs5';
-import 'datatables.net-responsive-bs5';
-import 'datatables.net-buttons-bs5';
+import '../datatables-plugins.js';
+// import 'datatables.net-searchpanes-bs5';
+// import 'datatables.net-select-bs5';
+// import 'datatables.net-scroller-bs5';
+// import 'datatables.net-responsive-bs5';
+// import 'datatables.net-buttons-bs5';
 // import DataTablesSearchPanes from 'datatables.net-searchpanes-bs5';
 
 
@@ -148,6 +150,7 @@ export default class extends Controller {
 
 
         this.columns = JSON.parse(this.columnConfigurationValue);
+        console.error(this.columns);
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
@@ -349,12 +352,13 @@ export default class extends Controller {
         let options = [];
         let preSelectArray = [];
 
-        let filterColuns = this.columns;
-        filterColuns.sort(function (a, b) {
+        let filterColumns = this.columns;
+        console.log(filterColumns, typeof filterColumns);
+        filterColumns.sort(function (a, b) {
             return a.browseOrder - b.browseOrder;
 
         });
-        filterColuns.forEach((column, index) => {
+        filterColumns.forEach((column, index) => {
             if (column.browsable) {
                 searchFieldsByColumnNumber.push(index);
             }

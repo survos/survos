@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-#[AsEventListener(event: KnpMenuEvent::SIDEBAR_MENU_EVENT, method: 'onMenuEvent')]
+#[AsEventListener(event: KnpMenuEvent::NAVBAR_MENU, method: 'onMenuEvent')]
 
 final class AppMenuEventListener implements KnpMenuHelperInterface
 {

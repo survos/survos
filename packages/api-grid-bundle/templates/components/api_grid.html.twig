@@ -1,6 +1,6 @@
 {# templates/components/datatable.html.twig #}
 
-{#{% set columns = this.normalizedColumns %}#}
+{% set columns = this.normalizedColumns %}
 {#{% set columns = this.col %}#}
 {% set templates = [] %}
 {#    {% if block(c.name) is defined %} #}
@@ -21,7 +21,6 @@
 {% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
 {% endif %}
 
-{{ dump('columns in api_grid.html.twig', columns, columns|json_encode) }}
 <div {{ stimulus_controller(this.stimulusController, {
     schema: schema,
     globals: this.globals,

@@ -100,9 +100,16 @@ export default class extends Controller {
     // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
+        const map1 = new Map();
+
+        map1.set('a', 1);
+        map1.set('b', 2);
+        map1.set('c', 3);
+
         let columns = this.columns.sort(function(a, b) {
             return   a.order - b.order; // Sort in ascending order
         });
+        console.error(columns);
 
         let x = columns.map(c => {
             let render = null;

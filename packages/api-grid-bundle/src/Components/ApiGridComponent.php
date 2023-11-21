@@ -199,7 +199,7 @@ class ApiGridComponent
     /**
      * @return array<string, Column>
      */
-    public function normalizedColumns(): iterable
+    public function GridNormalizedColumns(): iterable
     {
         $normalizedColumns = [];
         foreach ($this->columns as $c) {

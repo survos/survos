@@ -232,6 +232,7 @@ class CrawlerService
         }
 
         if ($status <> 200) {
+            //echo $response->getContent();exit;
             // @todo: what should we do here?
 //            dump($response->getContent());
             $this->logger->error("$url " . $status);
@@ -241,6 +242,7 @@ class CrawlerService
             $html = $response->getContent();
         }
         // hmm, how should 301's be tracked?
+
         if (!in_array($status, [200, 302, 301])) {
             $msg = ($link->username ? $link->username . '@' : '') . $this->baseUrl .
                 trim($link->getPath(), '/') . ' ' .
@@ -251,6 +253,7 @@ class CrawlerService
         if ($status == 500) {
             dd('stopped, 500 error');
         }
+
 
         //        $responseInfo = $response->getInfo();
         //        unset($responseInfo['pause_handler']);
@@ -273,8 +276,10 @@ class CrawlerService
                 if (empty($cleanHref)) {
                     return null;
                 }
-                if (preg_match('{^/(_(profiler|wdt)|css|images|js)/}', $cleanHref)) {
-                    //                dd($href);
+//                var_dump($cleanHref);
+                if (preg_match('/^\/(_profiler|_wdt|css|images|js)\//i', $cleanHref)) {
+//                    echo "====================================";
+//                    dd($cleanHref);
                     return null;
                 }
                 $parts = parse_url($cleanHref);

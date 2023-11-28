@@ -42,8 +42,13 @@ class ApiGridComponent
     public int $pageLength=50;
     public string $searchPanesDataUrl; // maybe deprecate this?
     public string $apiGetCollectionUrl;
+    public bool $trans = true;
+    public string|bool|null $domain = null;
 
-    public array $filter = [];
+    public bool $search = true;
+    public string $scrollY = '70vh';
+        public array $filter = [];
+    public bool $useDatatables = true;
 
     public ?string $source = null;
     public ?string $style = 'spreadsheet';
@@ -51,6 +56,10 @@ class ApiGridComponent
     public ?string $locale = null; // shouldn't be necessary, but sanity for testing.
 
     public ?string $path = null;
+    public bool $info = false;
+    public ?string $tableId = null;
+    public string $tableClasses = '';
+
 
     public function getLocale(): string
     {
@@ -107,7 +116,7 @@ class ApiGridComponent
 //
 //            }
 
-            // this blows up with nested blocks.
+            // this blows up with nested blocks.  Also, issue with {% block title %}
             if (preg_match('/component.*?%}(.*?) endcomponent/ms', $source, $mm)) {
                 $twigBlocks = $mm[1];
             } else {
@@ -118,13 +127,12 @@ class ApiGridComponent
 
             $crawler = new Crawler();
             $crawler->addHtmlContent($componentHtml);
+//            dd($componentHtml, $twigBlocks);
             $allTwigBlocks = [];
 
             if ($crawler->filterXPath('//api_grid')->count() > 0) {
                 $twigBlocks = $crawler->filterXPath('//api_grid')->each(function (Crawler $node, $i) {
-//                    dd($node->html());
                     return urldecode($node->html());
-//                    return html_entity_decode($node->html());
                 });
                 if(is_array($twigBlocks)) {
                     $twigBlocks = $twigBlocks[0];
@@ -146,7 +154,6 @@ class ApiGridComponent
 
 
             if (preg_match_all('/{% block (.*?) %}(.*?){% endblock/ms', $twigBlocks, $mm, PREG_SET_ORDER)) {
-                // we could throw a deprecation here.
                 foreach ($mm as $m) {
                     [$all, $columnName, $twigCode] = $m;
                     $customColumnTemplates[$columnName] = trim($twigCode);
@@ -174,5 +181,44 @@ class ApiGridComponent
 
         return $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks());
     }
+
+    public function searchPanesColumns(): int
+    {
+        $count = 0;
+        // count the number, if > 6 we could figured out the best layout
+        foreach ($this->normalizedColumns() as $column) {
+//            dd($column);
+            if ($column->inSearchPane) {
+                $count++;
+            }
+        }
+        $count = min($count, 6);
+        return $count;
+    }
+
+    /**
+     * @return array<string, Column>
+     */
+    public function GridNormalizedColumns(): iterable
+    {
+        $normalizedColumns = [];
+        foreach ($this->columns as $c) {
+            if (empty($c)) {
+                continue;
+            }
+            if (is_string($c)) {
+                $c = [
+                    'name' => $c,
+                ];
+            }
+            assert(is_array($c));
+            $column = new Column(...$c);
+            if ($column->condition) {
+                $normalizedColumns[$column->name] = $column;
+            }
+        }
+        return $normalizedColumns;
+    }
+
 
 }

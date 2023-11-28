@@ -20,7 +20,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
 #[AsCommand(
-    name: 'survos:user:create',
+    name: 'survos:user:create', description: 'create a new user with a password'
 )]
 class UserCreateCommand extends Command
 {
@@ -39,13 +39,12 @@ class UserCreateCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Creates a user record with email and password')
             ->addArgument('email', InputArgument::REQUIRED, 'email address of account')
             ->addArgument('password', InputArgument::OPTIONAL, 'Plain text password')
             ->addOption('roles', null, InputOption::VALUE_OPTIONAL, 'comma-delimited list of roles')
             ->addOption('password', null, InputOption::VALUE_NONE, 'Update password')
             ->addOption('username', null, InputOption::VALUE_OPTIONAL, 'username (defaults to email)')
-            ->addOption('userclass', null, InputOption::VALUE_OPTIONAL, 'user class (defaults to App\Entity\User)', 'App\\Entity\\User')
+            ->addOption('userclass', null, InputOption::VALUE_OPTIONAL, 'user class', 'App\\Entity\\User')
             ->addOption('extra', null, InputOption::VALUE_OPTIONAL, 'extra string passed to event dispatcher')
             ->addOption('force', null, InputOption::VALUE_NONE, 'Change password/roles if account exists.');
     }

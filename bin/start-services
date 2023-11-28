@@ -1,0 +1,24 @@
+sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v $HOME/docker/volumes/postgres16:/var/lib/postgresql/data postgres:16
+sudo docker run --rm --name meili -d -p 7700:7700 -v $(pwd)/../meili_data:/meili_data getmeili/meilisearch:v1.2.0 meilisearch
+exit 0
+
+
+# sudo usermod -aG docker $USER
+~/ca/libretranslate/run.sh
+
+# sudo docker run --rm --name libretranslate -d -p 5000:5000  libretranslate/libretranslate
+# -v $(pwd)/../libretranslate_data:/meili_data
+
+# sudo docker run -v $(pwd)/../redis:/data redis/redis-stack:latest -d
+
+ # --master-key=masterKey
+
+# sudo docker run --rm --name meili -d -p 7700:7700 -v $(pwd)/../meili_data:/meili_data getmeili/meilisearch meilisearch
+# sudo docker run --name opensearch -d -p 9200:9200 -p 9600:9600 -e "discovery.type=single-node" opensearchproject/opensearch:latest
+# sudo docker stop pg-docker
+
+https://github.com/LibreTranslate/LibreTranslate/blob/main/README.md#build-with-docker
+
+docker run -it -p 5000:5000 libretranslate
+
+docker build -f docker/Dockerfile --build-arg with_models=true -t libretranslate .

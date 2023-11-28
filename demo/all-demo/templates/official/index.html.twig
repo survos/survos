@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Official index{% endblock %}
+
+{% block body %}
+    <h1>Official index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Birthday</th>
+                <th>OfficialName</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for official in officials %}
+            <tr>
+                <td>{{ official.id }}</td>
+                <td>{{ official.birthday ? official.birthday|date('Y-m-d') : '' }}</td>
+                <td>{{ official.officialName }}</td>
+                <td>
+                    <a href="{{ path('app_official_show', {'id': official.id}) }}">show</a>
+                    <a href="{{ path('app_official_edit', {'id': official.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_official_new') }}">Create new</a>
+{% endblock %}

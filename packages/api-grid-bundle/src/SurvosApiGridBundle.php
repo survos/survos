@@ -4,36 +4,59 @@ namespace Survos\ApiGrid;
 
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGrid\Components\GridComponent;
+use Survos\ApiGrid\Components\ItemGridComponent;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Survos\ApiGrid\Paginator\SlicePaginationExtension;
 use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Twig\TwigExtension;
-use Survos\GridGroupBundle\Service\GridGroupService;
+use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-use Symfony\WebpackEncoreBundle\Twig\StimulusTwigExtension;
 use Twig\Environment;
 use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
 use Survos\ApiGrid\State\MeilliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
-use ApiPlatform\Hydra\Serializer\PartialCollectionViewNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 class SurvosApiGridBundle extends AbstractBundle
 {
+    use HasAssetMapperTrait;
     // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
     /**
      * @param array<mixed> $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        if (class_exists(Environment::class)) {
+            $builder
+                ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
+                ->addTag('twig.extension')
+                ->setPublic(false);
+        }
+
+        $builder->register(GridComponent::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setArgument('$twig', new Reference('twig'))
+            ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$stimulusController', $config['grid_stimulus_controller'])
+            ->setArgument('$registry', new Reference('doctrine'))
+        ;
+
+        $builder->register(ItemGridComponent::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+        ;
+
         $builder->register(DataTableFilter::class)
             ->setAutowired(true)
             ->addTag('meilli_search_filter')
@@ -65,7 +88,8 @@ class SurvosApiGridBundle extends AbstractBundle
         $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
-            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
+//            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
+            ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))
             ->setArgument('$requestStack', new Reference('request_stack'))
 
             ->setArgument('$resourceMetadataCollectionFactory', null)
@@ -91,13 +115,6 @@ class SurvosApiGridBundle extends AbstractBundle
         ;
         $container->services()->alias(SlicePaginationExtension::class,'api_platform.doctrine.orm.query_extension.pagination');
 
-        if (class_exists(Environment::class) && class_exists(StimulusTwigExtension::class)) {
-            $builder
-                ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
-                ->addTag('twig.extension')
-                ->setPublic(false);
-        }
-
         $builder->register(DatatableService::class)->setAutowired(true)->setAutoconfigured(true);
 
         $builder->register(ApiGridComponent::class)
@@ -113,8 +130,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->addArgument(new Reference('logger'))
             ->addTag('api_platform.filter');
 
-        //        $builder->register(GridComponent::class);
-        //        $builder->autowire(GridComponent::class);
+        //        $builder->register(SimpleDatatablesComponent::class);
+        //        $builder->autowire(SimpleDatatablesComponent::class);
 
         //        $definition->setArgument('$widthFactor', $config['widthFactor']);
         //        $definition->setArgument('$height', $config['height']);
@@ -127,6 +144,7 @@ class SurvosApiGridBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
             ->scalarNode('stimulus_controller')->defaultValue('@survos/api-grid-bundle/api_grid')->end()
+            ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid-bundle/grid')->end()
             ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
             ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
             ->end();;
@@ -134,16 +152,19 @@ class SurvosApiGridBundle extends AbstractBundle
 
     public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        $configs = $builder->getExtensionConfig('api_platform');
-        //        dd($configs);
-        //        assert($configs[0]['defaults']['pagination_client_items_per_page'], "pagination_client_items_per_page must be tree in config/api_platform");
+        if (!$this->isAssetMapperAvailable($builder)) {
+            return;
+        }
 
-        // https://stackoverflow.com/questions/72507212/symfony-6-1-get-another-bundle-configuration-data/72664468#72664468
-        //        // iterate in reverse to preserve the original order after prepending the config
-        //        foreach (array_reverse($configs) as $config) {
-        //            $container->prependExtensionConfig('my_maker', [
-        //                'root_namespace' => $config['root_namespace'],
-        //            ]);
-        //        }
+        $dir = realpath(__DIR__.'/../assets/');
+        assert(file_exists($dir), $dir);
+
+        $builder->prependExtensionConfig('framework', [
+            'asset_mapper' => [
+                'paths' => [
+                    $dir => '@survos/api-grid',
+                ],
+            ],
+        ]);
     }
 }

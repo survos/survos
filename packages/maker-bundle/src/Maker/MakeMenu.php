@@ -14,6 +14,9 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,6 +34,7 @@ final class MakeMenu extends AbstractMaker implements MakerInterface
 {
     public function __construct(
         private Generator $generator,
+        private RouterInterface $router,
         private string $templatePath
     ) {
     }
@@ -83,11 +87,18 @@ final class MakeMenu extends AbstractMaker implements MakerInterface
             ItemInterface::class,
             MenuBuilder::class,
             KnpMenuEvent::class,
+            Autowire::class,
             AsEventListener::class,
+            Security::class,
             KnpMenuHelperInterface::class,
             OptionsResolver::class,
             AuthorizationCheckerInterface::class,
         ]);
+
+        foreach ($this->router->getRouteCollection() as $routeName => $route) {
+            //
+//            dd($routeName, $route);
+        }
 
         $generatedFilename = $this->generator->generateClass(
             $classNameDetails->getFullName(),

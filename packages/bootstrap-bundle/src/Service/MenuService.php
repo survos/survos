@@ -1,23 +1,55 @@
 <?php
 
-// base class for menu subscriber, makes it easier to handle options
+// helper class for menus, e.g. auth, admin
 
 namespace Survos\BootstrapBundle\Service;
 
 use Knp\Menu\ItemInterface;
+use Survos\BootstrapBundle\Traits\KnpMenuHelperInterface;
+use Survos\BootstrapBundle\Traits\KnpMenuHelperTrait;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Http\Impersonate\ImpersonateUrlGenerator;
 use function Symfony\Component\String\u;
 
-class MenuService
+class MenuService implements KnpMenuHelperInterface
 {
+    use KnpMenuHelperTrait;
     private ?array $options;
 
-    private $childOptions;
+//    private $childOptions;
 
-    public function __construct(private AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct(
+        private ?AuthorizationCheckerInterface $authorizationChecker,
+        private ?Security $security,
+        private ?ImpersonateUrlGenerator $impersonateUrlGenerator,
+        private string $routeRequirementsFilename,
+        private array $usersToImpersonate=[]
+    )
     {
+
+    }
+
+    public function getUsersToImpersonate(): array
+    {
+        return $this->usersToImpersonate;
+    }
+
+    public function setUsersToImpersonate(array $usersToImpersonate): MenuService
+    {
+        $this->usersToImpersonate = $usersToImpersonate;
+        return $this;
+    }
+
+    public function getRouteRequirements(): array
+    {
+        static $requirements=null;
+        if (empty($requirements)) {
+            $requirements = json_decode(file_get_contents($this->routeRequirementsFilename), true);
+        }
+        return $requirements;
     }
 
     public function setAuthorizationChecker(AuthorizationCheckerInterface $authorizationChecker)
@@ -38,6 +70,58 @@ class MenuService
 
     public function addAuthMenu(ItemInterface $menu, $childOptions = []): ItemInterface
     {
+        if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            $user = $this->security?->getUser();
+            $subMenu = $this->addSubmenu($menu,
+                $user->getUserIdentifier(),
+                id: 'user_menu'
+            );
+
+            $subMenu->setExtra('btn', 'btn btn-info');
+
+            // @todo: add custom user links, like profile
+
+            if ($this->isGranted('IS_IMPERSONATOR')) {
+                $this->add($subMenu, external: false, uri: $this->impersonateUrlGenerator->generateExitPath('/'), label: 'exit impersonation');
+            }
+
+            if ($this->isGranted('ROLE_ALLOWED_TO_SWITCH')) {
+                $this->addHeading($subMenu, 'Impersonate...');
+                foreach ($this->usersToImpersonate as $item) {
+                    $this->add($subMenu, external: false, uri: $this->generateImpersonationPath($item), label: $item);
+                }
+            }
+
+            $this->add($subMenu, 'app_logout', dividerPrepend: true, icon: 'fas fa-sign-out-alt');
+        } else {
+            $menu->addChild(
+                'login',
+                [
+                    'route' => 'app_login',
+                    'label' => 'menu.login',
+                    'childOptions' => $childOptions,
+                ]
+            )->setLabelAttribute('icon', 'fas fa-sign-in-alt');
+
+            try {
+                $menu->addChild(
+                    'register',
+                    [
+                        'route' => 'app_register',
+                        'label' => 'menu.register',
+                        'childOptions' => $childOptions,
+                    ]
+                )->setLabelAttribute('icon', 'fas fa-sign-in-alt');
+            } catch (\Exception $exception) {
+                // route is likely missing
+            }
+        }
+
+        return $menu;
+
+        if ($this->isGranted('IS_IMPERSONATOR')) {
+            $this->add($subMenu, uri: $this->impersonateUrlGenerator->generateExitPath(), label:  'exit impersonation');
+        }
         if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $menu->addChild(
                 'logout',
@@ -73,7 +157,7 @@ class MenuService
         return $menu;
     }
 
-    public function addMenuItem(ItemInterface $menu, array $options, array $extra = []): ItemInterface
+    public function xxaddMenuItem(ItemInterface $menu, array $options, array $extra = []): ItemInterface
     {
         $options = $this->menuOptions($options);
         // must pass in either route, icon or menu_code
@@ -154,6 +238,7 @@ class MenuService
                     'uri' => null,
                     'classes' => [], // this doesn't feel quite right.  Maybe a "style: header"?
                     'style' => null,
+                    'is_submenu' => false,
                     'childOptions' => $this->childOptions,
                     'description' => null,
                     'attributes' => [],
@@ -238,4 +323,10 @@ class MenuService
         }
         return $this->authorizationChecker ? $this->authorizationChecker->isGranted($attribute, $subject) : false;
     }
+
+    public function generateImpersonationPath(string $identifier): string
+    {
+        return $this->impersonateUrlGenerator->generateImpersonationPath($identifier);
+    }
+
 }

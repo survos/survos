@@ -7,6 +7,7 @@ use Google\Auth\Cache\Item;
 use Knp\Menu\ItemInterface;
 use Survos\BootstrapBundle\Event\KnpMenuEvent;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -15,11 +16,11 @@ use function Symfony\Component\String\u;
 
 trait KnpMenuHelperTrait
 {
-    private ?AuthorizationCheckerInterface $authorizationChecker = null;
+//    private ?AuthorizationCheckerInterface $authorizationChecker = null;
     //    private ?ParameterBagInterface $bag=null;
 
     //    private ?array $options;
-    private $childOptions;
+    private array $childOptions=[];
 
     public function supports(KnpMenuEvent $event): bool
     {
@@ -38,24 +39,29 @@ trait KnpMenuHelperTrait
             'label' => $label,
             'icon' => $icon,
             'id' => $id,
+            'is_submenu' => true
         ]);
+        $subMenu->setExtra('is_submenu', true);
+//        $subMenu->setAttribute('is_submenu', true);
+//        if ($subMenu->getLabel() == 'tt@survos.com') dd($subMenu, $subMenu->getAttributes());
         return $subMenu;
     }
 
     public function addHeading(ItemInterface $menu, string $label, string $icon = null): void
     {
-        $this->addMenuItem($menu, [
+        $item = $this->addMenuItem($menu, [
             'label' => $label,
             'style' => 'header',
             'icon' => $icon,
-            'id' => (new AsciiSlugger())->slug($label)->toString()
+            'id' => (new AsciiSlugger())->slug($label??'')->toString()
         ]);
+
     }
 
     private function createId(ItemInterface $menu): string
     {
         $label = $menu->getLabel();
-        return (new AsciiSlugger())->slug($label)->toString() . '_' . uniqid();
+        return (new AsciiSlugger())->slug($label??null)->toString() . '_' . uniqid();
     }
 
     // add returns self, for chaining, by default.  Pass returnItem: true to get the item for adding options.
@@ -68,8 +74,13 @@ trait KnpMenuHelperTrait
         ?string $id = null,
         ?string $icon = null,
         string|int|null $badge = null,
-        bool $external = false,
+        ?bool $external = null,
         bool $returnItem = false,
+        bool $if = true,
+        bool $dividerPrepend = false,
+        bool $dividerAppend = false,
+        string $translationDomain = 'routes',
+
     ): self|ItemInterface { // for nesting.  Leaves only, requires route or uri.
 
         assert(! ($route && $uri));
@@ -90,23 +101,83 @@ trait KnpMenuHelperTrait
         }
 
         if (! $label) {
-            $label = $route; // @todo, be smarter.
+            $label = $route  ?? $uri; // @todo, be smarter.
         }
+
+        if ($route) {
+            if (isset($this->menuService)) {
+                if (array_key_exists($route, $this->menuService->getRouteRequirements())) {
+                    $x = $this->menuService->getRouteRequirements()[$route];
+                    foreach ($x as $y) {
+                        if (!$this->isGranted($y)) {
+                            $label .= " NOT AUTHORIZED?";
+
+//                            dd(sprintf('rejecting %s %s %s', $route, json_encode($x), $this->security->getUser()));
+                            return $this;
+                        }
+                    }
+                }
+            }
+        }
+
+
         $options['label'] = $label;
         if (! $id) {
             $id = $this->createId($menu);
         }
         $child = $menu->addChild($id, $options);
+        if (!$label) {
+            $child->setLabel(' '); // ideally so id isn't used.
+        }
+//        if (!$label) dd($id, $options, $child->getName());
+        if ($uri) {
+            $child->setUri($uri);
+            if ($external !== false) {
+                $external = true;
+            }
+        }
         if ($external) {
             $child->setLinkAttribute('target', '_blank');
-            $options['icon'] = 'fas fa-external-alt';
+            if (!$icon) {
+                $options['icon'] = 'fas fa-external-alt';
+            }
         }
+
+        // hack to align navigation if no link
+
+        if (!$child->getExtra('translation_domain')) {
+            $child->setExtra('translation_domain', $translationDomain);
+        }
+
 
         // now add the various classes based on the style.  Unfortunately, this happens in the menu_get, not the render.
         $child->setLabel($label);
 
+        if ($options['icon']??false) {
+            $child->setAttribute('icon', $options['icon']);
+        }
+
+        if ($dividerPrepend) {
+            $child->setAttribute('divider_prepend', true);
+        }
+        if ($dividerAppend) {
+            $child->setAttribute('divider_append', true);
+        }
+
         $options = $this->menuOptions($options);
         $this->setChildOptions($child, $options);
+        $child->setExtra('safe_label', true);
+
+            $child->setExtra('is_submenu', $options['is_submenu']);
+            $child->setAttribute('is_submenu', $options['is_submenu']);
+        if ($options['is_submenu']) {
+        }
+
+
+        if ($dividerAppend) {
+//            dd($label, $child->getLabel());
+        }
+
 
         return $returnItem ? $child : $this;
     }
@@ -119,7 +190,7 @@ trait KnpMenuHelperTrait
 
         // especially for collapsible menus.  Cannot start with a digit.
         if (!$options['id']) {
-            $options['id'] = 'id_' . (new AsciiSlugger())->slug($options['label'])->toString() . '_' . md5(json_encode($options));
+            $options['id'] = 'id_' . (new AsciiSlugger())->slug($options['label']??'')->toString() . '_' . md5(json_encode($options));
         }
 
         $child = $menu->addChild($options['id'], $options);
@@ -171,7 +242,7 @@ trait KnpMenuHelperTrait
             ]);
         }
 
-        if ($routes = $options['routes']) {
+        if ($routes = $options['routes']??false) {
             $child->setExtra('routes', $routes);
         }
 
@@ -197,8 +268,9 @@ trait KnpMenuHelperTrait
                 'routeParameters' => [],
                 'routes' => null,
                 'external' => false,
+                'is_submenu' => false,
                 '_fragment' => null,
-                'label' => null,
+                'label' => '', // null will use id as label
                 'icon' => null,
                 'badge' => null,
                 'feather' => null,
@@ -226,7 +298,9 @@ trait KnpMenuHelperTrait
             // _index is commonly used to list entities
             $routeLabel = preg_replace('/_index$/', '', $routeLabel);
             $routeLabel = preg_replace('/^app_/', '', $routeLabel);
-            $options['label'] = u($routeLabel)->replace('_', ' ')->title(true)->toString();
+            if ($options['label'] !== false) {
+                $options['label'] = u($routeLabel)->replace('_', ' ')->title(true)->toString();
+            }
         }
 
         if (empty($options['label']) && $options['menu_code']) {
@@ -284,16 +358,34 @@ trait KnpMenuHelperTrait
 
     public function isGranted($attribute, $subject = null)
     {
+        return $this->security->isGranted($attribute, $subject);
+
         if (! $this->authorizationChecker) {
             throw new \Exception("call setAuthorizationChecker() before making this call.");
         }
         return $this->authorizationChecker ? $this->authorizationChecker->isGranted($attribute, $subject) : false;
     }
 
-    public function authMenu(AuthorizationCheckerInterface $security, ItemInterface $menu, $childOptions = [])
+    public function authMenu(AuthorizationCheckerInterface $authorizationChecker,
+                             Security $security,
+                             ItemInterface                 $menu,
+                             $childOptions = [])
     {
-        if ($security->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            $menu->addChild(
+
+
+        if ($authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            $user = $security->getUser();
+            $subMenu = $this->addSubmenu($menu,
+                $user->getUserIdentifier(),
+                id: 'user_menu'
+            );
+
+            $subMenu->setExtra('btn', 'btn btn-info');
+
+            if ($this->isGranted('IS_IMPERSONATOR')) {
+                $this->add($subMenu, '');
+            }
+            $subMenu->addChild(
                 'logout',
                 [
                     'route' => 'app_logout',

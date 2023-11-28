@@ -2,7 +2,6 @@
 
 namespace Survos\CoreBundle\Entity;
 
-use JetBrains\PhpStorm\Deprecated;
 use Symfony\Component\Serializer\Annotation\Groups;
 use function Symfony\Component\String\u;
 
@@ -20,7 +19,8 @@ trait RouteParametersTrait
         return array_merge($this->getUniqueIdentifiers(), $addlParams);
     }
 
-    public static function getPrefix(string $class = null): string
+    /** e.g. MemberDirectory to member_directory */
+    public static function getClassnamePrefix(string $class = null): string
     {
         if (! $class) {
             $class = get_called_class();

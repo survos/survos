@@ -3,7 +3,7 @@
 {% block body_content %}
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
-            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+            <aside id="xxlayout-menu" class="layout-menux menu-vertical menu bg-menu-theme">
 
                 {% block sidebar_logo %}
                     <div class="app-brand demo">
@@ -12,6 +12,8 @@
                             class: 'app-brand-link'
                         } %}
                             {% block body %}
+                                {# where should translation be? #}
+                                {{ 'home'|route_alias }}
                             {% endblock %}
                         {% endcomponent %}
                         {% component link with {
@@ -92,8 +94,8 @@
                 {% endblock %}
                 <div class="menu-inner-shadow"></div>
 
-
                 {% block sidebar %}
+                    Sidebar
                     {{ component('menu', {type: 'sidebar'}) }}
                 {% endblock %}
             </aside>
@@ -147,7 +149,7 @@
                             {% block footer_menu %}
                                 {# dispatch a menu event to populate the footer menu.  Overwrite this block to customize with options or a custom menu event #}
                                 {{ component('menu', {
-                                    type: 'footer',
+                                    type: FOOTER_MENU,
                                     options: {
                                     }
                                 }) }}

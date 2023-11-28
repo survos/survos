@@ -13,7 +13,13 @@ class Column
         public ?string $type = null, // this is used for searchBuilder
         public ?string $prefix = null,
         public ?string $internalCode = null, // e.g. label, description, type
+        public ?string $className = null, // e.g. pull-right for numbers
         public bool $searchable = false,
+        public bool $useDatatables = true,
+
+        public bool $translateValue = false,
+        // @todo: consolidate these two
+        public bool $inSearchPane = false,
         public bool $browsable = false, // browseOrder = 100 if true unless set
         public int $browseOrder = 0, // if 0, same as false, so we can deprecate browsable
         public bool $sortable = false,
@@ -25,7 +31,8 @@ class Column
 //        public ?string $propertyConfig,
     ) {
         if (empty($this->title)) {
-            $this->title = ucwords($this->name);
+            // the title of the column!
+            $this->title = $this->name; // ucwords($this->name);
         }
     }
 

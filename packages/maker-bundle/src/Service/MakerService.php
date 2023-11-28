@@ -37,7 +37,6 @@ class MakerService
     }
 
     /**
-     * @param string $fqcn
      * @return array<int,string>
      */
     public function getClassUses(?string $fqcn = null, ?ReflectionClass $reflectionClass = null): array
@@ -151,7 +150,9 @@ class MakerService
 
             //            $reflectionClass = (new BetterReflection())->reflector()->reflectClass()
             $method = $reflectionClass->getMethod($methodName);
-            $originalBody = $method->getBodyCode();
+            assert($method, "$methodName is missing");
+//            dd($method);
+//            $originalBody = $method->getBodyCode();
             $methodSource = $this->getMethodSource($reflectionClass, $methodName);
 
             // too complicated...
@@ -160,6 +161,7 @@ class MakerService
                 'methodName' => $methodName,
                 'returnType' => $method->getReturnType(),
             ]);
+//            dd($methodSource, $newMethodSource);
 
             // hack
             if ($php) {
@@ -210,7 +212,7 @@ class MakerService
             // if this is in a comment, it may fail
             if (str_contains($source, $iString = "class $shortClassName implements ")) {
                 $source = str_replace($iString, $iString . $php . ',', $source);
-            // add new implements
+                // add new implements
             } else {
                 $toReplace = "class $shortClassName ";
                 assert(str_contains($source, $toReplace), "missing $toReplace in source");
@@ -320,7 +322,6 @@ class MakerService
     }
 
     /**
-     * @param string $fqcn
      * @return array<int,string>
      */
     public function getLastUseLineNumber(?string $fqcn = null, ?ReflectionClass $reflectionClass = null): ?int

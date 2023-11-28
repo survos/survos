@@ -3,6 +3,7 @@
 namespace Survos\CrawlerBundle;
 
 use Survos\CrawlerBundle\Command\CrawlCommand;
+use Survos\CrawlerBundle\Controller\CrawlerController;
 use Survos\CrawlerBundle\Services\CrawlerService;
 use Survos\CrawlerBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -20,6 +21,16 @@ class SurvosCrawlerBundle extends AbstractBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        $dir =
+        $builder->autowire(CrawlerController::class)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->addTag('container.service_subscriber')
+            ->addTag('controller.service_arguments')
+            ->setArgument('$bag', new Reference('parameter_bag'))
+        ;
+
         $builder->autowire(CrawlCommand::class)
 //            ->setArgument('$registry', new Reference('doctrine'))
             ->setArgument('$logger', new Reference('logger'))
@@ -44,6 +55,7 @@ class SurvosCrawlerBundle extends AbstractBundle
             ->setArgument('$maxDepth', $config['max_depth'])
             ->setArgument('$tokenStorage', new Reference('security.untracked_token_storage'))
             ->setArgument('$routesToIgnore', $config['routes_to_ignore'])
+            ->setArgument('$pathsToIgnore', $config['paths_to_ignore'])
         ;
         $container->services()->alias(CrawlerService::class, $crawler_service_id);
 
@@ -60,6 +72,7 @@ class SurvosCrawlerBundle extends AbstractBundle
 //            ->arrayNode('routes_to_skip')->defaultValue(['app_logout'])->end()
             ->arrayNode('users')->prototype('variable')->end()->end()
             ->arrayNode('routes_to_ignore')->prototype('variable')->end()->end()
+            ->arrayNode('paths_to_ignore')->prototype('variable')->defaultValue(['/^_profiler/'])->end()->end()
             ->scalarNode('max_per_route')->defaultValue(3)->end()
             ->scalarNode('base_url')->defaultValue('https://127.0.0.1:8000')->end()
             ->scalarNode('initial_path')->defaultValue('/')->end()

@@ -2,17 +2,14 @@
 
 namespace Survos\InspectionBundle;
 
-use ApiPlatform\Api\IriConverterInterface;
 use Survos\InspectionBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\WebpackEncoreBundle\Twig\StimulusTwigExtension;
-use Twig\Environment;
 
 class SurvosInspectionBundle extends AbstractBundle
 {
@@ -26,23 +23,12 @@ class SurvosInspectionBundle extends AbstractBundle
         $definition = $builder
             ->setDefinition('survos.inspection_twig', new Definition(TwigExtension::class))
             ->addTag('twig.extension')
-            ->setPublic(false)
-        ;
-        //                dd($reference);
-        //        $reference = new Reference('api_platform.iri_converter.legacy');
-        //        $definition->setArgument('$iriConverter', $reference);
-        $reference = new Reference('api_platform.iri_converter');
-        $definition->setArgument('$iriConverter', $reference);
-        //                if (!$reference->getInvalidBehavior()) {
-        //                    dd($reference);
-        //                    $definition->setArgument('$iriConverter', $reference);
-        //                } else {
-        //                    $reference = new Reference('api_platform.iri_converter.legacy');
-        //                    $definition->setArgument('$iriConverter', $reference);
-        //                }
-        //                dd($reference);
-        if (class_exists(Environment::class) && class_exists(IriConverterInterface::class)) {
-        }
+            ->setPublic(false);
+
+        $definition
+            ->setArgument('$iriConverter',
+                new Reference('api_platform.symfony.iri_converter', ContainerInterface::NULL_ON_INVALID_REFERENCE)
+            );
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -51,7 +37,6 @@ class SurvosInspectionBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
             ->booleanNode('debug')->defaultValue(false)->end()
-            ?->end();
-        ;
+            ?->end();;
     }
 }

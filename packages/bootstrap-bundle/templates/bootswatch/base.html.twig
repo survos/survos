@@ -1,0 +1,90 @@
+{% extends "@SurvosBootstrap/bs5/bootstrap_5_layout.html.twig" %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+{#    <style>#}
+{#        body {#}
+{#            padding-top: 460px;#}
+{#        }#}
+{#    </style>#}
+
+{% endblock %}
+{% block body_content %}
+    <div class="navbar navbar-expand-lg sticky-top xxfixed-top bg-primary" data-bs-theme="dark">
+        <div class="container">
+            <a href="../" class="navbar-brand">{{ config().app.abbr|raw }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                {{ component('menu', {type: NAVBAR_MENU}) }}
+                {{ component('menu', {type: NAVBAR_MENU2}) }}
+                {{ component('menu', {type: NAVBAR_MENU3}) }}
+                {{ component('menu', {type: AUTH_MENU}) }}
+                {# force this right? #}
+
+{#                {{ include('@SurvosBootstrap/bootswatch/_example_right_navbar.html.twig') }}#}
+
+            </div>
+
+            <!-- Dropdown - User Actions -->
+{#            <div class="xnav-menu xtext-nowrap">#}
+{#            </div>#}
+
+{#            <div class="xnav-menu xtext-nowrap">#}
+{#                <!-- Nav Item - User Information -->#}
+{#                <div class="nav-item dropdown no-arrow">#}
+{#                    <a class="btn rounded-0 border-dark dropdown-toggle text-bg-info" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">#}
+{#                        <span class="mr-2 text-gray-600 small">tacman@gmail.com</span>#}
+{#                        <i class="fas fa-user-shield fa-fw"></i>#}
+{#                    </a>#}
+
+{#                    <div class="dropdown-menu dropdown-menu-lg-end" aria-labelledby="userDropdown">#}
+{#                        <a class="dropdown-item" href="/profile">#}
+{#                            <i class="fas fa-id-card fa-sm fa-fw mr-2 text-gray-400"></i>#}
+{#                            Edit Profile#}
+{#                        </a>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+
+        </div>
+    </div>
+
+    {# maybe page header?  Or secondary navbar? #}
+{#    <div>#}
+{#        {% embed('@SurvosBootstrap/bs5/_navbar.html.twig') %}#}
+{#        {% endembed %}#}
+{#    </div>#}
+
+    <div class="container">
+        {% block page_header %}
+        <div class="page-header" id="banner">
+{#            {{ component('menu', {type: AUTH_MENU}) }}#}
+
+{#            page header, breadcrumbs, etc.#}
+{#            <div class="row">#}
+{#                <div class="col-lg-8 col-md-7 col-sm-6">#}
+{#                    <h1>Cerulean</h1>#}
+{#                    <p class="lead">A calm blue sky</p>#}
+{#                </div>#}
+{#                <div class="col-lg-4 col-md-5 col-sm-6">#}
+{#                    <div class="sponsor">#}
+{#                        #}{#  could put ads here. #}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+        </div>
+        {% endblock %}
+
+        <div class="mt-4">
+            {% block body 'overwrite the body...' %}
+        </div>
+    </div>
+
+
+{% endblock %}

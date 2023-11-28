@@ -14,6 +14,7 @@ use Survos\Bundle\MakerBundle\Maker\MakeCrud;
 use Survos\Bundle\MakerBundle\Maker\MakeInvokableCommand;
 use Survos\Bundle\MakerBundle\Maker\MakeMenu;
 //use Survos\Bundle\MakerBundle\Maker\MakeMethod;
+use Survos\Bundle\MakerBundle\Maker\MakeMethod;
 use Survos\Bundle\MakerBundle\Maker\MakeModel;
 use Survos\Bundle\MakerBundle\Maker\MakeParamConverter;
 use Survos\Bundle\MakerBundle\Maker\MakeService;
@@ -45,7 +46,7 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_it
 class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
 {
     // The compiler pass
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         //        $map = [];
         //        // get the map from serviceIds to classes, so we can inject things like router.default and serializer
@@ -70,19 +71,23 @@ class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
         }
         //        $reference = new Reference('workflow.registry');
 
-//        $container->get(MakeWorkflowListener::class)
-//            ->setArgument('registry', new Reference('workflow.registry'))
-//        ;
+        //        $container->get(MakeWorkflowListener::class)
+        //            ->setArgument('registry', new Reference('workflow.registry'))
+        //        ;
     }
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        foreach ([MakeMenu::class, MakeService::class, MakeInvokableCommand::class, MakeModel::class] as $makerClass) {
-            $builder->autowire($makerClass)
-                ->addTag(MakeCommandRegistrationPass::MAKER_TAG) // 'maker.command'
-                ->addArgument(new Reference('maker.generator'))
-                ->addArgument($config['template_path'])
+        foreach ([MakeMenu::class, MakeService::class, MakeMethod::class, MakeInvokableCommand::class, MakeModel::class] as $makerClass) {
+            $definition = $builder->autowire($makerClass)
+                ->addTag('maker.command')
+//                ->addTag(MakeCommandRegistrationPass::MAKER_TAG) // 'maker.command'
+                ->setArgument('$generator', new Reference('maker.generator'))
+                ->setArgument('$templatePath', $config['template_path'])
             ;
+            if ($makerClass === MakeMenu::class) {
+                $definition->setArgument('$router', new Reference('router'));
+            }
         }
         $builder->register(ParameterProvider::class)
             ->setArgument('$container', new Reference('service_container'))
@@ -98,17 +103,17 @@ class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
                 ->setAutoconfigured(true);
         }
 
-
-//        dd($config);
+        //        dd($config);
         $builder->autowire(MakeBundle::class)
-            ->addTag(MakeCommandRegistrationPass::MAKER_TAG) // 'maker.command'
+            ->addTag('maker.command')
+//            ->addTag(MakeCommandRegistrationPass::MAKER_TAG) // 'maker.command'
             ->addArgument($config['template_path'])
             ->addArgument($config['relative_bundle_path']) // /packages
-            ->addArgument($config['bundle_name'])
+//            ->addArgument($config['bundle_name'])
             ->setArgument('$jsonFileManager', new Reference(JsonFileManager::class))
             ->setArgument('$composerJsonFactory', new Reference(ComposerJsonFactory::class))
         ;
-//            ->setArgument('$jsonFileManager', $serviceId)
+        //            ->setArgument('$jsonFileManager', $serviceId)
 
         // we can likely combine these, or even move it to crud
         $builder->register('maker.param_converter_renderer', ParamConverterRenderer::class)
@@ -173,7 +178,7 @@ class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
             ->children()
             ->scalarNode('template_path')->defaultValue(__DIR__ . '/../templates/skeleton/')->end()
             ->scalarNode('vendor')->defaultValue('Survos')->end()
-            ->scalarNode('bundle_name')->defaultValue('FooBundle')->end()
+//            ->scalarNode('bundle_name')->defaultValue('FooBundle')->end()
             ->scalarNode('relative_bundle_path')->defaultValue('packages')->end()
             ->end();
     }
@@ -184,7 +189,7 @@ class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
 
         $container->addCompilerPass($this, PassConfig::TYPE_BEFORE_OPTIMIZATION, -1000);
 
-        return;
+        return; // not sure why MakeCommandRegistrationPass isn't available anymore
 
         // add a priority so we run before the core command pass
         //        $container->addCompilerPass(new DoctrineAttributesCheckPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 11);

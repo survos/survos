@@ -107,7 +107,9 @@ class CrawlCommand extends Command
             new InputOption('limit', null, InputOption::VALUE_REQUIRED, 'Limit the number of links to process, prevents infinite crawling', 0),
             new InputOption('locale', null, InputOption::VALUE_REQUIRED, 'Crawler will crawl only given locale url', 'en'),
             new InputOption('security-firewall', null, InputOption::VALUE_REQUIRED, 'Firewall name', 'secured_area'),
-           // new InputOption('ignore-route-keyword', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Skip routes containing this string', []),
+            new InputOption('ignore-route-keyword', null, InputOption::VALUE_REQUIRED, 'regex to ignore routes'),
+//            new InputOption('ignore-route-keyword', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Skip routes containing this string', []),
+
         ]);
     }
 
@@ -151,11 +153,11 @@ class CrawlCommand extends Command
             $loop = 0;
             while ($link = $crawlerService->getUnvisitedLink($username)) {
                 $loop++;
-                $this->logger->info("Considering " . $link->getPath());
                 //                $io->info("Considering " . $link->getPath());
                 $crawlerService->scrape($link);
+                $this->logger->info(sprintf("%s %s (%s)", $link->getPath(), $link->getRoute(), $link->getLinkStatus()));
                 if (! $link->testable()) {
-                    $io->warning("Rejecting " . $link->getPath() . ' ' . $link->getRoute());
+//                    $io->info("Rejecting " . $link->getPath() . ' ' . $link->getRoute());
                 }
                 if (($limit = $input->getOption('limit')) && ($loop > $limit)) {
                     break;
@@ -217,7 +219,7 @@ class CrawlCommand extends Command
         $stopwatch = new Stopwatch();
 
         // start crawling
-        $output->writeln(sprintf('Dominating <comment>%s</comment>, starting at <comment>%s</comment>.  
+        $output->writeln(sprintf('Dominating <comment>%s</comment>, starting at <comment>%s</comment>.
 At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->startingLink, $this->searchLimit));
 
         // crawl starting link
@@ -240,7 +242,7 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
             $url = array_pop($this->linksToProcess);
 
             // ignore certain routes
-            if (preg_match('{quick|copy-and-import|go-to-observe|docs}', $url)) {
+            if (preg_match('{quick|copy-and-import|go-to-observe|docs|_profiler}', $url)) {
                 $output->writeln('IGNORING: ' . $url);
                 continue;
             }
@@ -297,7 +299,7 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
      *
      * @author  Joe Sexton <joe@webtipblog.com
      */
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output): void
     {
         if (! $this->startingLink) {
             $defaultStart = 'jardin.wip';
@@ -403,7 +405,7 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         });
         // $seen = [];
 
-        // remove outboundlinks and links with spaces
+        // remove outbound links and links with spaces
         foreach ($links as $key => $link) {
             if (isset($this->domainLinks[$link]) || in_array($link, $seen)) {
                 unset($links[$key]);

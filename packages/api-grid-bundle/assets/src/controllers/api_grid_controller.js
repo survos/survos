@@ -1,20 +1,27 @@
 // during dev, from project_dir run
 // ln -s ~/survos/bundles/api-grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
 import {Controller} from "@hotwired/stimulus";
+import $ from 'jquery';
 
 import {default as axios} from "axios";
+
 import DataTables from "datatables.net-bs5";
-import 'datatables.net-select-bs5';
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs5';
-import 'datatables.net-buttons-bs5';
-import 'datatables.net-searchpanes-bs5';
-import 'datatables.net-datetime';
-import 'datatables.net-scroller-bs5';
-import 'datatables.net-buttons/js/buttons.colVis.min';
-import 'datatables.net-buttons/js/buttons.html5.min';
-import 'datatables.net-buttons/js/buttons.print.min';
-import 'jszip';
+import '../datatables-plugins.js';
+// import 'datatables.net-searchpanes-bs5';
+// import 'datatables.net-select-bs5';
+// import 'datatables.net-scroller-bs5';
+// import 'datatables.net-responsive-bs5';
+// import 'datatables.net-buttons-bs5';
+// import DataTablesSearchPanes from 'datatables.net-searchpanes-bs5';
+
+
+// import 'datatables.net-select-bs5';
+// import 'datatables.net-responsive';
+// import 'datatables.net-datetime';
+// import 'datatables.net-buttons/js/buttons.colVis.min';
+// import 'datatables.net-buttons/js/buttons.html5.min';
+// import 'datatables.net-buttons/js/buttons.print.min';
+// import 'jszip';
 import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
@@ -31,24 +38,19 @@ import PerfectScrollbar from 'perfect-scrollbar';
 // if component
 let routes = false;
 
-// if live
-import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
-routes = require('../../../../../public/js/fos_js_routes.json');
-// if local
-// routes = require('../../public/js/fos_js_routes.json');
-// import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+import Routing from 'fos-routing';
+import RoutingData from '/js/fos_js_routes.js';
+Routing.setData(RoutingData);
 
-Routing.setRoutingData(routes);
-
-import Twig from 'twig/twig.min';
+import Twig from 'twig';
 import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
-import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
-import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
-import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
-import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
-import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
+// import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
+// import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
+// import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
+// import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
+// import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
-    Twig._function.extend('path', (route, routeParams) => {
+    Twig._function.extend('path', (route, routeParams={}) => {
         // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
@@ -59,7 +61,7 @@ Twig.extend(function (Twig) {
 
 // import {Modal} from "bootstrap"; !!
 // https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
-import Modal from 'bootstrap/js/dist/modal';
+// import Modal from 'bootstrap/js/dist/modal';
 // import cb from "../js/app-buttons";
 
 
@@ -88,7 +90,7 @@ export default class extends Controller {
         locale: {type: String, default: 'no-locale!'},
         style: {type: String, default: 'spreadsheet'},
         index: {type: String, default: ''},
-        dom: {type: String, default: 'BPlfrtip'},
+        dom: {type: String, default: 'Blfrtip'}, // use P for searchPanes
         filter: String
     }
 
@@ -98,9 +100,16 @@ export default class extends Controller {
     // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
+        const map1 = new Map();
+
+        map1.set('a', 1);
+        map1.set('b', 2);
+        map1.set('c', 3);
+
         let columns = this.columns.sort(function(a, b) {
             return   a.order - b.order; // Sort in ascending order
         });
+        console.error(columns);
 
         let x = columns.map(c => {
             let render = null;
@@ -131,7 +140,8 @@ export default class extends Controller {
                 route: c.route,
                 locale: c.locale,
                 render: render,
-                sortable: (typeof c.sortable)?c.sortable:false
+                sortable: (typeof c.sortable)?c.sortable:false,
+                className: c.className
             })
         });
         return x;
@@ -142,12 +152,12 @@ export default class extends Controller {
         super.connect(); //
 
         this.apiParams = {}; // initialize
-        console.log(this.identifier);
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!'});
         window.dispatchEvent(event);
 
 
         this.columns = JSON.parse(this.columnConfigurationValue);
+        console.error(this.columns);
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
@@ -333,7 +343,6 @@ export default class extends Controller {
     initDataTable(el, fields) {
 
         let lookup = [];
-        console.error(fields);
         // for (const property in fields) {
         //     lookup[property] = field;
         //     console.error(property, fields[property]);
@@ -350,12 +359,13 @@ export default class extends Controller {
         let options = [];
         let preSelectArray = [];
 
-        let filterColuns = this.columns;
-        filterColuns.sort(function (a, b) {
+        let filterColumns = this.columns;
+        console.log(filterColumns, typeof filterColumns);
+        filterColumns.sort(function (a, b) {
             return a.browseOrder - b.browseOrder;
 
         });
-        filterColuns.forEach((column, index) => {
+        filterColumns.forEach((column, index) => {
             if (column.browsable) {
                 searchFieldsByColumnNumber.push(index);
             }
@@ -429,19 +439,19 @@ export default class extends Controller {
         }
 
         let language = enLanguage;
-        if(this.locale == 'en') {
-            language = enLanguage;
-        } else if(this.locale == 'es') {
-            language = esLanguage;
-        }else if(this.locale == 'uk') {
-            language = ukLanguage;
-        }else if(this.locale == 'de') {
-            language = deLanguage;
-        }else if(this.locale == 'hu') {
-            language = huLanguage;
-        }else if(this.locale == 'hi') {
-            language = hilanguage;
-        }
+        // if(this.locale == 'en') {
+        //     language = enLanguage;
+        // } else if(this.locale == 'es') {
+        //     language = esLanguage;
+        // }else if(this.locale == 'uk') {
+        //     language = ukLanguage;
+        // }else if(this.locale == 'de') {
+        //     language = deLanguage;
+        // }else if(this.locale == 'hu') {
+        //     language = huLanguage;
+        // }else if(this.locale == 'hi') {
+        //     language = hilanguage;
+        // }
 
         let setup = {
             // let dt = new DataTable(el, {
@@ -496,11 +506,6 @@ export default class extends Controller {
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
             buttons: [
                 'copy', 'csv', 'excel', 'pdf', 'print',
-                {
-                    extend: 'excelHtml5',
-                    autoFilter: true,
-                    sheetName: 'Exported data'
-                },
                 'pdf',
                 {
                     text: 'labels',
@@ -545,12 +550,11 @@ export default class extends Controller {
                 if (this.locale !== '') {
                     this.apiParams['_locale'] = this.locale;
                 }
-                if (this.indexValue) {
+                if (this.hasIndexValue) {
                     this.apiParams['_index'] = this.indexValue;
                 }
-                if (this.styleValue) {
+                if (this.hasStyleValue) {
                     this.apiParams['_style'] = this.styleValue;
-                    console.error(this.style, this.apiParams);
                 }
 
                 // console.warn(apiPlatformHeaders);
@@ -590,21 +594,28 @@ export default class extends Controller {
                         let targetMessage = "";
                         if(typeof this.apiParams.facet_filter != 'undefined') {
                             this.apiParams.facet_filter.forEach((index) => {
-                                let string = index.split(',');
-                                if(targetMessage != "") {
+                                // format is (probably) facet,value1|value2
+                                if(targetMessage !== "") {
                                     targetMessage += ", ";
                                 }
+                                let string = index.split(',');
+                                if (string.length > 0) {
+                                    let firstPart = string[0];
                                 let splitValue = string[2].split("|");
                                 let returnValue = [];
                                 splitValue.forEach((index) => {
-                                    searchPanes['options'][string[0]].forEach((array) => {
-                                        if(index == array.value) {
+                                        if (firstPart in searchPanes['options']) {
+                                            searchPanes['options'][firstPart].forEach((array) => {
+                                                if(index === array.value) {
                                             returnValue.push(array.label);
                                             return false;
                                         }
                                     });
+                                        }
+
                                 });
                                 targetMessage += string[0]+ " : "+ returnValue.join('|');
+                                }
                             });
                         }
 
@@ -638,7 +649,11 @@ export default class extends Controller {
             },
         };
         let dt = new DataTables(el, setup);
-        dt.searchPanes();
+
+
+        if (this.filter.hasOwnProperty('P')) {
+            dt.searchPanes();
+        }
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }
@@ -651,7 +666,10 @@ export default class extends Controller {
         });
 
         // console.log('moving panes.');
-        $("div.search-panes").append(dt.searchPanes.container());
+
+        if (this.filter.hasOwnProperty('P')) {
+            $("div.search-panes").append(dt.searchPanes.container());
+        }
         const contentContainer = document.getElementsByClassName('search-panes');
         if (contentContainer.length > 0) {
             const ps = new PerfectScrollbar(contentContainer[0]);
@@ -726,6 +744,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
           locale = null,
           renderType = 'string',
           sortable = false,
+          className = null,
       } = {}) {
 
         if (render === null) {
@@ -778,6 +797,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         return {
             title: label,
+            className: className,
             data: propertyName || '',
             render: render,
             sortable: sortable
@@ -867,10 +887,12 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         // Extract the path
         let path = urlWithoutProtocolAndDomain.split('?')[0];
         let facetsFilter = [];
-        for (const [key, value] of Object.entries(params.searchPanes)) {
-            if (Object.values(value).length) {
-                facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
-                facetsUrl.push(key + '=' + Object.values(value).join('|'));
+        if (params.searchPanes) {
+            for (const [key, value] of Object.entries(params.searchPanes)) {
+                if (Object.values(value).length) {
+                    facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
+                    facetsUrl.push(key + '=' + Object.values(value).join('|'));
+                }
             }
         }
 

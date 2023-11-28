@@ -39,7 +39,6 @@ use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
 
-use function PHPUnit\Framework\isNull;
 use function Symfony\Component\String\u;
 
 final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
@@ -48,7 +47,7 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
 
     public function __construct(
         private Generator $generator,
-        private string $templatePath
+        private string    $templatePath
     ) {
     }
 
@@ -67,6 +66,7 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
         $command
             //            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCommand.txt'))
             ->addArgument('name', InputArgument::REQUIRED, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
+            ->addArgument('description', InputArgument::REQUIRED, sprintf('Desceription (e.g. <fg=yellow>list something from the database</>)', Str::asCommand(Str::getRandomTerm())))
             ->addOption('force', null, InputOption::VALUE_NONE, 'Overwrite if it already exists.')
             ->addOption('prefix', null, InputOption::VALUE_OPTIONAL, 'Prefix the command name, but not the generated class, e.g. survos:make:user, app:do:something')
             ->addOption('inject', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Interfaces to inject, e.g. EntityManagerInterface', [])
@@ -80,7 +80,7 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
 //            ->addOption('oint-arg', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'optional int arguments')
 //            ->addOption('obool-arg', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'optional bool arguments')
         ;
-//            ->addOption('inject', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Interfaces to inject, e.g. EntityManagerInterface', []);
+        //            ->addOption('inject', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Interfaces to inject, e.g. EntityManagerInterface', []);
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -100,6 +100,7 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $commandName = $input->getArgument('name'); // create:user or app:create-user
+        $description = $input->getArgument('description'); // create:user or app:create-user
         $shortName = u($commandName)->camel()->title(); // 'CreateUSer'
         $classNameDetails = $generator->createClassNameDetails(
             $shortName,
@@ -129,7 +130,9 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
         name[]: array $name
         */
 
-        $description = $io->ask('A brief description of what the command does (blank for none)', '');
+        if (empty($description)) {
+            $description = $io->ask('A brief description of what the command does (blank for none)', '');
+        }
 
         // walk through the different command line arguments/options, by type, to pass to the template
         $hasOptional = false;
@@ -207,8 +210,8 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
 
     private function askForNextArgument(
         ConsoleStyle $io,
-        array &$fields,
-        bool $isFirstField
+        array        &$fields,
+        bool         $isFirstField
     ): array|null {
         $io->writeln('');
 
@@ -241,17 +244,29 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
 
         $fields[] = $fieldName;
 
+        $defaultValue = $this->getDefault($fieldType, $default);
+
         return [$fieldName, [
             'phpType' => $fieldType,
-            'default' => $default,
+            'default' => $defaultValue,
             'description' => $description ?? "($fieldType)",
         ]];
     }
 
+    private function getDefault(string $fieldType, mixed $default)
+    {
+        return match ($fieldType) {
+            'string' => sprintf("'%s'", $default),
+            'bool' => $default ? 'true' : 'false',
+            'int' => $default,
+            default => dd($fieldType)
+        };
+    }
+
     private function askForNextOption(
         ConsoleStyle $io,
-        array &$fields,
-        bool $isFirstField
+        array        &$fields,
+        bool         $isFirstField
     ): array|null {
         $io->writeln('');
 
@@ -287,7 +302,7 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
 
         return [$fieldName, [
             'phpType' => $fieldType,
-            'default' => $default,
+            'default' => $this->getDefault($fieldType, $default),
             'shortCut' => $shortCut,
             'description' => $description ?? "($fieldType)",
         ]];
@@ -295,10 +310,6 @@ final class MakeInvokableCommand extends AbstractMaker implements MakerInterface
 
     /**
      * Ask for valid existing type
-     *
-     * @param ConsoleStyle $io
-     * @param string $message
-     * @return string
      */
     public function askType(ConsoleStyle $io, string $message): string
     {

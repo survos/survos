@@ -14,15 +14,31 @@ class ContextService
         "warning",
         "danger",
         "light",
-        "dark", ];
+        "dark",
+        ];
 
-    public function __construct(private array $options = [])
+    public function __construct(
+        private array $options = [],
+        private array $config = []
+
+    )
     {
     }
 
-    public function getOption(string $option): mixed
+    public function getConfig(): array
     {
-        return $this->options[$option];
+        return $this->config;
+    }
+
+    public function setConfig(array $config): ContextService
+    {
+        $this->config = $config;
+        return $this;
+    }
+
+    public function getOption(string $option, string $default=null): mixed
+    {
+        return $this->options[$option]??$default;
     }
 
     public function getOptions(): array

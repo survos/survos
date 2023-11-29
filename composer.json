@@ -37,7 +37,7 @@
         "meilisearch/search-bundle": "^0.11.0",
         "picqer/php-barcode-generator": "^2.2",
         "roave/better-reflection": "^6.0",
-        "sabre/xml": "^3.0 || ^4.0",
+        "sabre/xml": "^4.0",
         "sebastian/diff": "^4.0",
         "stof/doctrine-extensions-bundle": "^1.7",
         "survos/bootstrap-bundle": "^1.4",
@@ -113,7 +113,8 @@
             "symfony/runtime": true,
             "phpstan/extension-installer": true,
             "php-http/discovery": true,
-            "phpro/grumphp": true
+            "phpro/grumphp": true,
+            "endroid/installer": true
         },
         "optimize-autoloader": true,
         "preferred-install": {

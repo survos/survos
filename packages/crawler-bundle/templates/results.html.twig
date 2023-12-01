@@ -9,25 +9,41 @@
 {% block javascripts %}
     {{ parent() }}
 
-
     <script type="module">
         import DataTables from "https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.7/+esm";
             // "datatables.net-select": "https://cdn.jsdelivr.net/npm/datatables.net-select@1.7.0/+esm",
             // "datatables.net-select-bs5": "https://cdn.jsdelivr.net/npm/datatables.net-select-bs5@1.7.0/+esm"
 
         let table = new DataTables('#crawler-table');
-        // import {DataTable} from 'https://cdn.jsdelivr.net/npm/simple-datatables@8.0.0/+esm'
-        // // import {DataTable} from "simple-datatables"
-        // document.querySelectorAll(".simple-datatables").forEach(table => {
-        //     new DataTable(table, {
-        //         searchable: true,
-        //         fixedHeight: true,
-        //     });
-        // });
     </script>
 {% endblock %}
 {% block body %}
 
+    {# if we have grid bundle installed, this would be very easy.  But we don't want to require it. we could put the table utility in core, though #}
+  <table id="crawler-table">
+    <thead>
+    <tr>
+      <th>User</th>
+      <th>URL</th>
+      <th>Found On</th>
+      <th>route</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for d in tableData %}
+      <tr>
+        <td>{{ d.user }}</td>
+        <td><a href="{{ d.path }}">{{ d.path }}</a></td>
+        <td><a href="{{ d.foundOn }}">{{ d.foundOn }}</a></td>
+        <td>{{ d.route }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  {% endblock %}
+
+{% block oldWay %}
     {% for header, data in crawldata %}
 {#        {{ loop.index == 1 ? dump(data) }}#}
         <h3>{{ header }}</h3>

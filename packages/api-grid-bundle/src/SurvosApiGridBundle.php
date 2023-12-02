@@ -4,6 +4,7 @@ namespace Survos\ApiGrid;
 
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGrid\Command\ApiIndexCommand;
 use Survos\ApiGrid\Components\GridComponent;
 use Survos\ApiGrid\Components\ItemGridComponent;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
@@ -13,6 +14,7 @@ use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Twig\TwigExtension;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -26,15 +28,32 @@ use Survos\ApiGrid\State\MeilliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
-class SurvosApiGridBundle extends AbstractBundle
+class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterface
 {
     use HasAssetMapperTrait;
-    // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
+
+    // The compiler pass
+    public function process(ContainerBuilder $container): void
+    {
+
+    }
+
+        // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
     /**
      * @param array<mixed> $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        // check https://github.com/zenstruck/console-extra/issues/59
+//        $definition = $builder->autowire(ApiIndexCommand::class)
+//            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+//            ->setArgument('$bag', new Reference('parameter_bag'))
+//            ->setArgument('$serializer', new Reference('serializer'))
+////            ->setArgument('$normalizer', new Reference('normalizer'))
+//            ->addTag('console.command')
+//        ;
+//        $definition->addMethodCall('setInvokeContainer', [new Reference('container')]);
 
         if (class_exists(Environment::class)) {
             $builder
@@ -42,6 +61,8 @@ class SurvosApiGridBundle extends AbstractBundle
                 ->addTag('twig.extension')
                 ->setPublic(false);
         }
+
+
 
         $builder->register(GridComponent::class)
             ->setAutowired(true)

@@ -97,7 +97,6 @@ class DatatableService
 
     public function getSettingsFromAttributes(string $class)
     {
-//        dd($class);
         assert(class_exists($class), $class);
         $reflector = new \ReflectionClass($class);
         $settings = [];

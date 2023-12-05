@@ -1,0 +1,84 @@
+version: '3.7'
+services:
+    database:
+        image: postgres:16.0-alpine
+        environment:
+            POSTGRES_PASSWORD: docker
+            POSTGRES_USER: postgres
+#            POSTGRES_DB: ac
+        ports:
+            # To allow the host machine to access the ports below, modify the lines below.
+            # For example, to allow the host to connect to port 3306 on the container, you would change
+            # "3306" to "3306:3306". Where the first port is exposed to the host and the second is the container port.
+            # See https://docs.docker.com/compose/compose-file/compose-file-v3/#ports for more information.
+            - 5432:5432
+#            - 5435:5432
+#            - 32785:32785
+        volumes:
+#            - ~/.docker-conf/postgres15:/var/lib/postgresql/data
+            - ./.docker/services/postgres16:/var/lib/postgresql/data
+
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        container_name: 'rabbitmq'
+        ports:
+            - 5672:5672
+#            - 5673:5672
+            - 15672:15672
+        volumes:
+            - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
+            - ./.docker/rabbitmq/log/:/var/log/rabbitmq
+        networks:
+            - rabbitmq_go_net
+
+    meilisearch:
+        image: getmeili/meilisearch:v1.5
+        container_name: 'meilisearch'
+        ports:
+            - 7700:7700
+        volumes:
+            - ./.docker/meili/:/meili_data/
+    redis:
+        image: redis:latest
+        container_name: 'redis'
+        command: ["redis-server", "--save", "60", "100"] # save every 60 seconds if 100 keys have changed
+        ports:
+            - 6379:6379
+#            - 6380:6379
+        volumes:
+            - ./.docker/redis:/usr/local/etc/redis
+            - ./.docker/redis_data:/data
+
+# -d
+
+# sudo docker run -ti -p 5000:5000 libretranslate/libretranslate
+# missing some language models, including spanish
+# https://pypi.org/project/libretranslate/
+#    libretranslate:
+#        image: libretranslate/libretranslate
+#        ports:
+#            - 5000:5000
+#        volumes:
+#            - ~/.docker-conf/libretranslate/:/home/libretranslate/
+
+###> doctrine/doctrine-bundle ###
+#  database:
+#    image: postgres:${POSTGRES_VERSION:-15}-alpine
+#    environment:
+#      POSTGRES_DB: ${POSTGRES_DB:-app}
+#      # You should definitely change the password in production
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+#      POSTGRES_USER: ${POSTGRES_USER:-app}
+#    volumes:
+#      - database_data:/var/lib/postgresql/data:rw
+#      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
+networks:
+    rabbitmq_go_net:
+        driver: bridge
+
+volumes:
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###

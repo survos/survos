@@ -32,5 +32,20 @@ class GridController extends AbstractController
         ]);
     }
 
+    #[Route('/column/{index}/{fieldCode}', name: 'survos_grid_column')]
+    public function column(Request $request, string $index, string $fieldCode)
+    {
+        // inspect the entity and colum?
+        // this gets the facet data from meili, though it could get it from a dedicated Field entity in this bundle
+        dd($fieldCode, $index);
+
+        return $this->render("@SurvosWorkflow/index.html.twig", [
+            'configs' => $this->helper->getWorkflowConfiguration(),
+            'workflowsGroupedByClass' => $workflowsGroupedByClass,
+            'workflowsByCode' => $workflowsGroupedByCode,
+        ]);
+    }
+
+
 
 }

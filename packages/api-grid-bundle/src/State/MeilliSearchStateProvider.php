@@ -10,10 +10,12 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Meilisearch\Bundle\SearchService;
 use Meilisearch\Client;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Tagged;
+use ApiPlatform\Util\Inflector;
 use ApiPlatform\State\Pagination\Pagination;
 use Symfony\Component\DependencyInjection\TaggedContainerInterface;
 use Meilisearch\Search\SearchResult;
-use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 
 class MeilliSearchStateProvider implements ProviderInterface
 {

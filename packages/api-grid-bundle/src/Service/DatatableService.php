@@ -8,8 +8,10 @@ use ApiPlatform\Api\FilterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Attribute\Facet;
+use Survos\ApiGrid\Attribute\MeiliId;
 use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -91,6 +93,7 @@ class DatatableService
         $reflectionClass = new \ReflectionClass($class);
         $settings = [];
         foreach ($reflectionClass->getAttributes() as $attribute) {
+
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
@@ -112,28 +115,30 @@ class DatatableService
                 continue;
 //                dd($arguments);
             }
-            foreach ($arguments['properties'] as $fieldname) {
-                if (in_array($filter, [RangeFilter::class, SearchFilter::class])) {
-                    $settings[$fieldname]['searchable'] = true;
+            $properties = $arguments['properties'];
+            foreach ($properties as $property) {
+                if (!array_key_exists($property, $settings)) {
+                    $settings[$property] = [
+                        'browsable' => false,
+                        'sortable' => false,
+                        'searchable' => false
+                    ];
                 }
-                if (in_array($filter, [SearchFilter::class])) {
-                    $settings[$fieldname]['browsable'] = true;
-                }
-                if (in_array($filter, [MultiFieldSearchFilter::class])) {
-                    $settings[$fieldname]['searchable'] = true;
-                }
-                if (in_array($filter, [OrderFilter::class])) {
-                    $settings[$fieldname]['sortable'] = true;
-                }
-                //Meili search filters
-                if (in_array($filter, [MeiliMultiFieldSearchFilter::class])) {
-                    $settings[$fieldname]['searchable'] = true;
-                }
-                if (in_array($filter, [FacetsFieldSearchFilter::class])) {
-                    $settings[$fieldname]['browsable'] = true;
-                }
-                if (in_array($filter, [SortFilter::class])) {
-                    $settings[$fieldname]['sortable'] = true;
+                switch ($filter) {
+                    case FacetsFieldSearchFilter::class:
+                        $settings[$property]['browsable'] = true;
+                        break;
+                    case SortFilter::class:
+                    case OrderFilter::class:
+                        $settings[$property]['sortable'] = true;
+                        break;
+
+                    case SearchFilter::class:
+                    case MeiliMultiFieldSearchFilter::class:
+                    case RangeFilter::class:
+                    case MultiFieldSearchFilter::class:
+                        $settings[$property]['searchable'] = true;
+                        break;
                 }
             }
         }
@@ -142,7 +147,7 @@ class DatatableService
         foreach ($reflectionClass->getProperties() as $property) {
             $fieldname = $property->getName();
             foreach ($property->getAttributes() as $attribute) {
-                if ($attribute->getName() == Id::class) {
+                if ($attribute->getName() == MeiliId::class) {
                     $settings[$fieldname]['is_primary'] = true;
                 }
                 if ($attribute->getName() == Facet::class) {
@@ -151,6 +156,7 @@ class DatatableService
             }
         }
 
+        // @todo: methods
         return $settings;
     }
 

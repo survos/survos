@@ -97,7 +97,7 @@ class IndexCommand extends Command
         }
         $this->meiliService->waitUntilFinished($index);
         $this->io->success('app:index-entity ' . $class . ' success.');
-        return Command::SUCCESS;
+        return self::SUCCESS;
 
     }
 
@@ -109,7 +109,7 @@ class IndexCommand extends Command
 //        $filterAttributes = [];
 //        $sortableAttributes = [];
         $settings = $this->datatableService->getSettingsFromAttributes($class);
-        $primaryKey = 'id'; // ?? code?
+        $primaryKey = 'id'; // default, check for is_primary
 
         foreach ($settings as $fieldname=>$classAttributes) {
             if ($classAttributes['browsable']) {
@@ -126,12 +126,12 @@ class IndexCommand extends Command
             }
         }
 
-        // @todo: define the meili key as an attribute, e.g. code
         $index = $this->meiliService->getIndex($indexName, $primaryKey);
         $index->updateFilterableAttributes($filterAttributes);
         $index->updateSortableAttributes($sortableAttributes);
 //        $index->updateSettings(); // could do this in one call
-//        $stats = $this->waitUntilFinished($index, $this->io());
+        $stats = $this->meiliService->waitUntilFinished($index);
+//        dd($stats,$filterAttributes, $sortableAttributes);
         return $index;
     }
 

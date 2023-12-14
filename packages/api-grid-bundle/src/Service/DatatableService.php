@@ -64,14 +64,16 @@ class DatatableService
 //            dd($c);
 
             $column = new Column(...$c);
-            if (in_array($columnName, $settings)) {
+            dump($column, $c);
+            $existingSettings = $settings[$columnName]??null;
+            if ($existingSettings) {
                 $options = (new OptionsResolver())
                     ->setDefaults([
                         'searchable' => false,
                         'order' => 100,
                         'sortable' => false,
                         'browsable' => false
-                    ])->resolve($settings);
+                    ])->resolve($existingSettings);
                 $column->searchable = $options['searchable'];
                 $column->sortable = $options['sortable'];
                 $column->browsable = $options['browsable'];
@@ -84,9 +86,20 @@ class DatatableService
 
             //            $normalizedColumns[$column->name] = $column;
         }
+//        dd($normalizedColumns, $settings);
         return $normalizedColumns;
     }
 
+    public function getFieldsWithAttribute(array $settings, string $internalAttribute)
+    {
+        $fields = [];
+        foreach ($settings as $fieldName => $attributes) {
+            if ($attributes[$internalAttribute]??false) {
+                $fields[] = $fieldName;
+            }
+        }
+        return $fields;
+    }
     public function getSettingsFromAttributes(string $class)
     {
         assert(class_exists($class), $class);
@@ -156,6 +169,7 @@ class DatatableService
             }
         }
 
+//        dd($settings);
         // @todo: methods
         return $settings;
     }

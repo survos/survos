@@ -52,7 +52,7 @@ class MeilliSearchStateProvider implements ProviderInterface
             $locale = $context['filters']['_locale'] ?? null;
 
             if (!$indexName = isset($context['uri_variables']['indexName'])?$context['uri_variables']['indexName']:false) {
-                $indexName = $this->getSearchIndexObject($operation->getClass(), $locale);
+                $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
             // this seems problematic, since it's probably defined by the application, we're getting it again here.
             try {
@@ -76,7 +76,7 @@ class MeilliSearchStateProvider implements ProviderInterface
         return null;
     }
 
-    private function getSearchIndexObject(string $class, ?string $locale=null) {
+    public static function getSearchIndexObject(string $class, ?string $locale=null) {
         $class = explode("\\",$class);
         return end($class);
     }

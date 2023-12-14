@@ -23,6 +23,8 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Symfony\UX\Chartjs\Builder\ChartBuilder;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Twig\Environment;
 use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
@@ -44,14 +46,11 @@ class SurvosApiGridBundle extends AbstractBundle
         $builder->register('survos_api_grid_datatable_service', DatatableService::class)
             ->setAutowired(true);
 
-        $definition = $builder->autowire(GridController::class)
-            ->addTag('container.service_subscriber')
-            ->addTag('controller.service_arguments')
-            ->setAutoconfigured(true)
-            ->setAutowired(true)
-            ->setPublic(true)
-        ;
-
+//        if (class_exists(ChartBuilderInterface::class)) {
+//        $definition = $builder->register('chart_builder', ChartBuilderInterface::class)
+//            ->setAutoconfigured(true)
+//            ->setAutowired(true);
+//        }
 
         $builder->register('api_meili_service', MeiliService::class)
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
@@ -62,6 +61,18 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setAutoconfigured(true)
         ;
+
+//        dump(new Reference('chart_builder'));
+        $definition = $builder->autowire(GridController::class)
+            ->addTag('container.service_subscriber')
+            ->addTag('controller.service_arguments')
+            ->setArgument('$meili', new Reference('api_meili_service'))
+            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setAutoconfigured(true)
+            ->setAutowired(true)
+            ->setPublic(true)
+        ;
+
 
         // check https://github.com/zenstruck/console-extra/issues/59
         $definition = $builder->autowire(IndexCommand::class)

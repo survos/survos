@@ -96,6 +96,11 @@ class IndexCommand extends Command
 
         }
         $this->meiliService->waitUntilFinished($index);
+
+        if ($this->io->isVerbose()) {
+            $stats = $this->meiliService->getIndex($indexName)->stats();
+            dump($indexName, stats: $stats);
+        }
         $this->io->success('app:index-entity ' . $class . ' success.');
         return self::SUCCESS;
 
@@ -109,29 +114,34 @@ class IndexCommand extends Command
 //        $filterAttributes = [];
 //        $sortableAttributes = [];
         $settings = $this->datatableService->getSettingsFromAttributes($class);
-        $primaryKey = 'id'; // default, check for is_primary
-
-        foreach ($settings as $fieldname=>$classAttributes) {
-            if ($classAttributes['browsable']) {
-                $filterAttributes[] = $fieldname;
-            }
-            if ($classAttributes['sortable']) {
-                $sortableAttributes[] = $fieldname;
-            }
-            if ($classAttributes['searchable']) {
-//                $searchAttributes[] = $fieldname;
-            }
-            if ($classAttributes['is_primary']??null) {
-                $primaryKey = $fieldname;
-            }
-        }
+        $primaryKey = 'id'; // default, check for is_primary));
+        $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
+        if (count($idFields)) $primaryKey = $idFields[0];
+//        dd($settings, $filterAttributes);
+//
+//        foreach ($settings as $fieldname=>$classAttributes) {
+//            if ($classAttributes['browsable']) {
+//                $filterAttributes[] = $fieldname;
+//            }
+//            if ($classAttributes['sortable']) {
+//                $sortableAttributes[] = $fieldname;
+//            }
+//            if ($classAttributes['searchable']) {
+////                $searchAttributes[] = $fieldname;
+//            }
+//            if ($classAttributes['is_primary']??null) {
+//                $primaryKey = $fieldname;
+//            }
+//        }
 
         $index = $this->meiliService->getIndex($indexName, $primaryKey);
-        $index->updateFilterableAttributes($filterAttributes);
-        $index->updateSortableAttributes($sortableAttributes);
+        $index->updateFilterableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'browsable'));
+        $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
 //        $index->updateSettings(); // could do this in one call
         $stats = $this->meiliService->waitUntilFinished($index);
-//        dd($stats,$filterAttributes, $sortableAttributes);
+        if ($this->io->isVerbose()) {
+            dump(stats: $stats, indexSettings: $index->getSettings());
+        }
         return $index;
     }
 

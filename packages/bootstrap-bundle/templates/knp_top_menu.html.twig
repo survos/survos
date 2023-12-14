@@ -328,13 +328,10 @@
         {% if not item.labelAttribute('iconOnly') %}
 {#            {{ item.name == 'copyright' ? dump(item, options) }}#}
 {#            and item.getExtra('safe_label', false)#}
-<<<<<<< Updated upstream
-            {% if options.allow_safe_labels %}{{ item.label|trans|raw }}{% else %}{{ item.label|trans }}{% endif %}
-=======
             {% set domain = item.extra('translation_domain','routing') %}
             {% set label = item.label|trans(domain=domain) %}
             {% if options.allow_safe_labels %}{{ label|raw }}{% else %}{{ label }}{% endif %}
->>>>>>> Stashed changes
+
         {% endif %}
         {% if item.labelAttribute('data-image') %}<img src="{{ item.labelAttribute('data-image') }}" alt="{{ item.name }}" class="menu-thumbnail"/>{% endif %}
 

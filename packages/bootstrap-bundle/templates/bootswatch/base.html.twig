@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block PAGE_MENU %}
-{{ _self }} (to be overwritten.)
+    <!-- {{ _self }} (to be overwritten.) -->
         {{ component('menu', {
             caller: _self,
             wrapperClass: 'fw-bold py-3 mb-4 d-print-none',
@@ -74,16 +74,13 @@
     <div class="{{ containerClass }}">
         {% block page_header %}
         <div class="page-header" id="banner">
-            this is page-header in             {{ _self }}
             <div class="row">
                 <div class="col-lg-8 col-md-7 col-sm-6">
-                    <h1>block PAGE_MENU</h1>
                     {{ block('PAGE_MENU') }}
                 </div>
                 <div class="col-lg-4 col-md-5 col-sm-6">
                     <div class="sponsor">
-                        page header, breadcrumbs, etc. PAGE_MENU block fired...
-                        right side page menu???
+{#                        right side page menu???#}
                     </div>
                 </div>
             </div>

@@ -56,6 +56,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
+            ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$bag', new Reference('parameter_bag'))
             ->setAutowired(true)
@@ -136,7 +137,8 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register(MeilliSearchStateProvider::class)
             ->setArgument('$meilliSearchFilter',tagged_locator('meilli_search_filter'))
-
+            ->setArgument('$meili', new Reference('api_meili_service'))
+            ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
             ->setAutowired(true)

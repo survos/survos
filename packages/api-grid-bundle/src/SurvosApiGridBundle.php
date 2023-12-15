@@ -54,6 +54,7 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register('api_meili_service', MeiliService::class)
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+            ->setArgument('$config',$config)
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
             ->setArgument('$httpClient',new Reference('httplug.http_client'))
@@ -208,6 +209,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid-bundle/grid')->end()
             ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
             ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
+            ->integerNode('maxValuesPerFacet')->defaultValue(100)->end()
             ->end();;
     }
 

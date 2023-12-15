@@ -70,6 +70,7 @@ class MeilliSearchStateProvider implements ProviderInterface
             }
 
             $data = $index->search($searchQuery, $body);
+//            dd($data, $body, $searchQuery);
             $data = $this->denormalizeObject($data, $resourceClass);
             unset($body['filter']);
             $body['limit'] = 0;
@@ -96,7 +97,8 @@ class MeilliSearchStateProvider implements ProviderInterface
         $returnObject['query'] = $data->getQuery();
         $returnObject['facetDistribution'] = $data->getFacetDistribution();
         $returnObject['facetStats'] = $data->getFacetStats();
-//        dd($returnObject['facetDistribution'], $returnObject['facetStats']);
+//        dd($returnObject['facetDistribution']['keywords'], $returnObject['facetStats']);
+
 
         return new SearchResult($returnObject);
     }

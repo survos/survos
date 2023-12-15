@@ -47,9 +47,20 @@ class MeiliService
         protected ClientInterface $httpClient,
         private string $meiliHost,
         private string $meiliKey,
+        private array $config=[],
         private ?LoggerInterface $logger = null,
     )
     {
+    }
+
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
+    public function setConfig(array $config): void
+    {
+        $this->config = $config;
     }
 
 

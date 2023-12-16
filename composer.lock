@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d9c0e6f83ecd9a8658b233c6fab2877",
+    "content-hash": "6948ffbacac9711a45c51504403df3c4",
     "packages": [
         {
             "name": "answear/liform",
@@ -14622,122 +14622,17 @@
             "time": "2023-11-07T14:57:07+00:00"
         },
         {
-            "name": "symplify/config-transformer",
-            "version": "11.2.3.72",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symplify/config-transformer.git",
-                "reference": "f9f1cd5425a7d44a80ccbb08de04da3bc942ebce"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symplify/config-transformer/zipball/f9f1cd5425a7d44a80ccbb08de04da3bc942ebce",
-                "reference": "f9f1cd5425a7d44a80ccbb08de04da3bc942ebce",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2"
-            },
-            "bin": [
-                "bin/config-transformer"
-            ],
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "bootstrap.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Prefixed version of Symfony YAML/XML to PHP/YAML config converter",
-            "support": {
-                "issues": "https://github.com/symplify/config-transformer/issues",
-                "source": "https://github.com/symplify/config-transformer/tree/11.2.3.72"
-            },
-            "funding": [
-                {
-                    "url": "https://www.paypal.me/rectorphp",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/tomasvotruba",
-                    "type": "github"
-                }
-            ],
-            "time": "2023-01-31T11:20:37+00:00"
-        },
-        {
-            "name": "symplify/easy-coding-standard",
-            "version": "11.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/easy-coding-standard/easy-coding-standard.git",
-                "reference": "1d2400f7bfe92e3754ce71f0782f2c0521bade3d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/easy-coding-standard/easy-coding-standard/zipball/1d2400f7bfe92e3754ce71f0782f2c0521bade3d",
-                "reference": "1d2400f7bfe92e3754ce71f0782f2c0521bade3d",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2"
-            },
-            "conflict": {
-                "friendsofphp/php-cs-fixer": "<3.0",
-                "squizlabs/php_codesniffer": "<3.6",
-                "symplify/coding-standard": "<11.3"
-            },
-            "bin": [
-                "bin/ecs"
-            ],
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "bootstrap.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Use Coding Standard with 0-knowledge of PHP-CS-Fixer and PHP_CodeSniffer",
-            "keywords": [
-                "Code style",
-                "automation",
-                "fixer",
-                "static analysis"
-            ],
-            "support": {
-                "issues": "https://github.com/easy-coding-standard/easy-coding-standard/issues",
-                "source": "https://github.com/easy-coding-standard/easy-coding-standard/tree/11.5.0"
-            },
-            "funding": [
-                {
-                    "url": "https://www.paypal.me/rectorphp",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/tomasvotruba",
-                    "type": "github"
-                }
-            ],
-            "time": "2023-06-21T06:26:15+00:00"
-        },
-        {
             "name": "symplify/monorepo-builder",
-            "version": "11.2.2.72",
+            "version": "11.2.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symplify/monorepo-builder.git",
-                "reference": "680ce13f48fa9e213db934b89fecd841cd031aaa"
+                "reference": "444efe08701776cb1a03b9f3600e715697519aa6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symplify/monorepo-builder/zipball/680ce13f48fa9e213db934b89fecd841cd031aaa",
-                "reference": "680ce13f48fa9e213db934b89fecd841cd031aaa",
+                "url": "https://api.github.com/repos/symplify/monorepo-builder/zipball/444efe08701776cb1a03b9f3600e715697519aa6",
+                "reference": "444efe08701776cb1a03b9f3600e715697519aa6",
                 "shasum": ""
             },
             "require": {
@@ -14764,7 +14659,7 @@
             "description": "Prefixed version of Not only Composer tools to build a Monorepo.",
             "support": {
                 "issues": "https://github.com/symplify/monorepo-builder/issues",
-                "source": "https://github.com/symplify/monorepo-builder/tree/11.2.2.72"
+                "source": "https://github.com/symplify/monorepo-builder/tree/11.2.20"
             },
             "funding": [
                 {
@@ -14776,7 +14671,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-01-28T15:09:50+00:00"
+            "time": "2023-11-17T08:30:16+00:00"
         },
         {
             "name": "tacman/composer-json-manipulator",

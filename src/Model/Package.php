@@ -6,7 +6,7 @@ namespace App\Model;
 
 
 use HaydenPierce\ClassFinder\ClassFinder;
-use Symplify\ComposerJsonManipulator\ValueObject\ComposerJson;
+//use Symplify\ComposerJsonManipulator\ValueObject\ComposerJson;
 
 class Package implements \Stringable
 {
@@ -14,7 +14,7 @@ class Package implements \Stringable
         public string $packageCode,
         public string $packageDir,
         public string $namespace,
-        public ComposerJson $composerJson
+//        public ComposerJson $composerJson
     )
     {
     }

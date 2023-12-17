@@ -1,0 +1,45 @@
+<?php //App_Entity_Term
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Symfony\\Component\\Serializer\\Mapping\\ClassMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\ClassMetadata')),
+        clone ($p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata')),
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+    ],
+    null,
+    [
+        'stdClass' => [
+            'name' => [
+                'App\\Entity\\Term',
+                'id',
+                'offical',
+                'type',
+                'stateAbbreviation',
+                'party',
+                'district',
+                'startDate',
+                'endDate',
+            ],
+            'attributesMetadata' => [
+                [
+                    'id' => $o[1],
+                    'offical' => $o[2],
+                    'type' => $o[3],
+                    'stateAbbreviation' => $o[4],
+                    'party' => $o[5],
+                    'district' => $o[6],
+                    'startDate' => $o[7],
+                    'endDate' => $o[8],
+                ],
+            ],
+        ],
+    ],
+    $o[0],
+    []
+); }];

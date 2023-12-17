@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <a href="{{ path('survos_commands') }}">Return to Command List</a>
+
+    <h2>{{ command.name }} <i>{{ command.description }}</i></h2>
+
+    <textarea cols="90">bin/console {{ cliString }}</textarea>
+
+    {{ form(form) }}
+    <pre>{{ result }}</pre>
+
+
+{% endblock %}

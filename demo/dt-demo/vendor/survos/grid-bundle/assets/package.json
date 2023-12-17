@@ -1,0 +1,44 @@
+{
+  "name": "@survos/grid-bundle",
+  "description": "integrate php and javascript helpers for DataTables.net",
+  "license": "MIT",
+  "version": "1.0.2",
+  "symfony": {
+    "controllers": {
+      "grid": {
+        "main": "src/controllers/grid_controller.js",
+        "webpackMode": "eager",
+        "fetch": "lazy",
+        "enabled": true,
+        "autoimport": {
+          "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css": true,
+          "datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css": true,
+          "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
+        }
+      }
+    },
+    "importmap": {
+      "@hotwired/stimulus": "^3.1.0",
+      "@popperjs/core": "^2.11.8",
+      "bootstrap": "^5.3.2",
+      "jquery": "^3.7.1",
+      "datatables.net-bs5": "1.13.7",
+      "datatables.net-select-bs5": "1.7.0",
+      "datatables.net-scroller-bs5": "2.3.0",
+      "datatables.net-searchpanes-bs5": "2.2.0"
+    }
+  },
+  "peerDependencies": {
+    "@hotwired/stimulus": "^3.2.0"
+  },
+  "devDependencies": {
+    "@hotwired/stimulus": "^3.2.2"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.2",
+    "jquery": "^3.7.1",
+    "twig": "^1.15.4"
+  }
+
+}

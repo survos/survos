@@ -54,16 +54,17 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register('api_meili_service', MeiliService::class)
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+            ->setArgument('$config',$config)
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
+            ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$bag', new Reference('parameter_bag'))
             ->setAutowired(true)
             ->setAutoconfigured(true)
         ;
 
-//        dump(new Reference('chart_builder'));
-        $definition = $builder->autowire(GridController::class)
+        $builder->autowire(GridController::class)
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')
             ->setArgument('$meili', new Reference('api_meili_service'))
@@ -137,7 +138,8 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register(MeilliSearchStateProvider::class)
             ->setArgument('$meilliSearchFilter',tagged_locator('meilli_search_filter'))
-
+            ->setArgument('$meili', new Reference('api_meili_service'))
+            ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
             ->setAutowired(true)
@@ -207,6 +209,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid-bundle/grid')->end()
             ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
             ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
+            ->integerNode('maxValuesPerFacet')->defaultValue(100)->end()
             ->end();;
     }
 

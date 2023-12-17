@@ -64,7 +64,6 @@ class DatatableService
 //            dd($c);
 
             $column = new Column(...$c);
-            dump($column, $c);
             $existingSettings = $settings[$columnName]??null;
             if ($existingSettings) {
                 $options = (new OptionsResolver())
@@ -72,6 +71,7 @@ class DatatableService
                         'searchable' => false,
                         'order' => 100,
                         'sortable' => false,
+                        'is_primary' => false,
                         'browsable' => false
                     ])->resolve($existingSettings);
                 $column->searchable = $options['searchable'];
@@ -243,7 +243,6 @@ class DatatableService
 //                    dd($searchFields, $filter);
                 }
                 foreach ($normalizedColumns as $idx => $column) {
-//                    dump($column->name);
                     if (in_array($column->name, $searchFields)) {
                         $columnNumbers[] = $idx;
                     }

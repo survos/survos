@@ -488,7 +488,7 @@ export default class extends Controller {
                 initCollapsed: true,
                 layout: 'columns-1',
                 show: true,
-//                cascadePanes: true,
+                cascadePanes: true,
                 viewTotal: true,
                 showZeroCounts: true,
                 preSelect: preSelectArray
@@ -549,16 +549,30 @@ export default class extends Controller {
                             console.log(d[0]);
                         }
                         let searchPanes = {};
+                        searchPanes = {
+                            initCollapsed: true,
+                            layout: 'columns-1',
+                            show: true,
+               cascadePanes: true,
+                            viewTotal: true,
+                            showZeroCounts: true,
+                            preSelect: preSelectArray
+                        };
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
                            console.error(searchPanes, searchPanesRaw);
                         } else {
                            searchPanes = {
-                                options: options
+                               options: options
                            };
                             console.error(options);
                         }
+                        searchPanes.threshold = 0.01;
+                        searchPanes.showZeroCounts = true;
+                        searchPanes.cascadePanes = true;
+                        searchPanes.viewTotal = true;
+                        searchPanes.show = true;
                         console.error('searchpanes', searchPanes);
 
                         let targetMessage = "";
@@ -621,8 +635,8 @@ export default class extends Controller {
 
 
         if (this.filter.hasOwnProperty('P')) {
-            dt.searchPanes();
         }
+        dt.searchPanes();
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }

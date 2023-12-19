@@ -57,7 +57,13 @@ class FacetsFieldSearchFilter extends AbstractFilter implements FilterInterface
                 return;
             }
             $key = $words[0];
-            $filterValue = explode('|', $words[2]);
+
+            if (!empty($words[2])) {
+                $filterValue = explode('|', $words[2]);
+            } else {
+                $filterValue[0] = null;
+            }
+dd($filterValue);
             $this->addWhereIn($queryBuilder, $filterValue, $key);
         }
         return;

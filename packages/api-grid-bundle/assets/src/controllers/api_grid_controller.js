@@ -103,7 +103,8 @@ export default class extends Controller {
                 return this.actions({prefix: c.prefix, actions: c.actions})
             }
 
-            return this.c({
+            let column =
+                this.c({
                 propertyName: c.name,
                 data: c.name,
                 label: c.title,
@@ -112,7 +113,15 @@ export default class extends Controller {
                 render: render,
                 sortable: (typeof c.sortable)?c.sortable:false,
                 className: c.className
-            })
+            });
+
+            if (c.browsable) {
+                column.searchPanes = {
+                    show: true
+                };
+            }
+            console.error(column, c);
+            return column;
         });
         return x;
 
@@ -558,6 +567,14 @@ export default class extends Controller {
                             showZeroCounts: true,
                             preSelect: preSelectArray
                         };
+
+                        options.threshold = 0.01;
+                        options.showZeroCounts = true;
+                        options.cascadePanes = true;
+                        options.viewTotal = true;
+                        options.show = true;
+                        console.error('searchpanes', searchPanes, options);
+
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
@@ -566,7 +583,6 @@ export default class extends Controller {
                            searchPanes = {
                                options: options
                            };
-                            console.error(options);
                         }
                         searchPanes.threshold = 0.01;
                         searchPanes.showZeroCounts = true;

@@ -57,13 +57,13 @@ class FacetsFieldSearchFilter extends AbstractFilter implements FilterInterface
                 return;
             }
             $key = $words[0];
+            $values = $words[2]??'';
 
-            if (!empty($words[2])) {
+            if (strlen($values)) {
                 $filterValue = explode('|', $words[2]);
             } else {
                 $filterValue[0] = null;
             }
-dd($filterValue);
             $this->addWhereIn($queryBuilder, $filterValue, $key);
         }
         return;
@@ -71,8 +71,13 @@ dd($filterValue);
 
     private function addWhereIn(QueryBuilder $queryBuilder, array $word, string $parameterName) {
         $alias = $queryBuilder->getRootAliases()[0];
-        $queryBuilder
-            ->andWhere($queryBuilder->expr()->in(sprintf('%s.%s', $alias, $parameterName),$word));
+        if (count($word) && ($word[0] === null)) {
+            $queryBuilder
+                ->andWhere($queryBuilder->expr()->isNull(sprintf('%s.%s', $alias, $parameterName)));
+        } else {
+            $queryBuilder
+                ->andWhere($queryBuilder->expr()->in(sprintf('%s.%s', $alias, $parameterName),$word));
+        }
     }
 
     public function getDescription(string $resourceClass): array

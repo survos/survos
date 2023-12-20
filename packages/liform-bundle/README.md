@@ -14,41 +14,17 @@ First and foremost, note that you have a complete example with React, Webpack an
 
 Feel free to clone it, run it, experiment, and copy the pieces you need to your project. Because this bundle focuses mainly on the frontend side of things, you are expected to have a compatible frontend setup.
 
-### Step 1: Download the Bundle
+### Install the Bundle
 
 Open a console, navigate to your project directory and execute the
 following command to download the latest stable version of this bundle:
 
-    $ composer require limenius/liform-bundle
+```bash
+composer require limenius/liform-bundle
+```
 
 This command requires you to have Composer installed globally, as explained
 in the *installation chapter* of the Composer documentation.
-
-### Step 2: Enable the Bundle
-
-Then, enable the bundle by adding the following line in the `app/AppKernel.php`
-file of your project:
-
-```php
-// app/AppKernel.php
-
-// ...
-class AppKernel extends Kernel
-{
-    public function registerBundles()
-    {
-        $bundles = array(
-            // ...
-
-            new Limenius\LiformBundle\LimeniusLiformBundle(),
-        );
-
-        // ...
-    }
-
-    // ...
-}
-```
 
 ## Usage
 
@@ -61,7 +37,7 @@ Serializing a form into JSON Schema:
 
 And `$schema` will contain a JSON Schema representation such as:
 
-```js
+```json
 {  
    "title":null,
    "properties":{  

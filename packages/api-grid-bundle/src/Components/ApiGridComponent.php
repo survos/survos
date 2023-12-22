@@ -2,14 +2,17 @@
 
 namespace Survos\ApiGrid\Components;
 
+use ApiPlatform\Doctrine\Orm\State\CollectionProvider;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Components\Common\TwigBlocksInterface;
 use Survos\ApiGrid\Model\Column;
 use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\State\MeiliSearchStateProvider;
 use Survos\ApiGrid\TwigBlocksTrait;
+use Survos\InspectionBundle\Services\InspectionService;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Twig\Environment;
 
@@ -23,7 +26,10 @@ class ApiGridComponent implements TwigBlocksInterface
         private LoggerInterface $logger,
         private RequestStack $requestStack,
         private DatatableService $datatableService,
-        public ?string $stimulusController
+        private InspectionService $inspectionService,
+        private UrlGeneratorInterface $urlGenerator,
+        public ?string $stimulusController,
+        private bool $meili = false,
     ) {
         $this->filter = $this->requestStack->getCurrentRequest()->query->all();
         //        ='@survos/grid-bundle/api_grid';
@@ -43,7 +49,8 @@ class ApiGridComponent implements TwigBlocksInterface
     public string $dom='lfrtipP';
     public int $pageLength=50;
     public string $searchPanesDataUrl; // maybe deprecate this?
-    public string $apiGetCollectionUrl;
+    public ?string $apiGetCollectionUrl=null;
+    public array  $apiGetCollectionParams = [];
     public bool $trans = true;
     public string|bool|null $domain = null;
 
@@ -126,6 +133,26 @@ class ApiGridComponent implements TwigBlocksInterface
             }
         }
         return $normalizedColumns;
+    }
+
+    public function mount(string $class, bool $meili=false) // , string $apiGetCollectionUrl,  array  $apiGetCollectionParams = [])
+    {
+        $urls = $this->inspectionService->getAllUrlsForResource($class);
+        $route = $urls[$meili ? MeiliSearchStateProvider::class : CollectionProvider::class];
+        if ($meili) {
+            $indexName = (new \ReflectionClass($class))->getShortName();
+            $params = ['indexName' => $indexName];
+            if (!$this->apiGetCollectionUrl) {
+                $this->apiGetCollectionUrl =  $this->urlGenerator->generate($route, $params??[]);
+            }
+        }
+        return;
+        dd($this->apiUrl);
+
+        dd($urls, $class, $meili, $route->getPath());
+        return;
+        dd(func_get_args());;
+        dd($this->apiUrl);
     }
 
 

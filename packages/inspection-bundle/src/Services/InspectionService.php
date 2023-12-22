@@ -33,10 +33,15 @@ class InspectionService
                     // we want the route, not the path
 //                    $urls[$operation->getProvider()] = $operation->getName();
                     $route = $this->router->getRouteCollection()->get($operation->getName());
+                    $urls[$operation->getProvider()] = $operation->getName(); // $route;
+                    continue;
                     $params = [];
                     $provider = $operation->getProvider();
                     if ($provider === MeiliSearchStateProvider::class) {
-                        $params['indexName'] = (new \ReflectionClass($resourceClass))->getShortName();
+                        foreach (array_keys($operation->getUriVariables()) as $var) {
+                            // total hack
+                            $params[$var] = (new \ReflectionClass($resourceClass))->getShortName();
+                        }
                     }
                     $url = $this->urlGenerator->generate($operation->getName(), $params);
                     $urls[$operation->getProvider()] = $url;

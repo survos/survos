@@ -31,7 +31,10 @@ class ApiGridComponent implements TwigBlocksInterface
         public ?string $stimulusController,
         private bool $meili = false,
     ) {
-        $this->filter = $this->requestStack->getCurrentRequest()->query->all();
+//        if ($stack = $this->requestStack->getCurrentRequest()) {
+//            $this->filter = $stack->query->all();
+//        }
+//        $this->filter = $this->requestStack->getCurrentRequest()?->query->all();
         //        ='@survos/grid-bundle/api_grid';
     }
 
@@ -146,8 +149,8 @@ class ApiGridComponent implements TwigBlocksInterface
                 $this->apiGetCollectionUrl =  $this->urlGenerator->generate($route, $params??[]);
             }
         }
+        dd($this->inspectionService->getAllUrlsForResource($class));
         return;
-        dd($this->apiUrl);
 
         dd($urls, $class, $meili, $route->getPath());
         return;

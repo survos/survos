@@ -11,13 +11,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Zenstruck\Console\CommandRunner;
+use Symfony\Component\Console\Messenger\RunCommandMessage;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class CommandController extends AbstractController
 {
 
     private Application $application;
 
-    public function __construct(private KernelInterface $kernel, private array $namespaces, private array $config)
+    public function __construct(private KernelInterface $kernel,
+                                private MessageBusInterface $bus,
+                                private array $namespaces,
+                                private array $config)
     {
         $this->application = new Application($this->kernel);
     }
@@ -103,7 +108,9 @@ class CommandController extends AbstractController
             $cliString = join(' ', $cli);
             $result = null;
 
-            if (!$form->get('dryRun')->getData()) {
+            if (!$form->get('asMessage')->getData()) {
+                $this->bus->dispatch(new RunCommandMessage($cliString));
+
                 CommandRunner::from($application, $cliString)
                     ->withOutput($output) // any OutputInterface
                     ->run();

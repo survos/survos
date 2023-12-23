@@ -108,15 +108,15 @@ class CommandController extends AbstractController
             $cliString = join(' ', $cli);
             $result = null;
 
-            if (!$form->get('asMessage')->getData()) {
+            if ($form->get('asMessage')->getData()) {
                 $this->bus->dispatch(new RunCommandMessage($cliString));
-
+                $result = "$cliString dispatched ";
+            } else {
                 CommandRunner::from($application, $cliString)
                     ->withOutput($output) // any OutputInterface
                     ->run();
                 $result = $output->fetch();
             }
-
             try {
             } catch (\Exception $exception) {
                 dd($cliString, $command, $application, $exception->getMessage());

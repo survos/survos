@@ -28,6 +28,7 @@ class SurvosCommandBundle extends AbstractBundle
             ->setAutoconfigured(true)
             ->setPublic(true)
             ->setArgument('$namespaces', $config['namespaces'])
+            ->setArgument('$config', $config)
         ;
 
         $builder->autowire(DumpTranslationsCommand::class)
@@ -58,6 +59,7 @@ class SurvosCommandBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
             ->scalarNode('base_layout')->defaultValue('base.html.twig')->end()
+            ->scalarNode('subdomain_variable')->defaultValue('subdomain')->end()
             ->arrayNode('namespaces')
             ->scalarPrototype()->end()
             ->end()

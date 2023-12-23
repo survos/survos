@@ -17,7 +17,7 @@ class CommandController extends AbstractController
 
     private Application $application;
 
-    public function __construct(private KernelInterface $kernel, private array $namespaces)
+    public function __construct(private KernelInterface $kernel, private array $namespaces, private array $config)
     {
         $this->application = new Application($this->kernel);
     }

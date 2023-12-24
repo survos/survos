@@ -65,6 +65,9 @@ class CommandController extends AbstractController
         if(isset($defaults['dryRun'])) {
             $defaults['dryRun'] = filter_var($defaults['dryRun'], FILTER_VALIDATE_BOOLEAN);
         }
+        if(isset($defaults['asMessage'])) {
+            $defaults['asMessage'] = filter_var($defaults['asMessage'], FILTER_VALIDATE_BOOLEAN);
+        }
         // load from request? for command?
         foreach (array_merge($definition->getArguments(), $definition->getOptions()) as $cliArgument) {
             $value = $defaults[$cliArgument->getName()] ?? null;

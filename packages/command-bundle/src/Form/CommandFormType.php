@@ -93,7 +93,6 @@ class CommandFormType extends AbstractType
         $builder->add('asMessage', CheckboxType::class, [
             'label' => 'Via Message Bus',
             'help' => 'Run Command via consume:messages',
-            'data' => false,
             'required' => false,
         ]);
 

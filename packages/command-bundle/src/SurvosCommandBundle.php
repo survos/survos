@@ -27,6 +27,7 @@ class SurvosCommandBundle extends AbstractBundle
         $builder->autowire(CommandController::class)
             ->setAutoconfigured(true)
             ->setPublic(true)
+            ->setArgument('$bus', new Reference('messenger.default_bus'))
             ->setArgument('$namespaces', $config['namespaces'])
             ->setArgument('$config', $config)
         ;

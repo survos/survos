@@ -54,7 +54,12 @@ class CommandController extends AbstractController
 //        $option = $definition->getOption('createProjects');
 //        assert($option->getDefault() === true);
 //        dd($command::class, $definition::class);
-
+        if(isset($defaults['reset'])) {
+            $defaults['reset'] = filter_var($defaults['reset'], FILTER_VALIDATE_BOOLEAN);
+        }
+        if(isset($defaults['dryRun'])) {
+            $defaults['dryRun'] = filter_var($defaults['dryRun'], FILTER_VALIDATE_BOOLEAN);
+        }
         // load from request? for command?
         foreach (array_merge($definition->getArguments(), $definition->getOptions()) as $cliArgument) {
             $value = $defaults[$cliArgument->getName()] ?? null;
@@ -117,7 +122,6 @@ class CommandController extends AbstractController
 
 //                CommandRunner::for($command, 'Bob p@ssw0rd --role ROLE_ADMIN')->run(); // works great
         }
-
 
 //        CommandRunner::from($application, 'my:command --help')
 //            ->run();

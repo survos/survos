@@ -561,29 +561,28 @@ export default class extends Controller {
                             initCollapsed: true,
                             layout: 'columns-1',
                             show: true,
-               cascadePanes: true,
+                            cascadePanes: true,
                             viewTotal: true,
                             showZeroCounts: true,
                             preSelect: preSelectArray
                         };
 
-                        options.threshold = 0.01;
-                        options.showZeroCounts = true;
-                        options.cascadePanes = true;
-                        options.viewTotal = true;
-                        options.show = true;
-                        console.error('searchpanes', searchPanes, options);
+                        // options.threshold = 0.01;
+                        // options.showZeroCounts = true;
+                        // options.cascadePanes = true;
+                        // options.viewTotal = true;
+                        // options.show = true;
+                        // console.error('searchpanes', searchPanes, options);
 
+                        // if searchPanes have been sent back from the results, sort them by browseOrder
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
                            console.error(searchPanes, searchPanesRaw);
                         } else {
-                           searchPanes = {
-                               options: options
-                           };
+                           searchPanes.options = options;
                         }
-                        searchPanes.threshold = 0.01;
+                        // searchPanes.threshold = 0.01;
                         searchPanes.showZeroCounts = true;
                         searchPanes.cascadePanes = true;
                         searchPanes.viewTotal = true;

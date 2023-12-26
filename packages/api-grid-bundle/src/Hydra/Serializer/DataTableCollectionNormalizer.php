@@ -12,7 +12,6 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
-use MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Arr;
 use Meilisearch\Search\SearchResult;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -173,7 +172,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         foreach ($object as $obj) {
             if ($iriOnly) {
-                $normalizedData =  $this->iriConverter->getIriFromResource($obj);
+                $normalizedData =  $this->iriConverter->getResourceFromIri($obj);
             } else {
                 $normalizedData =  $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
             }

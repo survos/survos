@@ -58,7 +58,6 @@ class ApiGridComponent implements TwigBlocksInterface
         if ($stack = $this->requestStack->getCurrentRequest()) {
             $this->filter = $stack->query->all();
         }
-        return [];
         return $this->filter;
     }
 

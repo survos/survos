@@ -24,8 +24,7 @@ trait QueryBuilderHelperTrait
             }
 
             $count = $r['count'];
-            if (!is_string($key)) dd($key);
-            assert(is_string($key));
+            assert(is_integer($key) || is_string($key), json_encode($key));
             assert(is_integer($count));
             $counts[$key] = $count;
         }

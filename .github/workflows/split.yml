@@ -44,6 +44,7 @@ jobs:
           - {local_path: 'libre-translate-bundle', split_repository: 'LibreTranslateBundle'}
           - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
+          - {local_path: 'key-value-bundle', split_repository: 'SurvosKeyValueBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'meili-admin-bundle', split_repository: 'SurvosMeiliAdminBundle'}
           - {local_path: 'providence-bundle', split_repository: 'SurvosProvidenceBundle'}

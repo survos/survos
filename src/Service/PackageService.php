@@ -18,7 +18,8 @@ class PackageService
         #[Autowire('%kernel.project_dir%/')]
         private                     $projectDir,
 //        private KernelInterface $kernel,
-        private ComposerJsonFactory $composerJsonFactory)
+//        private ComposerJsonFactory $composerJsonFactory
+    )
     {
     }
 
@@ -28,6 +29,7 @@ class PackageService
      */
     public function getPackages(bool $recursive = false): array
     {
+        // @todo: refactor to use plain json
         $composerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . 'composer.json');
         $packages = [];
 

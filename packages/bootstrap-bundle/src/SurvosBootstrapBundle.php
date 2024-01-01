@@ -166,6 +166,7 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
             ->autowire('survos.bootstrap_translations', RoutesTranslationLoader::class)
             ->setAutowired(true)
             ->setAutoconfigured(true)
+//            ->setArgument('$taggedServices', )
             ->addTag(name: 'translation.loader', attributes: ['alias' => 'bin']);
 
         foreach ([MenuComponent::class, MenuBreadcrumbComponent::class] as $c) {

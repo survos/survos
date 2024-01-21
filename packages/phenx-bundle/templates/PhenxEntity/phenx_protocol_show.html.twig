@@ -1,0 +1,92 @@
+{% extends '::layout.html.twig' %}
+
+{% block meta_title %}
+{{ d.title }} Protocol
+{% endblock %}
+
+{% block content_header  %}
+<h3>Display Customized Protocol Record </h3>
+{% endblock %}
+{% block breadcrumbs %}
+    {{ parent() }}
+    {#
+    <li><a href="{{ path('phenx_measure_browse', {domainId: d.domainId}) }}">{{ d.measure.domain.title }}</a></li>
+    #}
+    <li>{{ d.title }}</li>
+{% endblock %}
+
+{% block page_title %}Protocol {{ d.phenxId }}: {{ d.title }}
+
+{% endblock %}
+{% block content %}
+    <a target="_blank" href="{{ d.sourceUrl }}"><span class="label label-info">Phenx</span></a>
+    <a target="_blank" href="{{ path('phenx_protocol_json', d.routeParams) }}"><span class="label label-info">JSON</span></a>
+
+    <a href="{{ d.phenxUrl }}" class="btn btn-md btn-primary" target="_blank">Phenx <i class="fa fa-external"></i> </a>
+    <div class="row">
+        <div class="col-md-6">
+            <h3 class="heading">{{ d.phenxId}} {{ d.title }} </h3>
+            <ul>
+                {% for var, val in d.metaData %}
+                    <li>{{ var }}: {{ val|raw }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="heading">Import as Survey</h3>
+
+            {% set jsonUrl = url('phenx_protocol_json', d.routeParams) %}
+
+            <a target="_blank" href="{{ url('survey_new', {
+                import_url: jsonUrl,
+                moduleCode: 'ongoing', phenx_protocol:d.phenxId}) }}"
+               class="btn btn-sm btn-primary">-> Import as Study Survey </a>
+
+            {% include ":partials:import_protocol.html.twig" with {moduleCode: 'ongoing', protocol: d} %}
+        </div>
+    </div>
+
+    <div class="row">
+        <h3 class="heading">{{ d.variables|length}} Questions (Variables)</h3>
+        <ol>
+            {% for v in d.variables %}
+                <li>{{ v.description }} <small><br />{{ v.varname }}, {{ v.type }}</small>
+                    {{ v.choices|json_encode }}
+                    <u>{{ v.choiceFormula }}</u>
+                    {% set choices = v.choices %}
+                    {% if choices is iterable %}
+                        <table class="table">
+                            {% for c in choices %}
+                            <tr>
+                                <td>{{ c|json_encode }}</td>
+                                {#
+                                <td>{{ c.code }}</td>
+                                <td>{{ c.value }}</td>
+                                <td>{{ c.text }}</td>
+                                #}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    {% endif %}
+                </li>
+
+            {% endfor %}
+        </ol>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6">
+            {{ recorddump(d)|raw }}
+        </div>
+
+        {#
+        <div class="well col-xs-6">
+            <h3>Survey {{ s.code }}</h3>
+                {% include 'PosseSurveyBundle:Survey:_survey.html.twig' with {'s': s} only %}
+        </div>
+        #}
+    </div>
+
+{% endblock %}
+
+

@@ -6,7 +6,7 @@ use App\Service\PackageService;
 use HaydenPierce\ClassFinder\ClassFinder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symplify\ComposerJsonManipulator\ComposerJsonFactory;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 

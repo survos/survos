@@ -20,6 +20,24 @@ services:
 #            - ~/.docker-conf/postgres15:/var/lib/postgresql/data
             - ./.docker/services/postgres16:/var/lib/postgresql/data
 
+    mercure:
+        image: dunglas/mercure
+        restart: unless-stopped
+        ports:
+            - "3000:80"
+        environment:
+            SERVER_NAME: ':80'
+            MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
+            MERCURE_EXTRA_DIRECTIVES: |
+                cors_origins http://127.0.0.1:8000
+        # Comment the following line to disable the development mode
+        command: /usr/bin/caddy run --config /etc/caddy/Caddyfile.dev
+        volumes:
+            - ./.docker/mercure_data:/data
+            - ./.docker/mercure_config:/config
+
     rabbitmq:
         image: rabbitmq:3-management-alpine
         container_name: 'rabbitmq'

@@ -1,0 +1,43 @@
+<h3>{{ variables|length }} Variables</h3>
+
+<table class="table">
+    <thead>
+        <th>Protocol</th>
+        <th>Type</th>
+        <th>Question</th>
+    </thead>
+    <tbody>
+    {% for v in variables %}
+        {% set r = v.protocol %}
+        <tr>
+
+            <td>
+                {% if module %}
+                    {% include ":partials:import_protocol.html.twig" with {protocol: r, module: module} %}
+                {% endif %}
+            </td>
+
+            <td>
+                <a href="{{ path('phenx_protocol_show', r.routeParams) }}">{{ r.title }} {% if r.subTitle %}--{{ r.subTitle }}{% endif %}</a>
+            </td>
+            <td>
+                <a href="{{ path('phenx_protocol_json', r.routeParams) }}"><i class="fa fa-link"></i></a>
+                {% include "PosseSurveyBundle:Survey:_questions_json_popover.html.twig" with  {title:"questions", label:"Preview (%d Questions)"|format(r.variables.count), jsonUrl: path('phenx_protocol_json', r.routeParams) } %}
+            </td>
+
+            <td>
+                {% if v.protocol %}
+                {{ v.protocol }}
+                {% if v.protocol.measure %}
+                {{ v.protocol.measure.title}}
+                {% endif %}
+                {% endif %}
+            </td>
+            <td>{{ v.type }}
+            </td>
+            <td>{{ v.questionText }}</td>
+            <td>{{ recorddump(v.extra)|raw }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

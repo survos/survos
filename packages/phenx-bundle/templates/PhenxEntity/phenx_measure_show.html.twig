@@ -1,0 +1,35 @@
+{% extends '::layout.html.twig' %}
+
+
+{% block intro %}
+<h3>Display Customized Measure Record </h3>
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ parent() }}
+    {#
+    <li><a href="{{ path('phenx_domain_show', {phenxId: d.parent.parentId }) }}">{{ d.domain.title }}</a></li>
+    <li><a href="{{ path('phenx_measure_browse', {phenxId: d.parentId}) }}">Measures</a></li>
+    #}
+    <li>{{ d.title }}</li>
+{% endblock %}
+
+{% block page_title %}Measure {{ d.phenxId }}: {{ d.title }}
+    <a target="_blank" href="{{ d.phenxUrl }}"><span class="label label-info">Phenx</span></a>
+{% endblock %}
+
+
+{% block content %}
+    <h3 class="heading">{{ d.phenxId}} {{ d.title }} </h3>
+    <ul>
+        {% for var, val in d.metaData %}
+            <li>{{ var }}: {{ val }}</li>
+        {% endfor %}
+    </ul>
+
+    {{ dump(d) }}
+    {{ recorddump(d)|raw }}
+
+{% endblock %}
+
+

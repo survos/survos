@@ -1,0 +1,66 @@
+{% extends '::layout.html.twig' %}
+
+{% block breadcrumbs %}
+    {{ parent() }}
+    <li><a href="{{ path('phenx_domain_show', d.routeParams) }}">{{ d.title }}</a></li>
+{% endblock %}
+
+{% block meta_title %}{{ d.title }} Domain{% endblock %}
+
+{% block intro %}
+<h3>Display Customized Domain Record </h3>
+{% endblock %}
+
+
+    {% block content %}
+        {{ recorddump(d)|raw }}
+
+        <h3 class="heading">Measures</h3>
+        <ol>
+            {% for v in d.measures %}
+                <li>
+                    <a href="{{ path('phenx_measure_show', v.routeParams) }}">{{ v.title }} ({{ v.phenxId }})</a>
+                <ol>
+
+                    {%  for p in v.protocols %}
+                        <li><a href='{{ path('phenx_protocol_show', p.routeParams) }}'>{{ p.code }} {{ p.phenxId }}</a>: {{ p.title }} {% if p.subtitle  %}({{ p.subtitle }}) {% endif %}
+
+                            /{{ p.variables.count }}/
+
+                            <table>
+
+                            <tr>
+                                <td>
+                                    {% set jsonUrl = phenxService.jsonUrl(p) %}
+                                    <a href="{{ jsonUrl }}" target="_blank"><i class="fa fa-download"></i></a>&nbsp;
+                                    {% include "PosseSurveyBundle:Survey:_questions_json_popover.html.twig" with  {title:"questions", label:"Preview", jsonUrl: jsonUrl } %}
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-success" id="import_{{ p.phenxId }}"
+                                       href="{{ path('survey_new', {moduleCode: 'ongoing', import_url: jsonUrl }) }}">
+                                        Import
+                                    </a>
+                                </td>
+                            </tr>
+                            </table>
+
+
+                        </li>
+                    {% endfor %}
+                    </ol>
+                </li>
+
+            {% endfor %}
+
+        </ol>
+
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('bundles/possesurvey/css/survey.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/possesurvey/css/survey_edit.css') }}">
+{% endblock %}
+
+
+

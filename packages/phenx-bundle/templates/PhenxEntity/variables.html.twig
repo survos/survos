@@ -1,0 +1,16 @@
+{% extends '::layout.html.twig' %}
+
+{% block breadcrumbs %}
+    {{ parent() }}
+{% endblock %}
+
+{% block meta_title %}Phenx Questions{% endblock %}
+
+
+    {% block template_content %}
+        Search:
+        {{ form(form) }}
+
+        {% include "@Phenx/Default/variables_table.html.twig"  %}
+
+    {% endblock %}

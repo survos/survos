@@ -25,7 +25,7 @@
         "doctrine\/persistence": "^2.0 || ^3.0",
         "fabpot\/goutte": "^4.0",
         "fakerphp\/faker": "^1.20",
-        "freearhey\/wikidata": "^3.6",
+        "survos\/wikidata": "^4.0",
         "friendsofsymfony\/jsrouting-bundle": "^3.3",
         "gajus\/dindent": "^2.0",
         "haydenpierce\/class-finder": "^0.4.3",
@@ -130,7 +130,7 @@
     },
     "extra": {
         "symfony": {
-            "require": "^6.4",
+            "require": "^7.0",
             "allow-contrib": "true"
         }
     },

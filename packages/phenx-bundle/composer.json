@@ -1,0 +1,61 @@
+{
+    "name": "survos/phenx-bundle",
+    "description": "A Symfony bundle for integrating data from phenx",
+    "keywords": [
+        "symfony"
+    ],
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tac Tacelosky",
+            "email": "tacman@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "doctrine/doctrine-bundle": "^2.7",
+        "doctrine/orm": "^2.12",
+        "doctrine/persistence": "^2.0 || ^3.0",
+        "symfony/config": "^6.3 || ^7.0",
+        "symfony/dependency-injection": "^6.3 || ^7.0",
+        "symfony/http-kernel": "^6.3 || ^7.0",
+        "symfony/options-resolver": "^6.3 || ^7.0",
+        "twig/twig": "^3.8",
+        "symfony/dom-crawler": "^6.3 || ^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Survos\\PhenxBundle\\": "src/"
+        }
+    },
+    "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse"
+    },
+    "suggest": {
+        "monolog/monolog": "Allows more advanced logging of the application flow"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest",
+        "phpstan/phpstan": "^1.8",
+        "symfony/browser-kit": "^6.3 || ^7.0",
+        "symfony/framework-bundle": "^6.3 || ^7.0",
+        "symfony/phpunit-bridge": "^6.3 || ^7.0",
+        "symfony/twig-bundle": "^6.3 || ^7.0",
+        "symfony/var-dumper": "^6.3 || ^7.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.6-dev"
+        },
+        "symfony": {
+            "require": "^6.4 || ^7.0"
+        }
+    },
+    "prefer-stable": true
+}

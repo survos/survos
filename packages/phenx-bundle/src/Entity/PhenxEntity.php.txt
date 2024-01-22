@@ -1,0 +1,441 @@
+<?php
+
+namespace PhenxBundle\Entity;
+
+use AppBundle\Utility;
+use Doctrine\ORM\Mapping as ORM;
+use Survos\PhenxBundle\Traits\PhenxBaseTrait;
+
+/**
+ * Domain
+ *
+ * @ORM\Table(name="phenx")
+ * @ORM\Entity()
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="discr", type="string")
+ * @ORM\DiscriminatorMap({"domain" = "Domain", "measure" = "Measure", "protocol" = "Protocol"})
+ */
+
+
+abstract class PhenxEntity
+{
+#    use PhenxBaseTrait;
+
+
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="PhenxBundle\Entity\Measure", mappedBy="domain")
+     * @ORM\OrderBy({"phenxId" = "ASC"})
+     */
+    private $measures;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="PhenxBundle\Entity\Protocol", mappedBy="measure")
+     * @ORM\OrderBy({"phenxId" = "ASC"})
+     */
+    private $protocols;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $childCount;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $parentId;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="title", type="string", length=255)
+     */
+    private $title;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="html_page", type="text", nullable=true)
+     */
+    private $htmlPage;
+
+    /**
+     * @var array
+     *
+     * @ORM\Column(name="metadata", type="json_array", nullable=true)
+     */
+    private $metadata;
+
+    abstract public function getType();
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->phenxId;
+    }
+
+    /**
+     * Set code
+     *
+     * @param string $code
+     *
+     * @return Domain
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+
+        return $this;
+    }
+
+    /**
+     * Get code
+     *
+     * @return string
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+
+    /**
+     * Set title
+     *
+     * @param string $title
+     *
+     * @return Domain
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function createTitle()
+    {
+        return $this->getTitle();
+    }
+
+    /**
+     * Set htmlPage
+     *
+     * @param string $htmlPage
+     *
+     */
+    public function setHtmlPage($htmlPage)
+    {
+        $this->htmlPage = Utility::asciify($htmlPage);
+
+        return $this;
+    }
+
+    /**
+     * Get htmlPage
+     *
+     * @return string
+     */
+    public function getHtmlPage()
+    {
+        return $this->htmlPage;
+    }
+
+    /**
+     * Set metadata
+     *
+     * @param array $metadata
+     */
+    public function setMetadata($metadata)
+    {
+        $this->metadata = $metadata;
+
+        return $this;
+    }
+
+    /**
+     * @param string $field
+     *
+     * @return Domain
+     */
+    public function getMeta($field, $maxLength = 0)
+    {
+        $value = $this->metadata[$field] ?? null;
+        if ($maxLength) {
+            $value = substr($value, 0, $maxLength);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get metadata
+     *
+     * @return array
+     */
+    public function getMetadata()
+    {
+        return $this->metadata;
+    }
+
+    /**
+     * Set phenxId
+     *
+     * @param integer $phenxId
+     *
+     * @return Domain
+     */
+    public function setPhenxId($phenxId)
+    {
+        $this->phenxId = $phenxId;
+
+        return $this;
+    }
+
+    /**
+     * Get phenxId
+     *
+     * @return integer
+     */
+    public function getPhenxId()
+    {
+        return $this->phenxId;
+    }
+
+    /**
+     * Set childCount
+     *
+     * @param integer $childCount
+     *
+     * @return Domain
+     */
+    public function setChildCount($childCount)
+    {
+        $this->childCount = $childCount;
+
+        return $this;
+    }
+
+    /**
+     * Get childCount
+     *
+     * @return integer
+     */
+    public function getChildCount()
+    {
+        return $this->childCount;
+    }
+
+    /**
+     * Set parentId
+     *
+     * @param integer $parentId
+     *
+     * @return PhenxEntity
+     */
+    public function setParentId($parentId)
+    {
+        $this->parentId = $parentId;
+
+        return $this;
+    }
+
+    /**
+     * Get parentId
+     *
+     * @return integer
+     */
+    public function getParentId()
+    {
+        return $this->parentId;
+    }
+
+    public function getMetaFields()
+    {
+        return [];
+    }
+
+    public function setMeta($field, $value)
+    {
+        if (!in_array($field, $this->getMetaFields())) {
+            throw new \Exception("No meta field named $field");
+        }
+        $meta = $this->getMetadata();
+        $meta[$field] = $value;
+        $this->setMetadata($meta);
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return sprintf($this->getPhenxId());
+    }
+
+    public function getRouteParams()
+    {
+        return ['phenxId' => $this->getPhenxId()];
+    }
+
+    public function getSourceUrl()
+    {
+        static $base = 'https://www.phenxtoolkit.org/index.php';
+        $base_url = [
+            'measure'  => $base."?pageLink=browse.protocols&id=",
+            'protocol' => $base."?pageLink=browse.protocoldetails&id=",
+        ];
+
+        return $base_url[$this->getType()].$this->getPhenxId();
+    }
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->variables = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add variable
+     *
+     * @param \PhenxBundle\Entity\Variable $variable
+     *
+     * @return PhenxEntity
+     */
+    public function addVariable(\PhenxBundle\Entity\Variable $variable)
+    {
+        $this->variables[] = $variable;
+
+        return $this;
+    }
+
+    /**
+     * Remove variable
+     *
+     * @param \PhenxBundle\Entity\Variable $variable
+     */
+    public function removeVariable(\PhenxBundle\Entity\Variable $variable)
+    {
+        $this->variables->removeElement($variable);
+    }
+
+    /**
+     * Get variables
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getVariables()
+    {
+        return $this->variables;
+    }
+
+    /**
+     * Get variable count
+     *
+     * @return int
+     */
+    public function getVariableCount(): int
+    {
+        return $this->getVariables()->count();
+    }
+
+    /**
+     * Add measure.
+     *
+     * @param \PhenxBundle\Entity\Measure $measure
+     *
+     * @return PhenxEntity
+     */
+    public function addMeasure(\PhenxBundle\Entity\Measure $measure)
+    {
+        $this->measures[] = $measure;
+
+        return $this;
+    }
+
+    /**
+     * Remove measure.
+     *
+     * @param \PhenxBundle\Entity\Measure $measure
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeMeasure(\PhenxBundle\Entity\Measure $measure)
+    {
+        return $this->measures->removeElement($measure);
+    }
+
+    /**
+     * Get measures.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMeasures()
+    {
+        return $this->measures;
+    }
+
+    /**
+     * Add protocol.
+     *
+     * @param \PhenxBundle\Entity\Protocol $protocol
+     *
+     * @return PhenxEntity
+     */
+    public function addProtocol(\PhenxBundle\Entity\Protocol $protocol)
+    {
+        $this->protocols[] = $protocol;
+
+        return $this;
+    }
+
+    /**
+     * Remove protocol.
+     *
+     * @param \PhenxBundle\Entity\Protocol $protocol
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeProtocol(\PhenxBundle\Entity\Protocol $protocol)
+    {
+        return $this->protocols->removeElement($protocol);
+    }
+
+    /**
+     * Get protocols.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getProtocols()
+    {
+        return $this->protocols;
+    }
+}

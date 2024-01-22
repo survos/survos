@@ -1,6 +1,4 @@
-#
-
-version: '3.8'
+version: '3.7'
 services:
     database:
         image: postgres:16.0-alpine
@@ -20,6 +18,7 @@ services:
 #            - ~/.docker-conf/postgres15:/var/lib/postgresql/data
             - ./.docker/services/postgres16:/var/lib/postgresql/data
 
+    # moved to docker desktop
     rabbitmq:
         image: rabbitmq:3-management-alpine
         container_name: 'rabbitmq'
@@ -33,18 +32,15 @@ services:
         networks:
             - rabbitmq_go_net
 
+# moved to docker desktop
     meilisearch:
-        image: getmeili/meilisearch:v1.6
+        image: getmeili/meilisearch:v1.5
         container_name: 'meilisearch'
         ports:
             - 7700:7700
         volumes:
             - ./.docker/meili/:/meili_data/
-        environment:
-            - MEILI_MASTER_KEY=MeiliKey
-            - MEILI_NO_ANALYTICS=true
-            - MEILI_TASK_WEBHOOK_URL=https://meili-task.wip
-
+    # moved to docker desktop
     redis:
         image: redis:latest
         container_name: 'redis'

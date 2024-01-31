@@ -12,7 +12,8 @@ export default class extends Controller {
         slides: Array,
     }
 
-    connect() {
+    connect()
+    {
         super.connect();
         let el = this.element;
         // if (this.hasSlideshowTarget) {

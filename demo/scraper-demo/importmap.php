@@ -41,13 +41,13 @@ return [
         'version' => '3.7.1',
     ],
     'datatables.net-bs5' => [
-        'version' => '1.13.7',
+        'version' => '1.13.8',
     ],
     'datatables.net' => [
-        'version' => '1.13.7',
+        'version' => '1.13.8',
     ],
     'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
-        'version' => '1.13.7',
+        'version' => '1.13.8',
         'type' => 'css',
     ],
     'datatables.net-select-bs5' => [
@@ -69,6 +69,36 @@ return [
     ],
     'datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css' => [
         'version' => '2.2.0',
+        'type' => 'css',
+    ],
+    'datatables.net-plugins/i18n/en-GB.mjs' => [
+        'version' => '1.13.6',
+    ],
+    'datatables.net-buttons-bs5' => [
+        'version' => '2.4.2',
+    ],
+    'datatables.net-buttons' => [
+        'version' => '2.4.2',
+    ],
+    'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css' => [
+        'version' => '2.4.2',
+        'type' => 'css',
+    ],
+    'datatables.net-responsive-bs5' => [
+        'version' => '2.5.0',
+    ],
+    'datatables.net-responsive' => [
+        'version' => '2.5.0',
+    ],
+    'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css' => [
+        'version' => '2.5.0',
+        'type' => 'css',
+    ],
+    'simple-datatables' => [
+        'version' => '9.0.0',
+    ],
+    'simple-datatables/dist/style.min.css' => [
+        'version' => '9.0.0',
         'type' => 'css',
     ],
 ];

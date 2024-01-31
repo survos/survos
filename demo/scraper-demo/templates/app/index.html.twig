@@ -5,35 +5,20 @@
 {% block body %}
 
     {% set url = 'https://jsonplaceholder.typicode.com/users' %}
-    {% set users = request_data(url) %}
-
-    {% set url = 'https://jsonplaceholder.typicode.com/users' %}
-    {% set users = request_data(url) %}
+    {% set users = request_data(url, asData='array') %}
 
     {% set columns = users[0]|keys %}
 
-    <div{{ stimulus_controller('hello') }}>
-        Hi there.
-    </div>
-
-    <div{{ stimulus_controller('@survos/grid-bundle') }}>
-        grid
-    </div>
-
-    <div{{ stimulus_controller('@symfony/ux-chartjs') }}>
-        grid
-    </div>
-
-
-    <twig:grid :data="users" :columns="columns">
+    <twig:simple_datatables :data="users" :columns="columns">
         <twig:block name="id">
             {{ row.id }}
         </twig:block>
-    </twig:grid>
+    </twig:simple_datatables>
 
+    <h3>Albums</h3>
     <ul>
-        {% for row in users %}
-            <li>{{ row.name }} / {{ row.website }}</li>
+        {% for row in albums %}
+            <li>{{ row.title }}</li>
         {% endfor %}
     </ul>
 {% endblock %}

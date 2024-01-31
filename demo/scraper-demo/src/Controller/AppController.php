@@ -12,10 +12,10 @@ class AppController extends AbstractController
     #[Route('/', name: 'app_app')]
     public function index(ScraperService $scraper): Response
     {
-//        $json = $scraper->fetchUrl('https://theunitedstates.io/congress-legislators/legislators-current.json');
-//        $data = json_decode($json);
+        $data = $scraper->fetchData('https://jsonplaceholder.typicode.com/albums', asData: 'object');
+//        $data = $scraper->fetchData('https://theunitedstates.io/congress-legislators/legislators-current.json', asData: 'object');
         return $this->render('app/index.html.twig', [
-            'controller_name' => 'AppController',
+            'albums' => $data,
         ]);
     }
 }

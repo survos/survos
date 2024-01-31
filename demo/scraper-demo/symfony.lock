@@ -44,16 +44,16 @@
         "version": "dev-sy64"
     },
     "survos/core-bundle": {
-        "version": "dev-main"
+        "version": "1.5.133"
     },
     "survos/deployment-bundle": {
         "version": "dev-sy64"
     },
-    "survos/grid-bundle": {
-        "version": "dev-main"
-    },
     "survos/scraper-bundle": {
         "version": "dev-sy64"
+    },
+    "survos/simple-datatables-bundle": {
+        "version": "1.5.133"
     },
     "symfony/asset-mapper": {
         "version": "6.4",

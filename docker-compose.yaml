@@ -5,8 +5,8 @@ services:
     database:
         image: postgres:16.0-alpine
         environment:
-            POSTGRES_PASSWORD: docker
             POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: docker
 #            POSTGRES_DB: ac
         ports:
             # To allow the host machine to access the ports below, modify the lines below.

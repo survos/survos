@@ -27,10 +27,9 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^1.10",
-        "symfony/translation": "^7.0",
-        "symfony/security": "^2.0",
+        "survos/auth-bundle": "^1.5",
         "symfony/security-bundle": "^7.0",
-        "survos/auth-bundle": "^1.5"
+        "symfony/translation": "^7.0"
     },
     "conflict": {
         "survos/api-grid-bundle": "<1.2.57",

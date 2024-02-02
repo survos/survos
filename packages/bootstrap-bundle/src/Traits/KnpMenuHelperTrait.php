@@ -203,7 +203,7 @@ trait KnpMenuHelperTrait
 
     }
 
-    private function setChildOptions(ItemInterface $child, array $options)
+    private function setChildOptions(ItemInterface $child, array $options): ItemInterface
     {
 
         if ($options['external']) {

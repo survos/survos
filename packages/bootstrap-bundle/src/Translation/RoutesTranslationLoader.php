@@ -5,8 +5,10 @@ namespace Survos\BootstrapBundle\Translation;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Annotation\Route as AnnotationRoute;
+use Symfony\Component\Translation\Exception\InvalidResourceException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 use function Symfony\Component\String\u;
 

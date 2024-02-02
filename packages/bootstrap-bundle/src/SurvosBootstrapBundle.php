@@ -89,7 +89,6 @@ class SurvosBootstrapBundle extends AbstractBundle implements CompilerPassInterf
 //                    dd($args);
                 }
 
-                /** @var $attribute \ReflectionAttribute */
                 foreach ($method->getAttributes(Route::class) as $attribute) {
                     $args = $attribute->getArguments();
                     $name = $args['name'] ?? $method->getName();

@@ -1,9 +1,8 @@
 parameters:
-    level: 4
+    level: 0
     inferPrivatePropertyTypeFromConstructor: true
     paths:
         - ./src/
-        - ./vendor
 
     excludePaths:
 #      - 'src/Resources/skeleton'

@@ -94,3 +94,26 @@ These bundles are usable, but not ready for prime-time.
 [1]: https://survos.com
 [2]: https://symfony.com/packages
 [3]: https://symfony.com/doc/current/reference/requirements.html
+
+
+```bash
+symfony new unused-bug --webapp && cd unused-bug
+bin/console make:controller AppController
+sed -i 's|"type"|"name": "survos/bug", "description": "demo of a bug" , "type"|' composer.json
+composer req knplabs/knp-time-bundle
+sed -i "s|/app|/|" src/Controller/AppController.php 
+
+cat <<'EOF' > templates/app/index.html.twig
+{% extends 'base.html.twig' %}
+{% block body %}
+{{ "now"|date("m/d/Y")|ago }}
+{% endblock %}
+EOF
+
+#echo "{{ 'test'|barcode }} or {{ barcode('test', 2, 80, 'red') }} " >> templates/app/index.html.twig
+symfony server:start -d
+symfony open:local
+
+curl -OL https://github.com/composer-unused/composer-unused/releases/latest/download/composer-unused.phar
+php composer-unused.phar
+```

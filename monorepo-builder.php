@@ -18,13 +18,13 @@ return static function (MBConfig $mbConfig): void {
 
     // release workers - in order to execute
     $mbConfig->workers([
-//        UpdateReplaceReleaseWorker::class,
-//        SetCurrentMutualDependenciesReleaseWorker::class,
+        UpdateReplaceReleaseWorker::class,
+        SetCurrentMutualDependenciesReleaseWorker::class,
         AddTagToChangelogReleaseWorker::class,
         TagVersionReleaseWorker::class,
         PushTagReleaseWorker::class,
-//        SetNextMutualDependenciesReleaseWorker::class,
-//        UpdateBranchAliasReleaseWorker::class,
+        SetNextMutualDependenciesReleaseWorker::class,
+        UpdateBranchAliasReleaseWorker::class,
         PushNextDevReleaseWorker::class,
     ]);
 };

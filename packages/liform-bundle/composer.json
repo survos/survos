@@ -15,7 +15,7 @@
         }
     },
     "require": {
-        "survos/liform": "^1.0",
+        "survos/liform": "^1.5",
         "symfony/dependency-injection": "^6.3 || ^7.0",
         "symfony/config": "^6.3 || ^7.0",
         "symfony/http-kernel": "^6.3 || ^7.0"

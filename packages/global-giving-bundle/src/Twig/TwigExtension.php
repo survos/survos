@@ -24,7 +24,7 @@ class TwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-//            new TwigFunction('function_name', [::class, 'doSomething']),
+            new TwigFunction('hasApiKey', fn() => !empty($this->config['api_key'])),
         ];
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Survos\GlobalGivingBundle\Service;
 
-use Survos\GlobalGivingBundle\SurvosGlobalGivingBundle;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;

@@ -8,6 +8,10 @@ use function Symfony\Component\String\u;
 trait RouteParametersTrait
 {
 
+    public function getId(): int|string
+    {
+        throw new \Exception("you must implement getId() to use a default unique parameters in " . $this::class);
+    }
     public function getUniqueIdentifiers(): array
     {
         return [strtolower( (new \ReflectionClass($this))->getShortName() ) . 'Id' => $this->getId()];

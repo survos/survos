@@ -20,7 +20,7 @@ class GlobalGivingService
     ) {
     }
 
-    public function fetch(string $path, array $params = []): iterable
+    public function fetch(string $path, array $params = [], string $key=null): iterable
     {
 //        public const BASE_URI = 'https://api.globalgiving.org/api/public/projectservice/all/projects?api_key=YOUR_API_KEY&nextProjectId=354";
         $params['api_key'] = $this->apiKey;
@@ -32,7 +32,7 @@ class GlobalGivingService
                 'headers' => [
                     'Accept' => 'application/json',
                 ]])->toArray());
-        return $data;
+        return $key ? $data[$key] : $data;
     }
 
     // /api/public/projectservice/all/projects/ids?api_key=YOUR_API_KEY
@@ -40,12 +40,12 @@ class GlobalGivingService
     public function getAllProjectsIds(array $params = [])
     {
         $path = 'projectservice/all/projects/ids';
-        return $this->fetch($path, $params);
+        return $this->fetch($path, $params, 'projects');
     }
 
     public function getFeaturedProjects(array $params = [])
     {
         $path = 'projectservice/featured/projects';
-        return $this->fetch($path, $params);
+        return $this->fetch($path, $params, 'projects');
     }
 }

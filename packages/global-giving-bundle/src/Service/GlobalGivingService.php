@@ -10,7 +10,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GlobalGivingService
 {
-    public const BASE_URI = 'https://api.globalgiving.org/api/public/';
+    public const BASE_URI = 'https://api.globalgiving.org/api/public/projectservice/';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -38,13 +38,23 @@ class GlobalGivingService
     // https://www.globalgiving.org/api/methods/get-all-projects-ids/
     public function getAllProjectsIds(array $params = [])
     {
-        $path = 'projectservice/all/projects/ids';
+        $path = 'all/projects/ids';
         return $this->fetch($path, $params, 'projects');
     }
 
+    //
     public function getFeaturedProjects(array $params = [])
     {
-        $path = 'projectservice/featured/projects';
+        $path = 'featured/projects';
         return $this->fetch($path, $params, 'projects');
     }
+
+
+    // curl -H "Accept: application/xml" -H "Content-Type: application/xml" -X GET "https://api.globalgiving.org/api/public/projectservice/projects/1883?api_key=YOUR_API_KEY"
+    public function getProject(string|int $projectId, array $params = [])
+    {
+        $path = 'projects/' . $projectId;
+        return $this->fetch($path, $params, 'project');
+    }
+
 }

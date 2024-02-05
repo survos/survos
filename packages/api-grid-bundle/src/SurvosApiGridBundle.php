@@ -155,7 +155,9 @@ class SurvosApiGridBundle extends AbstractBundle
             ->addTag('api_platform.state_provider')
             ->setPublic(true);
 
-        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
+//        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
+        // todo this is patch it was not suppose to be working like this
+        $builder->register(DataTableCollectionNormalizer::class)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
 //            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))

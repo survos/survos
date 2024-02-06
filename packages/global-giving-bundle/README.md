@@ -1,6 +1,6 @@
 # GlobalGiving Bundle
 
-A simple bundle that facilitates calling the Global 
+A simple bundle that facilitates calling the Global Giving API from a Symfony application.
 
 ```bash
 composer require survos/global-giving-bundle
@@ -29,3 +29,4 @@ Inject the service and make the calls
 
 ```
 
+Note: There are only a handful of calls available to the API now.  I'm hoping to get an OpenAPI spec from GlobalGiving.org to make development of this bundle easier and more reliable.

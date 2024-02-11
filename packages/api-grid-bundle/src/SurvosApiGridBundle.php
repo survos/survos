@@ -116,7 +116,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
-            ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$stimulusController', $config['grid_stimulus_controller'])
             ->setArgument('$registry', new Reference('doctrine'))
         ;
@@ -150,17 +150,17 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
-            ->setAutowired(true)
             ->setArgument('$denormalizer', new Reference('serializer'))
             ->addTag('api_platform.state_provider')
-            ->setPublic(true);
+            ->setAutowired(true)
+            ->setPublic(true)
+        ;
 
-//        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
-        // todo this is patch it was not suppose to be working like this
-        $builder->register(DataTableCollectionNormalizer::class)
+        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
+//        $builder->register(DataTableCollectionNormalizer::class)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
-//            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))
             ->setArgument('$requestStack', new Reference('request_stack'))
             ->addTag('serializer.normalizer', ['priority' => -985]);
@@ -191,9 +191,10 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
-            ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
             ->setArgument('$inspectionService', new Reference(InspectionService::class))
+            ->setArgument('$meiliService', new Reference('api_meili_service'))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
         $builder->register(MultiFieldSearchFilter::class)
             ->addArgument(new Reference('doctrine.orm.default_entity_manager'))
@@ -214,11 +215,19 @@ class SurvosApiGridBundle extends AbstractBundle
         // since the configuration is short, we can add it here
         $definition->rootNode()
             ->children()
-            ->scalarNode('stimulus_controller')->defaultValue('@survos/api-grid-bundle/api_grid')->end()
+            ->scalarNode('stimulus_controller')
+                ->info('The stimulus controller to use, should extend @survos/api-grid-bundle/api_grid')
+                ->defaultValue('@survos/api-grid-bundle/api_grid')
+            ->end()
             ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid-bundle/grid')->end()
-            ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
-            ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
-            ->integerNode('maxValuesPerFacet')->defaultValue(100)->end()
+            ->scalarNode('meiliHost')->defaultValue('%env(MEILI_SERVER)%')->end()
+            ->scalarNode('meiliKey')->defaultValue('%env(MEILI_API_KEY)%')->end()
+            ->scalarNode('meiliPrefix')->defaultValue('%env(MEILI_PREFIX)%')->end()
+            ->booleanNode('passLocale')->defaultValue(false)->end()
+            ->integerNode('maxValuesPerFacet')
+                ->info('https://specs.meilisearch.com/specifications/text/157-faceting-setting-api.html#_3-functional-specification')
+                ->defaultValue(100)
+            ->end()
             ->end();;
     }
 

@@ -52,14 +52,14 @@ services:
             - rabbitmq_go_net
 
     meilisearch:
-        image: getmeili/meilisearch:v1.6
+        image: getmeili/meilisearch:v1.6.1
         container_name: 'meilisearch'
         ports:
             - 7700:7700
         volumes:
             - ./.docker/meili/:/meili_data/
         environment:
-            - MEILI_MASTER_KEY=MeiliKey
+#            - MEILI_MASTER_KEY=MeiliKey
             - MEILI_NO_ANALYTICS=true
             - MEILI_TASK_WEBHOOK_URL=http://localhost:8002/meili
 

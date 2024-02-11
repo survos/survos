@@ -74,6 +74,7 @@ class IndexCommand extends Command
                     $args = $attribute->getArguments();
                     // @todo: this could also be inside of the operation!
                     if (array_key_exists('normalizationContext', $args)) {
+                        assert(array_key_exists('groups', $args['normalizationContext']), "Add a groups to " . $meta->getName());
                         $groups = $args['normalizationContext']['groups'];
                         if (is_string($groups)) {
                             $groups = [$groups];
@@ -89,7 +90,9 @@ class IndexCommand extends Command
         $this->io = new SymfonyStyle($input, $output);
 
         foreach ($classes as $class=>$groups) {
-            $indexName = (new \ReflectionClass($class))->getShortName();
+            $indexName = $this->meiliService->getPrefixedIndexName((new \ReflectionClass($class))->getShortName());
+
+            $this->io->title($indexName);
             if ($reset=$input->getOption('reset')) {
                 $this->meiliService->reset($indexName);
             }
@@ -110,10 +113,12 @@ class IndexCommand extends Command
 
             if ($this->io->isVerbose()) {
                 $stats = $index->stats();
+                $this->io->write(json_encode($stats, JSON_PRETTY_PRINT));
+                $this->io->write(json_encode($index->getSettings(), JSON_PRETTY_PRINT));
                 // now what?
 
             }
-            $this->io->success('app:index-entity ' . $class . ' success.');
+            $this->io->success('app:index-entity ' . $class . ' finished indexing');
 
         }
 

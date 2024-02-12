@@ -33,6 +33,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     public function __construct(
         private                                                      $contextBuilder,
         ResourceClassResolverInterface                               $resourceClassResolver,
+        private readonly LoggerInterface $logger,
         private readonly RequestStack                                $requestStack, // hack to add locale
         private readonly IriConverterInterface                       $iriConverter,
         protected ?ResourceMetadataCollectionFactoryInterface        $resourceMetadataFactory,

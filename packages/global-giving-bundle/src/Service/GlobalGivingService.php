@@ -36,9 +36,42 @@ class GlobalGivingService
 
     // /api/public/projectservice/all/projects/ids?api_key=YOUR_API_KEY
     // https://www.globalgiving.org/api/methods/get-all-projects-ids/
+    // https://www.globalgiving.org/api/methods/get-all-projects-summary/
     public function getAllProjectsIds(array $params = [])
     {
         $path = 'all/projects/ids';
+        return $this->fetch($path, $params, 'projects');
+    }
+
+    // https://www.globalgiving.org/api/methods/get-all-projects-download/
+    public function getAllProjectsDownload(array $params = [])
+    {
+        // params: &nextProjectId=354
+        $path = 'all/projects/download.json';
+        return $this->fetch($path, $params, 'download');
+    }
+
+    // projectservice/all/projects
+    // https://api.globalgiving.org/api/public/projectservice/all/projects/
+    // https://www.globalgiving.org/api/methods/get-all-projects/
+    public function getAllProjects(array $params = [])
+    {
+        // params: &nextProjectId=354
+        $path = 'all/projects/';
+        if ($next = $path['nextProjectId']??null) {
+            $path .= '&nextProjectId=' . $next;
+        }
+        return $this->fetch($path, $params, 'projects');
+    }
+
+    // https://api.globalgiving.org/api/public/projectservice/all/projects/summary
+    public function getAllProjectsSummary(array $params = [])
+    {
+        // params: &nextProjectId=354
+        $path = 'all/projects/summary';
+        if ($next = $path['nextProjectId']??null) {
+            $path .= '&nextProjectId=' . $next;
+        }
         return $this->fetch($path, $params, 'projects');
     }
 

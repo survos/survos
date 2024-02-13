@@ -62,8 +62,6 @@ class MeiliSearchStateProvider implements ProviderInterface
             //dd($body);
             } catch (\Exception $exception) {
                 throw new Exception($indexName . ' -- ' . $exception->getMessage());
-                dd($indexName, $searchQuery, $exception);
-                throw new \Exception($indexName . ' ' . $exception->getMessage());
             }
 
             $data = $this->denormalizeObject($data, $resourceClass);

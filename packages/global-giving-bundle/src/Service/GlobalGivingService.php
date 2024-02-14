@@ -10,7 +10,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GlobalGivingService
 {
-    public const BASE_URI = 'https://api.globalgiving.org/api/public/projectservice/';
+    public const BASE_URI = 'https://api.globalgiving.org/api/public/';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -39,7 +39,7 @@ class GlobalGivingService
     // https://www.globalgiving.org/api/methods/get-all-projects-summary/
     public function getAllProjectsIds(array $params = [])
     {
-        $path = 'all/projects/ids';
+        $path = 'projectservice/all/projects/ids';
         return $this->fetch($path, $params, 'projects');
     }
 
@@ -47,7 +47,15 @@ class GlobalGivingService
     public function getAllProjectsDownload(array $params = [])
     {
         // params: &nextProjectId=354
-        $path = 'all/projects/download.json';
+        $path = 'projectservice/all/projects/download.json';
+        return $this->fetch($path, $params, 'download');
+    }
+
+    // https://www.globalgiving.org/api/methods/get-all-organizations-download/
+    public function getAllOrganizationsDownload(array $params = [])
+    {
+        // params: &nextProjectId=354
+        $path = 'orgservice/all/organizations/download.json';
         return $this->fetch($path, $params, 'download');
     }
 
@@ -57,7 +65,7 @@ class GlobalGivingService
     public function getAllProjects(array $params = [])
     {
         // params: &nextProjectId=354
-        $path = 'all/projects/';
+        $path = 'projectservice/all/projects/';
         if ($next = $path['nextProjectId']??null) {
             $path .= '&nextProjectId=' . $next;
         }
@@ -68,7 +76,7 @@ class GlobalGivingService
     public function getAllProjectsSummary(array $params = [])
     {
         // params: &nextProjectId=354
-        $path = 'all/projects/summary';
+        $path = 'projectservice/all/projects/summary';
         if ($next = $path['nextProjectId']??null) {
             $path .= '&nextProjectId=' . $next;
         }
@@ -78,7 +86,7 @@ class GlobalGivingService
     //
     public function getFeaturedProjects(array $params = [])
     {
-        $path = 'featured/projects';
+        $path = 'projectservice/featured/projects';
         return $this->fetch($path, $params, 'projects');
     }
 
@@ -86,7 +94,7 @@ class GlobalGivingService
     // curl -H "Accept: application/xml" -H "Content-Type: application/xml" -X GET "https://api.globalgiving.org/api/public/projectservice/projects/1883?api_key=YOUR_API_KEY"
     public function getProject(string|int $projectId, array $params = [])
     {
-        $path = 'projects/' . $projectId;
+        $path = 'projectservice/projects/' . $projectId;
         return $this->fetch($path, $params, 'project');
     }
 

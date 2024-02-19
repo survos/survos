@@ -1,10 +1,11 @@
 {
-    "name": "survos/ip2-location-bundle",
+    "name": "survos/ip2location-bundle",
     "type": "symfony-bundle",
     "description": "Symfony wrapper for ip2location.ip",
     "keywords": [
-        "symfony-ux",
-        "symfony6"
+        "symfony6",
+        "ip",
+        "geolocation"
     ],
     "license": "MIT",
     "require": {

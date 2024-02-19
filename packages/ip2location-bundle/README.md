@@ -39,17 +39,20 @@ Requirements:
 
 ```bash
 symfony new Ip2locationDemo --webapp && cd Ip2locationDemo
+echo "IP2LOCATION_API_KEY=my-api-key" >> .env.local
+echo "IP2LOCATION_API_KEY=92E8616AF22222F6801F3A217284CCAE" > .env.local
 symfony composer req survos/ip2location-bundle
 symfony console make:controller AppController
 sed -i "s|/app|/|" src/Controller/AppController.php 
 
-echo "IP2LOCATION_API_KEY=my-api-key" >> .env.local
-
 cat <<'EOF' > templates/app/index.html.twig
 {% extends 'base.html.twig' %}
 {% block body %}
-{{ ipGeolocation(app.request.clientIp).country_code}}
+Hello, visitor from {{ ipGeolocation(app.request.clientIp).country_name}}
 <pre>{{ ipGeolocation(app.request.clientIp)|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+
+Powered by IP2Location.io <a href="https://www.ip2location.io">IP geolocation</a> web service.
+
 {% endblock %}
 EOF
 

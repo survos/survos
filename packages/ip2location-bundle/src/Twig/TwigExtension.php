@@ -26,6 +26,7 @@ class TwigExtension extends AbstractExtension
         return [
             new TwigFunction('domainWhoIs', fn(string $domain) => $this->ip2LocationService->domainWhoIs($domain)),
             new TwigFunction('ipGeolocation', fn(string $ip) => $this->ip2LocationService->getIPGeolocation($ip)),
+            new TwigFunction('isLocalhost', fn(string $ip) => $ip === '127.0.0.1'),
         ];
     }
 }

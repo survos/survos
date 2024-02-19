@@ -30,6 +30,8 @@ Requirements:
 * Symfony CLI
 * sed (to change /app to / without opening an editor)
 
+If you're running locally, the remote address is localhost.  Get your real IP address at https://api.ipify.org?format=json and put it in survos_ip2location.yaml
+
 
 ```bash
 symfony new Ip2locationDemo --webapp && cd Ip2locationDemo
@@ -42,7 +44,8 @@ echo "IP2LOCATION_API_KEY=my-api-key" >> .env.local
 cat <<'EOF' > templates/app/index.html.twig
 {% extends 'base.html.twig' %}
 {% block body %}
-{{ ip2location(app.request.clientIp).country_code}}
+{{ domainWhoIs('172.58.187.114').country_code}}
+{{ ip2location('172.58.187.114').country_code}}
 {% endblock %}
 EOF
 

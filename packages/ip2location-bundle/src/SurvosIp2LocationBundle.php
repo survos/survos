@@ -8,7 +8,9 @@ use Survos\Ip2LocationBundle\Service\Ip2LocationService;
 use Survos\Ip2LocationBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SurvosIp2LocationBundle extends AbstractBundle
@@ -20,7 +22,9 @@ class SurvosIp2LocationBundle extends AbstractBundle
         $serviceId = 'survos_ip2location_service';
         $container->services()->alias(Ip2LocationService::class, $serviceId);
         $builder->autowire($serviceId, Ip2LocationService::class)
-            ->setArgument('$apiKey', $config['api'])
+            ->setArgument('$apiKey', $config['api_key'])
+            ->setArgument('$localhostIp', $config['localhost_ip'])
+            ->setArgument('$cache', new Reference('cache.app', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setPublic(true);
 
         $definition = $builder
@@ -33,7 +37,8 @@ class SurvosIp2LocationBundle extends AbstractBundle
     {
         $definition->rootNode()
             ->children()
-            ->scalarNode('api_key')->defaultValue(null)->end()
+            ->scalarNode('api_key')->defaultValue('%env(IP2LOCATION_API_KEY)%')->end()
+            ->scalarNode('localhost_ip')->defaultValue('8.8.8.8')->end() // Google DNS
             ->end();
     }
 }

@@ -43,6 +43,7 @@ jobs:
           - {local_path: 'inspection-bundle', split_repository: 'SurvosInspectionBundle'}
           - {local_path: 'libre-translate-bundle', split_repository: 'LibreTranslateBundle'}
           - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
+          - {local_path: 'ip2location-bundle', split_repository: 'Ip2LocationBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
           - {local_path: 'sitemap-parser-bundle', split_repository: 'SurvosSitemapParserBundle'}
           - {local_path: 'key-value-bundle', split_repository: 'SurvosKeyValueBundle'}

@@ -6,6 +6,8 @@ First, get an API key at https://www.ip2location.io/pricing
 
 ```bash
 composer req survos/ip2location-bundle
+bin/console debug:config survos_ip2_location --format=yaml > config/packages/survos_ip2_location.yaml
+
 ```
 
 ```twig
@@ -15,11 +17,16 @@ composer req survos/ip2location-bundle
 
 ```
 
-By default, the bundle gets the API key from the environment
+By default, the bundle gets the API key from the environment.
+Since localhost doesn't have geolocation data, you can set a default.
+If you're running locally, the remote address is localhost.  Get your real IP address at whatismyip.com or https://api.ipify.org?format=json
+
 ```yaml
 # config/packages/survos_ip2location.yaml
-survos_ip2location:
-  api_key: %env(IP2LOCATION_API_KEY)%
+survos_ip2_location:
+  api_key: '%env(IP2LOCATION_API_KEY)%'
+  localhost_ip: 8.8.8.8
+  
 ```
 
 ## Proof that it works
@@ -30,13 +37,10 @@ Requirements:
 * Symfony CLI
 * sed (to change /app to / without opening an editor)
 
-If you're running locally, the remote address is localhost.  Get your real IP address at https://api.ipify.org?format=json and put it in survos_ip2location.yaml
-
-
 ```bash
 symfony new Ip2locationDemo --webapp && cd Ip2locationDemo
 symfony composer req survos/ip2location-bundle
-syfmony console make:controller AppController
+symfony console make:controller AppController
 sed -i "s|/app|/|" src/Controller/AppController.php 
 
 echo "IP2LOCATION_API_KEY=my-api-key" >> .env.local
@@ -44,8 +48,8 @@ echo "IP2LOCATION_API_KEY=my-api-key" >> .env.local
 cat <<'EOF' > templates/app/index.html.twig
 {% extends 'base.html.twig' %}
 {% block body %}
-{{ domainWhoIs('172.58.187.114').country_code}}
-{{ ip2location('172.58.187.114').country_code}}
+{{ ipGeolocation(app.request.clientIp).country_code}}
+<pre>{{ ipGeolocation(app.request.clientIp)|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
 {% endblock %}
 EOF
 

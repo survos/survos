@@ -162,8 +162,21 @@ class OAuthController extends AbstractController
         ;
 
         $client = $this->clientRegistry->getClient($clientKey); // key used in config/packages/knpu_oauth2_client.yaml
-        return $client
-            ->redirect($scopes[$clientKey]??[],[]);
+//        $redirect = $client
+//            ->redirect($scopes[$clientKey]??[],[]);
+//        $x = parse_str(parse_url($redirect->getTargetUrl(), PHP_URL_QUERY), $array);
+//        $redirectUri = $array['redirect_uri']??'';
+//        if (!str_starts_with($redirectUri, 'https')) {
+//            throw new \Exception("The redirect must begin with https " . $redirectUri);
+//        }
+
+        $redirect = $client->redirect($scopes[$clientKey] ?? [], ['state' => $client->getOAuth2Provider()->getState()]);
+        //        dump($redirect->getTargetUrl());
+        $redirect->setTargetUrl(str_replace('http%3A', 'https%3A', $redirect->getTargetUrl()));
+        //         throw new \Exception($redirect);
+        return $redirect;
+
+
 
         $provider = $client->getOAuth2Provider();
         if (false)

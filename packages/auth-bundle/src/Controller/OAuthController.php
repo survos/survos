@@ -24,6 +24,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\AuthenticatorManagerInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Twig\Environment;
@@ -64,6 +65,7 @@ class OAuthController extends AbstractController
     }
 
     #[Route("/profile", name: "oauth_profile")]
+    #[IsGranted('IS_AUTHENTICATED')]
     public function profile(Request $request)
     {
         return $this->render('@SurvosAuth/oauth/profile.html.twig', [
@@ -230,6 +232,9 @@ class OAuthController extends AbstractController
         Request $request,
         string $clientKey
     ) {
+        if ($request->get('error')) {
+            dd($request->query->all());
+        }
         $clientRegistry = $this->clientRegistry;
 
 

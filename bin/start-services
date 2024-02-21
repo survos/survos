@@ -1,4 +1,4 @@
-sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v $HOME/docker/volumes/postgres16:/var/lib/postgresql/data postgres:16
+sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5434:5432 -v $HOME/docker/volumes/postgres16:/var/lib/postgresql/data postgres:16
 exit 0
 
 sudo docker run --rm --name meili -d -p 7700:7700 -v $(pwd)/../meili_data:/meili_data getmeili/meilisearch:1.5 meilisearch

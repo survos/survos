@@ -23,6 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         # define package to repository map
+        # run gh repo create survos/SurvosXXBundle --public --description
         package:
           - {local_path: 'recipes', split_repository: 'SurvosRecipes'}
 
@@ -45,6 +46,7 @@ jobs:
           - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
           - {local_path: 'ip2location-bundle', split_repository: 'Ip2LocationBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
+          - {local_path: 'pwa-extra-bundle', split_repository: 'SurvosPwaExtraBundle'}
           - {local_path: 'sitemap-parser-bundle', split_repository: 'SurvosSitemapParserBundle'}
           - {local_path: 'key-value-bundle', split_repository: 'SurvosKeyValueBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}

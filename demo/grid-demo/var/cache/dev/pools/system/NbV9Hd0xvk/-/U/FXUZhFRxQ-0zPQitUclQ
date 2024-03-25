@@ -1,3 +1,0 @@
-<?php //Exception%2523getPrevious
-
-return [PHP_INT_MAX, []];

@@ -1,3 +1,0 @@
-<?php //Throwable%2523getTraceAsString
-
-return [PHP_INT_MAX, []];

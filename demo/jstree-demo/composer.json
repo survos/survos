@@ -66,7 +66,7 @@
         ,
         "doctrine/doctrine-fixtures-bundle": "^3.3",
         "hgtan/symfony-pre-commit": "dev-master",
-        "phpunit/phpunit": "^9.5",
+        "phpunit/phpunit": "^9.5||^10.0||^11.0",
         "survos/maker-bundle": "dev-main",
         "symfony/browser-kit": "^6.0",
         "symfony/css-selector": "^6.0",

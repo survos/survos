@@ -117,3 +117,27 @@ symfony open:local
 curl -OL https://github.com/composer-unused/composer-unused/releases/latest/download/composer-unused.phar
 php composer-unused.phar
 ```
+
+
+bin/console make:controller App
+cat <<'EOF' > templates/app/index.html.twig
+{% extends 'base.html.twig' %}
+{% block body %}
+{{ sparkline([2,3,10,8,23,14,9,12,0,0,14])|raw }}
+{% endblock %}
+EOF
+
+cat <<'EOF' > tests/AllRoutesTest.php
+<?php
+
+namespace App\Tests;
+use Pierstoval\SmokeTesting\SmokeTestStaticRoutes;
+
+class AllRoutesTest extends SmokeTestStaticRoutes
+{
+    // That's all!
+}
+EOF
+
+SYMFONY_DEPRECATIONS_HELPER='disabled=1' vendor/bin/phpunit
+

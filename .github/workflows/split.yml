@@ -50,6 +50,7 @@ jobs:
           - {local_path: 'sitemap-parser-bundle', split_repository: 'SurvosSitemapParserBundle'}
           - {local_path: 'key-value-bundle', split_repository: 'SurvosKeyValueBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
+          - {local_path: 'mobile-bundle', split_repository: 'SurvosMobileBundle'}
           - {local_path: 'meili-admin-bundle', split_repository: 'SurvosMeiliAdminBundle'}
           - {local_path: 'providence-bundle', split_repository: 'SurvosProvidenceBundle'}
           - {local_path: 'reveal-bundle', split_repository: 'SurvosRevealBundle'}

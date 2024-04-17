@@ -12,7 +12,7 @@
         "symfony/dependency-injection": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
         "twig/twig": "^3.4",
-        "survos/core-bundle": "^1.6"
+        "survos/core-bundle": "^1.5.205"
     },
     "autoload": {
         "psr-4": {

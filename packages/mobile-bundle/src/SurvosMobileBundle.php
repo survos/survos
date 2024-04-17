@@ -4,6 +4,7 @@
 
 namespace Survos\MobileBundle;
 
+use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SurvosMobileBundle extends AbstractBundle
 {
+    use HasAssetMapperTrait;
+
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         // $builder->setParameter('survos_workflow.direction', $config['direction']);
@@ -36,4 +39,12 @@ class SurvosMobileBundle extends AbstractBundle
             ->booleanNode('enabled')->defaultTrue()->end()
             ->end();
     }
+
+    public function getPaths(): array
+    {
+        $dir = realpath(__DIR__ . '/../assets/');
+        assert(file_exists($dir), 'asset path must exist for the assets in ' . __DIR__);
+        return [$dir => '@survos/mobile'];
+    }
+
 }

@@ -7,12 +7,23 @@ use Survos\JsTwigBundle\TwigBlocksTrait;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Twig\Environment;
 
-#[AsTwigComponent(name: 'dexie', template: 'components/dexie_twig.html.twig')]
+#[AsTwigComponent(name: 'dexie', template: '@SurvosJsTwig/components/dexie_twig.html.twig')]
 final class DexieTwigComponent extends AsTwigComponent
 {
     use TwigBlocksTrait;
+    public string $dbName; // required
     public string $store; // required
     public ?string $refreshEvent=null;
+
+    public function __construct(
+        private Environment $twig,
+        private LoggerInterface $logger,
+        private array $config=[]
+    ) {
+
+        //        ='@survos/grid-bundle/api_grid';
+    }
+
 
     public function getRefreshEvent(): string
     {
@@ -31,19 +42,35 @@ final class DexieTwigComponent extends AsTwigComponent
     public $filter = null;
     public array $order = [];
 
-    public function __construct(
-        private Environment $twig,
-        private LoggerInterface $logger,
-    ) {
-
-        //        ='@survos/grid-bundle/api_grid';
-    }
 
     public function getTwigTemplate(): string
     {
         return $this->getTwigBlocks()['twig_template'];
-
     }
+
+    public function getSchema(): array
+    {
+        #    db.version(3).stores({
+#savedTable: "id,name,owned",
+#productTable: "++id,price,brand,category"
+#});
+
+        $schema = [];
+        foreach ($this->config['stores'] as $store) {
+            $schema[$store['name']] = $store['schema'];
+        }
+        return $schema;
+    }
+
+    public function getDbName()
+    {
+        return $this->config['db'];
+    }
+    public function getVersion(): int
+    {
+        return $this->config['version'];
+    }
+
 
 
 }

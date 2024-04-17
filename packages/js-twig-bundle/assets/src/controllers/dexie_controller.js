@@ -4,8 +4,9 @@ import { Controller } from '@hotwired/stimulus';
 // combination api-platform, inspection-bundle, dexie and twigjs
 // loads data from API Platform to dexie, renders dexie data in twigjs
 
-import db from '../db.js';
+// import db from '../db.js';
 import Twig from 'twig';
+import Dexie from 'dexie';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
@@ -13,6 +14,9 @@ export default class extends Controller {
     static values = {
         twigTemplate: String,
         refreshEvent: String,
+        dbName: String,
+        schema: Object,
+        version: Number,
         store: String,
         filter: {
             type: String,
@@ -22,7 +26,11 @@ export default class extends Controller {
     }
 
     connect() {
-        console.warn("hi from " + this.identifier);
+        this.db = new Dexie(this.dbNameValue);
+        this.db.version(this.versionValue).stores(this.schemaValue);
+        this.db.open();
+
+        console.warn("hi from " + this.identifier+ ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
         // console.error(this.filterValue);
         // compile the template
         this.template = Twig.twig({
@@ -44,7 +52,7 @@ export default class extends Controller {
     // because this can be loaded by Turbo or Onsen
     async contentConnected()
     {
-        let table = db.table(this.storeValue);
+        let table = this.db.table(this.storeValue);
         // if (this.filter) {
         //     this.filter = {'owned': true};
         //     table = table.where({owned: true}).toArray().then(rows => console.log(rows)).catch(e => console.error(e));

@@ -1,89 +1,130 @@
-import { Controller } from '@hotwired/stimulus';
+import {Controller} from '@hotwired/stimulus';
 
-// now called from the TwigJsComponent Component, so it can pass in a Twig Template
-// combination api-platform, inspection-bundle, dexie and twigjs
-// loads data from API Platform to dexie, renders dexie data in twigjs
-
-// import db from '../db.js';
-import Twig from 'twig';
-import Dexie from 'dexie';
-
+/*
+* The following line makes this controller "lazy": it won't be downloaded until needed
+* See https://github.com/symfony/stimulus-bridge#lazy-controllers
+*/
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
-    static targets = ['content'];
-    static values = {
-        twigTemplate: String,
-        refreshEvent: String,
-        dbName: String,
-        schema: Object,
-        version: Number,
-        store: String,
-        filter: {
-            type: String,
-            default: '{}'
-        }, // {status: 'queued'}
-        // order: Object // e.g. {dateAdded: 'DESC'} (could be array?)
+    static targets = [
+        'menu',
+        'detail',
+        'title',
+        'pageTitle',
+        'tabbar',
+        'twigTemplate',
+        'savedCount', 'message', 'menu', 'navigator']
+
+    // ...
+
+    eventPreDebug(e) {
+        let navigator = e.navigator;
+        console.warn(e.type, e.currentPage.getAttribute('id'), e.detail, e.currentPage, e);
+    }
+
+    eventPostDispatch(e) {
+        // idea: dispatch a "{page}:{eventName}" and let the stimulus controller listen for it.
+        let navigator = e.navigator;
+        let enterPageName = e.enterPage.getAttribute('id');
+        let leavePageName = '~';
+        if (e.leavePage) {
+            leavePageName = e.leavePage.getAttribute('id');
+            let eventType = leavePageName + '.' + e.type;
+            console.log('dispatching ' + eventType);
+            document.dispatchEvent(new Event(eventType));
+        }
+
+        // this.dispatch("saved", { detail: { content:
+        //         'saved content' } })
+
+        console.error(e.type, 'left ' + leavePageName,
+            'entering ' + enterPageName);
+        let eventType = enterPageName + '.' + e.type;
+        console.log('dispatching ' + eventType);
+        document.dispatchEvent(new Event(eventType));
+
+        if (enterPageName == 'saved') {
+            // this.tabbarTarget.loadPage('saved');
+
+        }
     }
 
     connect() {
-        this.db = new Dexie(this.dbNameValue);
-        this.db.version(this.versionValue).stores(this.schemaValue);
-        this.db.open();
+        super.connect();
+        console.log('hello from ' + this.identifier);
+        ons.ready((x) => {
+            console.warn("ons is ready, " + this.identifier)
+        })
+        this.navigatorTarget.addEventListener('prepush', this.eventPreDebug);
+        this.navigatorTarget.addEventListener('prepop', this.eventPreDebug);
+        this.navigatorTarget.addEventListener('postpush', this.eventPostDispatch);
+        this.navigatorTarget.addEventListener('postpop', this.eventPostDispatch);
+        // https://thoughtbot.com/blog/taking-the-most-out-of-stimulus
 
-        console.warn("hi from " + this.identifier+ ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
-        // console.error(this.filterValue);
-        // compile the template
-        this.template = Twig.twig({
-            data: this.twigTemplateValue
+        // prechange happens on tabs only
+        document.addEventListener('prechange', (e) => {
+            console.warn(e.type);
+
+            // console.log('target', target, e.target.dataset);
+
+            let tabItem = e.detail.tabItem;
+            if (tabItem) {
+                // console.log('prechange', target, tabItem, pageName);
+
+                // this is the tabItem component, not an HTML element
+                let title = tabItem.getAttribute('label');
+                console.warn(title);
+                this.titleTarget.innerHTML = tabItem.getAttribute('label');
+                let tabPageName = tabItem.getAttribute('page');
+                let eventType = tabPageName + '.' + e.type;
+                console.log('dispatching ' + eventType);
+                document.dispatchEvent(new Event(eventType));
+            }
         });
-        this.filter = this.filterValue ? JSON.parse(this.filterValue): false;
-        this.contentConnected();
-
-        if (this.refreshEventValue) {
-            document.addEventListener(this.refreshEventValue, ( e => {
-                // console.log('i heard an event! ' + e.type);
-                this.contentConnected();
-            }));
-        }
 
 
     }
 
-    // because this can be loaded by Turbo or Onsen
-    async contentConnected()
-    {
-        let table = this.db.table(this.storeValue);
-        // if (this.filter) {
-        //     this.filter = {'owned': true};
-        //     table = table.where({owned: true}).toArray().then(rows => console.log(rows)).catch(e => console.error(e));
-        // }
-        // // console.log(table);
-        // return;
+    setTitle(title) {
+        if (this.hasTitleTarget) {
+            this.titleTarget.innerHTML = title;
+        }
+    }
 
-        if (this.filter) {
-            table = table.filter(row => {
+    openMenu(e) {
+        console.log(e);
+        this.menuTarget.open();
+        console.log(this.menuTarget);
+    }
 
-                // there's probably a way to use reduce() or something
-                let okay = true;
-                for (const [key, value] of Object.entries(this.filter)) {
-                    // @todo: check for array and use 'in array'
-                    okay = okay && (row[key] === value);
-                    // console.log(`${key}: ${value}`, row[key] === value, okay);
-                }
-                return okay;
-            });
+
+    log(x) {
+        console.log(x);
+    }
+
+
+    messageTargetConnected(element) {
+        // this.messageTarget.innerHTML = ''
+    }
+
+    loadPage(e) {
+        this.menuTarget.close();
+        let page = e.params.route;
+        if (page) {
+            this.navigatorTarget.bringPageTop(page, {animation: 'fade'});
+            console.log('loading page ' + page);
+        } else {
+            console.error('missing page ', e.params);
         }
 
-        // table.toArray().then( (data) => {
-        //     data.forEach( (row) => {
-        //         console.log(row);
-        //         // nextPokenumber++;
-        //     })
-        // })
-
-        table.toArray()
-            .then( rows => this.template.render({rows: rows}))
-            .then( html => this.element.innerHTML = html);
-
     }
+
+    pushPage(e) {
+        console.error(e.params);
+        this.navigatorTarget.pushPage(e.params.page, {data: e.params})
+            .then(p => console.log(p));
+    }
+
+
 }
+

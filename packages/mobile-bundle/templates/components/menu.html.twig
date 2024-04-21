@@ -1,7 +1,7 @@
 {#  this fires an event, all listeners/subscribers will respond.  use A #}
 {#    {% set menuItem = knp_menu_get(menuAlias, path, options) %} #}
 {% set theme = false %}
-    {% if type in [TAB_MENU] %}
+    {% if type in [MOBILE_TAB_MENU] %}
         {#        "template"      : "@SurvosBootstrap/knp_sidebar_menu.html.twig", #}
         {{ knp_menu_render(menuItem, {
             "template"      : "@SurvosMobile/menu/tab_menu.html.twig",

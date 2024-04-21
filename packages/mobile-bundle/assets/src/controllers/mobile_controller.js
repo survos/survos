@@ -81,9 +81,13 @@ export default class extends Controller {
                 document.dispatchEvent(new Event(eventType));
             }
         });
-
-
     }
+
+    setDb(db) {
+        this.db = db;
+        console.log('db has been set!, @todo: dispatch an event up update related values');
+    }
+
 
     setTitle(title) {
         if (this.hasTitleTarget) {

@@ -11,8 +11,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class KnpMenuEvent extends Event
 {
-    public const PAGE_MENU = 'PAGE_MENU';
-    public const TAB_MENU = 'TAB_MENU';
+    public const MOBILE_PAGE_MENU = 'MOBILE_PAGE_MENU';
+    public const MOBILE_TAB_MENU = 'MOBILE_TAB_MENU';
 
     public function __construct(
         protected ItemInterface $menu,

@@ -2,6 +2,19 @@
 {% set _sc = pageController|default('render') %}
 <ons-page id="{{ block('pageId')|default('no-id') }}" {{ stimulus_controller(_sc) }}>
 
+{#    <ons-toolbar>#}
+{#        <div class="left">#}
+{#            <ons-toolbar-button icon="md-face"></ons-toolbar-button>#}
+{#        </div>#}
+
+{#        <div class="center">Title</div>#}
+
+{#        <div class="right">#}
+{#            <ons-toolbar-button>-</ons-toolbar-button>#}
+{#            <ons-toolbar-button>+</ons-toolbar-button>#}
+{#        </div>#}
+{#    </ons-toolbar>#}
+
     {% set toolbarContent = block('toolbar')|default(false) %}
     {% if toolbarContent %}
     <ons-toolbar>

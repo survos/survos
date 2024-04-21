@@ -8,7 +8,16 @@
 
 {% block item %}
 {#    {{ dump(item) }}#}
-<ons-tab page="{{ item.name }}" label="{{ item.label }}" icon="{{ item.attributes.icon|default('fa-question-mark') }}"></ons-tab>
+    {% set icon = item.attributes.icon|default('fa-question-mark') %}
+    {% set badge = item.extras.badge|default(false) %}
+<ons-tab page="{{ item.name }}" label="{{ item.label }}"
+        {{ stimulus_target('app','tab') }}
+         {% if icon %}icon="{{ icon }}"{% endif %}
+         {% if badge %}badge="{{ badge.value }}"{% endif %}
+{#        {% if item.name=='saved' ? 'active' %}{% endif %}#}
+        {# active-icon #}
+>
+</ons-tab>
 {% endblock %}
 
 {% block list %}

@@ -7,13 +7,13 @@
 {% endblock %}
 
 {% block item %}
-{#    {{ dump(item) }}#}
     {% set icon = item.attributes.icon|default('fa-question-mark') %}
     {% set badge = item.extras.badge|default(false) %}
     {% set route = item.name %} {#  really the pageId that's loaded #}
     <ons-list-item
             {{ stimulus_action('app', 'loadPage', 'click', {
-                route: route
+                route: route,
+                extras: item.extras
             }) }}
     >
         {% if icon %}

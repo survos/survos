@@ -1,16 +1,13 @@
 <?php
 
-// Simplies the construction of menu items,
+// Simplifies the construction of menu items,
 namespace Survos\MobileBundle\Menu;
 
 use Knp\Menu\ItemInterface;
-use Survos\BootstrapBundle\Event\KnpMenuEvent;
+use Survos\Mobilebundle\Event\KnpMenuEvent;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use function Symfony\Component\String\u;
 
 interface KnpMenuHelperInterface
 {

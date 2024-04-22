@@ -115,8 +115,12 @@ export default class extends Controller {
     loadPage(e) {
         this.menuTarget.close();
         let page = e.params.route;
+        console.error('loading page ' + page, e.params);
         if (page) {
-            this.navigatorTarget.bringPageTop(page, {animation: 'fade'});
+            this.navigatorTarget.bringPageTop(page, {
+                data: e.params.extras.rp,
+                animation: 'fade'
+            });
             console.log('loading page ' + page);
         } else {
             console.error('missing page ', e.params);

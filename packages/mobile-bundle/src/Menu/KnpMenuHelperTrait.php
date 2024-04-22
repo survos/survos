@@ -3,10 +3,9 @@
 // Simplies the construction of menu items,
 namespace Survos\MobileBundle\Menu;
 
-use Google\Auth\Cache\Item;
 use Knp\Menu\ItemInterface;
 use Knp\Menu\MenuItem;
-use Survos\BootstrapBundle\Event\KnpMenuEvent;
+use Survos\MobileBundle\Event\KnpMenuEvent;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -156,6 +155,7 @@ trait KnpMenuHelperTrait
         $child->setExtra('safe_label', true);
 
             $child->setExtra('is_submenu', $options['is_submenu']);
+            $child->setExtra('rp', $options['routeParameters']);
             $child->setAttribute('is_submenu', $options['is_submenu']);
         if ($options['is_submenu']) {
         }

@@ -14,6 +14,18 @@
             },
 
         }) }}
+    {% elseif type in [MOBILE_PAGE_MENU] %}
+        {{ knp_menu_render(menuItem, {
+            "template"      : "@SurvosMobile/menu/page_menu.html.twig",
+            "debug": debug|default(false),
+            "allow_safe_labels": true,
+            'comment': "This is an custom option passed in knp_menu_render. Only used by our custom renderer.",
+            rootAttributes: {
+                class: 'menu-inner py-1',
+                role: 'menu'
+            },
+
+        }) }}
     {% else %}
         <div class="text-danger">Invalid menu type: {{ type }}</div>
     {% endif %}

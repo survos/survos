@@ -2,7 +2,7 @@
 {% extends "@SurvosMobile/base.html.twig" %}
 
 {% block templates %}
-    {% for code, template in templates %}
+    {% for code, template in templates|default([]) %}
         <template id="{{ code }}">
             {{ template|raw }}
         </template>

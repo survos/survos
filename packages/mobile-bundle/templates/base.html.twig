@@ -19,9 +19,10 @@
 
 {#    {% set _appController = 'app' %}#}
 {# app_controller handles navigation #}
-<body id="app" {{ stimulus_controller(_app_sc) }} >
+<body>
+<div id="app" {{ stimulus_controller(_app_sc) }} >
 {% block body %}{% endblock %}
-</body>
+</div>
 
 <template id="layout">
     <ons-toolbar id="{{ pageId|default('index') }}-toolbar">

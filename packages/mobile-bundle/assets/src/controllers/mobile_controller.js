@@ -12,8 +12,9 @@ export default class extends Controller {
         'title',
         'pageTitle',
         'tabbar',
+        'tab',
         'twigTemplate',
-        'savedCount', 'message', 'menu', 'navigator']
+        'message', 'menu', 'navigator']
 
     // ...
 
@@ -42,24 +43,15 @@ export default class extends Controller {
         let eventType = enterPageName + '.' + e.type;
         console.log('dispatching ' + eventType);
         document.dispatchEvent(new Event(eventType));
-
-        if (enterPageName == 'saved') {
-            // this.tabbarTarget.loadPage('saved');
-
-        }
     }
 
     connect() {
         super.connect();
-        console.log('hello from ' + this.identifier);
+        console.log('hello from mobile_controller / ' + this.identifier);
         ons.ready((x) => {
-            console.warn("ons is ready, " + this.identifier)
+            // console.warn("ons is ready, " + this.identifier)
         })
-        this.navigatorTarget.addEventListener('prepush', this.eventPreDebug);
-        this.navigatorTarget.addEventListener('prepop', this.eventPreDebug);
-        this.navigatorTarget.addEventListener('postpush', this.eventPostDispatch);
-        this.navigatorTarget.addEventListener('postpop', this.eventPostDispatch);
-        // https://thoughtbot.com/blog/taking-the-most-out-of-stimulus
+
 
         // prechange happens on tabs only
         document.addEventListener('prechange', (e) => {
@@ -73,19 +65,48 @@ export default class extends Controller {
 
                 // this is the tabItem component, not an HTML element
                 let title = tabItem.getAttribute('label');
-                console.warn(title);
-                this.titleTarget.innerHTML = tabItem.getAttribute('label');
+                if (this.hasTitleTarget) {
+                    this.titleTarget.innerHTML = tabItem.getAttribute('label');
+                }
                 let tabPageName = tabItem.getAttribute('page');
                 let eventType = tabPageName + '.' + e.type;
                 console.log('dispatching ' + eventType);
-                document.dispatchEvent(new Event(eventType));
+                document.dispatchEvent(new CustomEvent(eventType, {'detail': e}));
             }
         });
     }
 
+    navigatorTargetConnected() {
+
+        // The page element throws init, show, hide and destroy events depending on its lifecycle
+        document.addEventListener('init', e => {
+                // console.error(e)
+            }
+        );
+
+        this.navigatorTarget.addEventListener('prepush', this.eventPreDebug);
+        this.navigatorTarget.addEventListener('prepop', this.eventPreDebug);
+        this.navigatorTarget.addEventListener('postpush', this.eventPostDispatch);
+        this.navigatorTarget.addEventListener('postpop', this.eventPostDispatch);
+        // https://thoughtbot.com/blog/taking-the-most-out-of-stimulus
+
+    }
+
+    tabbarTargetConnected(e) {
+        console.log('tabbar connected');
+        // e.element.addEventListener('init', e =>console.error(e));
+    }
+
     setDb(db) {
-        this.db = db;
-        console.log('db has been set!, @todo: dispatch an event up update related values');
+        if (db !== this.db) {
+            this.db = db;
+            console.log('db has been set!, @todo: dispatch an event up update related values');
+        }
+    }
+
+    getDb() {
+        console.assert(this.db, "Missing db in mobile_controller");
+        return this.db;
     }
 
 
@@ -134,6 +155,9 @@ export default class extends Controller {
             .then(p => console.log(p));
     }
 
+    getFilter() {
+        return { };
+    }
 
 }
 

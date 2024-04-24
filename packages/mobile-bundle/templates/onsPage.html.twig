@@ -1,8 +1,9 @@
 {# add stimulus controller for title? #}
-{% set _sc = pageController|default(false) %}
+{#{% set _sc = pageController|default(false) %}#}
 
 {% set pageId = block('pageId') is defined ? block('pageId') : false %}
 {% set tabId = block('tabId') is defined ? block('tabId') : false %}
+{% set _sc = block('pageController') is defined ? block('pageController') : false %}
 <ons-page id="{{ pageId ?: tabId }}" {{ _sc ? stimulus_controller(_sc) }}>
     {% if false and pageId %}
         <ons-toolbar>

@@ -97,9 +97,14 @@ export default class extends Controller {
         // e.element.addEventListener('init', e =>console.error(e));
     }
 
-    setDb(db) {
+    setDb(db, debug=false) {
         if (db !== this.db) {
             this.db = db;
+            if (debug) {
+                db.tables.forEach(t=>
+                    t.count().then(c => console.error(t.name + ': ' + c))
+                );
+            }
             console.log('db has been set!, @todo: dispatch an event up update related values');
         }
     }

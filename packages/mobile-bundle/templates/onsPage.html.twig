@@ -44,11 +44,13 @@
 {#        <p>#}
 {#            This is the {{ _self }} page, served from twig. {{ 'now'|date }}.#}
 {#        </p>#}
+{% if app.request.get('debug') %}
         <div>
              <b>{{ pageId ? 'page ' ~ pageId }}</b>
             <i>{{ tabId ? 'Tab '~ tabId }}</i>
 
         </div>
+        {% endif %}
         {% block body %}
         {% endblock %}
     </div>

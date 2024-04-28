@@ -38,8 +38,7 @@ export default class extends Controller {
         // this.dispatch("saved", { detail: { content:
         //         'saved content' } })
 
-        console.error(e.type, 'left ' + leavePageName,
-            'entering ' + enterPageName);
+        console.info("%s %s => %s", e.type, leavePageName, enterPageName);
         let eventType = enterPageName + '.' + e.type;
         console.log('dispatching ' + eventType);
         document.dispatchEvent(new Event(eventType));
@@ -50,10 +49,15 @@ export default class extends Controller {
         console.log('hello from mobile_controller / ' + this.identifier);
         ons.ready((x) => {
             // console.warn("ons is ready, " + this.identifier)
-        })
+        });
 
-
-        // prechange happens on tabs only
+        // https://stackoverflow.com/questions/26851516/how-to-open-page-with-ons-tabbar-and-display-specific-tab
+        ['init', 'show', 'hide','precache'].forEach( eventName =>
+            document.addEventListener(eventName, (e) => {
+                console.info('%s received for %s %o', e.type, e.target.getAttribute('id'), e.target);
+            })
+        );
+            // prechange happens on tabs only
         document.addEventListener('prechange', (e) => {
             console.warn(e.type);
 

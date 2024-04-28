@@ -24,6 +24,8 @@
 {% block body %}{% endblock %}
 </div>
 
+{{ block('templates') }}
+
 <template id="layout">
     <ons-toolbar id="{{ pageId|default('index') }}-toolbar">
         <div class="left">

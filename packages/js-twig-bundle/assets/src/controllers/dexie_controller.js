@@ -74,7 +74,7 @@ export default class extends Controller {
         // idea: dispatch an event that app_controller listens for and opens the database if it doesn't already exist.
         // there is only one app_controller, so this.db can be share.
         // app should be in the dom, not sure why this.appOutlet not immediately available when dexie connects.
-
+        this.openDatabase(this.dbNameValue);
     }
 
     convertArrayToObject(array, key) {
@@ -90,7 +90,7 @@ export default class extends Controller {
     }
 
     // opens the database and sets the global this.db.  Also pushes that db to appOutlet
-    async openDatabase()
+    async openDatabase(dbName)
     {
         // this opens the database for every dexie connection!
         console.assert(this.dbNameValue, "Missing dbName in dexie_controller");
@@ -99,15 +99,16 @@ export default class extends Controller {
         db.version(this.versionValue).stores(schema);
         console.info('opening db...');
 
-        return db.open().then( async  db => {
+        db.open().then( async  db => {
             console.info('db is now open? Is it a promise');
             this.db = await db;
-            await this.populateEmptyTables(this.db, this.configValue.stores);
+            this.populateEmptyTables(this.db, this.configValue.stores);
             // there should only be one app, but sometimes it appears to be zero.
             await this.appOutlets.forEach(app => app.setDb(db));
             this.contentConnected();
             // this.contentConnected();
         });
+        return this.db;
         console.info('at this point, the tables should be populated and db should be open');
 
 

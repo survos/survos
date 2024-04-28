@@ -74,7 +74,24 @@ export default class extends Controller {
         // idea: dispatch an event that app_controller listens for and opens the database if it doesn't already exist.
         // there is only one app_controller, so this.db can be share.
         // app should be in the dom, not sure why this.appOutlet not immediately available when dexie connects.
+        console.assert(this.hasAppOutlet, "appOutlet not loaded!");
+        // we shoulddn't need to call this every time, since appOutlet.getDb caches the db.
+        console.error('can we get rid of this call?')
+
         this.openDatabase(this.dbNameValue);
+
+        // maybe is has one but isn't connected?
+        if (this.hasAppOutlet) {
+            // moved to appOutletConnected
+            // get the database from the app.  Create it if it doesn't exist.
+            // this.db = this.appOutlet.getDb();
+            // if (!this.db) {
+            //     this.openDatabase(this.dbNameValue);
+            //     // this.appOutlets.forEach(app => app.setDb(db));
+            //     // this.contentConnected();
+            // }
+        }
+
     }
 
     convertArrayToObject(array, key) {
@@ -99,17 +116,18 @@ export default class extends Controller {
         db.version(this.versionValue).stores(schema);
         console.info('opening db...');
 
-        db.open().then( async  db => {
+        await db.open();
+        {
             console.info('db is now open? Is it a promise');
-            this.db = await db;
+            this.db = db;
+            // populate the tables after the db is open
             this.populateEmptyTables(this.db, this.configValue.stores);
             // there should only be one app, but sometimes it appears to be zero.
-            await this.appOutlets.forEach(app => app.setDb(db));
+            this.appOutlet.setDb(this.db);
             this.contentConnected();
-            // this.contentConnected();
-        });
-        return this.db;
+        }
         console.info('at this point, the tables should be populated and db should be open');
+        return this.db;
 
 
     }
@@ -177,10 +195,11 @@ export default class extends Controller {
             console.error('db is not connected, it should be loaded in appOutletConnected.');
             return;
         }
-
         console.error(this.db);
+        // is db a Dexie instance?  It shouldn't be complaining about void;
         // https://dexie.org/docs/Dexie/Dexie.table()
         let table = this.db.table(this.storeValue);
+        console.log(table);
 
         if (this.hasAppOutlet) {
             // console.error(this.hasAppOutlet, this.appOutlet.getCurrentProjectId());

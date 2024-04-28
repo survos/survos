@@ -114,8 +114,8 @@ export default class extends Controller {
     }
 
     getDb() {
+        return this.db ? this.db : false;
         console.assert(this.db, "Missing db in mobile_controller");
-        return this.db;
     }
 
 

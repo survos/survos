@@ -81,17 +81,17 @@ export default class extends Controller {
 
     initialize() {
         super.initialize();
-        console.error('initializing ' + this.dbNameValue);
+        console.info('initializing %s', this.dbNameValue);
         const db = new Dexie(this.dbNameValue);
         let schema = this.convertArrayToObject(this.configValue.stores);
         db.version(this.versionValue).stores(schema);
-        console.error('opening db...');
-        db.open().then(db => {
-            console.warn('db is now open');
+        console.info('opening db...');
+        db.open().then( async  db => {
+            console.info('db is now open');
             this.db = db;
-            this.populateEmptyTables(this.db, this.configValue.stores);
-            this.contentConnected();
-            this.appOutlets.forEach(app => app.setDb(db));
+             await this.populateEmptyTables(this.db, this.configValue.stores);
+             await this.appOutlets.forEach(app => app.setDb(db));
+             this.contentConnected();
             // this.contentConnected();
         });
         // db.delete();
@@ -118,19 +118,22 @@ export default class extends Controller {
         if (this.db) {
             this.appOutlet.setDb(this.db);
         } else {
-            console.error('appOutletConnected, but db not yet set');
+            console.warn('appOutletConnected, but db not yet set');
         }
         // console.log(app.identifier + '_controller', body);
         // console.error('page data', this.appOutlet.getProjectId);
     }
 
     async populateEmptyTables(db, stores) {
-        stores.forEach((store) => {
+        stores.forEach(async (store) => {
+            console.warn(store);
             let t = db.table(store.name);
             t.count(async c => {
                 if (c > 0) {
+                    console.warn('%s already has %d', t.name, c);
                     return;
                 }
+                console.warn('%s has no data, loading...', t.name);
                 const data = await loadData(store.url);
                 console.error(data);
                 // let withId = await data.map( (x, id) => {
@@ -190,7 +193,6 @@ export default class extends Controller {
         } else {
             this.filter = this.appOutlet.getFilter(this.refreshEventValue);
         }
-        console.error(this.filter);
 
         // this.appOutlet.setTitle('hello???!');
         if (this.keyValue) {

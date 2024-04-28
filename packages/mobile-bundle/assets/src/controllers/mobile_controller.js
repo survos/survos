@@ -115,7 +115,8 @@ export default class extends Controller {
 
     getDb() {
         // @todo: check if this is a real db? a Promise?
-        return this.db ? this.db : false;
+        // return this.db ? this.db : false;
+        return window.db ? window.db : false;
     }
 
 

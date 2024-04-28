@@ -70,6 +70,11 @@ export default class extends Controller {
                 this.contentConnected();
             }));
         }
+        // idea: dispatch an event that app_controller listens for and opens the database if it doesn't already exist.
+        // there is only one app_controller, so this.db can be share.
+        // app should be in the dom, not sure why this.appOutlet not immediately available when dexie connects.
+
+        this.openDatabase();
     }
 
     convertArrayToObject(array, key) {
@@ -82,31 +87,28 @@ export default class extends Controller {
     initialize() {
         super.initialize();
         console.info('initializing %s', this.dbNameValue);
+    }
+
+    // opens the database and sets the global this.db.  Also pushes that db to appOutlet
+    async openDatabase()
+    {
+        // this opens the database for every dexie connection!
         const db = new Dexie(this.dbNameValue);
         let schema = this.convertArrayToObject(this.configValue.stores);
         db.version(this.versionValue).stores(schema);
         console.info('opening db...');
-        db.open().then( async  db => {
+
+        return db.open().then( async  db => {
             console.info('db is now open');
             this.db = db;
-             await this.populateEmptyTables(this.db, this.configValue.stores);
-             await this.appOutlets.forEach(app => app.setDb(db));
-             this.contentConnected();
+            await this.populateEmptyTables(this.db, this.configValue.stores);
+            // there should only be one app, but sometimes it appears to be zero.
+            await this.appOutlets.forEach(app => app.setDb(db));
+            this.contentConnected();
             // this.contentConnected();
         });
-        // db.delete();
-        // create the schema from the stores
-        // https://dev.to/afewminutesofcode/how-to-convert-an-array-into-an-object-in-javascript-25a4
-        // convert the survos_js_twig.yaml config['stores'] to an object for creating the tables
+        console.info('at this point, the tables should be populated and db should be open');
 
-        // let schema2 = this.configValue.stores.reduce((acc, curr) => {
-        //     acc[curr.name] = curr.schema;
-        //     return acc;
-        // });
-        // console.error(schema);
-        // return;
-        // db.version(this.versionValue).stores(schema);
-        // db.open();
 
     }
 
@@ -118,6 +120,8 @@ export default class extends Controller {
         if (this.db) {
             this.appOutlet.setDb(this.db);
         } else {
+            this.db = this.appOutlet.getDb();
+
             console.warn('appOutletConnected, but db not yet set');
         }
         // console.log(app.identifier + '_controller', body);
@@ -146,7 +150,7 @@ export default class extends Controller {
                 await t.bulkPut(data)
                     .then((x) => console.log('bulk add', x))
                     .catch(e => console.error(e));
-                // console.log ("Done populating.", data[1]);
+                console.warn("Done populating.", data[1]);
 
             })
         })

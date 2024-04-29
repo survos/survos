@@ -41,7 +41,7 @@ Create the project on heroku, after logging in
 
 ### Create LoginFormAuthenticator
 ```bash
-bin/console make:auth
+bin/console make:security
 
    1 # Login Form Authenticator
    AppAuthenticator

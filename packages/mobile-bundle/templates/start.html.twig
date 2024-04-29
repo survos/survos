@@ -1,4 +1,4 @@
-{#{% extends "base.html.twig" %}#}
+{# {% extends "base.html.twig" %} #}
 {% extends "@SurvosMobile/base.html.twig" %}
 
 {% block templates %}
@@ -53,14 +53,25 @@
 
             <ons-toolbar id="home-toolbar">
                 <div {{ stimulus_target(_app_sc,'title') }} class="center">
-                    home!
-                    title {{ _self }}</div>
+                    home! title {{ _self }}</div>
 
                 {# this dropdown menu icon, click to open #}
                 <div class="left">
                     <ons-toolbar-button {{ stimulus_action(_app_sc,'openMenu', 'click') }}>
                         <ons-icon icon="md-menu"></ons-icon>
                     </ons-toolbar-button>
+                </div>
+
+                <div class="right">
+                    <ons-toolbar-button icon="md-translate"></ons-toolbar-button>
+                    <ons-select class="select">
+                        <select class="select-input">
+                            <option>en</option>
+                            <option>es</option>
+                        </select>
+                    </ons-select>
+
+
                 </div>
             </ons-toolbar>
 

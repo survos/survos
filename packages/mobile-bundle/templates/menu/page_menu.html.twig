@@ -6,19 +6,27 @@
     {{ block('list') -}}
 {% endblock %}
 
+{% block heading %}
+<ons-list-title style="margin-top: 10px">{{ item.label }}</ons-list-title>
+{% endblock %}
+
 {% block item %}
     {% set icon = item.attributes.icon|default('fa-question-mark') %}
     {% set badge = item.extras.badge|default(false) %}
     {% set route = item.name %} {#  really the pageId that's loaded #}
-    <ons-list-item
+    {% if item.attributes.style|default('') == 'header' %}
+        {{ block('heading') }}
+    {% else %}
+        <ons-list-item
             {{ stimulus_action('app', 'loadPage', 'click', {
                 route: route,
                 extras: item.extras
             }) }}
     >
+        {% endif %}
         {% if icon %}
         <div class="left">
-            <ons-icon icon="md-github" class="list-item__icon"></ons-icon>
+            <ons-icon icon="{{ icon }}" class="list-item__icon"></ons-icon>
         </div>
         {% endif %}
 

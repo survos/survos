@@ -53,7 +53,7 @@
 
             <ons-toolbar id="home-toolbar">
                 <div {{ stimulus_target(_app_sc,'title') }} class="center">
-                    home! title {{ _self }}</div>
+                    home! title</div>
 
                 {# this dropdown menu icon, click to open #}
                 <div class="left">
@@ -66,8 +66,20 @@
                     <ons-toolbar-button icon="md-translate"></ons-toolbar-button>
                     <ons-select class="select">
                         <select class="select-input">
-                            <option>en</option>
-                            <option>es</option>
+                            {% for lang in app.enabled_locales %}
+                                <option value="{{ lang }}">{{ lang|language_name(lang) }}</option>
+{#                                {% set pathWithLocale = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({_locale: lang})) %}#}
+{#                                {% set currentClass = app.request.locale == lang ? 'border-3' : 'border-0'  %}#}
+{#                                {% set height = app.request.locale == lang ? 20 : 14 %}#}
+{#                                {% set pathWithLocale = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({_locale: lang})) %}#}
+{#                                <a href="{{ pathWithLocale }}" class="border {{ currentClass }}">#}
+{#                                    <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle {{ currentClass }}"#}
+{#                                            aria-haspopup="true" aria-expanded="false">#}
+
+{#                                        {{ lang }}#}
+{#                                    </button>#}
+{#                                </a>#}
+                            {% endfor %}
                         </select>
                     </ons-select>
 

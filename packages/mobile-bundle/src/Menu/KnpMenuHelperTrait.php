@@ -47,13 +47,13 @@ trait KnpMenuHelperTrait
         return $subMenu;
     }
 
-    public function addHeading(ItemInterface $menu, string $label, string $icon = null): void
+    public function addHeading(ItemInterface $menu, string $label, string $icon = null, string $id=null): void
     {
         $item = $this->addMenuItem($menu, [
             'label' => $label,
             'style' => 'header',
             'icon' => $icon,
-            'id' => (new AsciiSlugger())->slug($label)->toString()
+            'id' => $id ?? (new AsciiSlugger())->slug($label)->toString()
         ]);
 
     }
@@ -237,6 +237,7 @@ trait KnpMenuHelperTrait
         if ($style = $options['style']) {
             $child->setAttribute('style', $style);
         }
+
 
         return $child;
     }

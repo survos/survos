@@ -10,7 +10,13 @@
 {#    {{ dump(item) }}#}
     {% set icon = item.attributes.icon|default('fa-question-mark') %}
     {% set badge = item.extras.badge|default(false) %}
-<ons-tab page="{{ item.name }}" label="{{ item.label }}"
+    {% set label = item.label %}
+    {% set domain = item.extras.translation_domain|default(false) %}
+    {% if domain %}
+    {% set label = label|trans({}, domain ) %}
+    {% endif %}
+
+<ons-tab page="{{ item.name }}" label="{{ label|title }}"
         {{ stimulus_target('app','tab') }}
          {% if icon %}icon="{{ icon }}"{% endif %}
          {% if badge %}badge="{{ badge.value }}"{% endif %}
@@ -18,6 +24,11 @@
         {# active-icon #}
 >
 </ons-tab>
+{% endblock %}
+
+{% block label %}
+{#    {{ dump(item) }}#}
+{{ item.label  }}
 {% endblock %}
 
 {% block list %}

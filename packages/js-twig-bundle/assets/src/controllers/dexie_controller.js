@@ -144,6 +144,7 @@ export default class extends Controller {
         console.info("db is now open? Is it a promise");
         this.db = db;
         window.db = db;
+        console.info("dispatched successfully");
         document.dispatchEvent(new CustomEvent('window.db.availble', {'detail': {dbName: db.name}}));
 
         // populate the tables after the db is open
@@ -189,33 +190,33 @@ export default class extends Controller {
     }
 
     async populateEmptyTables(db, stores) {
-        stores.forEach(async (store) => {
+        for (const store of stores) {
             console.warn(store);
-            // let t = this.db.table(store.name);
             let t = window.db.table(store.name);
-            t.count(async (c) => {
-                if (c > 0) {
-                    console.warn("%s already has %d", t.name, c);
-                    return;
+            try {
+                const count = await new Promise((resolve, reject) => {
+                    t.count(count => resolve(count)).catch(reject);
+                });
+    
+                if (count > 0) {
+                    console.warn("%s already has %d", t.name, count);
+                    continue; // Move to the next store
                 }
+    
                 console.warn("%s has no data, loading...", t.name);
                 const data = await loadData(store.url);
                 console.error(data);
-                // let withId = await data.map( (x, id) => {
-                //     x.id = id+1;
-                //     x.owned = id < 3;
-                //     return x;
-                // });
-                // console.error(data, withId);
-
-                await t
-                    .bulkPut(data)
+    
+                await t.bulkPut(data)
                     .then((x) => console.log("bulk add", x))
                     .catch((e) => console.error(e));
+                
                 console.warn("Done populating.", data[1]);
-                window.location.reload();
-            });
-        });
+            } catch (error) {
+                console.error("Error populating table", t.name, error);
+            }
+        }
+        window.location.reload(); // Reload after populating all tables
     }
 
     // because this can be loaded by Turbo or Onsen

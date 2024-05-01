@@ -190,6 +190,7 @@ export default class extends Controller {
     }
 
     async populateEmptyTables(db, stores) {
+        let shouldReload = false;
         for (const store of stores) {
             console.warn(store);
             let t = window.db.table(store.name);
@@ -202,21 +203,20 @@ export default class extends Controller {
                     console.warn("%s already has %d", t.name, count);
                     continue; // Move to the next store
                 }
-    
+                shouldReload = true;
                 console.warn("%s has no data, loading...", t.name);
-                const data = await loadData(store.url);
-                console.error(data);
-    
-                await t.bulkPut(data)
-                    .then((x) => console.log("bulk add", x))
-                    .catch((e) => console.error(e));
                 
-                console.warn("Done populating.", data[1]);
+                // Fetch and bulk put data for each page
+                await loadData(store.url,store.name);
+                
+                console.warn("Done populating.");
             } catch (error) {
                 console.error("Error populating table", t.name, error);
             }
         }
-        window.location.reload(); // Reload after populating all tables
+        if (shouldReload) {
+            window.location.reload(); // Reload after populating all tables
+        }
     }
 
     // because this can be loaded by Turbo or Onsen
@@ -333,26 +333,24 @@ export default class extends Controller {
     }
 }
 
-async function loadData(url) {
-    let allData = [];
+async function loadData(url, tableName) {
+    let nextPageUrl = url;
 
-    while (url) {
-        console.log("fetching " + url);
-        const response = await fetch(url);
+    while (nextPageUrl) {
+        console.log("fetching " + nextPageUrl);
+        const response = await fetch(nextPageUrl);
         const data = await response.json();
         console.log(data);
-        allData = allData.concat(data["hydra:member"]);
-        // return allData;
-        console.error(data);
+        
+        // Bulk put data for this page
+        const t = window.db.table(tableName); 
+        await t.bulkPut(data["hydra:member"])
+            .then((x) => console.log("bulk add", x))
+            .catch((e) => console.error(e));
 
+        console.warn("Done populating.", data["hydra:member"][1]);
+        
         // Check if there's a next page
-        if (data["hydra:view"]["hydra:next"]) {
-            url = data["hydra:view"]["hydra:next"];
-        } else {
-            url = null; // No next page, exit loop
-        }
+        nextPageUrl = data["hydra:view"] && data["hydra:view"]["hydra:next"] ? data["hydra:view"]["hydra:next"] : null;
     }
-    console.log(allData);
-
-    return allData;
 }

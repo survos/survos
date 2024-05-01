@@ -14,7 +14,9 @@ export default class extends Controller {
         'tabbar',
         'tab',
         'twigTemplate',
-        'message', 'menu', 'navigator']
+        'message',
+        'menu',
+        'navigator']
 
     // ...
 

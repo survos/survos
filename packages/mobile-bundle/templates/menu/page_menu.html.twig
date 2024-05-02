@@ -17,11 +17,17 @@
     {% if item.attributes.style|default('') == 'header' %}
         {{ block('heading') }}
     {% else %}
+            {% if item.linkAttributes.target|default('') == '_blank' %}
+                <a target="_blank" href="{{ item.uri }}">
+                    {{ block('label') }}
+                </a>
+                {% else %}
         <ons-list-item
             {{ stimulus_action('app', 'loadPage', 'click', {
                 route: route,
                 extras: item.extras
             }) }}
+        {% endif %}
     >
         {% endif %}
         {% if icon %}

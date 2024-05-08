@@ -56,8 +56,8 @@ export default class extends Controller {
         // https://stackoverflow.com/questions/26851516/how-to-open-page-with-ons-tabbar-and-display-specific-tab
         ['init', 'show', 'hide','precache'].forEach( eventName =>
             document.addEventListener(eventName, (e) => {
-                console.error('%s:%s / %o', e.type, e.target.getAttribute('id'), e.target);
-                console.info('%s received for %s %o', e.type, e.target.getAttribute('id'), e.target);
+                // console.error('%s:%s / %o', e.type, e.target.getAttribute('id'), e.target);
+                // console.info('%s received for %s %o', e.type, e.target.getAttribute('id'), e.target);
                 let tabItem = e.detail.tabItem;
                 if (tabItem) {
                     let tabPageName = tabItem.getAttribute('page');

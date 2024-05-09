@@ -27,7 +27,7 @@ export default class extends Controller {
 
     eventPostDispatch(e) {
         // idea: dispatch a "{page}:{eventName}" and let the stimulus controller listen for it.
-        let navigator = e.navigator;
+        // let navigator = e.navigator;
         let enterPageName = e.enterPage.getAttribute('id');
         let leavePageName = '~';
         if (e.leavePage) {
@@ -43,7 +43,11 @@ export default class extends Controller {
         console.info("%s %s => %s", e.type, leavePageName, enterPageName);
         let eventType = enterPageName + '.' + e.type;
         console.log('dispatching ' + eventType);
-        document.dispatchEvent(new Event(eventType));
+        if (e.type === 'postpush') {
+            document.dispatchEvent(new CustomEvent(eventType, {detail: e.enterPage.data}));
+        }
+
+
     }
 
     connect() {

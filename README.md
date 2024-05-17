@@ -141,3 +141,6 @@ EOF
 
 SYMFONY_DEPRECATIONS_HELPER='disabled=1' vendor/bin/phpunit
 
+## Worth Reading
+
+* https://matemarschalko.medium.com/28-javascript-one-liners-every-senior-developer-needs-to-know-e74bdedc3b3b

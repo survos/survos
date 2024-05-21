@@ -31,7 +31,7 @@ class GoogleApiClientService
     {
         $client = new Google_Client();
         $client->setApplicationName($this->applicationName);
-        $client->setAuthConfig($this->clientSecret);
+        $client->setAuthConfig(json_validate($this->clientSecret) ? json_decode($this->clientSecret, true) : $this->clientSecret);
         $client->setAccessType($type);
         return $client;
     }

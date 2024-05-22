@@ -36,7 +36,7 @@ class GoogleSheetsApiCommand extends Command
         $function = $input->getOption('function');
         $id = $input->getOption('id');
         $sheetTitle = $input->getOption('title');
-        $data = json_decode($input->getOption('data'));
+        $data = json_decode((string) $input->getOption('data'));
         $header = $input->getOption('header');
 
         $clientService = $this->clientService;

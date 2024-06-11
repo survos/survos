@@ -8,5 +8,6 @@ interface FlickrUserInterface
 {
     public function getFlickrKey(): ?string;
     public function getFlickrSecret(): ?string;
+    public function getFlickrUserId(): ?string;
 }
 

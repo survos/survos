@@ -9,6 +9,7 @@ use JetBrains\PhpStorm\NoReturn;
 use \PDO;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\CacheItem;
+use function Symfony\Component\String\u;
 
 /*
  *
@@ -35,7 +36,9 @@ class StorageBox
      */
     #[NoReturn] function __construct(private string                    $filename,
                                      private array                     $tablesToCreate = [],
+                                     private array $regexRules=[],
                                      private ?string                   $currentTable = null,
+                                     private ?int $version=1,
                                      private string $valueType='json', // eventually jsonb
                                      private readonly ?LoggerInterface $logger=null,
     )
@@ -63,16 +66,38 @@ class StorageBox
         $this->tables = $sth->fetchAll(PDO::FETCH_COLUMN); // load the existing tables
 
         foreach ($this->tablesToCreate as $table=>$indexes) {
+//            dd($indexes, array_is_list($indexes));
+//            dd($this->tablesToCreate, array_is_list($this->tablesToCreate));
             if (!in_array($table, $this->tables)) {
                 $this->createTable($table, $indexes, $this->valueType);
                 $this->tables[] = $table;
             }
         }
-        // defaults to first table
-        $this->currentTable = current($this->tablesToCreate)??current($this->tables);
+//        dd($this->tablesToCreate, $this->tables, current($this->tablesToCreate));
+        // defaults to first table?
+//        $this->currentTable = current($this->tablesToCreate)??current($this->tables);
 //        $this->commit();
 //        $this->beginTransaction();
         assert(!$this->db->inTransaction());
+    }
+
+    // given the HEADER array, map the key names, for array_combine or csv getRecords
+    public function mapHeader(array $header, string $tableName=null): array
+    {
+        $tableName = $tableName ?? $this->currentTable;
+        // $fieldName is the attribute (json) or column name (csv)
+        $newHeaders = [];
+        foreach ($header as $fieldName) {
+            $newFieldName = $fieldName;
+            foreach ($this->regexRules[$tableName]??[] as $regex=>$value) {
+                if (preg_match($regex, $fieldName, $mm)) {
+                    $newFieldName = $value; // @todo: apply a function or rule
+                    break; // match first rule only
+                }
+            }
+            $newHeaders[] = u($newFieldName)->snake()->toString();
+        }
+        return $newHeaders;
     }
 
     public function select(string $tableName): self
@@ -81,6 +106,19 @@ class StorageBox
         $this->currentTable = $tableName;
         return $this;
 
+    }
+
+    /**
+     * @param array $regexRules sequence of rules to rename columns
+     * @param array $tables select which columns to apply this to.
+     * @return void
+     */
+    public function map(array $tableRegexRules, array $tables=['__all'])
+    {
+        // __all is special key for all tables
+        foreach ($tables as $table) {
+            $this->regexRules[$table] = $tableRegexRules;
+        }
     }
 
     public function inspectSchema(string $filename=null)
@@ -104,22 +142,33 @@ class StorageBox
                     $tables[$table->getName()]['columns'][] = $column->getName();
                 }
             }
-
-            dd($fromSchema, $tables);
+//            dd($fromSchema, $tables);
         } catch (\Exception $exception) {
             dd($exception, $filename);
         }
     }
 
 
-    public function createTable(string $tableName, string $indexes, string $valueType, string $primaryKeyType='int'): void
+    private function createTable(string $tableName, string|array $indexes, string $valueType, string $primaryKeyType='int'): void
     {
+        if (is_string($indexes)) {
+            $indexes = explode(',', $indexes);
+        }
+
+        // more json examples at https://www.sqlitetutorial.net/sqlite-json/
+        $indexSql = [];
         // @todo: improve PK: https://www.sqlitetutorial.net/sqlite-primary-key/
+        // a generated column can't be the primary key, but interesting: https://sqlite.org/forum/info/5928225848d0409f
         $primaryKey = 'key TEXT PRIMARY KEY';
         $columns = [
             'value TEXT NOT NULL',
         ];
-        foreach (explode(',', $indexes) as $index) {
+        foreach ($indexes as $indexId=>$index) {
+            if (is_array($index)) {
+                // parse type and maybe regex rule
+                continue;
+
+            }
             if (str_contains($index, '|')) {
                 [$index, $type] = explode('|', $index);
             } else {
@@ -131,14 +180,24 @@ class StorageBox
                 $index = substr($index, 2);
                 $primaryKey = "$index $type PRIMARY KEY";
             } else {
-//                https://www.sqlite.org/gencol.html 
-                $columns[] = "$index $type";
+                // create a generated column so that it all happens internally
+                // json_extract('{"a":"xyz"}', '$.a') → 'xyz'
+//                https://www.sqlite.org/gencol.html
+
+                // d INT GENERATED ALWAYS AS (a*abs(b)) VIRTUAL,
+                $columns[] = "$index $type  GENERATED ALWAYS AS (json_extract(value, '\$.$index')) STORED";
+                $indexSql[] = "create index {$tableName}_{$index} on $tableName($index)";
             }
         }
         array_unshift($columns, $primaryKey);
-        $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", $tableName, join(",\n", $columns));
-        dd($sql);
-        $sth = $this->query($sql);
+        $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s); %s", $tableName,
+            join(",\n", $columns),
+            join(";\n", $indexSql));
+//        dd($sql);
+        $result = $this->db->exec($sql);
+//        dd($sql, $result);
+//        dd($sql);
+        $this->inspectSchema();
     }
 
     private function log($msg)
@@ -243,7 +302,17 @@ class StorageBox
      * @param string $key The key to store the value under.
      * @return    string    The value to store.
      */
-    public function get(string $key, string $table = null, callable $fn = null): string|object|array|null
+    public function get(string $key, string $table = null): string|object|array|null
+    {
+        $results = $this->query(
+            sprintf("SELECT * FROM %s WHERE key = :key;", $table??$this->currentTable),
+            ["key" => $key]
+        )->fetchObject();
+        dd($results);
+        return json_decode($results, true);
+    }
+
+    public function getValue(string $key, string $table = null, callable $fn = null): string|object|array|null
     {
         if (!$this->has($key)) {
             if ($fn) {
@@ -259,6 +328,7 @@ class StorageBox
         )->fetchColumn();
         return json_decode($results, true);
     }
+
     public function getValueObject(string $key, string $table = null, callable $fn = null): ?object
     {
         return json_decode($this->get($key, $table), true);
@@ -320,11 +390,18 @@ class StorageBox
         $this->query("DELETE FROM $this->currentTable;");
     }
 
-    public function iterate(string $table = null,  ?bool $associative = null, int $depth = 512, int $flags = 0): \Generator
+    public function iterate(string $table = null,
+                            ?bool $associative = null, int $depth = 512,
+                            int $flags = PDO::FETCH_ASSOC,
+    int $max =0
+    ): \Generator
     {
+        $sql = "select * from " . ($table??$this->currentTable);
+        if ($max>0) {
+            $sql .= " limit " . $max;
+        }
         // https://stackoverflow.com/questions/78623214/using-a-generator-to-loop-through-an-update-a-table-in-pdo
-        $sth = $this->query("select key, value from " . ($table??$this->currentTable));
-//        return $sth->execute();
+        $sth = $this->query($sql);
         $all = $sth->fetchAll($flags);
 
         foreach ($all as $idx => $row)
@@ -333,7 +410,10 @@ class StorageBox
         {
             $value = $row['value'];
 //            dump($value);
-            $value = json_decode($value, $associative, $depth, $flags);;
+            $value = json_decode($value, $associative, $depth, $flags);
+            // now merge with the keys
+            unset($row['value']);
+            $value = array_merge((array)$value, $row);
 //            dd($value);
             // check, or is the value always json?
             yield $row['key'] => $value;
@@ -365,6 +445,34 @@ class StorageBox
     {
         $sth = $this->query("SELECT * FROM sqlite_master WHERE name='$table' type='table';");
         return count($sth->fetchAll(PDO::FETCH_COLUMN)) > 0;
+    }
+
+    public function getCounts(string $column, string $table = null): array
+    {
+        $tablename = $table??$this->currentTable;
+        $sql = "SELECT COUNT(rowid), $column
+FROM $tablename
+GROUP BY $column
+ORDER BY COUNT(rowid) DESC;";
+
+        $sth = $this->query($sql);
+        return $sth->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getIndexes(string $table = null): array
+    {
+        $sth = $this->db->query($sql = "SELECT * FROM sqlite_master where type='index'");
+        $indexes = [];
+        foreach ($sth->fetchAll(PDO::FETCH_ASSOC) as $item) {
+            // auto-inc has no sql
+            $itemTableName = $item['tbl_name'];
+            if ($item['sql'] && ($itemTableName===$table)) {
+                $indexes[] = str_replace($itemTableName . '_', '', $item['name']);
+            }
+
+        };
+        return $indexes;
+
     }
 
     public function commit()

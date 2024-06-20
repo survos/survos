@@ -2,34 +2,47 @@
 
 A Symfony bundle that leverages Sqlite to create an indexed no-sql datastore.
 
-Insprired by https://gist.github.com/sbrl/c3bfbbbb3d1419332e9ece1bac8bb71c and https://dexie.org/
+Inspired by https://gist.github.com/sbrl/c3bfbbbb3d1419332e9ece1bac8bb71c and https://dexie.org/ and the Symfony PDO Cache component.
 
 At its core, the idea is to store strings or unstructured data accessibile by a key or a filter.
 
-Initially, it was just a string lookup, which could be a JSON string.
+Initially, it was just a string lookup, which could be a JSON string, for example looking up a wikidata object by its QID, or a movie from a csv file by its imdb_id.
 
 You can customize the import process by adding a .conf file with directives that facilitate renaming fields and munging data.  You can also listen for events during the import and export process.
 
-Pixy can (will, eventually) using json schema files to defining the fields. https://json-schema.org/ using LiFormBundle
+Pixy can (will, eventually) use json schema files to defining the fields. https://json-schema.org/ using LiFormBundle
 
 The indexes can be defined via the command line, a listener, or a .conf file.  There's a succinct format that is a comma-separated string, and a detailed format with is a hash with the index details as keys.
 
+There is (will be) an API endpoint if api-platform is installed.
 
+Integration with survos/translation-bundle
 
+## Examples
+
+```bash
+wget https://dummyjson.com/products products.json
+```
 ```php
-$id = 'tt123';
-$kv = $keyValueService->getStorageBox('app.db', [
-    'movies' => 'imdb_id' // first key is text primary key by default
-]);
-$data = ['title' => 'sequence', 'imdb_id' => $id, 'category' => 'animated', 'year' => 2021];
+// inject the service
 
-$kv->select('movies'); // so that we don't have to pass it each time.
+$id = 'tt123';
+$kv = $keyValueService->getStorageBox('dummy.pixy', [
+    'products' => 'sku,brand,category' // first key is text primary key by default
+]);
+
+$kv->select('products'); // so that we don't have to pass it each time.
+
 $kv->set($data); // because they key is in the data.
 assert($kv->get($id));
 assert($kv->has($id));
 assert(json_decode($kv->get($id)) == $data);
 //
 ```
+
+The conf file simplifies some of the php calls, but isn't 100% necessary
+
+
 
 Suppose we want to filter by category.  First, we need to add an index, dexie-style, to the table.
 

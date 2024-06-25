@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Survos\KeyValueBundle\DataCollector;
 
+use Psr\Log\LoggerInterface;
 use Survos\KeyValueBundle\Debug\TraceableStorageBox;
 use Survos\KeyValueBundle\Service\KeyValueService;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
@@ -17,7 +18,7 @@ final class KeyValueDataCollector extends AbstractDataCollector
 {
 
     public function __construct(
-        private KeyValueService $keyValueService
+        private KeyValueService $keyValueService,
     )
     {
     }
@@ -26,15 +27,17 @@ final class KeyValueDataCollector extends AbstractDataCollector
         $data = $this->keyValueService->getData();
 
         $this->data[$this->getName()] = !empty($data) ? $this->cloneVar($data) : null;
+//        dd($this->data);
     }
 
     public function getName(): string
     {
-        return 'pixy';
+        return self::class;
     }
 
+
     /** @internal used in the DataCollector view template */
-    public function getPixy(): mixed
+    public function getCollectedData(): mixed
     {
         $data = $this->data[$this->getName()] ?? null;
         return $data;

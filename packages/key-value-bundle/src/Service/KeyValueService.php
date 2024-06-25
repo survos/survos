@@ -14,14 +14,37 @@ class KeyValueService
 {
     // cache, indexed by filename
     private array $storageBoxes = [];
+    private array $data=[
+        'x' => 'y',
+        'dummy' => 'value'];
+
     public function __construct(
         private bool $isDebug,
-        private array $data=[], // used for debug profile
         private ?LoggerInterface $logger=null,
         private ?Stopwatch $stopwatch=null,
     )
     {
+        $this->innerSearchService(self::class, ['isDebug' => $this->isDebug]);
     }
+
+    private function innerSearchService(string $function, array $args): mixed
+    {
+        $this->stopwatch->start($function);
+
+        $result = 'dummy-result'; //  $this->searchService->{$function}(...$args);
+
+        $event = $this->stopwatch->stop($function);
+
+        $this->data[$function] = [
+            '_params' => $args,
+            '_results' => $result,
+            '_duration' => $event->getDuration(),
+            '_memory' => $event->getMemory(),
+        ];
+
+        return $result;
+    }
+
 
     function getStorageBox(string $filename, array $tables=[]): StorageBox
     {
@@ -48,11 +71,13 @@ class KeyValueService
     /** @internal used in the DataCollector class */
     public function getData(): array
     {
-        $data = [];
+        return $this->data;
         foreach ($this->storageBoxes as $filename => $storageBox) {
-            $data[$filename] = $storageBox->getData();
+            $this->data[$filename] = $storageBox->getData();
         }
-        return $data;
+        return $this->data;
     }
+
+
 
 }

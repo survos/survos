@@ -39,6 +39,7 @@ class SurvosKeyValueBundle extends AbstractBundle
 
         $builder->autowire(KeyValueDataCollector::class)
             ->setArgument('$keyValueService', new Reference(KeyValueService::class))
+//            ->setArgument('$logger', new Reference('logger'))
             ->addTag('data_collector', [
                 'template' => '@SurvosKeyValue/DataCollector/pixy_debug_profile.html.twig'
             ]);

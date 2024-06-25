@@ -12,8 +12,11 @@ use Symfony\Component\Stopwatch\Stopwatch;
 
 class KeyValueService
 {
+    // cache, indexed by filename
+    private array $storageBoxes = [];
     public function __construct(
         private bool $isDebug,
+        private array $data=[], // used for debug profile
         private ?LoggerInterface $logger=null,
         private ?Stopwatch $stopwatch=null,
     )
@@ -22,8 +25,12 @@ class KeyValueService
 
     function getStorageBox(string $filename, array $tables=[]): StorageBox
     {
-        $class = $this->isDebug ? TraceableStorageBox::class : StorageBox::class;
-        return new $class($filename, $tables, logger: $this->logger, stopwatch: $this->stopwatch);
+        if (!$kv = $this->storageBoxes[$filename]??false) {
+            $class = $this->isDebug ? TraceableStorageBox::class : StorageBox::class;
+            $kv =  new $class($filename, $tables, logger: $this->logger, stopwatch: $this->stopwatch);
+            $this->storageBoxes[$filename] = $kv;
+        }
+        return $kv;
     }
 
     function getStringBox(string $filename, array $tables=[]): StorageBox
@@ -37,4 +44,15 @@ class KeyValueService
             unlink($filename);
         }
     }
+
+    /** @internal used in the DataCollector class */
+    public function getData(): array
+    {
+        $data = [];
+        foreach ($this->storageBoxes as $filename => $storageBox) {
+            $data[$filename] = $storageBox->getData();
+        }
+        return $data;
+    }
+
 }

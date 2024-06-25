@@ -1,29 +1,30 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% block toolbar %}
-    {% set _data = collector.meilisearch %}
+    {% set text = 'xxx' %}
+    {% set _data = collector.pixy %}
     {% if _data is not null %}
         {% set icon %}
-            {{ include('@Meilisearch/DataCollector/meilisearch.svg') }}
-            <span class="sf-toolbar-value">Meilisearch</span>
+            {{ include('@SurvosKeyValue/DataCollector/pixy.svg') }}
+            <span class="sf-toolbar-value">Pixy</span>
         {% endset %}
-        {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: 'meilisearch' }) }}
+        {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: 'pixy' }) }}
     {% endif %}
 {% endblock %}
 
 {% block menu %}
-    {% set _data = collector.meilisearch %}
+    {% set _data = collector.pixy %}
     <span class="label{{ _data is null ? ' disabled' }}">
         <span class="icon">
-            {{ include('@Meilisearch/DataCollector/meilisearch.svg') }}
+            {{ include('@SurvosKeyValue/DataCollector/pixy.svg') }}
         </span>
-        <strong>Meilisearch</strong>
+        <strong>Pixy</strong>
     </span>
 {% endblock %}
 
 {% block panel %}
-    <h2>Meilisearch</h2>
-    {% set _data = collector.meilisearch %}
+    <h2>Pixy</h2>
+    {% set _data = collector.pixy %}
     {% if _data is not null %}
         <div class="sf-tabs">
             {% for _name, _d in _data %}

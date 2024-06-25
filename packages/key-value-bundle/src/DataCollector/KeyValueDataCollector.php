@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Meilisearch\Bundle\DataCollector;
+namespace Survos\KeyValueBundle\DataCollector;
 
-use Meilisearch\Bundle\Debug\TraceableMeilisearchService;
+use Survos\KeyValueBundle\Debug\TraceableStorageBox;
+use Survos\KeyValueBundle\Service\KeyValueService;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,29 +13,30 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * @author Antoine Makdessi <amakdessi@me.com>
  */
-final class MeilisearchDataCollector extends AbstractDataCollector
+final class KeyValueDataCollector extends AbstractDataCollector
 {
-    private TraceableMeilisearchService $meilisearchService;
 
-    public function __construct(TraceableMeilisearchService $meilisearchService)
+    public function __construct(
+        private KeyValueService $keyValueService
+    )
     {
-        $this->meilisearchService = $meilisearchService;
     }
     public function collect(Request $request, Response $response, \Throwable $exception = null): void
     {
-        $data = $this->meilisearchService->getData();
+        $data = $this->keyValueService->getData();
 
         $this->data[$this->getName()] = !empty($data) ? $this->cloneVar($data) : null;
     }
 
     public function getName(): string
     {
-        return 'meilisearch';
+        return 'pixy';
     }
 
     /** @internal used in the DataCollector view template */
-    public function getMeilisearch(): mixed
+    public function getPixy(): mixed
     {
-        return $this->data[$this->getName()] ?? null;
+        $data = $this->data[$this->getName()] ?? null;
+        return $data;
     }
 }

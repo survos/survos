@@ -92,12 +92,15 @@ class ParserTest extends TestCase
 
     public static function parserTests()
     {
+        /* format:
+            code[<delimiter>?]:<type>?<settings in k=v;>
+        */
         return [
+            ['header', new Property('header')],
+            ['actors,',new Property(code: 'actors', type: Property::PROPERTY_ARRAY, settings: ['delim' => ','])],
             ['genre|', new Property(code: 'genre', type: Property::PROPERTY_ARRAY, settings: ['delim' => '|'])],
             ['languages:array?delim=|', new Property(code: 'languages', type: Property::PROPERTY_ARRAY, settings: ['delim' => '|'])],
-            ['actors,',new Property(code: 'actors', type: Property::PROPERTY_ARRAY, settings: ['delim' => ','])],
             ['label:db.label',new Property(code: 'label', type: Property::TYPE_DATABASE, subType: 'label')],
-            ['header', new Property('header')],
             ['author:rel.per', new Property('author', Property::TYPE_RELATION, 'per')],
             // we need to pass the relative properties to the schema for this to work.
 //            ['author:per', new Property('author', Property::TYPE_RELATION, 'per')],

@@ -128,8 +128,7 @@ class KeyValueTest extends KernelTestCase
     }
 
     #[Test]
-//    #[Depends('createTables')]
-    public function importData(): void
+    public function importJsonData(): void
     {
 //        $kvService = static::getContainer()->get(KeyValueService::class);
 
@@ -140,11 +139,41 @@ class KeyValueTest extends KernelTestCase
         $configFilename = __DIR__ . '/Fixtures/config/test-moma.yaml';
         $this->assertTrue(file_exists($configFilename), $configFilename);
         $configData = Yaml::parseFile($configFilename);
-
-
-
-        $testDataDir = __DIR__ . '/Fixtures/config/testdata';
+        $testDataDir = __DIR__ . '/Fixtures/testdata';
         $importService->import($configData, $momaTable, $testDataDir);
+    }
+
+    private function import(string $code): StorageBox
+    {
+        /** @var PixyImportService $importService */
+        $importService = static::getContainer()->get(PixyImportService::class);
+        $table = "$code.pixy.db";
+
+        $configFilename = __DIR__ . "/Fixtures/config/$code.yaml";
+        $this->assertTrue(file_exists($configFilename), $configFilename);
+        $configData = Yaml::parseFile($configFilename);
+        $testDataDir = __DIR__ . "/Fixtures/$code";
+        $importService->import($configData, $table, $testDataDir);
+
+        $configFilename = __DIR__ . "/Fixtures/config/$code.yaml";
+        $this->assertTrue(file_exists($configFilename), $configFilename);
+        $configData = Yaml::parseFile($configFilename);
+        $testDataDir = __DIR__ . "/Fixtures/$code";
+        $kv = $importService->import($configData, $table, $testDataDir);
+        return $kv;
+    }
+
+    #[Test]
+    public function importCsvData(): void
+    {
+        $kv = $this->import('education');
+        $kv->select('school');
+        self::assertGreaterThan(1, $kv->count());
+//        $kvService = static::getContainer()->get(KeyValueService::class);
+
+
+        # csv
+
     }
 
     public function testMigration()

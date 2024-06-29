@@ -22,7 +22,7 @@
         "survos/crawler-bundle": "*@dev",
         "survos/inspection-bundle": "*@dev",
         "survos/tree-bundle": "^1.2.0",
-        "survos/workflow-helper-bundle": "^2.0",
+        "survos/workflow-helper-bundle": "^1.5",
         "symfony/asset": "^6.0",
         "symfony/console": "^6.0",
         "symfony/dotenv": "^6.0",
@@ -83,7 +83,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "endroid/installer": true
         }
     },
     "autoload": {
@@ -138,9 +139,8 @@
     "extra": {
         "symfony": {
             "allow-contrib": true,
-            "require": "^6.1",
-            "endpoint": ["/home/tac/g/survos/survos/packages/recipes/index.json", "flex://defaults"]
-        }
+            "require": "^6.1"
+            }
     },
     "prefer-stable": true
 }

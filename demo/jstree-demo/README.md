@@ -1,3 +1,12 @@
+
+
+
+# Moved to its own repo.
+
+This uses sneat and does not have assetmapper, so is old and not working.
+
+
+
 # JS-TREE and Doctrine Tree Extension
 
 ## Example

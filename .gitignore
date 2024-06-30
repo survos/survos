@@ -24,7 +24,7 @@
 ###< squizlabs/php_codesniffer ###
 
 ###> phpstan/phpstan ###
-phpstan.neon
+## phpstan.neon
 ###< phpstan/phpstan ###
 
 .docker

@@ -30,6 +30,7 @@ jobs:
 
           - {local_path: 'api-grid-bundle', split_repository: 'SurvosApiGridBundle'}
           - {local_path: 'auth-bundle', split_repository: 'SurvosAuthBundle'}
+#          - {local_path: 'album-bundle', split_repository: 'SurvosAlbumBundle'}
           - {local_path: 'barcode-bundle', split_repository: 'BarcodeBundle'}
           - {local_path: 'bootstrap-bundle', split_repository: 'BootstrapBundle'}
           - {local_path: 'command-bundle', split_repository: 'SurvosCommandBundle'}
@@ -51,7 +52,7 @@ jobs:
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
           - {local_path: 'pwa-extra-bundle', split_repository: 'SurvosPwaExtraBundle'}
           - {local_path: 'sitemap-parser-bundle', split_repository: 'SurvosSitemapParserBundle'}
-          - {local_path: 'key-value-bundle', split_repository: 'SurvosKeyValueBundle'}
+          - {local_path: 'pixie-bundle', split_repository: 'SurvosPixieBundle'}
           - {local_path: 'js-twig-bundle', split_repository: 'JsTwigBundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'mobile-bundle', split_repository: 'SurvosMobileBundle'}

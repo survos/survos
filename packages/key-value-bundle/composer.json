@@ -18,7 +18,8 @@
         "symfony/yaml": "^6.4|7.1",
         "doctrine/dbal": "^3.0|^4.0",
         "symfony/property-access": "^7.1",
-        "halaxa/json-machine": "^1.1"
+        "halaxa/json-machine": "^1.1",
+        "league/csv": "^9.16"
     },
     "autoload": {
         "psr-4": {

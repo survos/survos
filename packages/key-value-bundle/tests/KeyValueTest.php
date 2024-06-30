@@ -153,12 +153,6 @@ class KeyValueTest extends KernelTestCase
         $this->assertTrue(file_exists($configFilename), $configFilename);
         $configData = Yaml::parseFile($configFilename);
         $testDataDir = __DIR__ . "/Fixtures/$code";
-        $importService->import($configData, $table, $testDataDir);
-
-        $configFilename = __DIR__ . "/Fixtures/config/$code.yaml";
-        $this->assertTrue(file_exists($configFilename), $configFilename);
-        $configData = Yaml::parseFile($configFilename);
-        $testDataDir = __DIR__ . "/Fixtures/$code";
         $kv = $importService->import($configData, $table, $testDataDir);
         return $kv;
     }
@@ -185,9 +179,8 @@ class KeyValueTest extends KernelTestCase
 
     }
 
-        public function tearDown(): void
+    public function tearDown(): void
     {
-
         parent::tearDown();
     }
 

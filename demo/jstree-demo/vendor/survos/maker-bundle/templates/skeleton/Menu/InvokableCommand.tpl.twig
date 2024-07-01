@@ -1,0 +1,29 @@
+<?= "<?php\n" ?>
+
+namespace <?= $namespace ?>;
+
+<?= $use_statements; ?>
+
+#[AsCommand('<?= $commandName ?>', '<?= $commandDescription ?>')]
+final class <?= $class_name ?> extends InvokableServiceCommand<?= "\n" ?>
+{
+use ConfigureWithAttributes, RunsCommands, RunsProcesses;
+
+public function __invoke(
+IO $io,
+<?php foreach ($args as $argName=>$arg) { ?>
+#[Argument(description: '<?= $arg['description'] ?>')]
+<?= $arg['phpType'] ?> $<?= $argName ?><?= $arg['default'] ? sprintf(" = %s", $arg['default']) : '' ?>,
+<?php } ?>
+
+<?php foreach ($options as $optionName=>$option) { ?>
+#[Option(description:'<?= $option['description'] ?>'<?= $option['shortCut'] ? sprintf(", shortcut:'%s'", $option['shortCut']) : '' ?>)]
+<?= $option['phpType'] ?> $<?= $optionName ?><?= $option['default'] ? sprintf(" = %s", $option['default']) : '' ?>,
+<?php } ?>
+
+): void {
+
+$io->success('<?= $commandName ?> success.');
+}
+
+}

@@ -46,20 +46,6 @@ class SurvosMobileBundle extends AbstractBundle implements CompilerPassInterface
                 new Reference('security.helper', ContainerInterface::NULL_ON_INVALID_REFERENCE)
             );
 
-
-        // $builder->setParameter('survos_workflow.direction', $config['direction']);
-
-        // twig classes
-
-        /*
-        $definition = $builder
-        ->autowire('survos.barcode_twig', BarcodeTwigExtension::class)
-        ->addTag('twig.extension');
-
-        $definition->setArgument('$widthFactor', $config['widthFactor']);
-        $definition->setArgument('$height', $config['height']);
-        $definition->setArgument('$foregroundColor', $config['foregroundColor']);
-        */
     }
 
     public function process(ContainerBuilder $container): void

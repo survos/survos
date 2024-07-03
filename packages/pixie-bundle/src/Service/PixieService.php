@@ -65,7 +65,7 @@ class PixieService
     function getStorageBox(string $filename, array $tables=[],
                            bool $destroy=false,
                            bool $createFromConfig=false,
-    ?Config $config = null,
+                            ?Config $config = null,
     ): StorageBox
     {
         if ($createFromConfig) {
@@ -74,6 +74,7 @@ class PixieService
                 // filename? Or code???  ugh,
 //                $config = $this->getConfig($filename)
             }
+            // the array! someday the model.
             $tables = $config->getTables();
 //            foreach ($config->getTables() as $tableName => $table) {
 //                dd($tableName, $table);
@@ -124,13 +125,17 @@ class PixieService
     {
         $finder = new Finder();
         $configs  = [];
+        // this is only the configs in the configDir.
         foreach ($finder->files()->name('*.yaml')->in($this->getConfigDir()) as $file) {
             // we can optimize later...
-            $config = new Config($file->getRealPath());
             $code = $file->getFilenameWithoutExtension();
+            $config = $this->getConfig($code);
+
             $resolvedDataPath = $this->resolveFilename($config->getSourceFilesDir(), 'data');
             $config->dataDir = $resolvedDataPath;
-            $config->pixieFilename = $this->getPixieFilename($code);
+//            dd($config);
+            // hacky!  configs can belong to more than one filename
+//            $config->setPixieFilename($this->getPixieFilename($code));
             $configs[$code] = $config;
         }
         return $configs;

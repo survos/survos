@@ -7,13 +7,22 @@ use Symfony\Component\Yaml\Yaml;
 class Config
 {
     public function __construct(
-        private readonly string $filename,
+        private ?string $version=null,
+        private ?Source $source=null,
+        private array $files=[],
+        /**
+         * @var array<string,Table>
+         */
+        private array $tables=[],
+        private readonly ?string $filename=null, // the config filename!
         private array           $data=[],
         public ?string $dataDir = null, // set in service, kinda hacky
-        public ?string $pixieFilename = null // set in service, kinda hacky
+        public ?string $pixieFilename = null // set in service, kinda hacky, the sqlite file
     )
     {
-        $this->data = Yaml::parseFile($this->filename);
+        if ($this->filename) {
+            $this->data = Yaml::parseFile($this->filename);
+        }
     }
 
     public function getFilename(): string
@@ -50,6 +59,10 @@ class Config
     public function getTableRules($tableName): array
     {
         return $this->data['tables'][$tableName]['rules']??[];
+    }
+    public function getProperties($tableName): array
+    {
+        return $this->data['tables'][$tableName]['properties']??[];
     }
 
     public function getVersion(): ?string

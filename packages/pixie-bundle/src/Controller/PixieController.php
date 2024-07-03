@@ -3,6 +3,7 @@
 namespace Survos\PixieBundle\Controller;
 
 use League\Csv\Reader;
+use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieImportService;
 use Symfony\Bridge\Twig\Attribute\Template;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
@@ -257,6 +259,7 @@ class PixieController extends AbstractController
     #[Route('/import/{pixieCode}', name: 'pixie_import')]
     public function import(PixieService             $pixieService,
                            PixieImportService       $pixieImportService,
+                           DenormalizerInterface $denormalizer,
                            string                   $pixieCode,
                            #[MapQueryParameter] int $limit = 0,
     ): Response
@@ -264,7 +267,23 @@ class PixieController extends AbstractController
         // get the conf file from the configured directories (from the bundle)
 
 //        $config = $pixieService->getConfigFilename($pixieCode);
+        $configFilename = $pixieService->getConfigFilename($pixieCode);
+        $configData = file_get_contents($configFilename);
+        $configData = Yaml::parseFile($configFilename);
         // cache wget "https://github.com/MuseumofModernArt/collection/raw/main/Artists.csv"   ?
+//        dd($configData);
+        $x = $denormalizer->denormalize($configData, Config::class);
+        dd($x, $configData);
+
+        $config = $this->pixieService->getConfig($pixieCode);
+        $pixie = $pixieService->getStorageBox(
+            $pixieService->getPixieFilename($pixieCode),
+            destroy: true,
+            createFromConfig: true,
+            config:$config
+        );
+        dd($config, $pixie->getTables());
+
         $pixieImportService->import($pixieCode, limit: $limit);
         return $this->redirectToRoute('pixie_homepage', [
             'pixieCode' => $pixieCode

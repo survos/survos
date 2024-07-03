@@ -27,6 +27,10 @@ tables:
       #            /^Date_Acquired/: art_year
       /ConstituentID/: artist_id
     # could come from SQL or created during the import
+    properties:
+      - name: status
+        type: text
+
     virtualColumns:
       - isAlive:
           type: bool

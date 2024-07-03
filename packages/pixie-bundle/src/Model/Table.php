@@ -5,8 +5,17 @@ namespace Survos\PixieBundle\Model;
 class Table
 {
     public function __construct(
-        public string $name,
-        public array $columns,
+        public ?string $name=null,
+        // keyed by regex
+        public array $rules=[],
+        /**
+         * @var array<Column>
+         */
+        public array $columns=[],
+        /**
+         * @var array<string>
+         */
+        public array $properties=[],
         public ?string $pkName=null,
     )
     {

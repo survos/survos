@@ -314,6 +314,7 @@ class StorageBox
             }
         }
 
+        dd($tableConfig);
 //        array_unshift($columns, $primaryKey);
 //        dd($columns, $indexSql);
 

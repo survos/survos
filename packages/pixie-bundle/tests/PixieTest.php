@@ -316,6 +316,12 @@ class PixieTest extends KernelTestCase
         $importService = static::getContainer()->get(PixieImportService::class);
         $kv = $importService->import($code);
         assertCount($tableCount, $kv->getTables(), join(",", $kv->getTables()));
+    }
+
+    #[Test]
+    public function testConfig(string $code, int $tableCount): void
+    {
+//        $config = new Config()
 
     }
 

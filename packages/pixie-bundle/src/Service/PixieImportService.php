@@ -37,6 +37,9 @@ class PixieImportService
         }
         // the csv/json files
         $dirOrFilename = $this->pixieService->getSourceFilesDir($pixieCode);
+
+
+
 //        if (!file_exists($dirOrFilename)) {
 //            $dirOrFilename = $this->pixieService->getDataDir($pixieCode, $config);
 //        }

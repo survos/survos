@@ -94,6 +94,7 @@ class StorageBox
 
         $this->beginTransaction();
         foreach ($this->tablesToCreate as $table => $tableConfig) {
+            assert(is_array($tableConfig), json_encode($tableConfig));
             // until we fix the init
             assert(array_key_exists('indexes', $tableConfig), "missing indexes key!");
             // if coming in from table, needs to have a shape.
@@ -204,6 +205,7 @@ class StorageBox
             'driver' => 'pdo_sqlite',
         ];
             $conn = DriverManager::getConnection($connectionParams);
+            dump($connectionParams, $filename);
             $sm = $conn->createSchemaManager();
             $fromSchema = $sm->introspectSchema();
 

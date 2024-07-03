@@ -123,7 +123,7 @@ class PixieTest extends KernelTestCase
         dump($filename);
 
          $kv = $pixieService->getStorageBox($filename, [
-             self::MOVIE_TABLE_NAME => 'imdb_id|int,name'
+             self::MOVIE_TABLE_NAME => ['indexes' => ['imdb_id|int,name']]
          ]);
          $fn = $kv->getFilename();
          $this->assertCount(1, $kv->getTables(), "bad table count in $fn " . join("\n", $kv->getTables()))  ;

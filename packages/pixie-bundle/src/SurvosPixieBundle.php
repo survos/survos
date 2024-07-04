@@ -73,11 +73,14 @@ class SurvosPixieBundle extends AbstractBundle
 
         $x = $builder->register(PixieService::class)
             ->setAutowired(true)
+            ->setAutoconfigured(true)
             ->setArgument('$isDebug', $builder->getParameter('kernel.debug'))
             ->setArgument('$dataRoot', $config['data_root'])
             ->setArgument('$configDir', $config['config_dir'])
             ->setArgument('$dbDir', $config['db_dir'])
             ->setArgument('$stopwatch', new Reference('debug.stopwatch'))
+            ->setArgument('$serializer', new Reference('serializer'))
+//            ->setArgument('$denormalizer', new Reference('denormalizer'))
             ->setArgument('$logger', new Reference('logger'))
         ;
 

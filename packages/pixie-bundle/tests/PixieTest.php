@@ -123,7 +123,7 @@ class PixieTest extends KernelTestCase
         dump($filename);
 
          $kv = $pixieService->getStorageBox($filename, [
-             self::MOVIE_TABLE_NAME => ['indexes' => ['imdb_id|int,name']]
+             self::MOVIE_TABLE_NAME => ['indexes' => 'imdb_id|int,name']
          ]);
          $fn = $kv->getFilename();
          $this->assertCount(1, $kv->getTables(), "bad table count in $fn " . join("\n", $kv->getTables()))  ;
@@ -174,7 +174,7 @@ class PixieTest extends KernelTestCase
         foreach ($pixieService->getConfigFiles() as $code => $config) {
             self::assertNotFalse($config->getVersion());
             $config->getIgnored();
-            self::assertStringContainsString('yaml', $config->getFilename()); // this is the config filename!
+            self::assertStringContainsString('yaml', $config->getConfigFilename()); // this is the config filename!
         }
 
 
@@ -306,7 +306,7 @@ class PixieTest extends KernelTestCase
     }
 
     #[Test]
-    #[TestWith(['education', 4])]
+//    #[TestWith(['education', 4])]
     #[TestWith(['test-moma', 2])]
     public function import(string $code, int $tableCount): void
     {

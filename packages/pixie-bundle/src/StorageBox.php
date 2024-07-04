@@ -5,9 +5,12 @@ namespace Survos\PixieBundle;
 // see https://github.com/bungle/web.php/blob/master/sqlite.php for a wrapper without PDO
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Schema\Schema;
 use JetBrains\PhpStorm\NoReturn;
 use \PDO;
 use Psr\Log\LoggerInterface;
+use Survos\PixieBundle\CsvSchema\Parser;
+use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Index;
 use Survos\PixieBundle\Model\Table;
 use Symfony\Component\Cache\CacheItem;
@@ -32,7 +35,8 @@ class StorageBox
      * @var \PDO
      */
     private \PDO $db;
-    private array $tables = [];
+    private array $tables = []; // from the config
+    private array $schemaTables = []; // from the schema inspection
     private bool $inTransaction = false;
 
 //    private array $regexRules=[];
@@ -43,8 +47,9 @@ class StorageBox
      */
     #[NoReturn] function __construct(private string                    $filename,
                                      array &$data, // debug data, passed from Pixie
-                                     private array                     $tablesToCreate = [],
-                                     private array                     $regexRules = [],
+    private Config $config,
+//                                     private array                     $tablesToCreate = [],
+//                                     private array                     $regexRules = [],
                                      private ?string                   $currentTable = null,
                                      private ?int                      $version = 1,
                                      private string                    $valueType = 'json', // eventually jsonb
@@ -57,13 +62,6 @@ class StorageBox
     {
         $path = $this->filename;
 
-
-        // Enable WAL mode to fix locking issues?
-//        $this->beginTransaction();
-//        $sqlite3 = new \SQLite3($this->filename);
-//        dd($this->filename, $path);
-        // HACK: This might not work on some systems, because it depends on the current working directory
-
         // PDO creates the db if it doesn't exist, so check after
         if (!file_exists($path)) {
             $dir = pathinfo($path, PATHINFO_DIRNAME);
@@ -73,7 +71,9 @@ class StorageBox
             try {
                 $this->db = new \PDO("sqlite:" . $path);
             } catch (\PDOException $e) {
-                dd($path, $e->getMessage());
+                throw new \LogicException("Invalid database connection: " . $path . "\n\n" . $e->getMessage());
+//                dd($path, $e->getMessage());
+//                return;
             }
             $this->db->query("PRAGMA journal_mode=WAL");
             $this->db->query("PRAGMA lock_timeout=5");
@@ -89,30 +89,25 @@ class StorageBox
             }
         }
 
+        $this->createTables($this->config);
+
+    }
+
+    public function createTables(Config $config): void
+    {
         $sth = $this->db->query($sql = "SELECT name FROM sqlite_master where type='table'");
-        $this->tables = $sth->fetchAll(PDO::FETCH_COLUMN); // load the existing tables
+        $this->schemaTables = $sth->fetchAll(PDO::FETCH_COLUMN); // load the existing tables
 
         $this->beginTransaction();
-        foreach ($this->tablesToCreate as $table => $tableConfig) {
-            assert(is_array($tableConfig), json_encode($tableConfig));
-            // until we fix the init
-            assert(array_key_exists('indexes', $tableConfig), "missing indexes key!");
-            // if coming in from table, needs to have a shape.
-//            dd($indexes, array_is_list($indexes));
-//            dd($this->tablesToCreate, array_is_list($this->tablesToCreate));
-            if (!in_array($table, $this->tables)) {
 
-                $this->createTable($table, $tableConfig, $this->valueType);
+        foreach ($config->getTables() as $tableName => $table) {
+            assert($table instanceof Table, json_encode($table));
+            if (!in_array($table, $this->tables)) {
+                $this->createTable($tableName, $table, $this->valueType);
                 $this->tables[] = $table;
             }
         }
         $this->commit();
-//        $tables = $this->inspectSchema();
-//        dd($this->tablesToCreate, $this->tables, current($this->tablesToCreate));
-        // defaults to first table?
-//        $this->currentTable = current($this->tablesToCreate)??current($this->tables);
-//        $this->commit();
-//        $this->beginTransaction();
         assert(!$this->db->inTransaction());
     }
 
@@ -190,6 +185,10 @@ class StorageBox
 
     }
 
+
+    /* get the DBAL schema.
+     *
+     */
     public function inspectSchema(string $filename = null): array
     {
         $filename = $filename ?? $this->getFilename();
@@ -199,20 +198,24 @@ class StorageBox
             return $tables[$filename];
         }
 
+        // ripe for caching, refactoring, etc.
         // is it necessary to open it again, or can we get this from the PDO?
         $connectionParams = [
             'path' => $filename,
             'driver' => 'pdo_sqlite',
         ];
             $conn = DriverManager::getConnection($connectionParams);
-            dump($connectionParams, $filename);
+//            dump($connectionParams, $filename);
             $sm = $conn->createSchemaManager();
             $fromSchema = $sm->introspectSchema();
 
             $tables[$filename] = [];
             foreach ($fromSchema->getTables() as $schemaTable) {
                 $primaryIndex = $schemaTable->getIndex('primary');
-                $table = new Table($schemaTable->getName(), $schemaTable->getColumns(), join('-', $primaryIndex->getColumns()));
+                //
+                $table = new Table($schemaTable->getName(),
+                    $schemaTable->getColumns(),
+                    pkName: join('-', $primaryIndex->getColumns()));
 //                foreach ($schemaTable->getColumns() as $column) {
 //                    $tables[$schemaTable->getName()]['columns'][] = $column->getName();
 //                }
@@ -277,14 +280,26 @@ class StorageBox
      * @param string $valueType
      * @return void
      */
-    public function createTable(string $tableName, string|array $tableConfig,
+    public function createTable(string $tableName, Table $table,
                                 string $valueType = 'JSON',
         array $columns=[]
     ): void
     {
+        foreach ($table->getColumns() as $column) {
 
+        }
+        $properties = [];
         // if no column is flagged as unique, assume the first key
         $indexes = $tableConfig['indexes'] ?? [];
+        foreach ($table->getProperties() as $propertyString) {
+            $property = Parser::parseConfigHeader($propertyString);
+            if ($index = $property->getIndex()) {
+                $indexes[] = new Index($property->getCode());
+            }
+            $properties[] = $property;
+//            dd($actual, $propertyString);
+//            dd($property, $tableName, $this->filename, $this->config->getConfigFilename());
+        }
         $indexes = $this->getIndexDefinitions($indexes);
 
         // more json examples at https://www.sqlitetutorial.net/sqlite-json/
@@ -316,7 +331,7 @@ class StorageBox
             }
         }
 
-        dd($tableConfig);
+//        dd($tableConfig);
 //        array_unshift($columns, $primaryKey);
 //        dd($columns, $indexSql);
 

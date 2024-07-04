@@ -425,6 +425,7 @@ class Parser
         if (empty($config)) {
             return null;
         }
+        $indexType = null;
         if (!str_contains($config, '?')) {
             $config .= '?';
         }
@@ -442,14 +443,26 @@ class Parser
 //            $type = null;
             $type = $dottedConfig; // no params, native type, like string, which is really att.string
             $parameters = null;
-            if (in_array($type, Property::ATTRIBUTE_TYPES )) {
-                $parameters = $type;
-                $type = Property::TYPE_ATTRIBUTE;
-            }
         }
+
+        $lastChar = $type ? substr($type, -1) : null;
+        if (in_array($lastChar, ['#'])) {
+//            $header = $header ? rtrim($header, $lastChar) : null;
+            $type = $type ? rtrim($type, $lastChar): null; // hack!
+//            $subType = $subType ? rtrim($subType, $lastChar): null; // hack!
+            $indexType = 'INDEX';
+//            $settings['index'] = 'INDEX';
+        }
+        // only an attribute if the type is att?
+//        if (in_array($type, Property::ATTRIBUTE_TYPES )) {
+//            $parameters = $type;
+//            $type = Property::TYPE_ATTRIBUTE;
+//        }
+
         $subType = $parameters;
 
         // handle array shortcut
+
 
         $lastChar = $header ? substr($header, -1) : null;
         if (in_array($lastChar, ['|', '$', ',', '/'])) {
@@ -477,7 +490,7 @@ class Parser
 //            $header = $parameters; // db types must be our internal codes
         }
 
-        $property = new Property($header, $type, $subType, $settings);
+        $property = new Property($header, $type, $subType, $settings, $indexType);
         if ($property->getDelim()) {
 //            dd($property, $type, $parameters, subType: $subType, settings: $settings);
         }

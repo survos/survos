@@ -9,6 +9,7 @@ use League\Csv\Reader;
 use Psr\Log\LoggerInterface;
 use Survos\PixieBundle\Event\CsvHeaderEvent;
 use Survos\PixieBundle\Model\Config;
+use Survos\PixieBundle\Model\Table;
 use Survos\PixieBundle\StorageBox;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -37,8 +38,6 @@ class PixieImportService
         }
         // the csv/json files
         $dirOrFilename = $this->pixieService->getSourceFilesDir($pixieCode);
-
-
 
 //        if (!file_exists($dirOrFilename)) {
 //            $dirOrFilename = $this->pixieService->getDataDir($pixieCode, $config);
@@ -113,7 +112,8 @@ class PixieImportService
 //            }
 //            $tableData = (array)$table; // $tables[$tableName];
             $tables = $config->getTables(); // with the rules and such
-            $tableData = $tables[$tableName];
+            $table = $tables[$tableName];
+            assert($table instanceof Table, "Invalid table type");
             $rules = $config->getTableRules($tableName);
             $kv->map($rules, [$tableName]);
             $kv->select($tableName);
@@ -211,6 +211,7 @@ class PixieImportService
 
 
         // only create the tables that match the filenames
+        $tablesToCreate=[];
         foreach ($fileMap as $fn => $tableName) {
             $tables = $config->getTables();
             foreach ($tables as $tableName => $tableData) {

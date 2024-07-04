@@ -38,6 +38,7 @@ class Property implements \Stringable
         private ?string $type=null, // self::PROPERTY_STRING, // rel, cat, att
         private ?string $subType = null, // e.g. type, relatedCore, dbField.  aka subType?
         private ?array $settings=[], // min/max, delimited, etc.
+        private ?string $index=null, // 'INDEX', 'UNIQUE' ??
         private ?Schema $schema = null,
 
     )
@@ -45,6 +46,17 @@ class Property implements \Stringable
         if ($this->schema) {
             $schema->addProperty($this);
         }
+    }
+
+    public function getIndex(): ?string
+    {
+        return $this->index;
+    }
+
+    public function setIndex(?string $index): Property
+    {
+        $this->index = $index;
+        return $this;
     }
 
     public function getOrderIdx(): ?int
@@ -196,9 +208,16 @@ class Property implements \Stringable
         if ($subType = $this->getSubType()) {
             $x .= '.'.$subType;
         }
+
+        $x .= match($this->index) {
+            'INDEX' => '#',
+            'UNIQUE' => '##',
+            null => ''
+        };
         if ( $settings && !empty($settings)) {
             $x .= '?' . http_build_query($settings);
         }
+
         return $x;
 
     }

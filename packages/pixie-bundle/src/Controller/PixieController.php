@@ -267,13 +267,12 @@ class PixieController extends AbstractController
         // get the conf file from the configured directories (from the bundle)
 
 //        $config = $pixieService->getConfigFilename($pixieCode);
-        $configFilename = $pixieService->getConfigFilename($pixieCode);
-        $configData = file_get_contents($configFilename);
-        $configData = Yaml::parseFile($configFilename);
-        // cache wget "https://github.com/MuseumofModernArt/collection/raw/main/Artists.csv"   ?
-//        dd($configData);
-        $x = $denormalizer->denormalize($configData, Config::class);
-        dd($x, $configData);
+//        $configFilename = $pixieService->getConfigFilename($pixieCode);
+//        $configData = file_get_contents($configFilename);
+//        $configData = Yaml::parseFile($configFilename);
+//        // cache wget "https://github.com/MuseumofModernArt/collection/raw/main/Artists.csv"   ?
+////        dd($configData);
+//        $config = $denormalizer->denormalize($configData, Config::class);
 
         $config = $this->pixieService->getConfig($pixieCode);
         $pixie = $pixieService->getStorageBox(

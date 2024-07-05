@@ -18,7 +18,7 @@ final class TraceableStorageBox extends StorageBox
 //    private Stopwatch $stopwatch;
     #[NoReturn] function __construct(private string                    $filename,
                                      private array                     &$data, // debug data, passed from Pixie
-    private Config $config,
+                                     private ?Config $config=null, // for creation only.  Shouldn't be in constructor!
                                      private ?string                   $currentTable = null,
                                      private ?int                      $version = 1,
                                      private string                    $valueType = 'json', // eventually jsonb

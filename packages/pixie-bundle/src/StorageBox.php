@@ -48,7 +48,7 @@ class StorageBox
      */
     #[NoReturn] function __construct(private string                    $filename,
                                      array &$data, // debug data, passed from Pixie
-    private Config $config,
+    private ?Config $config=null, // for creation only.  Shouldn't be in constructor!
 //                                     private array                     $tablesToCreate = [],
 //                                     private array                     $regexRules = [],
                                      private ?string                   $currentTable = null,
@@ -89,8 +89,9 @@ class StorageBox
 
             }
         }
-
-        $this->createTables($this->config);
+        if ($this->config) {
+            $this->createTables($this->config);
+        }
 
     }
 
@@ -182,7 +183,20 @@ class StorageBox
     public function getPrimaryKey(?string $tableName=null): string
     {
         $tableName = $tableName ?? $this->currentTable;
-        return $this->inspectSchema()[$tableName]->getPkName();
+        // https://stackoverflow.com/questions/10472103/sqlite-query-to-find-primary-keys
+        // use <> 0 if multiple
+        $result = $this->query($sql = "SELECT l.name FROM pragma_table_info('$tableName') 
+    as l WHERE l.pk = 1");
+        $pk = $result->fetchColumn();
+assert($pk, $tableName .  $sql);
+//dd($result->fetchColumn(), $result);
+return $pk;
+//dd($result->fetchColumn(), $result->fetchAll(), $tableName, $sql);
+//
+//        $schemaTables = $this->inspectSchema();
+//        $table = $schemaTables[$tableName] ?? null;
+//
+//        return $table?->getPkName();
 
     }
 
@@ -211,6 +225,7 @@ class StorageBox
             $fromSchema = $sm->introspectSchema();
 
             $tables[$filename] = [];
+
             foreach ($fromSchema->getTables() as $schemaTable) {
                 $primaryIndex = $schemaTable->getIndex('primary');
                 //
@@ -235,9 +250,13 @@ class StorageBox
      * @param string|array $indexConfig
      * @return Index[] array
      */
-    static function getIndexDefinitions(string|array $indexConfig): array
+    static function getIndexDefinitions(null|string|array $indexConfig): array
     {
+
         $indexes = [];
+        if (empty($indexConfig)) {
+            return $indexes;
+        }
         if (is_string($indexConfig)) {
             $indexConfig = array_map(fn($key) => $key ? trim($key) : assert($key, "empty key! " . $indexConfig),
                 explode(',', $indexConfig));
@@ -281,44 +300,52 @@ class StorageBox
      * @param string $valueType
      * @return void
      */
-    public function createTable(string $tableName, Table $table,
+    public function createTable(string $tableName,
+                                Table $table,
                                 string $valueType = 'JSON',
-        array $columns=[]
+//        array $columns=[]
     ): void
     {
-        foreach ($table->getColumns() as $column) {
-
-        }
         $properties = [];
-        // if no column is flagged as unique, assume the first key
-        $indexes = $tableConfig['indexes'] ?? [];
-        foreach ($table->getProperties() as $propertyString) {
-            if (is_string($propertyString)) {
-                $property = Parser::parseConfigHeader($propertyString);
+        $columns = [];
+        $indexes = $this->getIndexDefinitions($table->getIndexes());
+        foreach ($table->getProperties() as $propIndex => $propData) {
+            if (is_string($propData)) {
+                $property = Parser::parseConfigHeader($propData);
             } else {
+//                dd($table->getProperties());
                 $property = new Property(
-                    code: $propertyString['name'],
-                    type: $propertyString['type']??null // maybe default type based on code?
+                    index: $propData['index']??null,
+                    code: $propData['name'],
+                    type: $propData['type']??null // maybe default type based on code?
                 );
-                dd($propertyString, $property);
-                $property = $propertyString;
+//                dump($tableName, $table, $propData, $property);
             }
-            if ($index = $property->getIndex()) {
-                $indexes[] = new Index($property->getCode());
+            if ($propIndex == 0) {
+                $primaryKey = $property->getCode();
             }
             $properties[] = $property;
-//            dd($actual, $propertyString);
+//            dd($actual, $propData);
 //            dd($property, $tableName, $this->filename, $this->config->getConfigFilename());
         }
-        dd($properties, $tableName, $table);
-        $indexes = $this->getIndexDefinitions($indexes);
+//        dd($tableName, properties: $properties, table: $table);
 
         // more json examples at https://www.sqlitetutorial.net/sqlite-json/
         $indexSql = [];
         // @todo: improve PK: https://www.sqlitetutorial.net/sqlite-primary-key/
         // a generated column can't be the primary key, but interesting: https://sqlite.org/forum/info/5928225848d0409f
-        $columns['_value'] = 'value TEXT NOT NULL';
+        if (count($indexes) && count($properties)) {
+            dd("Cannot have both indexes and properties " . $table->getIndexes());
+        }
+        foreach ($properties as $property) {
+            if ($primaryKey == $property->getCode()) {
+                $indexes[] = new Index($property->getCode(), isPrimary: true);
+            } elseif ($property->getIndex()) {
+                $indexes[] = new Index($property->getCode());
+            }
 
+        }
+//        dd($tableName, $indexes);
         /**
          * @var int $indexId
          * @var Index $index
@@ -337,24 +364,31 @@ class StorageBox
 //                https://www.sqlite.org/gencol.html
 
                 // d INT GENERATED ALWAYS AS (a*abs(b)) VIRTUAL,
-                $columns[$name] = "$name $type  GENERATED ALWAYS AS (json_extract(value, '\$.$name')) STORED /* @searchable */";
+                $columns[$name] = "$name $type  GENERATED ALWAYS AS (json_extract(_raw, '\$.$name')) STORED /* @searchable */";
                 $indexSql[$tableName . $name] = "create index {$tableName}_{$name} on $tableName($name) /* @filterable */";
             }
         }
+        $columns['_att'] = '_att TEXT'; // type=att
+        $columns['json'] = '_extra TEXT'; // original data minus defined properties
+        $columns['raw'] = '_raw TEXT'; // original data sent to ->set()
 
 //        dd($tableConfig);
 //        array_unshift($columns, $primaryKey);
-//        dd($columns, $indexSql);
 
-        $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (%s); %s", $tableName,
+        $sql = sprintf("CREATE TABLE IF NOT EXISTS %s (\n%s\n); \n\n%s", $tableName,
             join(",\n", array_values($columns)),
             join(";\n", array_values($indexSql))
         );
+//        dd($columns, $indexSql, $sql, $primaryKey);
         try {
             $result = $this->db->exec($sql);
         } catch (\Exception $exception) {
             dd($exception, $sql, $columns, $indexSql);
         }
+//        dd($sql, $result, $indexes);
+        // still in a transaction, can't do this yet, wait until all tables are created.
+
+//        assert($this->getPrimaryKey($tableName), "missing pk " . $sql);
 //        if (str_contains($sql, 'student')) dd($sql, $result);
 //        dd($sql);
     }
@@ -521,13 +555,12 @@ class StorageBox
         if (empty($preparedStatements[$tableName])) {
             $preparedStatements[$tableName] =
                 $this->db->prepare("
-                    INSERT OR REPLACE INTO $tableName($keyName, value) 
+                    INSERT OR REPLACE INTO $tableName($keyName, _raw) 
                         VALUES(:key, :value)
                 ");
         }
+//        dd($value, $key, $tableName);
         $statement = $preparedStatements[$tableName];
-        // @todo: defer these in a batch
-//        $this->db->beginTransaction();
         assert($this->db->inTransaction());
             $results = $statement->execute(
                 $params = [
@@ -603,7 +636,7 @@ class StorageBox
     ): \Generator
     {
         $table = $table??$this->currentTable;
-        assert($table, "no table configuredd");
+        assert($table, "no table configured");
         $pkName = $this->getPrimaryKey($table);
         [$sql, $params] = $this->getSql($table, $where, $max);
 
@@ -617,7 +650,8 @@ class StorageBox
 //        foreach ($sth as $idx => $row)
 //        while ($row = $sth->fetch(PDO::FETCH_ASSOC))
         {
-            $value = $row['value'];
+            // @todo: lax, strict, none
+            $value = $row['_raw'];
 //            dump($value);
             $value = json_decode($value, $associative, $depth, $flags);
             // now merge with the keys

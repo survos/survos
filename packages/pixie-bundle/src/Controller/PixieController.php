@@ -196,6 +196,7 @@ class PixieController extends AbstractController
         $charts = [];
         $tables = [];
         $pixieFilename = $this->pixieService->getPixieFilename($pixieCode);
+        assert(file_exists($pixieFilename));
         $kv = $this->pixieService->getStorageBox($pixieFilename);
         foreach ($kv->getTables() as $tableName) {
             $count = $kv->count($tableName);
@@ -259,21 +260,10 @@ class PixieController extends AbstractController
     #[Route('/import/{pixieCode}', name: 'pixie_import')]
     public function import(PixieService             $pixieService,
                            PixieImportService       $pixieImportService,
-                           DenormalizerInterface $denormalizer,
                            string                   $pixieCode,
                            #[MapQueryParameter] int $limit = 0,
     ): Response
     {
-        // get the conf file from the configured directories (from the bundle)
-
-//        $config = $pixieService->getConfigFilename($pixieCode);
-//        $configFilename = $pixieService->getConfigFilename($pixieCode);
-//        $configData = file_get_contents($configFilename);
-//        $configData = Yaml::parseFile($configFilename);
-//        // cache wget "https://github.com/MuseumofModernArt/collection/raw/main/Artists.csv"   ?
-////        dd($configData);
-//        $config = $denormalizer->denormalize($configData, Config::class);
-
         $config = $this->pixieService->getConfig($pixieCode);
         $pixie = $pixieService->getStorageBox(
             $pixieService->getPixieFilename($pixieCode),
@@ -281,9 +271,9 @@ class PixieController extends AbstractController
             createFromConfig: true,
             config:$config
         );
-        dd($config, $pixie->getTables());
+//        dd($config, $pixie->getTables());
 
-        $pixieImportService->import($pixieCode, limit: $limit);
+        $pixieImportService->import($pixieCode, $config, limit: $limit, kv: $pixie);
         return $this->redirectToRoute('pixie_homepage', [
             'pixieCode' => $pixieCode
         ]);

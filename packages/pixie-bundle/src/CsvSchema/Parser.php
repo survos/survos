@@ -445,6 +445,7 @@ class Parser
             $parameters = null;
         }
 
+
         $lastChar = $type ? substr($type, -1) : null;
         if (in_array($lastChar, ['#'])) {
 //            $header = $header ? rtrim($header, $lastChar) : null;

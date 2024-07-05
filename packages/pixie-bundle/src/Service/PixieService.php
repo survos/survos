@@ -13,6 +13,7 @@ use Survos\PixieBundle\StorageBox;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -164,15 +165,20 @@ class PixieService
 //        $config = $this->denormalizer->denormalize($configData, Config::class);
 //        dd(config: $config, data: $configData);
 //        $config->setConfigFilename($configFilename);
-        $config = $this->serializer->deserialize(
-            file_get_contents($configFilename),
-             Config::class, 'yaml');
+        try {
+            $config = $this->serializer->deserialize(
+                file_get_contents($configFilename),
+                Config::class, 'yaml');
+        } catch (NotNormalizableValueException $exception) {
+            dd($configFilename, $exception->getMessage());
+        }
         assert($config instanceof Config);
         assert($config->source);
         assert($config->source instanceof Source);
         foreach ($config->getTables() as $idx=>$table) {
             assert($table instanceof Table, "table $idx is not of class Table");
         }
+        $config->setConfigFilename($configFilename);
 //        dd($config, $configFilename, $config);
         return $config;
     }

@@ -16,10 +16,22 @@ class Table
          * @var array<string>
          */
         private array $properties=[],
+        private ?string $indexes=null, // the super-succint dexie-style index defintion, e.g. "id|int,department"
         private ?string $pkName=null,
     )
     {
 
+    }
+
+    public function getIndexes(): ?string
+    {
+        return $this->indexes;
+    }
+
+    public function setIndexes(?string $indexes): Table
+    {
+        $this->indexes = $indexes;
+        return $this;
     }
 
     public function getName(): ?string

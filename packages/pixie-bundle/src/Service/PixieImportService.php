@@ -6,6 +6,7 @@ namespace Survos\PixieBundle\Service;
 
 use League\Csv\Info;
 use League\Csv\Reader;
+use League\Csv\SyntaxError;
 use Psr\Log\LoggerInterface;
 use Survos\PixieBundle\Event\CsvHeaderEvent;
 use Survos\PixieBundle\Model\Config;
@@ -27,7 +28,8 @@ class PixieImportService
     {
     }
 
-    public function import(string $pixieCode, ?Config $config=null,
+    public function import(string $pixieCode,
+                           Config $config,
                            int    $limit = 0,
                            ?StorageBox $kv=null, // if we already created it.
                            ?callable $callback=null): StorageBox
@@ -39,22 +41,6 @@ class PixieImportService
         // the csv/json files
         $dirOrFilename = $this->pixieService->getSourceFilesDir($pixieCode);
 
-//        if (!file_exists($dirOrFilename)) {
-//            $dirOrFilename = $this->pixieService->getDataDir($pixieCode, $config);
-//        }
-//        if (file_exists($this->dataDir)) {
-//            $this->dataDir = realpath($this->dataDir);
-//        }
-//        dd($dirOrFilename, $this->dataDir, $config->getDataDirectory());
-//        $dirOrFilename = $this->pixieService->getDataDir($pixieCode, $config);
-//        $dirOrFilename = $dirOrFilename ?? $config->getDataDirectory();
-//        $dirOrFilename = $dirOrFilename ?? $this->dataDir . DIRECTORY_SEPARATOR . $pixieCode;
-//        if (!file_exists($dirOrFilename)) {
-//            $dirOrFilename = $this->dataDir . $dirOrFilename;
-//        }
-//        if (!file_exists($dirOrFilename)) {
-//            throw new \LogicException("$dirOrFilename does not exist");
-//        }
         assert(file_exists($dirOrFilename), $dirOrFilename);
         $finder = new Finder();
         $files = $finder->in($dirOrFilename);
@@ -80,6 +66,7 @@ class PixieImportService
         }
         unset($splFile);
 
+        assert($config);
 //        list($splFile, $tableName, $mm, $fileMap, $fn, $tables, $tableData, $kv) =
         if (!$kv) {
             $kv = $this->createKv($fileMap, $config, $pixieCode);
@@ -98,7 +85,7 @@ class PixieImportService
             $schemaTables = $kv->inspectSchema();
             if (!array_key_exists($tableName, $validTableNames)) {
                 $this->logger && $this->logger->warning("Skipping $fn, table is undefined");
-                dd($tableName, $kv->getFilename(), $validTableNames, array_keys($schemaTables));
+//                dd($tableName, $kv->getFilename(), $validTableNames, array_keys($schemaTables));
                 continue;
             }
 //            if (!str_contains($pixieDbName, 'moma')) dd($tableName, $pixieDbName, $kv->getFilename());
@@ -139,8 +126,6 @@ class PixieImportService
                     }
                 }
             }
-            $resolver = new OptionsResolver();
-
             foreach ($iterator as $idx => $row) {
                 // if it's json, remap the keys
                 if ($ext === 'json') {
@@ -172,8 +157,9 @@ class PixieImportService
 //                    dd($idx, $row, $headers); return $kv;
                 }
 //                dump($ext, $mappedHeader, $row);
-                assert(array_key_exists($kv->getPrimaryKey($tableName), $row),
-                    $tableName . " " .
+                $pk = $kv->getPrimaryKey($tableName);
+                assert(array_key_exists($pk, $row),
+                    $tableName . " should have $pk  " .
                     json_encode($row, JSON_PRETTY_PRINT));
 
                 foreach ($row as $k => $v) {
@@ -220,7 +206,11 @@ class PixieImportService
         }
         $pixieFilename = $this->pixieService->getPixieFilename($pixieCode);
         $this->pixieService->destroy($pixieFilename);
-        $kv = $this->pixieService->getStorageBox($pixieFilename, $tablesToCreate);
+
+        $kv = $this->pixieService->getStorageBox($pixieFilename,
+            $tablesToCreate,
+            createFromConfig: true,
+            config: $config);
 //        if (str_contains($kv->getFilename(), 'edu')) dd($kv->getFilename());
         return $kv;
         return array($splFile, $tableName, $mm, $fileMap, $fn, $tables, $tableData, $kv);
@@ -250,7 +240,7 @@ class PixieImportService
             // @todo: handle nested properties
             $headers = array_keys(get_object_vars($firstRow));
             $iterator->rewind();
-        } elseif (in_array($ext, ['tsv', 'csv', 'txt'])) {
+        } else { // if (in_array($ext, ['tsv', 'csv', 'txt'])) {
             $csvReader = Reader::createFromPath($fn, 'r');
             $result = Info::getDelimiterStats($csvReader, ["\t", ','], 3);
             // pick the highest one
@@ -267,18 +257,24 @@ class PixieImportService
         $mappedHeader = $kv->mapHeader($headers, regexRules: $rules);
 //            dd($rules, $configData, $tableName, filename: $splFile->getFilename(), mappedHeader: $mappedHeader);
         // keep for replacing the key names later
-//                dd($headers, mapped: $mappedHeader);
+//                dd($headers, mapped: $mappedHeader, rules: $rules);
         $this->eventDispatcher->dispatch(
             $headerEvent = new CsvHeaderEvent($mappedHeader, $fn));
+        $headers = $headerEvent->header;
 //
 //                dump($headerEvent->header);
-        $headers = $headerEvent->header;
+        // headers is now a map from column headers to properties
         if (count($headers) != count(array_unique($headers))) {
             dd($headers, array_unique($headers));
         }
 
         if ($ext !== 'json') {
-            $iterator = $csvReader->getRecords($headers);
+            try {
+                $headerKeys = array_keys($headers);
+                $iterator = $csvReader->getRecords($headerKeys);
+            } catch (SyntaxError $error) {
+                dd($headers, $error->getMessage());
+            }
         }
 
         return [$ext, $iterator, $headers];

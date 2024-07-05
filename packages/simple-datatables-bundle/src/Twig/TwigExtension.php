@@ -42,6 +42,9 @@ class TwigExtension extends AbstractExtension
             new TwigFunction('reverseRange', fn ($x, $y) => sprintf("%s-%s", $x, $y)),
             // survosCrudBundle?
             new TwigFunction('browse_route', [$this, 'browseRoute']),
+            new TwigFunction('is_array', fn($x) => is_array($x)),
+            new TwigFunction('is_object', fn($x) => is_object($x)),
+            new TwigFunction('is_list', fn($x) => is_array($x) && array_is_list($x)),
 
         ];
     }

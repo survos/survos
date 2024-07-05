@@ -14,7 +14,14 @@
                         {% endwith %}
                     {% else %}
                         {# handle bools #}
-                        {{ attribute(data, c.name)|default() }}
+                        {% set value = attribute(data, c.name)|default() %}
+                        {% if is_array(value) %}
+
+                            {{ value|json_encode }}
+                            {% else %}
+
+                                {{ is_object(value) ? value|json_encode : value }}
+                    {% endif %}
                     {% endif %}
                 </dd>
             {% endfor %}

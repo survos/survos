@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Survos\PixieBundle\CsvSchema\Parser;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Index;
+use Survos\PixieBundle\Model\Property;
 use Survos\PixieBundle\Model\Table;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
@@ -292,7 +293,16 @@ class StorageBox
         // if no column is flagged as unique, assume the first key
         $indexes = $tableConfig['indexes'] ?? [];
         foreach ($table->getProperties() as $propertyString) {
-            $property = Parser::parseConfigHeader($propertyString);
+            if (is_string($propertyString)) {
+                $property = Parser::parseConfigHeader($propertyString);
+            } else {
+                $property = new Property(
+                    code: $propertyString['name'],
+                    type: $propertyString['type']??null // maybe default type based on code?
+                );
+                dd($propertyString, $property);
+                $property = $propertyString;
+            }
             if ($index = $property->getIndex()) {
                 $indexes[] = new Index($property->getCode());
             }
@@ -300,6 +310,7 @@ class StorageBox
 //            dd($actual, $propertyString);
 //            dd($property, $tableName, $this->filename, $this->config->getConfigFilename());
         }
+        dd($properties, $tableName, $table);
         $indexes = $this->getIndexDefinitions($indexes);
 
         // more json examples at https://www.sqlitetutorial.net/sqlite-json/

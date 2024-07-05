@@ -29,6 +29,7 @@ tables:
       /ConstituentID/: artist_id
     # could come from SQL or created during the import
     properties:
+      - 'id:int#'
       - c: 'id:int##'
       - c: 'age:int#'
       - name: id

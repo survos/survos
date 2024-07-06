@@ -4,6 +4,8 @@
 
 {% block body %}
 
+    {{ dump(row._raw|json_decode) }}
+
     <h3>Properties</h3>
     {% if row %}
         <twig:simple_item_grid

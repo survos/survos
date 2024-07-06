@@ -51,8 +51,11 @@ class Config
 
     public function getIgnored(): array
     {
-        $ignore =  $this->data["source"]["ignore"]??[];
-        return is_string($ignore) ? [$ignore] : $ignore;
+        $ignore =  $this->source?->ignore;
+        if (is_string($ignore)) {
+            $ignore = [$ignore];
+        }
+        return $ignore;
     }
     public function getInclude(): array
     {
@@ -67,7 +70,7 @@ class Config
 
     public function getSourceFilesDir(): ?string
     {
-        return $this->source->dir;
+        return $this->source?->dir;
     }
 
     /**

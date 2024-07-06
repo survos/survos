@@ -120,6 +120,7 @@ class PixieController extends AbstractController
         } else {
             $columns = ['value'];
         }
+//        dd($where, $firstRow, $columns);
 
         // @todo: flatten nested json, apply view, column rules, etc.
         if ($_format=='json') {
@@ -155,16 +156,19 @@ class PixieController extends AbstractController
 //            dd($row);
 //        }
 
-
+        // there may be a better way.
+        $remoteUrl = $this->urlGenerator->generate(
+            $request->get('_route'),
+            [...$request->get('_route_params'),
+                ...$request->query->all(),
+                '_format' => 'json']
+        );
         // see kaggle for inspiration, https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction/data
         return $this->render('@SurvosPixie/pixie/browse.html.twig', [
             'pixieCode' => $pixieCode,
 'tableName' => $tableName,
 //            'kv' => $kv, // avoidable?/
-        'remoteUrl' => $this->urlGenerator->generate(
-            $request->get('_route'),
-            [...$request->get('_route_params'), '_format' => 'json']
-        ),
+        'remoteUrl' => $remoteUrl,
             'iterator' => [], // $firstRow ? $iterator : [],
             'keyName' => $kv->getPrimaryKey(),
             'columns' => $columns,
@@ -188,7 +192,7 @@ class PixieController extends AbstractController
     #[Route('/{pixieCode}', name: 'pixie_homepage')]
     public function home(
                          string $pixieCode,
-    #[MapQueryParameter] int $limit = 5
+    #[MapQueryParameter] int $limit = 25
     ): Response
     {
         $chartBuilder = $this->chartBuilder;

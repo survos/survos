@@ -35,7 +35,7 @@ final class TraceableStorageBox extends StorageBox
 //        $this->stopwatch = $stopwatch;
     }
 
-    public function map(array $tableRegexRules, array $tables = ['__all'])
+    public function mapHeader(array $header, string $tableName = null, array $regexRules=[]): array
     {
         return $this->innerSearchService(__FUNCTION__, \func_get_args());
     }

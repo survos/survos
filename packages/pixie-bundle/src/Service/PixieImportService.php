@@ -9,11 +9,12 @@ use League\Csv\Reader;
 use League\Csv\SyntaxError;
 use Psr\Log\LoggerInterface;
 use Survos\PixieBundle\Event\CsvHeaderEvent;
+use Survos\PixieBundle\Event\ImportFileEvent;
+use Survos\PixieBundle\Event\ImportRowEvent;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Table;
 use Survos\PixieBundle\StorageBox;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function Symfony\Component\String\u;
 use \JsonMachine\Items;
@@ -54,6 +55,8 @@ class PixieImportService
         assert($files->count(), "No files in $dirOrFilename");
 
         foreach ($files as $splFile) {
+            $this->eventDispatcher->dispatch(new ImportFileEvent($splFile->getRealPath()));
+//            assert($splFile->getExtension() <> 'csv', json_encode($ignore));
             $map[$splFile->getRealPath()] = u($splFile->getFilenameWithoutExtension())->snake()->toString();
                 foreach ($config->getFileToTableMap() as $rule => $tableNameRule) {
                 if (preg_match($rule, $splFile->getFilename(), $mm)) {
@@ -88,6 +91,8 @@ class PixieImportService
 //                dd($tableName, $kv->getFilename(), $validTableNames, array_keys($schemaTables));
                 continue;
             }
+            // we could do a callback here tagging it as a file.  Or some sort of event?
+            $this->logger && $this->logger->warning("Importing $fn to $tableName");
 //            if (!str_contains($pixieDbName, 'moma')) dd($tableName, $pixieDbName, $kv->getFilename());
 //            dd($tableName, $tablesToCreate);
 //            $table = [$tableName]??null;
@@ -173,6 +178,7 @@ class PixieImportService
                 }
                 assert(count($kv->getTables()), "no tables in $pixieCode");
 
+                $this->eventDispatcher->dispatch(new ImportRowEvent($row));
                 $kv->set($row);
 //                if ($idx == 1) dump($tableName, $row);
                 if ($limit && ($idx > $limit)) break;

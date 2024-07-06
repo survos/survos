@@ -7,6 +7,7 @@ class Source
     public function __construct(
         public ?string $dir=null,
         public string $locale = 'en',
+        public null|string|array $ignore = [],
     )
     {
 

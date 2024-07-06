@@ -173,8 +173,8 @@ class PixieService
             dd($configFilename, $exception->getMessage());
         }
         assert($config instanceof Config);
-        assert($config->source);
-        assert($config->source instanceof Source);
+//        assert($config->source, $configFilename . " missing source key");
+//        assert($config->source instanceof Source);
         foreach ($config->getTables() as $idx=>$table) {
             assert($table instanceof Table, "table $idx is not of class Table");
         }

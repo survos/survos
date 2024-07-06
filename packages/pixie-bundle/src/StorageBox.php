@@ -40,7 +40,6 @@ class StorageBox
     private array $schemaTables = []; // from the schema inspection
     private bool $inTransaction = false;
 
-//    private array $regexRules=[];
     /**
      * Initialises a new store connection.
      * @param string $filename The filename that the store is located in.
@@ -403,7 +402,7 @@ return $pk;
 
     public function close()
     {
-        $this->log(__METHOD__);
+//        $this->log(__METHOD__);
         // if a transaction, commit it
         if ($this->db->inTransaction()) {
             $this->commit();
@@ -413,7 +412,7 @@ return $pk;
 
     public function beginTransaction()
     {
-        $this->log(__METHOD__);
+//        $this->log(__METHOD__);
         assert(!$this->db->inTransaction(), "already in a transaction");
 
         $this->db->beginTransaction();
@@ -562,6 +561,7 @@ return $pk;
 //        dd($value, $key, $tableName);
         $statement = $preparedStatements[$tableName];
         assert($this->db->inTransaction());
+        try {
             $results = $statement->execute(
                 $params = [
                     'key' => $key,
@@ -570,9 +570,8 @@ return $pk;
 //            $this->db->commit();
 //        assert(false);
 
-        try {
         } catch (\Exception $exception) {
-            dd($exception, $params, $preparedStatements, $tableName);
+            dd($exception, $params, $value, $preparedStatements, $tableName);
         }
         if (!$results) {
             dd("Error: " . $statement->errorInfo()[2]);
@@ -726,7 +725,7 @@ $sql .= " ORDER BY COUNT(rowid) DESC";
 
     public function commit()
     {
-        $this->log(__METHOD__);
+//        $this->log(__METHOD__);
         // we could check the db, too
         assert($this->db->inTransaction(), "NOT in a transaction");
         $this->db->commit();

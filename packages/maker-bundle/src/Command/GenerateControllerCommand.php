@@ -77,6 +77,8 @@ final class GenerateControllerCommand extends InvokableServiceCommand
             $name .= 'Controller';
         }
 
+        // for twig stuff, see https://github.com/zenstruck/twig-service-bundle
+        // @todo: instead of generating the controller, read it and append/replace the new method
         $ns = $this->generatorService->generateController($name, $namespace, $routeName, $route, $security, $cache, $templateName, $classRoute);
 
         $class = $ns->getClasses()[array_key_first($ns->getClasses())];
@@ -97,26 +99,6 @@ final class GenerateControllerCommand extends InvokableServiceCommand
         } else {
             throw new \Exception("$filename already exists");
         }
-
-//        if (!u($name)->endsWith('Controller')) {
-//            $name .= 'Controller';
-//        }
-//        if (empty($route)) {
-//            $route = "/$routeName";
-//        }
-//        if (empty($method)) {
-//            $method = u($route)->snake()->toString();
-//        }
-
-
-
-        // first, generate the controller class if it doesn't exist
-
-
-//        $astLocator = (new BetterReflection())->astLocator();
-//        $reflector = new DefaultReflector(new StringSourceLocator($phpCode, $astLocator));
-//        $reflectionClass = $reflector->reflectClass($namespace . '\\' . $name);
-////        dd($reflectionClass);
 
         $io->success(sprintf('controller %s generated.', $filename));
     }

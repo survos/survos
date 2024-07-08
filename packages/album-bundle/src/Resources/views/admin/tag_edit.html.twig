@@ -1,0 +1,28 @@
+{% extends '@WebelopAlbum/admin/index.html.twig' %}
+
+{% set title = 'Tag: ' ~ tag.name %}
+
+{% block body %}
+    <div class="row">
+        {% if tag.id %}
+        <div class="col-md-4">
+            <a href="{{ path('webelop_album_tag_view', {hash: tag.hash, slug: tag.slug}) }}" class="btn btn-success">
+                <i class="far fa-new-window"></i> Sharing is caring!
+            </a>
+        </div>
+        {% endif %}
+        <div class="col-md-8">
+            {%  if tag.id %}
+            {{ form(form, {action:path('webelop_album_admin_tag_edit', {id:tag.id}) }) }}
+            {% else %}
+            {{ form(form, {action:path('webelop_album_admin_tag_new') }) }}
+            {% endif %}
+        </div>
+    </div>
+
+    {{ include('@WebelopAlbum/album/_picture_grid.html.twig', {tags:true}) }}
+{% endblock %}
+
+{% block sidebar %}
+    {{ render(controller('webelop_album.controller.admin_controller:sidebar', {type: 'tag'})) }}
+{% endblock %}

@@ -1,0 +1,7 @@
+/vendor
+/node_modules
+/.phpunit.result.cache
+/composer.lock
+/build/*
+*.log
+/bin/photosync-*.sh.run

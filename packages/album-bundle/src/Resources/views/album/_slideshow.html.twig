@@ -1,0 +1,35 @@
+<div class="slideshow hidden">
+    <div class="picture">
+        <img src="{{ asset('bundles/webelopalbum/images/loading.gif') }}" class="align-self-center"/>
+        <video class="hidden" controls autoplay></video>
+
+        <div class="controls-container">
+            <div class="controls">
+                <a href="#prev" class="btn btn-primary prev"><i class="fas fa-chevron-left"></i></a>
+                <a href="#next" class="btn btn-success play"><i class="fas fa-pause"></i></a>
+                <a href="#next" class="btn btn-primary next"><i class="fas fa-chevron-right"></i></a>
+
+                {% for k,tag in tags %}
+                <a class="tag btn btn-light {% if k == 0 %}new-group{% endif %}"
+                   href="{{ path('webelop_album_admin_tag_picture', {'tag' : tag.hash, 'pic' : 'XXX', 'state' : 'YYY'}) }}"
+                   title="{{ tag.name }}" data-hash="{{ tag.hash }}">
+                    <i class="fas fa-{{ tag.class }}"></i>
+                </a>
+                {% endfor %}
+
+                <a class="download btn btn-warning new-group"
+                   data-href="{{ path('webelop_album_download', {'hash' : 'abcdef'}) }}"
+                   title="Download original file"
+                >
+                    <i class="fas fa-download"></i>
+                </a>
+                <a href="#fullscreen" class="btn btn-light fullscreen"><i class="fas fa-expand-arrows-alt"></i></a>
+                <a href="#close" class="btn btn-danger ss-close"><i class="fas fa-window-close"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="hidden">
+        <img class="prevloader" src="{{ asset('bundles/webelopalbum/images/loading.gif') }}">
+        <img class="nextloader" src="{{ asset('bundles/webelopalbum/images/loading.gif') }}">
+    </div>
+</div>

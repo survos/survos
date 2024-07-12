@@ -41,6 +41,7 @@ jobs:
           - {local_path: 'datatables-bundle', split_repository: 'SurvosDatatablesBundle'}
           - {local_path: 'faker-bundle', split_repository: 'SurvosFakerBundle'}
           - {local_path: 'flickr-bundle', split_repository: 'SurvosFlickrBundle'}
+          - {local_path: 'geoapify-bundle', split_repository: 'SurvosGeoapifyBundle'}
           - {local_path: 'global-giving-bundle', split_repository: 'GlobalGivingBundle'}
           - {local_path: 'google-sheets-bundle', split_repository: 'SurvosGoogleSheetsBundle'}
           - {local_path: 'grid-group-bundle', split_repository: 'SurvosGridGroupBundle'}

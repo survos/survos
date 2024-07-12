@@ -23,14 +23,14 @@ class SurvosGeoapifyBundle extends AbstractBundle
         $serviceId = 'survos_geoapify_service';
         $container->services()->alias(GeoapifyService::class, $serviceId);
         $builder->autowire($serviceId, GeoapifyService::class)
+            ->setAutoconfigured(true)
             ->setArgument('$apiKey', $config['api_key'])
-            ->setArgument('$localhostIp', $config['localhost_ip'])
-            ->setArgument('$cache', new Reference('cache.app', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+//            ->setArgument('$cache', new Reference('cache.app', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setPublic(true);
 
         $definition = $builder
         ->autowire('survos.survos_geoapify_twig', TwigExtension::class)
-        ->addTag('twig.extension');
+            ->addTag('twig.extension');
 
     }
 
@@ -41,7 +41,6 @@ class SurvosGeoapifyBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
             ->scalarNode('api_key')->defaultValue('%env(GEOAPIFY_API_KEY)%')->end()
-            ->scalarNode('localhost_ip')->defaultValue('8.8.8.8')->end() // Google DNS
             ->end();
     }
 }

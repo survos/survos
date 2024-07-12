@@ -1,0 +1,36 @@
+{
+    "name": "survos/geoapify-bundle",
+    "type": "symfony-bundle",
+    "description": "Symfony bundle to interact with https://www.geoapify.com/",
+    "keywords": [
+        "symfony6",
+        "ip",
+        "geolocation"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "symfony/config": "^6.4 || ^7.0",
+        "symfony/dependency-injection": "^6.4 || ^7.0",
+        "symfony/http-kernel": "^6.4 || ^7.0",
+        "twig/twig": "^3.4",
+        "symfony/http-client-contracts": "^3.5"
+    },
+    "suggest": {
+        "symfony/cache-contracts": "Cache the lookups"
+    },
+    "autoload": {
+        "psr-4": {
+            "Survos\\GeoapifyBundle\\": "src/"
+        }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10",
+        "symfony/browser-kit": "^6.4 || ^7.0",
+        "symfony/framework-bundle": "^6.4 || ^7.0",
+        "symfony/phpunit-bridge": "^6.4 || ^7.0",
+        "symfony/twig-bundle": "^6.4 || ^7.0",
+        "symfony/var-dumper": "^6.4 || ^7.0",
+        "symfony/cache-contracts": "^3.4"
+    }
+}

@@ -20,28 +20,32 @@ class GeoapifyService
 
     public function reverseGeocode(float|string $lat, float|string $lng): ?array
     {
-        $key = sprintf('%s-%s', $lat, $lng);
+        $key = sprintf('%s-%sx', $lat, $lng);
         return $this->cache
             ? $this->cache->get($key, fn(CacheItem $item) => $this->reverseApiCall($lat, $lng))
             : $this->reverseApiCall($lat, $lng);
+
     }
 
     public function reverseApiCall(float|string $lat, float|string $lng): ?array
     {
+        $response = null;
         // https://myprojects.geoapify.com/api/SaXR1ujolOktGdYjGwMW/keys
         $url = sprintf('https://api.geoapify.com/v1/geocode/reverse?lat=%s&lon=%s&apiKey=%s', $lat, $lng, $this->apiKey);
         if ($this->httpClient) {
             $request = $this->httpClient->request('GET', $url);
             $statusCode = $request->getStatusCode();
             if ($statusCode === 200) {
-                return $request->toArray();
+                $response =  $request->toArray();
+            } else {
+
+                dd($url, $request->getStatusCode());
             }
         } else {
             // or use curl?
-            return json_decode(file_get_contents($url), true);
+            $response = json_decode(file_get_contents($url), true);
         }
-        // handle exceptions?
-        return null;
+        return $response;
 //        $data = $json['data']; // json_decode($json, true);
 //        return $data['features'][0]['properties'];
     }

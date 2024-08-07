@@ -3,17 +3,26 @@
 {% block title %}{{ pixieCode }} Tables{% endblock %}
 
 {% block body %}
+
     {% for tableName, table in tables %}
         <li>
         <a href="{{ path('pixie_table', {pixieCode: pixieCode, tableName: tableName}) }}">
             Browse {{ tableName }}
             {{ table.count }}
         </a>
+
         <ul>
             {% for indexName, values in table.counts %}
                 <li>
+                    {{ values|length }} Values
+                    <br />
                     <a href="{{ path('pixie_table', {pixieCode: pixieCode, tableName: tableName, '_fragment': indexName}) }}">
                     by {{ indexName }}
+                    </a>
+
+
+                    <a class="btn btn-primary" href="{{ path('pixie_show_property', {pixieCode: pixieCode, tableName: tableName, propertyCode: indexName}) }}">
+                        {{ indexName }} Property Page
                     </a>
                 </li>
             {% endfor %}

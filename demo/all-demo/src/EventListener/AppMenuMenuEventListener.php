@@ -8,8 +8,8 @@ use Survos\BootstrapBundle\Traits\KnpMenuHelperTrait;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-#[AsEventListener(event: KnpMenuEvent::PAGE_MENU_EVENT, method: 'pageMenu')]
-#[AsEventListener(event: KnpMenuEvent::NAVBAR_MENU_EVENT, method: 'navbarMenu')]
+#[AsEventListener(event: KnpMenuEvent::PAGE_MENU, method: 'pageMenu')]
+#[AsEventListener(event: KnpMenuEvent::NAVBAR_MENU, method: 'navbarMenu')]
 final class AppMenuMenuEventListener implements KnpMenuHelperInterface
 {
     use KnpMenuHelperTrait;

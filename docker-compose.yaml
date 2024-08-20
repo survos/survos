@@ -18,25 +18,25 @@ services:
 #            - 32785:32785
         volumes:
 #            - ~/.docker-conf/postgres15:/var/lib/postgresql/data
-            - ./.docker/services/postgres16:/var/lib/postgresql/data
+            - ./.docker/postgres16:/var/lib/postgresql/data
 
-    mercure:
-        image: dunglas/mercure
-        restart: unless-stopped
-        ports:
-            - "3000:80"
-        environment:
-            SERVER_NAME: ':80'
-            MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
-            MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
-            # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
-            MERCURE_EXTRA_DIRECTIVES: |
-                cors_origins http://127.0.0.1:8000
-        # Comment the following line to disable the development mode
-        command: /usr/bin/caddy run --config /etc/caddy/Caddyfile.dev
-        volumes:
-            - ./.docker/mercure_data:/data
-            - ./.docker/mercure_config:/config
+#    mercure:
+#        image: dunglas/mercure
+#        restart: unless-stopped
+#        ports:
+#            - "3000:80"
+#        environment:
+#            SERVER_NAME: ':80'
+#            MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+#            MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+#            # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
+#            MERCURE_EXTRA_DIRECTIVES: |
+#                cors_origins http://127.0.0.1:8000
+#        # Comment the following line to disable the development mode
+#        command: /usr/bin/caddy run --config /etc/caddy/Caddyfile.dev
+#        volumes:
+#            - ./.docker/mercure_data:/data
+#            - ./.docker/mercure_config:/config
 
     rabbitmq:
         image: rabbitmq:3-management-alpine
@@ -52,7 +52,7 @@ services:
             - rabbitmq_go_net
 
     meilisearch:
-        image: getmeili/meilisearch:v1.8
+        image: getmeili/meilisearch:v1.9
         container_name: 'meilisearch'
         ports:
             - 7700:7700
@@ -68,8 +68,8 @@ services:
         container_name: 'redis'
         command: ["redis-server", "--save", "60", "100"] # save every 60 seconds if 100 keys have changed
         ports:
-#            - 6379:6379
-            - 6380:6379
+            - 6379:6379
+#            - 6380:6379
         volumes:
             - ./.docker/redis:/usr/local/etc/redis
             - ./.docker/redis_data:/data

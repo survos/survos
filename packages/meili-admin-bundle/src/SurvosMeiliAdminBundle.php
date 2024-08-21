@@ -41,13 +41,7 @@ $definition->setArgument('$foregroundColor', $config['foregroundColor']);
     {
         $definition->rootNode()
             ->children()
-            ->scalarNode('direction')->defaultValue('LR')->end()
-            ->scalarNode('base_layout')->defaultValue('base.html.twig')->end()
-            ->arrayNode('entities')
-            ->scalarPrototype()
-            ->end()->end()
             ->booleanNode('enabled')->defaultTrue()->end()
-//            ->integerNode('min_sunshine')->defaultValue(3)->end()
             ->end();
     }
 

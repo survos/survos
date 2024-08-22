@@ -5,7 +5,7 @@ namespace Survos\LandingBundle\Controller;
 use App\Entity\ApiToken;
 use App\Entity\LoginToken;
 use App\Entity\User;
-use App\Form\ForgotPasswordFormType;
+use App\Form\ForgotPasswNordFormType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Survos\LandingBundle\Form\ChangePasswordFormType;

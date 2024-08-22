@@ -1,4 +1,4 @@
-survos_apiGrid:
+survos_api_grid:
   prefix: /api-grid
   type: attribute
   resource:

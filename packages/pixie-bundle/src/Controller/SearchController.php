@@ -41,7 +41,12 @@ class SearchController extends AbstractController
         $config = $this->pixieService->getConfig($pixieCode);
         $table = $config->getTable($tableName);
         $gridColumns = [
-            '#',
+            new Column(
+                name: 'chevron',
+                title: '>',
+//                sortable: true,
+                browsable: false
+            ),
             new Column(
                 name: 'pixie_key',
                 title: 'id',
@@ -90,6 +95,7 @@ class SearchController extends AbstractController
             'pixieCode' => $pixieCode,
             'columns' => $gridColumns,
             'class' => MeiliItem::class,
+            'tableName' => $tableName,
             'filter' => ['table' => $tableName]
         ]);
     }

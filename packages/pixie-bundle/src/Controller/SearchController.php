@@ -18,8 +18,9 @@ use Symfony\Bundle\SecurityBundle\Security;
 class SearchController extends AbstractController
 {
     public function __construct(
-        private readonly Security $security,
-        private readonly PixieService $pixieService)
+        private readonly PixieService $pixieService,
+//        private ?AuthorizationCheckerInterface $authorizationChecker=null
+    )
     {
     }
 
@@ -76,7 +77,8 @@ class SearchController extends AbstractController
                 browsable: $property->getIndex()=='INDEX',
             );
             if ($condition = $property->getSetting('security')) {
-                $column->condition = $this->security->isGranted($condition); // sprintf("isGranted('%s')", $condition);
+//                $column->condition = $this->security->isGranted($condition); // sprintf("isGranted('%s')", $condition);
+                $column->condition = $this->isGranted($condition); // sprintf("isGranted('%s')", $condition);
             }
             if ($title = $property->getSetting('title')) {
                 $column->title = $title;
@@ -99,4 +101,13 @@ class SearchController extends AbstractController
             'filter' => ['table' => $tableName]
         ]);
     }
+
+//    private function isGranted($attribute, $subject = null): bool
+//    {
+//        if (! $this->authorizationChecker) {
+//            throw new \Exception("try composer require symfony/security-bundle to use this feature");
+//        }
+//        return $this->authorizationChecker->isGranted($attribute, $subject);
+//    }
+
 }

@@ -43,7 +43,7 @@
 
                     {% if appLocale and (appLocale != supportedLocale) %}
                         <span class="text-muted">
-                        {{ supportedLocale|language_name(appLocale) }}
+                        ({{ supportedLocale|language_name(appLocale) }})
                     </span>
                     {% endif %}
                 </div>

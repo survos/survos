@@ -12,16 +12,68 @@
         Fields, not just property.  Language, country, etc.
     </p>
 
+    <h3>Loading</h3>
+{% set _sc = 'clipboard' %}
+
+    <div {{ stimulus_controller(_sc, {
+        successContent: "copied!"
+    })
+    }} >
+
+        <textarea cols="80" rows="{{ config.source.instructions|split("\n")|length}}"
+                {{ stimulus_target(_sc, 'source') }}>
+            {{ config.source.instructions|trim }}</textarea>
+
+        <button type="button" {{ stimulus_action(_sc, 'copy') }}
+                {{ stimulus_target(_sc, 'button') }}
+        >
+            {{ ux_icon('pajamas:copy-to-clipboard') }}
+        </button>
+    </div>
+
+    <h3>Individual lines</h3>
+    {% for line in config.source.instructions|split("\n") %}
+        <li {{ stimulus_controller(_sc, {
+        successContent: "copied"
+    }) }}>
+            <button type="button" {{ stimulus_action(_sc, 'copy') }}
+                    {{ stimulus_target(_sc, 'button') }}
+            >
+                {{ ux_icon('pajamas:copy-to-clipboard') }}
+            </button>
+            <span {{ stimulus_target(_sc, 'source') }}>{{ line }}</span>
+        </li>
+
+    {% endfor %}
+
+
+
+    <textarea rows="10" cols="90">
+
+    </textarea>
+
+
+    clipboard
+
+
+
     <h1>Capped at {{ limit }}</h1>
 
     {% for tableName, table in tables %}
         <li>
         <a href="{{ path('pixie_table', {pixieCode: pixieCode, tableName: tableName}) }}">
-            Browse {{ tableName }}
-            {{ table.count }}
+            {{ tableName }}
+            Field Graphs
+            (n = {{ table.count }})
         </a>
 
-        <ul>
+            <a href="{{ path('pixie_browse',
+                {'pixieCode': pixieCode, tableName: tableName}) }}">
+                Preview {{ tableName }} Data
+            </a>
+
+
+            <ul>
             {% for indexName, values in table.counts %}
                 <li>
                     {{ values|length }} {{ indexName }} Values

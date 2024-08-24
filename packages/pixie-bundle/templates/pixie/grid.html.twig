@@ -3,11 +3,13 @@
 {% block title %}{{ pixieCode }} Grid{% endblock %}
 
 {% block body %}
-    <a href="{{ apiUrl }}" target="_blank">{{ apiUrl }}</a>
     <a href="{{ path('survos_index_stats', {indexName: indexName}) }}">
-        survos_index_stats
-
+        stats
+    </a> |
+    <a href="{{ path('pixie_table', {pixieCode: pixieCode, tableName: tableName}) }}">
+        config
     </a>
+
     {#    {% set columns = [ #}
     {#        'table', #}
     {#        'label', #}
@@ -32,13 +34,18 @@
     >
         <twig:block name="thumbnail">
             <div class="width-100">
-            <img class="img-thumbnail" src="{{ row.is_shown_by }}" />
+            <img class="img-thumbnail"
+                 src="{{ row.is_shown_by|default(row.image_url) }}" />
             </div>
         </twig:block>
 
+        <twig:block name="chevron">
+            &nbsp;
+        </twig:block>
         <twig:block name="tombstone">
-            <div class="custom-heading text-truncate-three-line">
-                <b>{{ row.title }}</b>
+            <div class="tombstone custom-headingx text-truncate-three-line">
+                {# really the translatable fields #}
+                <b>{{ row.title|default(row.label) }}</b>
                 <div class="text-truncate-three-line">
                     {{ row.description }}
                 </div>
@@ -46,7 +53,12 @@
         </twig:block>
 
         <twig:block name="pixie_key">
-            <code>{{ row.pixie_key }}</code>
+
+            {% set lrp =  row.rp|merge({_locale: globals.locale|default('en')}) %}
+            {% set pixieItemUrl = path('pixie_show_record', lrp) %}
+            <a href="{{ pixieItemUrl }}">
+                #<code>{{ row.id }}</code>
+            </a>
         </twig:block>
         <twig:block name="id">
             <div style="width: 40px">

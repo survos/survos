@@ -37,8 +37,8 @@ class PixieController extends AbstractController
     public function __construct(
         private ParameterBagInterface  $bag,
         private PixieService           $pixieService,
-        private MessageBusInterface $bus,
-        private UrlGeneratorInterface  $urlGenerator,
+        private ?UrlGeneratorInterface  $urlGenerator=null,
+        private ?MessageBusInterface $bus=null,
         private ?WorkflowHelperService $workflowHelperService = null,
         private ?ChartBuilderInterface $chartBuilder = null,
     )
@@ -373,6 +373,7 @@ class PixieController extends AbstractController
             'kv' => $kv,
             'tables' => $tables,
             'pixieCode' => $pixieCode,
+            'config' => $this->pixieService->getConfig($pixieCode)
             ]);
     }
 

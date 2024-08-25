@@ -4,10 +4,13 @@
 
 namespace Survos\BunnyBundle;
 
+use Survos\BunnyBundle\Controller\BunnyController;
 use Survos\BunnyBundle\Service\BunnyService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SurvosBunnyBundle extends AbstractBundle
@@ -23,25 +26,17 @@ class SurvosBunnyBundle extends AbstractBundle
             ->setAutowired(true)
             ->setPublic(true);
 
-        $builder->autowire(BunnCon::class)
+        $builder->autowire(BunnyController::class)
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')
-            ->setArgument('$bus', new Reference('debug.traced.messenger.bus.default', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
         ;
 
-        // $builder->setParameter('survos_workflow.direction', $config['direction']);
-
-        // twig classes
-
+        // twig classes, for bunny_url
         /*
         $definition = $builder
         ->autowire('survos.barcode_twig', BarcodeTwigExtension::class)
         ->addTag('twig.extension');
 
-        $definition->setArgument('$widthFactor', $config['widthFactor']);
-        $definition->setArgument('$height', $config['height']);
-        $definition->setArgument('$foregroundColor', $config['foregroundColor']);
         */
     }
 

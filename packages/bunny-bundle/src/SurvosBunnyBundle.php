@@ -4,6 +4,7 @@
 
 namespace Survos\BunnyBundle;
 
+use Survos\BunnyBundle\Command\BunnyListCommand;
 use Survos\BunnyBundle\Controller\BunnyController;
 use Survos\BunnyBundle\Service\BunnyService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -21,6 +22,8 @@ class SurvosBunnyBundle extends AbstractBundle
         $container->services()->alias(BunnyService::class, $serviceId);
         $builder->autowire($serviceId, BunnyService::class)
             ->setArgument('$apiKey', $config['api_key'])
+            ->setArgument('$readonlyPassword', $config['readonly_password'])
+            ->setArgument('$password', $config['password'])
             ->setArgument('$storageZone', $config['storage_zone'])
             ->setAutoconfigured(true)
             ->setAutowired(true)
@@ -30,6 +33,14 @@ class SurvosBunnyBundle extends AbstractBundle
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')
         ;
+
+        foreach ([BunnyListCommand::class] as $commandName) {
+            $builder->autowire($commandName)
+                ->setAutoconfigured(true)
+                ->addTag('console.command')
+            ;
+        }
+
 
         // twig classes, for bunny_url
         /*
@@ -45,6 +56,8 @@ class SurvosBunnyBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
                 ->scalarNode('api_key')->defaultValue(null)->end()
+                ->scalarNode('readonly_password')->defaultValue(null)->end()
+                ->scalarNode('password')->defaultValue(null)->end()
                 ->scalarNode('storage_zone')->defaultValue(null)->end()
 //            ->integerNode('cache')->defaultValue('1h')->end()
             ->end();

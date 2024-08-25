@@ -40,15 +40,18 @@ class BunnyController extends AbstractController
     ): Response|array
     {
         $baseApi = $this->bunnyService->getBaseApi();
-        $zone = $baseApi->getStorageZone($id)->getContents();
-        $accessKey = $zone['ReadOnlyPassword'];
-        $edgeStorageApi = $this->bunnyService->getEdgeApi($accessKey);
+//        $zone = $baseApi->getStorageZone($id)->getContents();
+//        $accessKey = $zone['ReadOnlyPassword'];
+//        $accessKey = null;
+        $zone = null;
+        $edgeStorageApi = $this->bunnyService->getEdgeApi();
         $list = $edgeStorageApi->listFiles(
             storageZoneName: $zoneName,
             path: $path
         );
         return [
             'zone' => $zone,
+            'zoneName' => $zoneName,
             'path' => $path,
             'files' => $list->getContents()
         ];

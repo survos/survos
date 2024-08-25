@@ -3,6 +3,7 @@
 namespace Survos\BunnyBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Http\Discovery\Psr18Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -25,6 +26,8 @@ class BunnyService
         private ?BaseAPI $baseApi=null,
         private int $cacheTimeout = 0,
         private ?string $apiKey = null,
+        private ?string $readonlyPassword = null,
+        private ?string $password = null, // for writing
         private ?EdgeStorageAPI $edgeStorageApi = null,
         private ?string $storageZone = null,
     ) {
@@ -37,10 +40,6 @@ class BunnyService
             apiKey: $this->apiKey,
             client: $this->bunnyClient,
         );
-
-        return;
-
-
     }
 
     public function getBaseApi(): ?BaseAPI
@@ -48,11 +47,11 @@ class BunnyService
         return $this->baseApi;
     }
 
-    public function getEdgeApi(string $readOnlyPassword): EdgeStorageAPI
+    public function getEdgeApi(?string $readOnlyPassword=null): EdgeStorageAPI
     {
         if (!$this->edgeStorageApi) {
             $this->edgeStorageApi = new EdgeStorageAPI(
-                apiKey: $readOnlyPassword,
+                apiKey: $readOnlyPassword??$this->readonlyPassword,
                 client: $this->bunnyClient,
                 region: Region::NY // is this global? Or by zone?
             );

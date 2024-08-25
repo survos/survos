@@ -31,6 +31,7 @@ jobs:
           - {local_path: 'api-grid-bundle', split_repository: 'SurvosApiGridBundle'}
           - {local_path: 'auth-bundle', split_repository: 'SurvosAuthBundle'}
 #          - {local_path: 'album-bundle', split_repository: 'SurvosAlbumBundle'}
+          - {local_path: 'bunny-bundle', split_repository: 'SurvosBunnyBundle'}
           - {local_path: 'barcode-bundle', split_repository: 'BarcodeBundle'}
           - {local_path: 'bootstrap-bundle', split_repository: 'BootstrapBundle'}
           - {local_path: 'command-bundle', split_repository: 'SurvosCommandBundle'}

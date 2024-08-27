@@ -73,7 +73,7 @@ final class BunnyConfigCommand extends InvokableServiceCommand
             }
             $table->render();
             $config['survos_bunny'] = [
-                'api_key' => $apiKey,
+                'api_key' => "%env(BUNNY_API_KEY)%",
                 'zones' => $zoneConfig,
             ];
 

@@ -16,6 +16,15 @@
             <div class="col-md-2">
                 <div class="card shadow-sm">
                     <div class="card-body p-1">
+                        {% if row.images.web|default(false) %}
+                        {% set i = row.images.web %}
+                        <img src="{{ i.url }}" class="w-100 rounded-2 object-fit-cover"/>
+                        {% endif %}
+{#                        {% for image in row.images.web|default([]) %}#}
+{#                            <li>#}
+{#                                {{ dump(image) }}#}
+{#                            </li>#}
+{#                        {% endfor %}#}
                         {% for imageField in ['thumbnail','is_shown_by'] %}
                             {% set value = attribute(row,imageField) %}
                             {% if value %}
@@ -50,6 +59,10 @@
 {% endblock %}
 
 {% block details %}
+{#    {% set map = {#}
+{#        id: 'primative',#}
+{#        code: 'primative',#}
+{#    } %}#}
     {# {% for var in ['id','code','object_number'] %}
         <div class="primitives">
         {% set value = attribute(data,var)|default(false) %}
@@ -59,7 +72,7 @@
         </div>
     {% endfor %} #}
 
-    {% for var in ['codigo_de_catalogacion'] %}
+    {% for var in ['codigo_de_catalogacion','object_number','code'] %}
         {% set value = attribute(data,var)|default(false) %}
         {% if value %}
             <div class="primitives mb-3 badge bg-dark bg-opacity-10 text-muted">
@@ -101,7 +114,7 @@
             {% endfor %}
         </div>
 
-        {% for var in ['description'] %}
+        {% for var in ['description','tombstone', 'did_you_know'] %}
             <div class="fields-text">
                 <p class="text-muted mb-2">{{ attribute(data,var)|default(false) }}</p>
             </div>
@@ -119,15 +132,22 @@
             {% endfor %}
         </div>
 
-    {% for var in ['dynasty','reign','culture','style','medium'] %}
+    {% for var in ['dynasty','reign','culture','style','medium','technique'] %}
         {% set value = attribute(data,var)|default(false) %}
         {% if value %}
         <div class="fields-text">
             <code>{{ var }}</code>
+            {% if value is iterable %}
+                {% for v in value %}
+                    <li>{{ v }}</li>
+                {% endfor %}
+                {% else %}
             <span class="text-success">{{ value }}</span>
+                    {% endif %}
         </div>
         {% endif %}
     {% endfor %}
+{% endblock %}{% block x %}
 
 
 {% endblock %}

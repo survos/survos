@@ -11,8 +11,11 @@
     <h1>{{ pixieCode }}.{{ tableName }} {{ key }}</h1>
 
 <div class="row">
-    <div class="col-md-6">
-        IMAGE
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+            </div>
+        </div>
     </div>
     <div class="col-md-6">
         {% with {data: row.data} %}
@@ -35,18 +38,42 @@
 {% endblock %}
 
 {% block details %}
-    {% for var in ['id','code','object_number'] %}
+    {# {% for var in ['id','code','object_number'] %}
         <div class="primitives">
         {% set value = attribute(data,var)|default(false) %}
         {% if value %}
-            <b>{{ var }}</b><i>{{ value }}</i>
+            <b>{{ var }}</b><i> : {{ value }}</i>
         {% endif %}
-    {% endfor %}
         </div>
+    {% endfor %} #}
 
-        {% for var in ['label','description'] %}
+    {% for var in ['codigo_de_catalogacion'] %}
+        <div class="primitives mb-2 badge bg-dark bg-opacity-10 text-muted">
+        {% set value = attribute(data,var)|default(false) %}
+        {% if value %}
+            {# <b>{{ var }}</b> #}
+            <i> {{ value }}</i>
+        {% endif %}
+        </div>
+    {% endfor %}
+
+        {% for var in ['label'] %}
             <div class="fields-text">
-                <code>{{ var }}</code>
+                {# <code>{{ var }}</code> #}
+                <h5 class="fw-semibold">{{ attribute(data,var)|default(false) }}</h5>
+            </div>
+        {% endfor %}
+
+        {% for var in ['reign', 'dynasty'] %}
+            <div>
+                {# <code>{{ var }}</code> #}
+                <h5 class="fw-semibold">{{ attribute(data,var)|default(false) }}</h5>
+            </div>
+        {% endfor %}
+
+        {% for var in ['description'] %}
+            <div class="fields-text">
+                {# <code>{{ var }}</code> #}
                 <div class="text-muted">{{ attribute(data,var)|default(false) }}</div>
             </div>
         {% endfor %}

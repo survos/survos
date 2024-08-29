@@ -96,6 +96,7 @@
     {% for group, keys in groups %}
         {% with {title: group, keys:keys} %}
             {% if group %}
+{#                {{ dump(row.data) }}#}
             {{ block(group) }}
             {% else %}
                 <text class="bg-danger">
@@ -235,12 +236,12 @@
 
 {% block text %}
     <div class="pb-2">
-        <h3 class="fw-semibold mb-3 text-capitalize">{{ group }}</h3>
+        <h3 class="fw-semibold mb-3 text-capitalize">{{ data.title|default(data.label|default(data.name|default("~"))) }}</h3>
         {% for var in keys %}
             {% set value = attribute(data,var)|default(false) %}
             {% if value %}
                 <div class="fields-text">
-                    {# <code>{{ var }}</code> #}
+{#                     <code>{{ var }}</code>#}
                     {# @todo: add translation #}
                     {#                <h5 class="fw-semibold">{{ var }}</h5> #}
                     <p class="text-{{ var }} mb-2">{{ value }}</p>
@@ -274,11 +275,9 @@
 
         {% for var in keys %}
             {% set value = attribute(data,var)|default(false) %}
-            <h6 class="px-3 fw-medium pt-3 text-capitalize">{{ var }}</h6>
-    {#        {{ dump(var, iconMap) }}#}
-            {% set icon = iconMap[var]|default(false) %}
-
             {% if value %}
+{#                <h6 class="px-3 fw-medium pt-3 text-capitalize">{{ var }}</h6>#}
+                {% set icon = iconMap[var]|default(false) %}
                 <li class="list-group-item bg-light pt-0">
                     <div class="fields-text">
                         <span class="align-middle me-2">
@@ -310,19 +309,33 @@
 {% endblock %}
 
 {% block global %}
-    <div class="mb-4">
-        <h4 class="fw-medium my-3 text-capitalize">Globals</h4>
+        {% if data.citation|default(false) %}
+            <div class="mb-4">
+        Citation: <a href="{{ data.citation }}" target="_blank">{{ data.citation }}</a>
+            </div>
+        {% endif %}
+
+    {% if data.credit|default(false) %}
+        <div class="mb-4">
+            Credit: {{ data.credit }}
+        </div>
+    {% endif %}
+
+    <details>
+        <summary>Globals (debug)
+{#            <h4 class="fw-medium my-3 text-capitalize">Globals</h4>#}
+        </summary>
         <p>
             universal fields, can be used anywhere in the template with <code>row.var</code>
         </p>
         <ul class="list-group">
             {% for var in keys %}
                 <li class="list-group-item px-0 py-1 border-0">
-                    <code>row.{{ var }}</code>: <span class="fw-medium">{{ attribute(data, var) }}</span>
+                    <code>data.{{ var }}</code>: <span class="fw-medium">{{ attribute(data, var) }}</span>
                 </li>
             {% endfor %}
         </ul>
-    </div>
+    </details>
 {% endblock %}
 
 {% block date %}

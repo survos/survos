@@ -15,7 +15,7 @@
     <div class="inner-page">
         <h1>{{ pixieCode }}.{{ tableName }} {{ key }}</h1>
 
-        <div class="section-item">
+        {# <div class="section-item">
             <div class="item__image">
                 {% for imageField in ['thumbnail','is_shown_by'] %}
                     {% set value = attribute(row,imageField) %}
@@ -29,15 +29,15 @@
             {% with {data: row.data} %}
                 {{ block('details') }}
             {% endwith %}
-        </section>
+        </section> #}
 
 
-        <div class="card mb-4 d-none">
+        <div class="card mb-4">
             <div class="card-body p-4">
                 <div class="row g-4">
                     <div class="col-md-2">
                         <div class="card shadow-sm">
-                            <div class="card-body p-1">
+                            <div class="card-body p-1 text-center">
                                 <div>
                                     {% for imageUrl in row.imageUrls|default([]) %}
                                         {# candidate for gLightbox or a slideshow or something #}
@@ -48,7 +48,7 @@
                                 <twig:ux:icon name="{{ icon }}" height="15" width="15"/>
                                 {% if row.images.web|default(false) %}
                                     {% set i = row.images.web %}
-                                    <img src="{{ i.url }}" class="w-100 rounded-2 object-fit-cover"/>
+                                    <img src="{{ i.url }}" class="w-100 rounded-2 object-fit-cover" style="max-width: 150px"/>
                                 {% endif %}
                                 {#                        {% for image in row.images.web|default([]) %} #}
                                 {#                            <li> #}
@@ -58,7 +58,7 @@
                                 {% for imageField in ['thumbnail','is_shown_by'] %}
                                     {% set value = attribute(row,imageField) %}
                                     {% if value %}
-                                        <img src="{{ value }}" class="w-100 rounded-2 object-fit-cover"/>
+                                        <img src="{{ value }}" class="w-100 rounded-2 object-fit-cover" style="max-width: 150px"/>
                                         {# <br /><b>{{ value }}</b> #}
                                     {% endif %}
                                 {% endfor %}
@@ -90,12 +90,11 @@
 {% endblock %}
 
 {% block details %}
-    {% for group, keys in groups %}
+    {# {% for group, keys in groups %}
         {% with {title: group, keys:keys} %}
             {{ block(group) }}
         {% endwith %}
-
-    {% endfor %}
+    {% endfor %} #}
 
     {# {% for var in ['id','code','object_number'] %}
         <div class="primitives">
@@ -105,6 +104,33 @@
         {% endif %}
         </div>
     {% endfor %} #}
+
+<div class="row"> 
+    <div class="col-md-6">
+        {% for var in ['title'] %}
+            {% set value = attribute(data,var)|default(false) %}
+            {% if value %}
+                <p class="mb-2"> {{ value }}</p>
+            {% endif %}
+        {% endfor %}
+        {% for var in ['label'] %}
+            {% set value = attribute(data,var)|default(false) %}
+            {% if value %}
+                <p class="mb-2"> {{ value }}</p>
+            {% endif %}
+        {% endfor %}
+        {% for var in ['description','tombstone', 'did_you_know'] %}
+                <p class="text-muted mb-2">{{ attribute(data,var)|default(false) }}</p>
+        {% endfor %}
+    </div>
+    <div class="col-md-6">
+        {% for var in ['description','tombstone', 'did_you_know'] %}
+            <div class="fields-text">
+                <p class="text-muted mb-2">{{ attribute(data,var)|default(false) }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
     {% for var in ['codigo_de_catalogacion','object_number','code'] %}
         {% set value = attribute(data,var)|default(false) %}
@@ -145,12 +171,6 @@
             </h6>
         {% endfor %}
     </div>
-
-    {% for var in ['description','tombstone', 'did_you_know'] %}
-        <div class="fields-text">
-            <p class="text-muted mb-2">{{ attribute(data,var)|default(false) }}</p>
-        </div>
-    {% endfor %}
 
     {% for var in ['cronologia'] %}
         <div class="fields-text">
@@ -244,6 +264,7 @@
 {% endblock %}
 
 {% block internal %}
+
     <h4 class="fw-medium my-3 text-capitalize">{{ group }}</h4>
     <div class="row">
         {% for key in keys %}

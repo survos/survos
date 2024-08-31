@@ -157,7 +157,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
       //                $this->io->writeln("Flushing " . count($records));
                         $results = $this->meiliService->waitForTask($task);
                     } else {
-                        dump($task, count($recordsToWrite), $primaryKey);
+//                        dump($task, count($recordsToWrite), $primaryKey);
                     }
                     $recordsToWrite = [];
                 }

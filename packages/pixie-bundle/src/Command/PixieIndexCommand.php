@@ -53,7 +53,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         PixieService                                          $pixieService,
         PixieImportService                                    $pixieImportService,
         #[Argument(description: 'config code')] string        $pixieCode,
-        #[Option(description: 'table name(s?), all if not set')] string         $table=null,
+        #[Option('table', description: 'table name(s?), all if not set')] string         $tableFilter=null,
         #[Option(name: 'trans', description: 'fetch the translation strings')] bool $addTranslations=false,
         #[Option(description: "reset the meili index")] ?bool                      $reset=null,
         #[Option(description: "max number of records per table to export")] int                     $limit = 0,
@@ -74,25 +74,35 @@ final class PixieIndexCommand extends InvokableServiceCommand
         $kv = $pixieService->getStorageBox($pixieCode);
         $config = $pixieService->getConfig($pixieCode);
 
-        $indexName = $this->meiliService->getPrefixedIndexName(PixieService::getMeiliIndexName($pixieCode));
-
-        $io->title($indexName);
-        if ($reset) {
-            $this->io()->warning("resetting $indexName");
-            $this->meiliService->reset($indexName);
+        if ($tableFilter) {
+            assert($kv->tableExists($tableFilter), "Missing table $tableFilter: \n".join("\n", $kv->getTableNames()));
         }
-        $index = $this->configureIndex($config, $indexName);
-//            $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => Instance::DB_CODE_FIELD]));
 
-        // yikes, we need to configure all facets unless we have a different index for each table
-        if ($table) {
-            assert($kv->tableExists($table), "Missing table $table: \n".join("\n", $kv->getTableNames()));
-        }
 
         $recordsToWrite=[];
         $key = $key??'key';
         // now iterate
         foreach ($kv->getTables() as $tableName => $table) {
+            if ($tableFilter && ($tableName <> $tableFilter)) {
+                continue;
+            }
+
+            $indexName = $this->meiliService->getPrefixedIndexName(PixieService::getMeiliIndexName($pixieCode, $tableName));
+            $io->title($indexName);
+
+            if ($reset) {
+                $this->io()->warning("resetting $indexName");
+                $this->meiliService->reset($indexName);
+            }
+            if ($kv->count($tableName) == 0) {
+                $this->io()->warning("Skipping $tableName (no records)");
+                continue;
+            }
+            $index = $this->configureIndex($config, $indexName, $tableName);
+//            $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => Instance::DB_CODE_FIELD]));
+
+            // yikes, we need to configure all facets unless we have a different index for each table
+
             $progressBar = new ProgressBar($io, $kv->count($tableName));
             $primaryKey = 'pixie_key'; // $kv->getPrimaryKey($tableName); // ??
             $count = 0;
@@ -169,6 +179,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
             $progressBar->finish();
 
             $task = $index->addDocuments($recordsToWrite, $primaryKey);
+            $recordsToWrite = [];
             $this->meiliService->waitForTask($task);
 
 
@@ -196,7 +207,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         return self::SUCCESS;
     }
 
-    private function configureIndex(Config $config, string $indexName): Indexes
+    private function configureIndex(Config $config, string $indexName, ?string $tableName=null): Indexes
     {
 
         $primaryKey = 'pixie_key';
@@ -204,7 +215,10 @@ final class PixieIndexCommand extends InvokableServiceCommand
         $filterable = ['table'];
         $sortable = ['id']; // hack
 
-        foreach ($config->getTables() as $table) {
+        // foreach ($config->getTables() as $table)
+        $table = $config->getTable($tableName);
+        {
+
             foreach ($table->getProperties() as $property) {
                 $code = $property->getCode();
                 // the table pk is renamed to {tableName}_{pk}
@@ -225,6 +239,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         "maxValuesPerFacet" => $this->meiliService->getConfig()['maxValuesPerFacet']
     ],
             ]);
+//        dd($results, $settings);
 
 //        dd($results, $settings);
         // wait until the index is set up.

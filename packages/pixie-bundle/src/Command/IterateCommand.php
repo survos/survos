@@ -87,7 +87,12 @@ final class IterateCommand extends InvokableServiceCommand
             if ($marking) {
                 $where = ['marking' => $marking];
             }
-            $progressBar = new ProgressBar($io, $count = $kv->count(where: $where));
+            $count = $kv->count(where: $where);
+            if (!$count) {
+                $this->io()->warning("No items found for " . json_encode($where));
+                return self::SUCCESS;
+            }
+            $progressBar = new ProgressBar($io, $count);
             $idx = 0;
             $stamps = [];
             if ($transport) {
@@ -98,9 +103,10 @@ final class IterateCommand extends InvokableServiceCommand
                 // since we have the workflow and transition, we can do a "can" here.
                 if ($workflow && $transition) {
                     if (!$workflow->can($item, $transition)) {
-//                        dump("$item cannot transition to $transition");
+                        dd("$item cannot transition from {$item->getMarking()} to $transition");
                         continue;
                     } else {
+                        // if there's a workflow and a transition, dispatch a transition message, otherwise a simple row event
                         $envelope = $this->bus->dispatch($message = new PixieTransitionMessage(
                             $pixieCode,
                             $key,
@@ -110,7 +116,6 @@ final class IterateCommand extends InvokableServiceCommand
                             $transport
                         ), $stamps);
                     }
-                    // if there's a workflow and a transition, dispatch a transition message, otherwise a simple row event
                 } else {
                     // no workflow, so dispatch the row event and let the listeners handle it.
                     $this->eventDispatcher->dispatch(

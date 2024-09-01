@@ -12,6 +12,7 @@ use Survos\PixieBundle\StorageBox;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -58,6 +59,7 @@ final class IterateCommand extends InvokableServiceCommand
         #[Option(description: 'message transport')] ?string   $transport=null,
         #[Option(description: 'tags (for listeners)')] ?string   $tags=null,
         #[Option] int                                         $limit = 0,
+        #[Option] string                                         $dump = '',
 
     ): int
     {
@@ -98,8 +100,22 @@ final class IterateCommand extends InvokableServiceCommand
             if ($transport) {
                 $stamps[] =  new TransportNamesStamp($transport);
             }
+            if ($dump) {
+                $headers = explode(',', $dump);
+                if (!in_array('key', $headers)) {
+                    $headers[] = 'key';
+                }
+                $table = new Table($io);
+                $table->setHeaders($headers);
+                $table->render();
+            }
             foreach ($kv->iterate(where: $where) as $key => $item) {
                 $idx++;
+                if ($dump) {
+                    $values = array_map(fn($key) => substr($item->{$key}(), 0, 40),$headers);
+                    $table->addRow($values);
+                    $table->render();
+                }
                 // since we have the workflow and transition, we can do a "can" here.
                 if ($workflow && $transition) {
                     if (!$workflow->can($item, $transition)) {

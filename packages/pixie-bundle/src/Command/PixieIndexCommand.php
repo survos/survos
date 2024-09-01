@@ -7,6 +7,7 @@ use App\Service\TranslationService;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Service\MeiliService;
+use Survos\PixieBundle\Event\StorageBoxEvent;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieImportService;
@@ -15,6 +16,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -25,6 +28,7 @@ use Zenstruck\Console\InvokableServiceCommand;
 use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 #[AsCommand('pixie:index', 'create a Meili index"')]
 final class PixieIndexCommand extends InvokableServiceCommand
@@ -40,6 +44,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         private ParameterBagInterface $bag,
         private readonly PixieService $pixieService,
         private SerializerInterface $serializer,
+        private EventDispatcherInterface $eventDispatcher,
         private ?MeiliService $meiliService = null,
         private ?SluggerInterface $asciiSlugger = null,
     )
@@ -110,10 +115,23 @@ final class PixieIndexCommand extends InvokableServiceCommand
 
             // first, fetch all the translations
 
-            $transKv = $this->pixieService->getStorageBox(PixieInterface::PIXIE_TRANSLATION);
+
+            $transKv = $this->eventDispatcher->dispatch(new StorageBoxEvent(
+                $pixieCode,
+                isTranslation: true,
+                tags: ['fetch']
+            ))->getStorageBox();
+
+//            $transKv = $this->pixieService->getStorageBox($pixieCode, $this->pixieService->getPixieFilename());
+//            $transKv = $this->translationService->getTranslationStorageBox($pixieCode);
+//            $tKvConfig = $tKv->getConfig();
+
             $transKv->select(TranslationService::ENGINE);
             foreach ($kv->iterate($tableName) as $idx => $row) {
                 $data = $row->getData();
+                // hack
+                $lang = $row->expected_language()??$config->getSource()->locale;
+//                dd($lang, $row);
 //                foreach ($table->getTranslatable() as $translatableProperty) {
 //                    $toTranslate[] = $row->{$translatableProperty}();
 //                }
@@ -121,16 +139,19 @@ final class PixieIndexCommand extends InvokableServiceCommand
                 // @todo: optimize fetches
                 if ($addTranslations) {
                     foreach ($table->getTranslatable() as $translatableProperty) {
+                        $data->_translations=[];
                         if ($textToTranslate = $row->{$translatableProperty}()) {
                             $toTranslate[] = $textToTranslate;
-                            $key = TranslationService::calculateHash($textToTranslate, $config->source->locale);
+                            $key = TranslationService::calculateHash($textToTranslate, $lang);
                             // @todo: batch keys with "in"
                             $translations = $transKv->iterate(where: ['hash' => $key]);
+//                            dd(iterator_to_array($translations), $textToTranslate,  $key, $transKv->getFilename());
                             foreach ($translations as $translation) {
                                 $data->_translations[$translation->target()][$translatableProperty] = $translation->text();;
                             }
                         }
                     }
+//                    dd($data, $data->_translations);
                     unset($data->translations);
                 }
                 // this is the data we got when inserting the original text

@@ -65,10 +65,12 @@
             template: '@SurvosBootstrap/knp_top_menu.html.twig',
             style: 'navbar'}) %}
         {# ugh, the classes here are pure hacks until rk can make sense of menu rendering #}
+        {% if wrapperClass|default(false) %}<div class="{{ wrapperClass }}">{% endif %}
         <div>
             {{ menuHtml|raw }}
 
         </div>
+        {% if wrapperClass|default(false) %}</div>{% endif %}
 
     {% elseif type in ['top_navbar', 'top_page', NAVBAR_MENU, NAVBAR_MENU2, NAVBAR_MENU3] %}
         {% set menu = knp_menu_get(menuItem) %}

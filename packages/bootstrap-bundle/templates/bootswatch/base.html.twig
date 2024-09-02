@@ -13,6 +13,10 @@
 
 {% endblock %}
 
+{% block SIDEBAR_MENU %}
+overwrite this!
+{% endblock %}
+
 {% block PAGE_MENU %}
     <!-- {{ _self }} (to be overwritten.) -->
         {{ component('menu', {
@@ -61,6 +65,8 @@
 
         </div>
     </div>
+
+    {{ block('SIDEBAR_MENU') }}
 
     <div class="{{ containerClass }}">
         {% block page_header %}

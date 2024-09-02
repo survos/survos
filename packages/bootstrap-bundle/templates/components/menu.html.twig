@@ -58,7 +58,7 @@
         {% set menuHtml = knp_menu_render(menuItem, {
             allow_safe_labels: true,
             rootAttributes: {
-                class:"nav nav-justify-end list-group list-group-horizontal d-print-none sub-navbar"
+                class:"nav nav-justify-end mt-0 list-group list-group-horizontal d-print-none sub-navbar collapse collapseExamplePageNav show",
             },
             leaf_class: 'dropdown-item',
             currentClass  : "current ",
@@ -66,7 +66,10 @@
             style: 'navbar'}) %}
         {# ugh, the classes here are pure hacks until rk can make sense of menu rendering #}
         {% if wrapperClass|default(false) %}<div class="{{ wrapperClass }}">{% endif %}
-        <div>
+        <div class="pageNavMenu mt-4">
+            <button class="navbar-toggler pageMenu" id="pageMenu" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExamplePageNav" aria-expanded="false" aria-controls="collapseExamplePageNav">
+                {{ ux_icon('bi:list-ul') }}
+            </button>
             {{ menuHtml|raw }}
 
         </div>
@@ -79,7 +82,7 @@
             {{ knp_menu_render(menuItem, {
                 allow_safe_labels: true,
                 rootAttributes: {
-                    class:"navbar-nav me-auto mb-2 mb-lg-0 list-group-horizontal d-print-none"
+                    class:"navbar-nav me-auto mb-lg-0 list-group-horizontal d-print-none"
                 },
                 currentClass  : "active",
                 template: '@SurvosBootstrap/knp_top_menu.html.twig',
@@ -95,3 +98,18 @@
 {#    project: project, #}
 {#    title: project.code #}
 {#    } #}
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Get references to the elements
+  var pageMenu = document.getElementById('pageMenu');
+  var collapseExamplePageNav = document.querySelector('.collapseExamplePageNav');
+
+  // Add click event listener to the pageMenu
+  pageMenu.addEventListener('click', function() {
+    // Toggle the 'show' class on the collapseExamplePageNav element
+    collapseExamplePageNav.classList.toggle('show');
+  });
+});
+
+</script>

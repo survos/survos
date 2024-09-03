@@ -72,6 +72,15 @@
 
 {# sidebar content start #}
     <aside class="navbar navbar-vertical navbar-expand-lg custom-sidebar sidebar-open" data-bs-theme="dark" id="asideSidebar">
+        {% block SIDEBAR_MENU %}
+            {% set options = {
+                pixieCode: pixieCode|default(false)
+            } %}
+            <twig:menu :type="SIDEBAR_MENU" :caller="_self" :options="options">
+
+            </twig:menu>
+
+        {% endblock %}
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -141,7 +150,7 @@
                     </li>
                 </ul>
             </div>
-        </div>    
+        </div>
     </aside>
 {# sidebar content end #}
 

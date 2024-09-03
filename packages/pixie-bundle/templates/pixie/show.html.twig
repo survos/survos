@@ -269,7 +269,7 @@
 {% block text %}
     <div class="pb-2">
         <h3 class="fw-semibold mb-3 text-capitalize">{{ data.title|default(data.label|default(data.name|default("~"))) }}</h3>
-        {% set _translation = attribute(data, '_translations') %}
+        {% set _translation = attribute(data, '_translations')|default({}) %}
         {% set _fields = attribute(_translation, app.locale)|default('!!') %}
         {% for var in keys %}
             {% set translatedValue = attribute(_fields, var)|default('x') %}

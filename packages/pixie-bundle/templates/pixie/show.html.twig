@@ -164,7 +164,7 @@
             <p class="mb-2 d-flex align-items-center flex-wrap gap-2">
                 {#                {{ ux_icon('tabler:ruler-measure', {width: "30px"}) }} #}
                 {% for d in ['height','width','length','depth','radius'] %}
-                
+
                     {% set dimValue = attribute(dimension, d)|default(false) %}
                     {% if dimValue %}
                     <span class="badge bg-light text-muted mb-0">
@@ -177,7 +177,7 @@
                         {{ dimension.units }}
                         </span>
                     {% endif %}
-                
+
                 {% endfor %}
                 {# if not enough space to show all above, e.g. mobile #}
                 {# {{ dimension.units }} #}
@@ -185,7 +185,7 @@
         {% endfor %}
 
         {% for ww in attribute(row, 'weight')|default([]) %}
-            <p> 
+            <p>
                 <span class="badge bg-light text-muted mb-0"
                 {{ ux_icon(dimIcons.weight) }}
                 {#                        {% for w in ww %} #}
@@ -269,7 +269,12 @@
 {% block text %}
     <div class="pb-2">
         <h3 class="fw-semibold mb-3 text-capitalize">{{ data.title|default(data.label|default(data.name|default("~"))) }}</h3>
+        {% set _translation = attribute(data, '_translations') %}
+        {% set _fields = attribute(_translation, app.locale)|default('!!') %}
         {% for var in keys %}
+            {% set translatedValue = attribute(_fields, var)|default('x') %}
+            <h3>{{ translatedValue }}</h3>
+{#            {{ data['_translations'][app.locale][key] }}#}
             {% set value = attribute(data,var)|default(false) %}
             {{ block('value') }}
             {#            {% if value %} #}

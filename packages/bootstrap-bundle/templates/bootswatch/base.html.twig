@@ -74,9 +74,11 @@
     <aside class="navbar navbar-vertical navbar-expand-lg custom-sidebar sidebar-open" data-bs-theme="dark" id="asideSidebar">
         {% block SIDEBAR_MENU %}
             {% set options = {
-                pixieCode: pixieCode|default(false)
+                pixieCode: pixieCode|default(false),
             } %}
-            <twig:menu :type="SIDEBAR_MENU" :caller="_self" :options="options">
+            <twig:menu :type="SIDEBAR_MENU"
+                       wrapperClass="bg-info"
+                     :caller="_self" :options="options">
 
             </twig:menu>
 

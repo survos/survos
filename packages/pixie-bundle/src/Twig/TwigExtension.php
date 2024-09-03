@@ -19,6 +19,13 @@ class TwigExtension extends AbstractExtension
             // Reference: https://twig.symfony.com/doc/3.x/advanced.html#automatic-escaping
             new TwigFilter('file_exists', fn (string $s) => file_exists($s)),
             new TwigFilter('json_decode', fn (string $s, bool $asArray=true) => json_decode($s, $asArray)),
+            new TwigFilter('urlize', fn($x, $target='blank', string $label=null) =>
+            filter_var($x, FILTER_VALIDATE_URL)
+                ? sprintf('<a target="%s" href="%s">%s</a>', $target, $x, $label ?: $x)
+                : $x, [
+                'is_safe' => ['html'],
+            ]),
+
         ];
     }
 

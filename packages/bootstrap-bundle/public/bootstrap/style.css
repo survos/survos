@@ -413,7 +413,7 @@
         margin-left: 0;
         margin-right: 0;
         overflow-y: auto;
-        max-height: calc(100vh - 55px);
+        max-height: calc(100vh - 70px);
     }
     .navbar-vertical.navbar-expand-lg .navbar-nav .nav-link {
         padding-top: .5rem;
@@ -452,11 +452,3 @@
         padding-left: calc(calc(calc(1rem* 2) / 2) + 3.25rem);
     }
 }
-
-/* .dropdown-menu li {
-    margin-left: 30px;
-}
-
-.dropdown-menu li .dropdown-menu li {
-    margin-left: 60px;
-} */

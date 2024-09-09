@@ -39,7 +39,11 @@
 
 {% block navbarButtons %}
 
-    <a href="{{item.uri}}" class="btn" target="_blank" rel="noreferrer">
+    {# @todo: check external, check active.  We could have dropdown buttons, too. #}
+    <a href="{{item.uri}}" class="btn"
+        {{  attributes(item.linkAttributes) }}
+       rel="noreferrer"
+    >
         {{ item.attributes.icon|default(false)
             ? ux_icon(item.attributes.icon, {style: 'width:20px'})
         }}
@@ -348,8 +352,8 @@
     <a {{ macros.attributes(attributes) }}
             href="#" id="collapse_{{itemSlug}}"
     >
-        {% if item.attribute('icon') is not empty  %}
-            <i class="{{ item.attribute('icon') }}"></i>
+        {% if item.attribute('icon') ?? false %}
+            {{ ux_icon(item.attribute('icon'), {width: '20px'}) }}
         {% endif %}
         {{ block('label') }}
 {#        <b class="caret"></b>#}

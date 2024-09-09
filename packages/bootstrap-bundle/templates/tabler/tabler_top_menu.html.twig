@@ -166,6 +166,7 @@
 {% block dropdownlinks %}
     <ul>
 
+        {{ dump(item) }}
     <{{ use_multilevel ? 'ul' : 'div'}} class="dropdown-menu">
     {% for item in item.children %}
         {# this renders the label #}
@@ -179,6 +180,7 @@
 {% endblock %}
 
 {% block collapselinks %}
+{#    <code>cols: {{ item.extras.columns|default(1) }}</code>#}
     {# the collapseELement block references this id, we might need data-parent #}
     {# isAncestor checks if the item is an ancestor of the currentItem #}
 {#    <div id="collapse_{{itemSlug}}" class="{{ matcher.isAncestor(item) ? 'show' : 'collapse' }}">#}

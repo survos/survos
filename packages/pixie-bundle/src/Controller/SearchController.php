@@ -92,6 +92,7 @@ class SearchController extends AbstractController
         ]);
         $config = $this->pixieService->getConfig($pixieCode);
         $table = $config->getTable($tableName);
+        assert($table, "Missing $tableName in $pixieCode");
         $gridColumns = [
             new Column(
                 name: 'chevron',

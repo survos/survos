@@ -115,6 +115,11 @@ class SearchController extends AbstractController
                 className: 'tombstone-heading',
                 browsable: false
             ),
+            new Column(
+                name: 'attrs',
+                className: 'tombstone-heading',
+                browsable: false
+            ),
         ];
 
 //        foreach ($table->getTranslatable() as $field) {

@@ -21,10 +21,15 @@
         showPath: show_path,
         showParams: show_params??{locale: app.locale},
         icons: {
-            bug : 'fas fa-bug'
+            bug : ux_icon("tabler:bug"),
+            url : ux_icon("tabler:world-www"),
+            api : ux_icon("tabler:api"),
+            wiki : ux_icon("simple-icons:wikidata"),
+            github: ux_icon("tabler:brand-github"),
+            ds1: ux_icon("tabler:database"),
+            rights: ux_icon("tabler:copyright")
         }
     } %}
-
     <div class="search_builder">
     <twig:api_grid
             :class="class"
@@ -48,7 +53,10 @@
             @
             &nbsp;
         </twig:block>
+        <twig:block name="attrs">
+        </twig:block>
         <twig:block name="tombstone">
+            {% set svg = globals.icons['github'] %}
             <div class="tombstone custom-heading text-truncate-four-lines">
                 {# really the translatable fields #}
                 <b>{{ row.title|default(row.label) }}</b>
@@ -60,8 +68,28 @@
                         {{ row.credit }}
                     </a>
                 {% endif %}
+{#                {{ globals.icons|json_encode|raw }}#}
+            </div>
 
 {#                @tombstone links#}
+            <div xclass='d-flex justify-content-between align-items-center gap-2'>
+                {% for x in ['url','github','api','wiki','ds1','rights'] %}
+                    {% if row[x]??false %}
+                        <a class="d-flex align-items-center gap-2" href="{{ row[x] }}" title="{{ x }}" target="_blank">
+                            {#                        {{ globals|json_encode }}#}
+                            <span title="{{ x }}">
+                            {% if x in globals.icons|keys %}
+                                {{ globals.icons[x] }}
+                            {% else %}
+                                {{ x }}
+                            {% endif %}
+                            {% set label = row[x]|replace({'https://':'', 'http://':'', 'www.':''}) %}
+                            {{ label }}
+
+                            </span>
+                        </a>
+                    {% endif %}
+                {% endfor %}
             </div>
         </twig:block>
 

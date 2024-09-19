@@ -14,10 +14,13 @@ use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\StorageBox;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Intl\Locales;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -47,6 +50,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         private EventDispatcherInterface $eventDispatcher,
         private ?MeiliService $meiliService = null,
         private ?SluggerInterface $asciiSlugger = null,
+        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales=[],
     )
     {
 
@@ -182,7 +186,6 @@ final class PixieIndexCommand extends InvokableServiceCommand
 //                }
 
                 if ($batchSize && (($progress = $progressBar->getProgress()) % $batchSize) === 0) {
-
                     $task = $index->addDocuments($recordsToWrite, $primaryKey);
                     // wait for the first record, so we fail early and catch the error, e.g. meili down, no index, etc.
                     if (!$progress) {
@@ -204,6 +207,22 @@ final class PixieIndexCommand extends InvokableServiceCommand
             $recordsToWrite = [];
             $this->meiliService->waitForTask($task);
 
+            // export?
+            $stats = $index->stats();
+//            dd($stats, $index->getSettings());
+            $io->success($stats['numberOfDocuments'] . " documents");
+            $table = new Table($this->io());
+            $table->setHeaders(['attributes', 'value']);
+//            $io->write(json_encode($stats, JSON_PRETTY_PRINT));
+            foreach ($index->getSettings() as $var=>$value) {
+                if (str_contains($var, 'Attributes')) {
+                    $table->addRow([$var, json_encode($value)]);
+                }
+            }
+            $table->render();
+            if ($io->isVerbose()) {
+//                $io->write(json_encode($index->getSettings(), JSON_PRETTY_PRINT));
+            }
 
 //            $filename = $pixieCode . '-' . $tableName.'.json';
 //            file_put_contents($filename, $this->serializer->serialize($recordsToWrite, 'json'));
@@ -216,14 +235,6 @@ final class PixieIndexCommand extends InvokableServiceCommand
         // Pixie databases go in datadir, not with their source? Or defined in the config
 
 
-        // export?
-        if ($io->isVerbose()) {
-            $stats = $index->stats();
-            $io->write(json_encode($stats, JSON_PRETTY_PRINT));
-            $io->write(json_encode($index->getSettings(), JSON_PRETTY_PRINT));
-            // now what?
-
-        }
 
         $io->success(sprintf("%s success %s %s",  $this->getName(), $pixieCode, $indexName));
         return self::SUCCESS;
@@ -252,9 +263,28 @@ final class PixieIndexCommand extends InvokableServiceCommand
                 }
             }
         }
+        $map = [
+            'es' => 'spa',
+            'en' => 'eng',
+            'de' => 'deu',
+            'hi' => 'hin',
+            'fr' => 'fra',
+        ];
+        $searchableAttrs = [];
+        foreach ($this->enabledLocales as $locale) {
+            $locale3 = $map[$locale];
+            $localizedAttributes[] = ['locales' => [$locale3],
+                'attributePatterns' => [sprintf('_translations.%s.*',$locale)]];
+            foreach ($table->getTranslatable() as $property) {
+                $searchableAttrs[] = '_translations.' . $locale . ".$property";
+            }
+        }
+        $localizedAttributes[] = ['locales' => [], 'attributePatterns' => ['*']];
 
         $results = $index->updateSettings($settings = [
             'displayedAttributes' => ['*'],
+            'searchableAttributes' => $searchableAttrs,
+//            'localizedAttributes' => $localizedAttributes,
             'filterableAttributes' => $filterable, //  $this->datatableService->getFieldsWithAttribute($settings, 'browsable'),
             'sortableAttributes' => $sortable, // this->datatableService->getFieldsWithAttribute($settings, 'sortable'),
                 "faceting" => [
@@ -263,53 +293,8 @@ final class PixieIndexCommand extends InvokableServiceCommand
     ],
             ]);
 //        dd($results, $settings);
-
-//        dd($results, $settings);
         // wait until the index is set up.
-        $stats = $this->meiliService->waitUntilFinished($index);
-        return $index;
-
-        dd($results);
-
-//        $reflection = new \ReflectionClass($class);
-//        $classAttributes = $reflection->getAttributes();
-//        $filterAttributes = [];
-//        $sortableAttributes = [];
-        $settings = $this->datatableService->getSettingsFromAttributes($class);
-        $primaryKey = 'id'; // default, check for is_primary));
-        $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
-        if (count($idFields)) $primaryKey = $idFields[0];
-//        dd($settings, $filterAttributes);
-//
-//        foreach ($settings as $fieldname=>$classAttributes) {
-//            if ($classAttributes['browsable']) {
-//                $filterAttributes[] = $fieldname;
-//            }
-//            if ($classAttributes['sortable']) {
-//                $sortableAttributes[] = $fieldname;
-//            }
-//            if ($classAttributes['searchable']) {
-////                $searchAttributes[] = $fieldname;
-//            }
-//            if ($classAttributes['is_primary']??null) {
-//                $primaryKey = $fieldname;
-//            }
-//        }
-
-//        $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
-//        $index->updateSettings(); // could do this in one call
-
-        $results = $index->updateSettings($settings = [
-            'displayedAttributes' => ['*'],
-            'filterableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'browsable'),
-            'sortableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'sortable'),
-            "faceting" => [
-                "sortFacetValuesBy" => ["*" => "count"],
-                "maxValuesPerFacet" => $this->meiliService->getConfig()['maxValuesPerFacet']
-            ],
-        ]);
-
-        $stats = $this->meiliService->waitUntilFinished($index);
+//        $stats = $this->meiliService->waitUntilFinished($index);
         return $index;
     }
 

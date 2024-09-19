@@ -4,6 +4,8 @@ namespace Survos\PixieBundle\Service;
 
 // see https://github.com/bungle/web.php/blob/master/sqlite.php for a wrapper without PDO
 
+use App\Event\FetchTranslationEvent;
+use App\Event\FetchTranslationObjectEvent;
 use App\Service\AppService;
 use League\Csv\Info;
 use League\Csv\Reader;
@@ -144,12 +146,14 @@ class PixieImportService
             if (isset($headers))
                 assert(count($headers) == count(array_unique($headers)), json_encode($headers));
             // don't parse the header match each time, store them
-            $regexRules = $configData['tables'][$tableName]['formatter'] ?? [];
+//            $regexRules = $configData['tables'][$tableName]['formatter'] ?? [];
             // why not mapped headers?
-            foreach ($headers as $headerOrig=>$header) {
-                foreach ($regexRules as $variableRegexRule => $dataRegexRules) {
-                    if (preg_match($variableRegexRule, $header)) {
-                        $dataRules[$header] = $dataRegexRules;
+            $dataRules = [];
+            foreach ($headers as $header => $origHeader) {
+                foreach ($table->getPatches() as $headerRegex => $regexRules) {
+                    if (preg_match($headerRegex, $header, $mm)) {
+                        $dataRules[$header]??= [];
+                        $dataRules[$header] += $regexRules;
                     }
                 }
             }
@@ -188,8 +192,14 @@ class PixieImportService
                     foreach ($dataRules[$k] ?? [] as $dataRegexRule => $substitution) {
                         $match = preg_match($dataRegexRule, $v, $mm);
                         if ($match) {
-                            // @todo: a preg_replace?
-                            $row[$k] = $substitution === '' ? null : $substitution;
+                            if ($substitution === '') {
+                                $row[$k] = null;
+                            } else {
+//                                dump($row[$k]);
+                                // or a preg_replace?
+                                $row[$k] = str_replace($mm[0], $substitution, $row[$k]);
+//                                dd($row[$k]);
+                            }
                         }
                     }
                 }
@@ -232,6 +242,22 @@ class PixieImportService
                 // don't set if discard
                 if ($event->type == RowEvent::DISCARD) {
                     continue;
+                }
+                // add the source strings
+//                $event = new FetchTranslationObjectEvent($row, )
+//                    $sourceString = $row[$tKey];
+                if (count($table->getTranslatable())) {
+                    $event = $this->eventDispatcher->dispatch(
+                        new FetchTranslationObjectEvent(
+                            $row, // or $item?
+                            pixieCode: $pixieCode,
+                            sourceLanguage: $config->getSource()->locale,
+                            targetLanguage: $config->getSource()->locale,
+                            table: $tableName, // for debugging,
+                            key: $row[$table->getPkName()],
+                            keys: $table->getTranslatable()
+                        ));
+                    $row = $event->getNormalizedData();
                 }
 
                 assert($row['license']??'' <> 'Copyrighted', "invalid license");
@@ -333,7 +359,7 @@ class PixieImportService
         $rules = $config->getTableRules($tableName);
         $table = $config->getTable($tableName);
         $mappedHeader = $kv->mapHeader($headers, regexRules: $rules);
-//            dd($rules, $configData, $tableName, filename: $splFile->getFilename(), mappedHeader: $mappedHeader);
+//            dump($rules, $tableName, headers: $headers, mappedHeader: $mappedHeader);
         // keep for replacing the key names later
 //                dd($headers, mapped: $mappedHeader, rules: $rules);
         $this->eventDispatcher->dispatch(

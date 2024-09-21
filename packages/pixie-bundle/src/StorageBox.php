@@ -534,23 +534,21 @@ catch
 
     if ($preloadKeys) {
         // if this is too big, we can add a preloadWhere and selectively preload, e.g. translated string
-        $tableKey = $table . md5(json_encode($where));
+        $tableKey = $table . '-' . md5(json_encode($where));
         if (empty($this->keyCache[$tableKey])) {
             $sql = "SELECT $pk from $table WHERE 1 ";
-            foreach ($where as $key => $value) {
-                $sql .= " and ($key = :$key)";
+            foreach ($where as $itemKey => $value) {
+                $sql .= " and ($itemKey = :$itemKey)";
             }
-
-            $this->keyCache[$table] = $this->query($sql, $where)->fetchAll(PDO::FETCH_COLUMN);
+            $this->keyCache[$tableKey] = $this->query($sql, $where)->fetchAll(PDO::FETCH_COLUMN);
             if (empty($this->keyCache[$tableKey])) {
-                $this->keyCache[$tableKey][] = null;
+                $this->keyCache[$tableKey][] = null; // ??
             }
             $this->logger->info(sprintf("Preloaded %d keys in $table", count($this->keyCache[$tableKey])));
         }
         if (!is_array($this->keyCache[$tableKey])) {
             dd($this->keyCache, $tableKey);
         }
-        dd($this->keyCache[$tableKey]);
         return in_array($key, $this->keyCache[$tableKey]);
     }
 
@@ -646,8 +644,11 @@ catch
      * @param string $propertyName If set, update the property, not _raw
      */
     public function set(array|object|string $value, string $tableName = null,
-                        string|int|null     $key = null, string $propertyName = null,
-                        string              $mode = 'replace' // _raw, if patch then read first and merge
+                        string|int|null     $key = null,
+                        string $propertyName = null,
+                        string              $mode = 'replace',
+        array $where=[] // for preload
+        // _raw, if patch then read first and merge
 ): mixed
 {
     $previousTable = $this->currentTable;
@@ -738,8 +739,8 @@ catch
             dd("Error: " . $statement->errorInfo()[2]);
         }
     }
-    $this->keyCache[$tableName][] = $key;
-
+    $tableKey = $tableName . '-' . md5(json_encode($where));
+    $this->keyCache[$tableKey][] = $key;
     $this->currentTable = $previousTable;
 
     return $results;

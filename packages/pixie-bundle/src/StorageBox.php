@@ -157,7 +157,7 @@ class StorageBox
 
     // @todo: make this an event listener?
     // given the HEADER array, map the key names, for array_combine or csv getRecords
-    public function mapHeader(array $header, string $tableName = null, array $regexRules = []): array
+    public function mapHeader(array $header, string $propertyRule, string $tableName = null, array $regexRules = []): array
     {
         $tableName = $tableName ?? $this->currentTable;
         // $fieldName is the attribute (json) or column name (csv)
@@ -175,7 +175,14 @@ class StorageBox
                     break; // match first rule only
                 }
             }
-            $newHeaders[] = u($newFieldName)->snake()->toString();
+
+            $newFieldName = match($propertyRule) {
+                'preserve' => $newFieldName,
+                'snake' => u($newFieldName)->snake()->toString(),
+                'camel' => u($newFieldName)->camel()->toString()
+            };
+            assert(!str_contains(' ', $newFieldName), "invalid $propertyRule property code: $newFieldName");
+            $newHeaders[] = $newFieldName;
         }
         return array_combine($newHeaders, $header);
     }
@@ -508,8 +515,8 @@ catch
     static $preparedStatements = [];
     // cache prepared statements
     if (empty($preparedStatements[$this->filename][$sql])) {
-        $preparedStatements[$this->filename][$sql] = $this->db->prepare($sql);;
         try {
+        $preparedStatements[$this->filename][$sql] = $this->db->prepare($sql);;
         } catch (\Exception $exception) {
             dump($exception, $sql, $this->filename, $variables);
             assert(false, $sql . " " . $exception->getMessage());
@@ -643,7 +650,8 @@ catch
      * @param string $value The value to store.
      * @param string $propertyName If set, update the property, not _raw
      */
-    public function set(array|object|string $value, string $tableName = null,
+    public function set(array|object|string $value,
+                        string $tableName = null,
                         string|int|null     $key = null,
                         string $propertyName = null,
                         string              $mode = 'replace',
@@ -659,12 +667,13 @@ catch
     }
     static $preparedStatements = [];
 
-    $schema = $this->inspectSchema();
-    assert(array_key_exists($tableName, $schema), "no table $tableName in schema " . $this->getFilename());
+//    $schema = $this->inspectSchema();
+//    assert(array_key_exists($tableName, $schema), "no table $tableName in schema " . $this->getFilename());
     /** @var Table $table */
-    $table = $schema[$tableName];
-    assert($table, "No table $tableName");
-    $keyName = $table->getPkName();
+//    $table = $schema[$tableName];
+//    assert($table, "No table $tableName");
+
+    $keyName = $this->getTable($tableName)->getPkName();
 
     if ($mode === self::MODE_PATCH) {
         $data = $this->get($key, $tableName)->getData();

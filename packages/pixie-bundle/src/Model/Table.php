@@ -21,11 +21,20 @@ class Table
         private ?string $indexes=null, // the super-succint dexie-style index defintion, e.g. "id|int,department"
         private ?string $pkName=null,
         private ?string $workflow=null,
+        private ?bool $hasImages=null,
         private ?int $total=null, // if known, speeds up count, especially JSON
         private ?string $parent=null, // one ManyToOne, e.g. Artwork or Objekt in the 'image' table
     )
     {
+        if (is_null($this->hasImages)) {
+            $this->hasImages = $this->name == 'obj';  // hack!
+        }
 
+    }
+
+    public function isHasImages(): bool
+    {
+        return $this->hasImages;
     }
 
     public function getPatches(): array

@@ -779,19 +779,37 @@ catch
     $this->query("DELETE FROM $this->currentTable;");
 }
 
-    public function getSql(string $table, array $where = [], array $order = [], int $startingAt = 0, int $max = 0, bool $keyOnly = false): array
+    public function getSql(string $table, array $where = [],
+                           array $order = [],
+                           int $startingAt = 0,
+                           int $max = 0,
+                           bool $keyOnly = false,
+    array $whereExtra = [],
+    array $pks = [],
+    array $columns = ['*']
+    ): array
 {
     $pk = $this->getPrimaryKey($table);
     // @todo: only prepare the statement once
-    $sql = "select " . ($keyOnly ? $pk : '*') . " from " . ($table ?? $this->currentTable);
+    $sql = "select " . ($keyOnly ? $pk : join(',', $columns)) .
+        " from " . ($table ?? $this->currentTable);
+    $params = [];
 
     // @todo: prepared statement and bind values.
-    $sql .= " where 1=1";
+    $sql .= " where 1=1 ";
+
+    // https://stackoverflow.com/questions/920353/can-i-bind-an-array-to-an-in-condition-in-a-pdo-query
+    if (count($pks)) {
+        foreach ($pks as $idx => $pkValue) {
+            $pkKeys[] = ":" . ($keyName = "key$idx");
+            $params[$keyName] = $pkValue;
+        }
+        $sql .= "and $pk in (" . join(',', $pkKeys) . ")";
+    }
 
     // dexie format: .where('myField').equals(1) .where('myField').gt(5)
     // where returns a collection (promise) with no objects. https://dexie.org/docs/Collection/Collection
     // pass a tuple with operator?  or a string?  I think that's how api grid works.
-    $params = [];
     foreach ($where as $key => $value) {
         if ($value === null) {
             $sql .= " and ($key IS NULL)";
@@ -799,6 +817,13 @@ catch
             $sql .= " and " . $key . " = :$key";
             $params[$key] = $value;
         }
+    }
+
+    // marking == NULL
+    // key in (:ids)
+    foreach ($whereExtra as $fragment => $fragmentValues) {
+        $sql .= " and $fragment ";
+        $params = array_merge($params, $fragmentValues);
     }
     if (count($order) == 0) {
         $order = [$this->getPrimaryKey($table) => 'ASC'];
@@ -823,13 +848,19 @@ catch
                             ?bool  $associative = null,
                             int    $depth = 512,
                             int    $flags = PDO::FETCH_ASSOC,
+                            ?array $whereExtra= [],
+                            ?array $pks= [],
 ): \Generator
 {
     $table = $table ?? $this->currentTable;
     assert($table, "no table configured");
     $pkName = $this->getPrimaryKey($table);
     $keyOnly = true;
-    [$sql, $params] = $this->getSql($table, $where, $order, max: $max, keyOnly: $keyOnly);
+    [$sql, $params] = $this->getSql($table, $where, $order, max: $max,
+        keyOnly: $keyOnly,
+        pks: $pks,
+        whereExtra: $whereExtra,
+    );
 
 
     // https://stackoverflow.com/questions/78623214/using-a-generator-to-loop-through-an-update-a-table-in-pdo

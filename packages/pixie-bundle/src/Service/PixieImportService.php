@@ -211,7 +211,9 @@ class PixieImportService
 
 
                 // handling relations could be its own RowEvent too, for now it's here
-                $row = $this->handleRelations($kv, $config, $pixieCode, $table, $row);
+                $row = $this->handleRelations($kv, $config, $pixieCode, $table, $event->row);
+                $event->row = $row;
+//                $tableName=='obj' && dd($row['classification'], $event->row['classification']);
 
 //                $tableName == 'obj' && dd($row);
 
@@ -231,7 +233,6 @@ class PixieImportService
                     dd($event);
                     continue;
                 }
-                $row  = $event->row;
                 // don't set if discard
                 if ($event->type == RowEvent::DISCARD) {
                     continue;
@@ -397,6 +398,7 @@ class PixieImportService
     {
         assert(count($kv->getTables()), "no tables in $pixieCode");
         foreach ($table->getProperties() as $property) {
+
             $propertyCode = $property->getCode();
             $settings = $property->getSettings();
 
@@ -450,9 +452,8 @@ class PixieImportService
 //                    dump($this->listsByLabel[$relatedTableName], $label);
                     if (!array_key_exists($label, $this->listsByLabel[$relatedTableName])) {
                         if ($valueType === '@label') {
-                            $relatedId = count($this->listsByLabel[$relatedTableName])+1;
+                            $relatedId = 'line-' . count($this->listsByLabel[$relatedTableName])+1;
                             $relatedRow = [
-                                $pkName => $relatedId,
                                 'label' => $label,
                             ];
                             if (class_exists(FetchTranslationObjectEvent::class)) {
@@ -468,18 +469,10 @@ class PixieImportService
                                 );
                                 // the label and _translations have been set
                                 $relatedRow = $event->getNormalizedData();
+                                $relatedId = $relatedRow['label'];;
+                                // replace the key with the translation key
+                                $relatedRow[$pkName] = $relatedId;
                             }
-
-                            // this is too mus-specific, needs to be an event
-//                            $this->eventDispatcher->dispatch(new Trans)
-//                            $_trans[$config->getSource()->locale] = ['label' => $label];
-
-//                            foreach ($relatedTable->getTranslatable() as $translatable) {
-//                                $_trans[$config->getSource()->locale][$translatable] =
-//                                    $row[$translatable];
-//                            }
-//                            // @todo: apply the dataRules to label
-//                            dd($_trans, $label, $relatedId, $relatedTableName);
                             $kv->set($relatedRow, $relatedTableName);
                             $this->listsByLabel[$relatedTableName][$label] = $relatedId;
                         } else {
@@ -491,11 +484,12 @@ class PixieImportService
 
                     $relatedId = $this->listsByLabel[$relatedTableName][$label];
                     $row[$propertyCode] = $relatedId; // if this is a string, this could instead be the translation source key?
-//                    dd($row[$propertyCode], $propertyCode);
                 }
+
                 // fetch the key by label?  Or keep it in memory?
                 // create the relation.  unlike the old system, we can have relations in the sql
             }
+
         }
         return $row;
     }

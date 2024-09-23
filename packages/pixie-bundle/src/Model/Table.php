@@ -26,14 +26,14 @@ class Table
         private ?string $parent=null, // one ManyToOne, e.g. Artwork or Objekt in the 'image' table
     )
     {
-        if (is_null($this->hasImages)) {
-            $this->hasImages = $this->name == 'obj';  // hack!
-        }
 
     }
 
     public function isHasImages(): bool
     {
+        if (is_null($this->hasImages)) {
+            $this->hasImages = $this->name == 'obj';  // hack!
+        }
         return $this->hasImages;
     }
 

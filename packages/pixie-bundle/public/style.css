@@ -258,3 +258,24 @@ body {
     border-radius: 4px;
     height: calc(100% - 1.5rem);
 }
+
+@media print {
+    @media print and (min-width: 310px) { /* A3 size or larger */
+        .walters-main .row>* {
+            margin: 0;
+        }
+        .walters-main .walters-left,
+        .walters-main .walters-right {
+            width: 50%;
+        }
+        .walters-main .walters-left{
+            padding-left: 0;
+        }
+        .walters-main .walters-right{
+            padding-right: 0;
+        }
+        .walters-main.card .card-body {
+            padding: 0;
+        }
+    }
+}

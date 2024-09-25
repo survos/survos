@@ -23,7 +23,6 @@ Enjoy your theme!
     {% endblock %}
     <title>{% block title %}{{ block('page_title') }}{% endblock %}</title>
     {% block stylesheets %}
-        {{ importmap('app') }}
 {#        {% if tabler_bundle.isRightToLeft() %}#}
 {#            <link rel="stylesheet" href="{{ asset('bundles/tabler/tabler-rtl.css') }}?{{ tabler_asset_version() }}">#}
 {#        {% else %}#}
@@ -139,11 +138,13 @@ Enjoy your theme!
                             {% set map = {
                                 'success': 'success',
                                 'error': 'danger',
+                                'info': 'info',
+                                'primary': 'info',
                                 'warning': 'warning'
                             } %}
                             {% for flashType, messages in app.flashes %}
                                 {% for message in messages %}
-                                    <twig:alert :message="message" :type="map[flashType]" dismissible="true" />
+                                    <twig:alert :message="message" :type="map[flashType]|default(flashType) " dismissible="true" />
 
                                 {% endfor %}
                             {% endfor %}
@@ -169,8 +170,8 @@ Enjoy your theme!
     </div>
 </div>
 
-{#{% block javascripts %}#}
-{#    <script src="{{ asset('bundles/tabler/tabler.js') }}?{{ tabler_asset_version() }}"></script>#}
-{#{% endblock %}#}
+{% block javascripts %}
+{#            {{ importmap('app') }}#}
+{% endblock %}
 </body>
 </html>

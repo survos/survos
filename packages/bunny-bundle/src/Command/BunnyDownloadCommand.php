@@ -15,8 +15,8 @@ use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
 
-#[AsCommand('bunny:sync', 'sync local/remote bunny files')]
-final class BunnySyncCommand extends InvokableServiceCommand
+#[AsCommand('bunny:download', 'download remote bunny files')]
+final class BunnyDownloadCommand extends InvokableServiceCommand
 {
     use RunsCommands;
     use RunsProcesses;
@@ -35,7 +35,7 @@ final class BunnySyncCommand extends InvokableServiceCommand
         #[Argument(description: 'object/file name')] string        $filename='',
         #[Argument(description: 'path name within zone')] string        $path='',
         #[Argument(description: 'zone name')] ?string        $zoneName=null,
-        #[Argument(description: 'dir')] ?string        $relativeDir='.',
+        #[Argument(description: 'local directory')] ?string        $relativeDir='.',
 
     ): int
     {

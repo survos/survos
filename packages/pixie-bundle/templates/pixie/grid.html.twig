@@ -21,10 +21,16 @@
         showPath: show_path,
         showParams: show_params??{locale: app.locale},
         icons: {
-            bug : 'fas fa-bug'
+            bug : ux_icon("tabler:bug"),
+            url : ux_icon("tabler:world-www"),
+            api : ux_icon("tabler:api"),
+            wiki : ux_icon("simple-icons:wikidata"),
+            github: ux_icon("tabler:brand-github"),
+            ds1: ux_icon("tabler:database"),
+            citation: ux_icon("formkit:url"),
+            rights: ux_icon("tabler:copyright")
         }
     } %}
-
     <div class="search_builder">
     <twig:api_grid
             :class="class"
@@ -38,6 +44,10 @@
             <div class="size-100">
                 {% set thumb = row.thumbnail|default(row.image_url|default(false)) %}
                 {% if thumb %}
+                    {% if row.image_count|default(1) > 1 %}
+                        {# @todo: make a badge in the image somewhere. #}
+                        <code>{{ row.image_count }}</code>
+                    {% endif %}
             <img class="img-thumbnail h-100 object-fit-cover size-100"
                  src="{{ thumb }}" />
                 {% endif %}
@@ -48,10 +58,20 @@
             @
             &nbsp;
         </twig:block>
+        <twig:block name="attrs">
+        </twig:block>
         <twig:block name="tombstone">
+            {% set svg = globals.icons['github'] %}
             <div class="tombstone custom-heading text-truncate-four-lines">
                 {# really the translatable fields #}
-                <b>{{ row.title|default(row.label) }}</b>
+                {% set lrp =  row.rp|merge({_locale: globals.locale|default('en')}, globals.showParams) %}
+                {% set pixieItemUrl = path(globals.showPath, lrp) %}
+                <div class="text-truncate-one-line">
+                    <a href="{{ pixieItemUrl }}">
+                        <b>{{ row.title|default(row.label|default(row.name|default(row.code|default(row.id|default('~'))))) }}</b>
+                    </a>
+                </div>
+
                 <div class="text-truncate-three-line">
                     {{ row.description }}
                 </div>
@@ -60,17 +80,39 @@
                         {{ row.credit }}
                     </a>
                 {% endif %}
+{#                {{ globals.icons|json_encode|raw }}#}
+            </div>
 
 {#                @tombstone links#}
+            <div xclass='d-flex justify-content-between align-items-center gap-2'>
+{#                'rights',#}
+                {% for x in ['url','github','api','wiki','ds1','citation'] %}
+                    {% if row[x]??false %}
+                        <a class="d-flex align-items-center gap-2" href="{{ row[x] }}" title="{{ x }}" target="_blank">
+                            {#                        {{ globals|json_encode }}#}
+                            <span title="{{ x }}">
+                            {% if x in globals.icons|keys %}
+                                {{ globals.icons[x] }}
+                            {% else %}
+                                {{ x }}
+                            {% endif %}
+                            {% set label = row[x]|replace({'https://':'', 'http://':'', 'www.':''}) %}
+                            {{ label }}
+
+                            </span>
+                        </a>
+                    {% endif %}
+                {% endfor %}
             </div>
         </twig:block>
 
         <twig:block name="pixie_key">
 
+            {# really we need the pk #}
             {% set lrp =  row.rp|merge({_locale: globals.locale|default('en')}) %}
             {% set pixieItemUrl = path('pixie_show_record', lrp) %}
             <a href="{{ pixieItemUrl }}">
-                #<code>{{ row.id }}</code>
+4                @<code>{{ row.id|default(row.code|default('~')) }}</code>
             </a>
         </twig:block>
         <twig:block name="id">

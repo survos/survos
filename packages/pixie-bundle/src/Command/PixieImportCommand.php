@@ -24,7 +24,7 @@ use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
 
-#[AsCommand('pixie:import', 'Import csv to Pixie, a file or directory of files"')]
+#[AsCommand('pixie:import', 'Import csv to Pixie, a file or directory of files"', aliases: ['import'])]
 final class PixieImportCommand extends InvokableServiceCommand
 {
     use RunsCommands;
@@ -55,6 +55,7 @@ final class PixieImportCommand extends InvokableServiceCommand
         #[Option(description: "purge db file first")] bool                                           $reset = false,
         #[Option(description: "Batch size for commit")] int                                          $batch = 500,
         #[Option(description: "total if known (slow to calc)")] int                                  $total = 0,
+        #[Option('start', description: "starting at (offset)")] int                                  $startingAt = 0,
         #[Option(description: "table search pattern")] string                                        $pattern = '',
         #[Option(description: 'tags (for listeners)')] ?string                                       $tags=null,
 
@@ -101,19 +102,22 @@ final class PixieImportCommand extends InvokableServiceCommand
         if ($reset) {
             $this->pixieService->destroy($pixieDbName);
         }
-        $this->total = $total; // @togo: get from config
+        $this->total = $total;
         if ($limit && !$this->total) {
             $this->total = $limit;
         }
+        if ($config->getSource()->total) {
+            $this->total = $config->getSource()->total;
+        }
 
         $limit = $this->pixieService->getLimit($limit);
-        $pixieImportService->import($configCode, $config, limit: $limit,
+        $pixieImportService->import($configCode, $config, limit: $limit, startingAt: $startingAt,
             context: [
                 'tags' => explode(",", $tags),
             ],
             overwrite: $overwrite, pattern: $pattern,
             callback: function ($row, $idx, StorageBox $kv) use ($batch, $limit) {
-                $finished = $limit ? $idx >= ($limit+1) : false;
+                $finished = $limit ? $idx > ($limit) : false;
 //                dd($limit, $idx, $finished, $batch);
                 if ($finished || (($idx % $batch) == 0) ) {
                     $this->logger->info("Saving $batch, now at $idx of $limit");
@@ -149,13 +153,23 @@ final class PixieImportCommand extends InvokableServiceCommand
         $this->io()->title($event->filename);
         if (!$count = $this->total) {
             if ($event->getType() == 'json') {
+                // faster to get the first record and filesize and divide, for a rough estimate.
+                $iterator = Items::fromFile($event->filename);
+                $first = $iterator->getIterator()->current();
+                $pointer = $iterator->getCurrentJsonPointer();
+                $size = filesize($event->filename);
+                $guess = (int)($size / strlen(json_encode($first, JSON_PRETTY_PRINT)));
+                $count = $guess;
+//                dump($guess);
+//                dd("plz set total in config");
 //                    halaxa/json-machine
-                try {
-                    $count =  iterator_count(Items::fromFile($event->filename));
-                } catch (\Exception $e) {
-                    $this->logger->error($e->getMessage() . "\n" . $event->filename);
-                    throw $e;
-                }
+//                try {
+//                    $count =  iterator_count(Items::fromFile($event->filename));
+//                    dd($count, $guess);
+//                } catch (\Exception $e) {
+//                    $this->logger->error($e->getMessage() . "\n" . $event->filename);
+//                    throw $e;
+//                }
             } else {
                 $count = $this->lineCount($event->filename);
             }

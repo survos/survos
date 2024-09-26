@@ -64,6 +64,7 @@ trait KnpMenuHelperTrait
                                ?string $translationDomain=null): void
     {
 
+        $translationDomain && dd($label, $translationDomain);
                $item = $this->addMenuItem($menu, [
                        'label' => $label,
                        'style' => 'header',

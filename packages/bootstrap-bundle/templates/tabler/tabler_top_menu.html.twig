@@ -350,8 +350,8 @@
     {{ ownmacro.setCssClassAttribute(item, 'LabelAttribute', item.attributes.class??'nav-link') }}
 {#    {{ ownmacro.setCssClassAttribute(item, 'LabelAttribute', 'nav-link') }}#}
     <span {{ macros.attributes(item.labelAttributes) }}>
-        {% if item.attribute('data-icon') is not empty  %}
-            {{ ux_icon(item.attribute('data-icon')) }}
+        {% if item.attribute('icon') is not empty  %}
+            {{ ux_icon(item.attribute('icon')) }}
         {% endif %}
 
         {{ block('label') }}
@@ -418,8 +418,10 @@
             {% set translation_params = item.extra('translation_params', {}) %}
             {% set label = item.label %}
             {% if domain %}
-                {% set label = label|trans(translation_params, domain=domain) %}
+                {% set label = label|trans(translation_params, domain=domain)|title %}
+
             {% endif %}
+
             {% if options.allow_safe_labels %}{{ label|raw }}{% else %}{{ label }}{% endif %}
         {% endif %}
 

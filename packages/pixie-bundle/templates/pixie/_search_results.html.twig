@@ -187,7 +187,6 @@
                                 {% set icon = iconMap[key]|default('mdi:external-link') %}
                                     <a href="{{ link }}" target="_blank" class="avatar-group-item flex-shrink-0 text-decoration-none">
                                         <div class="avatar-xxs rounded-circle bg-light d-flex align-items-center text-dark justify-content-center">
-{#                                            <twig:ux:icon name="{{icon }}" height="15" width="15" />#}
                                             {{ ux_icon(icon) }}
                                         </div>
                                         {# {{ key }} #}

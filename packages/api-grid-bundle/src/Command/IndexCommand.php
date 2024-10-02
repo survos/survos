@@ -311,7 +311,7 @@ class IndexCommand extends Command
         }
 //            $this->io->writeln("$count of $total loaded, this batch:" . count($records));
         if ($startingAt > $total) {
-//            dump($count, $total, $startingAt);
+    //            dump($count, $total, $startingAt);
         }
         } while ( ($count < $total)) ;
 //        dd($count, $total, $batchSize);

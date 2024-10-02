@@ -1,4 +1,3 @@
-
 <div {{ apiCall ? stimulus_controller(this.stimulusController, {
     schema: schema,
     globals: this.globals,
@@ -48,7 +47,7 @@
         {#                {% endif %}#}
         {#                <a href="{{ path('field') }}">{{ c.name }}</a>#}
         {#            {% endfor %}#}
-                    <div class="table-responsive customTable testtt">
+                    <div class="table-responsive customTable">
                         <table class="table table-bordered table-striped nowrap" {{ stimulus_target(this.stimulusController, 'table') }}>
                         </table>
                     </div>

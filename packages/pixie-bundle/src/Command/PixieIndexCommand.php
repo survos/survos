@@ -7,6 +7,7 @@ use App\Service\TranslationService;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Service\MeiliService;
+use Survos\PixieBundle\Event\IndexEvent;
 use Survos\PixieBundle\Event\StorageBoxEvent;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Service\PixieService;
@@ -210,7 +211,9 @@ final class PixieIndexCommand extends InvokableServiceCommand
             // export?
             $stats = $index->stats();
 //            dd($stats, $index->getSettings());
-            $io->success($stats['numberOfDocuments'] . " documents");
+            $io->success($stats['numberOfDocuments'] . " $pixieCode.$tableName documents");
+            $this->eventDispatcher->dispatch(new IndexEvent($pixieCode, $tableName, $stats['numberOfDocuments']));
+
             $table = new Table($this->io());
             $table->setHeaders(['attributes', 'value']);
 //            $io->write(json_encode($stats, JSON_PRETTY_PRINT));
@@ -269,6 +272,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
             'de' => 'deu',
             'hi' => 'hin',
             'fr' => 'fra',
+            'da' => 'dnk',
         ];
         $searchableAttrs = [];
         foreach ($this->enabledLocales as $locale) {

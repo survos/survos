@@ -14,15 +14,17 @@
         {#        <img id="header-lang-img-XX" src="{{ asset('/bundles/survosvelzon/images/flags/%s.svg'|format(flag)) }}" alt="{{ app.request.locale|language_name }}" height="20" class="rounded">#}
         {#        {{ app.request.locale|upper }}#}
         {# only when the screen is large enough #}
-        <span class="d-lg-inline-block d-none">&nbsp; {{ lang|language_name(appLocale)  }}</span>
+        <span class="d-lg-inline-block d-none">{{ lang|language_name(appLocale)  }}</span>
         {# when mobile, like the museado logo #}
-        <span class="d-inline-block d-lg-none">&nbsp; {{ lang  }}</span>
+        <span class="d-inline-block d-lg-none">{{ lang  }}</span>
     </button>
     <div class="dropdown-menu dropdown-menu-end">
 
         {% for supportedLocale in app.enabled_locales %}
             {% set flag = flagMap[supportedLocale]|default(supportedLocale) %}
             {% set pathWithLocale = path(app.current_route, app.current_route_parameters|merge({_locale: supportedLocale})) %}
+
+            {% set pathWithLocale = pathWithLocale ~ '?' ~  app.request.queryString %}
             {#            <span class="align-middle">{{ supportedLocale }}</span>#}
             {#            {% set langClass =  lang == app.request.locale ? 'fw-bold' : 'fw-light' %}#}
             {#            <a href="{{ pathWithLocale }}" class="dropdown-item notify-item language py-2" data-lang="en" title="English">#}

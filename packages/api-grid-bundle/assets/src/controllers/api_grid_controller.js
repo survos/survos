@@ -5,8 +5,6 @@ import $ from 'jquery';
 
 import {default as axios} from "axios";
 
-console.log('bootstrap before responsive!');
-
 import DataTable from "datatables.net-bs5";
 import '../datatables-plugins.js';
 // https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
@@ -39,10 +37,6 @@ Twig.extend(function (Twig) {
     });
 });
 
-
-// import cb from "../js/app-buttons";
-
-
 console.assert(Routing, 'Routing is not defined');
 // global.Routing = Routing;
 
@@ -73,7 +67,8 @@ export default class extends Controller {
         index: {type: String, default: ''}, // meili
         dom: {type: String, default: 'QBlfrtip'}, // use P for searchPanes
         searchBuilderFields: {type: String, default: '[]'},
-        filter: String // json, from queryString, e.g. party=dem
+        filter: String, // json, from queryString, e.g. party=dem
+        buttons: String // json, from queryString, e.g. party=dem
     }
 
     // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
@@ -179,6 +174,51 @@ export default class extends Controller {
         console.assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
+        console.error(this.buttonsValue);
+        this.buttons = JSON.parse(this.buttonsValue || '[]');
+        this.buttonMap = new WeakMap();
+        this.x = {};
+        this.buttons.forEach(button => {
+            console.error(button.label);
+            // this.buttonMap.set(button.label, button);
+            this.x[button.label] = button;
+            // this.urlByCode[button.label] = button.url;
+            console.log("adding " + button.label);
+            this.buttons.push({
+                text: button.label,
+                action:  ( e, dt, node, config ) => {
+                    let key = config.text;
+                    let button = this.x[key];
+
+                    // Create a base URL
+                    // const url = new URL(button.url);
+
+// Create URLSearchParams object
+                    const params = new URLSearchParams();
+
+// Add query parameters
+                    if (this.apiParams.search??false) {
+                        params.append("q", this.apiParams.search);
+                    }
+                    params.append("ff[]", this.apiParams.facet_filter);
+
+// Set the search property of the URL object
+//                     console.error( params.toString());
+
+// Get the final URL string
+
+                    // @todo: add this.apiParams to the url
+                    // console.log(this.apiParams);
+                    window.open(button.url+'?'+params.toString(), '_blank').focus();
+                    // dt.ajax.reload();
+                }
+                // action: {
+                //     // console.log("open " + button.url);
+                //     // open url,maybe in new tab
+                // },
+            })
+        })
+
         // this.sortableFields = JSON.parse(this.sortableFieldsValue);
         // this.searchableFields = JSON.parse(this.searchableFieldsValue);
         this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
@@ -204,6 +244,7 @@ export default class extends Controller {
             this.dt = this.initDataTable(this.tableElement, []);
             this.initialized = true;
         }
+
     }
 
     openModal(e) {
@@ -545,21 +586,38 @@ export default class extends Controller {
             },
 
             dom: this.dom,
-
-            // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
-            // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print',
-                'pdf',
-                {
-                    text: 'labels',
-                    action:  ( e, dt, node, config ) =>  {
-                        console.log("calling API " + this.apiCallValue, this.apiParams);
-                        const event = new CustomEvent("changeSearchEvent", {detail: this.apiParams});
-                        window.dispatchEvent(event);
+            buttons: this.buttons,
+            xxbuttons: (x) => {
+                // why isn't this being called?
+                console.error(x);
+                let buttons =  [
+                    'copy', 'csv', 'excel', 'pdf', 'print',
+                    {
+                        text: 'labels',
+                        action:  ( e, dt, node, config ) =>  {
+                            // window.open(Routing.generate('owner_labels', {
+                            //     ownerId: 1,
+                            //     pixieCode: pixie
+                            // }))
+                            console.log("open url, pass the params ", this.apiParams);
+                            const event = new CustomEvent("changeSearchEvent", {detail: this.apiParams});
+                            window.dispatchEvent(event);
+                        }
                     }
-                }
-                ],
+                ];
+                console.error(this.buttons);
+                this.buttons.forEach((button, index) => {
+                    buttons.push({
+                        text: 'x',
+                        action: ( e, dt, node, config ) =>  {
+                            // console.log(e, config);
+                            // open url,maybe in new tab
+                        },
+                    })
+                    console.log(button, index);
+                });
+                return buttons;
+            },
             columns: this.cols(),
             searchPanes: {
                 initCollapsed: true,

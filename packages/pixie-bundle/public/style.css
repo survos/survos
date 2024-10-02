@@ -174,10 +174,25 @@ body {
     max-width: 116px;
 }
 
+.customTable td .size-125 ,
 .customTable td .size-100 {
     height: 100px;
     width: 100px;
     max-width: 100px;
+}
+
+.line-limit-1{
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.customTable td:has(> .size-125) {
+    background: transparent;
+    height: 100px;
+    width: 125px;
+    max-width: 125px;
 }
 
 @media (max-width:500px) {
@@ -257,4 +272,110 @@ body {
     padding: 10px;
     border-radius: 4px;
     height: calc(100% - 1.5rem);
+}
+
+@media print {
+    @media print and (min-width: 310px) { /* A3 size or larger */
+        .walters-main .row>* {
+            margin: 0;
+        }
+        .walters-main .walters-left,
+        .walters-main .walters-right {
+            width: 50%;
+        }
+        .walters-main .walters-left{
+            padding-left: 0;
+        }
+        .walters-main .walters-right{
+            padding-right: 0;
+        }
+        .walters-main.card .card-body {
+            padding: 0;
+        }
+    }
+}
+body .navbar .navbar-nav .nav-link .badge {
+    position: relative;
+    transform: none;
+    top: 0;
+    right: 0;
+}
+
+.dt-container .dt-info {
+    padding-top: var(--tblr-card-spacer-y);
+}
+
+div.dt-container div.dt-search {
+    padding-top: 4px;
+}
+
+.dtsp-verticalContainer .dtsp-verticalPanes .dtsp-panesContainer {
+    margin-bottom: 0;
+}
+
+.dtsp-verticalContainer .dtsp-verticalPanes .dtsp-searchPanes .dtsp-searchPane {
+    margin-top: 4px !important;
+}
+
+.dtsp-verticalContainer .dtsp-verticalPanes .dtsp-panesContainer .dtsp-titleRow { 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.list-inline-dots {
+    display: inline-flex;
+    flex-wrap: wrap;
+}
+
+footer .nav-item .nav-link {
+    gap: 6px;
+}
+
+.dt-container.dt-bootstrap5 .dt-scroll-body {
+    border: none !important;
+    background: none !important;
+    padding-right: 0 !important;
+    overflow: hidden;
+}
+
+.dt-container.dt-bootstrap5 .dt-scroll-body:hover {
+    overflow: auto;
+}
+
+.dt-container.dt-bootstrap5 .dt-scroll-body::-webkit-scrollbar {
+    display: none;
+}
+
+.dt-container.dt-bootstrap5 .dt-scroll-body:hover::-webkit-scrollbar {
+    display: block;
+}
+
+.dt-container.dt-bootstrap5 .dt-scroll-body {
+    scrollbar-width: none;
+}
+
+.dt-container.dt-bootstrap5 .dt-scroll-body:hover {
+    scrollbar-width: thin;
+}
+
+body .page-wrapper .page-header {
+    margin: calc(var(--tblr-gutter-x) * .5) 0 0;
+}
+
+body .page-wrapper .page-header .page-title {
+    line-height: var(--tblr-line-height-h3);
+}
+
+body .page-wrapper .page-body {
+    margin-top: var(--tblr-spacer-2);
+}
+
+body .page-wrapper .page-body section.content h3 {
+    margin-bottom: 8px;
+}
+
+body div.dtsb-searchBuilder div.dtsb-group {
+    margin-bottom: 4px;
 }

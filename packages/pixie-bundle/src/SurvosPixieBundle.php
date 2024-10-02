@@ -11,7 +11,6 @@ use Survos\PixieBundle\Command\PixieExportCommand;
 use Survos\PixieBundle\Command\PixieImportCommand;
 use Survos\PixieBundle\Command\PixieIndexCommand;
 use Survos\PixieBundle\Controller\PixieController;
-use Survos\PixieBundle\Controller\PixieTransitionController;
 use Survos\PixieBundle\Controller\SearchController;
 use Survos\PixieBundle\DataCollector\PixieDataCollector;
 use Survos\PixieBundle\Debug\TraceableStorageBox;
@@ -74,11 +73,6 @@ class SurvosPixieBundle extends AbstractBundle
             ->addTag('controller.service_arguments')
             ->setArgument('$bus', new Reference('debug.traced.messenger.bus.default', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-        ;
-
-        $builder->autowire(PixieTransitionController::class)
-            ->addTag('container.service_subscriber')
-            ->addTag('controller.service_arguments')
         ;
 
         $builder->autowire(SearchController::class)
@@ -191,6 +185,7 @@ class SurvosPixieBundle extends AbstractBundle
             ->scalarNode('extension')->info("the pixie db extension")->defaultValue('.pixie.db')->end()
             ->scalarNode('db_dir')->info("where to store the pixie db files")->defaultValue('pixie]')->end()
             ->scalarNode('data_root')->info("root for csv/json data")->defaultValue('data')->end()
+            ->scalarNode('transport')->info("default transport for iterate")->defaultNull()->end()
             ->booleanNode('purge_before_import')->info("purge db before import")->defaultValue(false)->end()
             ->integerNode('limit')->info("import, index, translation, etc. limit")->defaultValue(0)->end()
             ->scalarNode('config_dir')->info("location of .pixie.yaml config files")->defaultValue('config/packages/pixie')->end()

@@ -382,7 +382,7 @@
 
     {# nav-link kills buttons, so we need to explicitly set it in the caller #}
 
-    {%- set classes = classes|merge(['dropdown-toggle']) %}
+    {%- set classes = classes|merge(['dropdown-toggle gap-1']) %}
     {%- set classes = classes|merge([item.extras['btn']|default('nav-link')]) %}
     {% if item.getAttribute('style') == 'heading'  %}
     {%- set classes = classes|merge(['menu-heading']) %}
@@ -400,7 +400,7 @@
             href="#" id="collapse_{{itemSlug}}"
     >
         {% if item.attribute('icon') ?? false %}
-            {{ ux_icon(item.attribute('icon'), {width: '20px'}) }}
+            {{ ux_icon(item.attribute('icon'), {width: '13px'}) }}
         {% endif %}
         {{ block('label') }}
 {#        <b class="caret"></b>#}
@@ -424,7 +424,6 @@
 
     {% if item.getExtra('badge') is not null %}
         {% set value = item.getExtra('badge').value  %}
-        <twig:badge :message="value" color="bg-danger" />
     {% endif %}
 
 

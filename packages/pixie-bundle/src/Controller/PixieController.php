@@ -222,7 +222,8 @@ class PixieController extends AbstractController
             'row' => $item,
             'item' => $item, // redundant! use row for data!
             'columns' => array_keys((array)$item),
-            'groups' => $groups
+            'groups' => $groups,
+                'config' => $config
         ];
 
     }
@@ -486,6 +487,9 @@ class PixieController extends AbstractController
                 rand(0, 255)
             );
         }
+        if (!$chartBuilder) {
+            throw new \Exception("composer require symfony/ux-chartjs");
+        }
         $chart = $chartBuilder->createChart(
             str_contains($indexName, 'year') ? Chart::TYPE_LINE :
                 Chart::TYPE_PIE
@@ -531,7 +535,7 @@ class PixieController extends AbstractController
 
             $charts = [];
             $table = $kv->getTable($tableName);
-            $tableSchema = $kv->inspectSchema()[$tableName];
+//            $tableSchema = $kv->inspectSchema()[$tableName];
             foreach ($table->getProperties() as $property) {
                 if ($condition = $property->getSetting('security')) {
                     if (!$this->isGranted($condition)) {

@@ -64,13 +64,13 @@ trait KnpMenuHelperTrait
                                ?string $translationDomain=null): void
     {
 
-               $item = $this->addMenuItem($menu, [
-                       'label' => $label,
-                       'style' => 'header',
-                       'icon' => $icon,
-                       'translation_domain' => $translationDomain,
-                       'id' => (new AsciiSlugger())->slug($label)->toString()
-                       ]);
+               $item = $this->add($menu,
+                       label: $label,
+                       style: self::HEADING,
+                       icon: $icon,
+                       translationDomain: $translationDomain,
+                       id: (new AsciiSlugger())->slug($label)->toString()
+               );
         return;
 
         $item = $this->add($menu,
@@ -505,7 +505,7 @@ trait KnpMenuHelperTrait
     public function addWorkflowMenu(ItemInterface $menu)
     {
         assert(isset($this->workflowHelperService), 'add protected WorkflowHelperService $workflowHelperService to the __constructor of ' . static::class);
-        $workflowMenu = $this->addSubmenu($menu, 'Workflows', icon: 'fas fa-diagram-project');
+        $workflowMenu = $this->addSubmenu($menu, 'Workflows', icon: 'fa6-solid:diagram-project');
         $this->add($workflowMenu, route: 'survos_workflows', label: "All");
         foreach ($this->workflowHelperService->getWorkflowsIndexedByName() as $workflowCode => $workflow) {
             $this->add($workflowMenu, 'survos_workflow', [

@@ -14,32 +14,37 @@ use ToshY\BunnyNet\BaseAPI;
 use ToshY\BunnyNet\Client\BunnyClient;
 use ToshY\BunnyNet\EdgeStorageAPI;
 use ToshY\BunnyNet\Enum\Region;
+use ToshY\BunnyNet\Model\Client\Interface\BunnyClientResponseInterface;
 
 class BunnyService
 {
-
     public function __construct(
         private CacheInterface $cache,
         private readonly LoggerInterface $logger,
         private readonly HttpClientInterface $client,
-        private ?BunnyClient $bunnyClient=null,
-        private ?BaseAPI $baseApi=null,
+        private ?BunnyClient $bunnyClient = null,
+        private ?BaseAPI $baseApi = null,
         private int $cacheTimeout = 0,
-        private array $config=[], // comes from config/packages/survos_bunny.yaml
-//        private ?string $apiKey = null,
-//        private ?string $readonlyPassword = null,
-//        private ?string $password = null, // for writing
+        private array $config = [], // comes from config/packages/survos_bunny.yaml
+        //        private ?string $apiKey = null,
+        //        private ?string $readonlyPassword = null,
+        //        private ?string $password = null, // for writing
         private ?EdgeStorageAPI $edgeStorageApi = null,
         private ?string $storageZone = null,
+        private array $zones=[]
     ) {
 // Create a BunnyClient using any HTTP client implementing "Psr\Http\Client\ClientInterface".
         $this->bunnyClient = new BunnyClient(
-            client: new \Symfony\Component\HttpClient\Psr18Client(),
+            client: new \Symfony\Component\HttpClient\Psr18Client(
+                client: $this->client
+            ),
         );
         if (!$this->storageZone) {
-            $this->storageZone=$this->config['storage_zone'];
+            $this->storageZone = $this->config['storage_zone'];
         }
-
+        foreach ($this->config['zones'] as $zoneData) {
+            $this->zones[$zoneData['name']] = $zoneData;
+        }
     }
 
     public function getConfig(): array
@@ -50,7 +55,6 @@ class BunnyService
     public function getApiKey(): ?string
     {
         return $this->config['api_key'];
-
     }
 
     public function getEdgeStorageApi(): ?EdgeStorageAPI
@@ -58,11 +62,11 @@ class BunnyService
         return $this->edgeStorageApi;
     }
 
-    public function getBaseApi(?string $apiKey=null): ?BaseAPI
+    public function getBaseApi(?string $apiKey = null): ?BaseAPI
     {
         if (!$this->baseApi) {
             $this->baseApi = new BaseAPI(
-                apiKey: $apiKey??$this->config['api_key'],
+                apiKey: $apiKey ?? $this->config['api_key'],
                 client: $this->bunnyClient,
             );
         }
@@ -70,10 +74,10 @@ class BunnyService
         return $this->baseApi;
     }
 
-    public function downloadFile(string $filename, string $path, string $storageZone=null)
+    public function downloadFile(string $filename, string $path, string $storageZone = null)
     {
         $ret = $this->getEdgeApi()->downloadFile(
-            storageZoneName: $storageZone??$this->getStorageZone(),
+            storageZoneName: $storageZone ?? $this->getStorageZone(),
             path: $path,
             fileName: $filename,
         );
@@ -81,20 +85,41 @@ class BunnyService
         return $ret;
     }
 
-    public function getEdgeApi(string $storageZone=null): EdgeStorageAPI
+    public function uploadFile(
+        string $fileName, // the filename on bunny
+        string $storageZoneName,
+        mixed $body, // content to write
+        string $path = '',
+        array $headers = [],
+    ): BunnyClientResponseInterface {
+
+        $ret = $this->getEdgeApi(writeAccess: true)->uploadFile(
+            $storageZoneName,
+            $fileName,
+            $body,
+            $path,
+            $headers,
+        );
+        return $ret;
+    }
+
+    public function getEdgeApi(string $storageZone = null, bool $writeAccess = false): EdgeStorageAPI
     {
-        if (!$storageZone = $storageZone??$this->getStorageZone()) {
-            if (count($this->config['zones']) >= 1) {
-                $storageZone = array_key_first($this->config['zones']);
+        if (!$storageZone = $storageZone ?? $this->getStorageZone()) {
+            if (!$storageZone = $this->config['storage_zone']) {
+                if (count($this->config['zones']) >= 1) {
+                    $storageZone = $this->config['zones'][0]['name'];
+               }
             }
         }
         assert($storageZone, "Missing storageZone!");
 
         if (!$this->edgeStorageApi) {
+            $password = $this->zones[$storageZone][$writeAccess ? 'password' : 'readonly_password'];
             $this->edgeStorageApi = new EdgeStorageAPI(
-                apiKey: $readOnlyPassword??$this->config['zones'][$storageZone]['readonly_password'],
+                apiKey: $password,
                 client: $this->bunnyClient,
-                region: Region::NY // from($this->config['region']) # Region::NY # $this->config['region']
+                region: Region::from($this->zones[$storageZone]['region'])
             );
         }
 
@@ -133,6 +158,4 @@ class BunnyService
         $this->cache = $cache;
         return $this;
     }
-
-
 }

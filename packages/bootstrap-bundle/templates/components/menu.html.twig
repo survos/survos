@@ -46,16 +46,17 @@
         {% if menu.children|length %}
             {% if wrapperClass|default(false) %}<div class="{{ wrapperClass }}">{% endif %}
 
+
             {{ knp_menu_render(menuItem, {
-                template: '@SurvosBootstrap/knp_top_menu.html.twig',
+                template: '@SurvosBootstrap/tabler/tabler_top_menu.html.twig',
                 leaf_class: "list-group-item footer-link me-4",
                 rootAttributes: {
-                    class:"nav navbar-nav nav-justify-end list-group list-group-horizontal dropup"
+                    class:"list-inline list-inline-dots mb-0 dropup d-flex justify-content-center flex-wrap gap-3"
                 },
 
                 "ancestorClass" : "nav-item dropdown m-4",
                 "branch_class"  : "menu-item nav-item dropdown ",
-                'leaf_class'    : 'nav-item mb-4 bg-danger',
+                'leaf_class'    : 'nav-item',
                 'link_class'    : 'nav-link m-4',
                 "allow_safe_labels": true,
 

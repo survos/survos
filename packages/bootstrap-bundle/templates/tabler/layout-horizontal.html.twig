@@ -29,7 +29,16 @@ Enjoy your theme!
 {#            <link rel="stylesheet" href="{{ asset('bundles/tabler/tabler.css') }}?{{ tabler_asset_version() }}">#}
 {#        {% endif %}#}
     {% endblock %}
+    {# @todo: move to bottom, but need to get defer: true working #}
+    {% block javascripts %}
+        {#            {{ importmap('app') }}#}
+    {% endblock %}
+
+    {% block pwa %}
+        <!-- trigger pwa -->
+    {% endblock %}
 </head>
+
 {#<body{% block body_start %}{% endblock %} class="{{ 'antialiased'|tabler_body }} {% block body_class %}{% endblock %}" data-bs-theme="{{ tabler_theme() }}">#}
 <body>
 {% block after_body_start %}{% endblock %}
@@ -160,18 +169,21 @@ Enjoy your theme!
         </div>
 
         {% block footer %}
-            <footer id="{% block footer_id %}{% endblock %}" class="footer footer-transparent d-print-none">
+            <footer id="{% block footer_id %}{% endblock %}" class="footer border-top py-3 d-print-none">
                 <div class="{{ ''|tabler_container }}">
-                    @todo: footer
-{#                    {% include '@Tabler/includes/footer.html.twig' %}#}
+                    {% block FOOTER_MENU %}
+                        {{ component('menu', {
+                            type: FOOTER_MENU,
+                            caller: _self
+                        }) }}
+                    {% endblock %}
                 </div>
             </footer>
         {% endblock %}
     </div>
 </div>
 
-{% block javascripts %}
-{#            {{ importmap('app') }}#}
-{% endblock %}
+
+
 </body>
 </html>

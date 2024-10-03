@@ -14,7 +14,7 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
-use ApiPlatform\Util\IriHelper;
+use ApiPlatform\Metadata\Util\IriHelper;
 use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Event\FacetEvent;
@@ -35,7 +35,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     ];
 
     public function __construct(
-//        private               $contextBuilder,
+        private             ContextBuilderInterface  $contextBuilder,
         ResourceClassResolverInterface                        $resourceClassResolver,
         private readonly LoggerInterface                      $logger,
         private EventDispatcherInterface                      $eventDispatcher,

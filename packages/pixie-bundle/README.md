@@ -1,8 +1,15 @@
 # Pixie Bundle
 
-A Symfony bundle that leverages Sqlite to create an indexed no-sql datastore.
+A Symfony bundle that leverages Sqlite to create an indexed structured datastore without an ORM.  In particular, it is a solution for analyzing Excel spreadsheets and nest JSON data.
 
 Inspired by https://gist.github.com/sbrl/c3bfbbbb3d1419332e9ece1bac8bb71c and https://dexie.org/ and the Symfony PDO Cache component.
+
+## Example
+
+```bash
+bin/console pixie:import walters
+bin/console pixie:import md/74
+```
 
 At its core, the idea is to store strings or unstructured data accessible by a key or a filter.
 

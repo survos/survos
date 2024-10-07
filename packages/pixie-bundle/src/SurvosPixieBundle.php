@@ -201,24 +201,24 @@ class SurvosPixieBundle extends AbstractBundle
         $source
             ->scalarNode('instructions')->end()
             ->scalarNode('notes')->end()
-            ->scalarNode('dir')->info('defaults to <projectDir>/data')->end()
+            ->scalarNode('dir')->info('defaults to <projectDir>/data')->end();
 
-            ->arrayNode('links')->info("pre-defined links");
+        $links = $source->arrayNode('links')->children();
         # this isn't right.
-        foreach (['facebook', 'twitter','github','instagram','flickr'] as $socialMedia) {
-            $source->scalarNode($socialMedia)->end();
+        foreach (['facebook', 'twitter','github','instagram','flickr', 'website'] as $socialMedia) {
+            $links->scalarNode($socialMedia)->end();
         }
-        $source
-            ->end()
 
+        $links->end()->end();
+
+        $source
             ->arrayNode('ignore')->info("array of patterns to ignore")
                 ->scalarPrototype()->defaultValue(["*.zip"])->end()
             ->end()
-            ->scalarNode('include')->end()
-            ->end() // End pixies children
-                ;
-        // this seems like its in the wrong spot.
-        $source->end();  // End source children
+            ->scalarNode('include')
+            ->end()
+        ->end()
+        ->end();
     }
 
     private function addGitSection(NodeBuilder $sourceRoot): void

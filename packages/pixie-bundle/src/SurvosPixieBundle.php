@@ -24,6 +24,7 @@ use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\SqliteService;
 use Survos\PixieBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -151,31 +152,67 @@ class SurvosPixieBundle extends AbstractBundle
 
     private function addPixiesSection(ArrayNodeDefinition $rootNode): void
     {
-        $rootNode
-            ->children()
+        $children = $rootNode->children();  // Start with children() on the root node
+
+        $this->addCoresSection($children);
+        $this->addPixiesSectionChildren($children);
+
+        $children->end();  // End the children block
+    }
+
+    private function addCoresSection(NodeBuilder $children): void
+    {
+        $children
             ->arrayNode('cores')
-                ->arrayPrototype()
-                    ->children()
-                        ->scalarNode('icon')->end()
-                        ->scalarNode('icon_class')->end()
-                    ->end()
-                ->end()
+            ->arrayPrototype()
+            ->children()
+            ->scalarNode('icon')->end()
+            ->scalarNode('icon_class')->end()
             ->end()
-
-            ->arrayNode('pixies')
-                ->arrayPrototype()
-                ->children()
-                    ->scalarNode('version')->end()
-                ->arrayNode('tables')->end()
-                ->arrayNode('source')
-                    ->children()
-                    ->scalarNode('instructions')->end()
-                    ->scalarNode('notes')->end()
-            ->end()
-
             ->end()
             ->end();
+    }
 
+    private function addPixiesSectionChildren(NodeBuilder $children): void
+    {
+        $pixies = $children
+            ->arrayNode('pixies')
+            ->arrayPrototype()
+            ->children();
+
+        $pixies->scalarNode('version')->end();
+        $pixies->arrayNode('tables')->end();
+
+        $this->addSourceSection($pixies);
+    }
+
+    private function addSourceSection(NodeBuilder $children): void
+    {
+        $source = $children
+            ->arrayNode('source')
+            ->children();
+
+        $this->addGitSection($source);
+        $source
+            ->scalarNode('instructions')->end()
+            ->scalarNode('notes')->end()
+            ->scalarNode('dir')->end()
+            ->scalarNode('ignore')->end()
+            ->scalarNode('include')->end()
+            ->end(); // End pixies children
+        $source->end();  // End source children
+    }
+
+    private function addGitSection(NodeBuilder $children): void
+    {
+        $children
+            ->arrayNode('git')
+            ->children()
+            ->scalarNode('repo')->end()
+            ->scalarNode('lfs')->end()
+            ->scalarNode('lsf_include')->end()
+            ->end()
+            ->end();
     }
 
 

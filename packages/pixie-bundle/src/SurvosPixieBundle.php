@@ -202,7 +202,18 @@ class SurvosPixieBundle extends AbstractBundle
             ->scalarNode('instructions')->end()
             ->scalarNode('notes')->end()
             ->scalarNode('dir')->info('defaults to <projectDir>/data')->end()
-            ->scalarNode('ignore')->info("glob pattern to ignore")->defaultValue("*.zip")->end()
+
+            ->arrayNode('links')->info("pre-defined links");
+        # this isn't right.
+        foreach (['facebook', 'twitter','github','instagram','flickr'] as $socialMedia) {
+            $source->scalarNode($socialMedia)->end();
+        }
+        $source
+            ->end()
+
+            ->arrayNode('ignore')->info("array of patterns to ignore")
+                ->scalarPrototype()->defaultValue(["*.zip"])->end()
+            ->end()
             ->scalarNode('include')->end()
             ->end() // End pixies children
                 ;

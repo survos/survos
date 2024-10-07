@@ -165,30 +165,35 @@ class SurvosPixieBundle extends AbstractBundle
         $children
             ->arrayNode('cores')
             ->arrayPrototype()
-            ->children()
-            ->scalarNode('icon')->end()
-            ->scalarNode('icon_class')->end()
-            ->end()
+                ->children()
+                    ->scalarNode('icon')->end()
+                    ->scalarNode('icon_class')->end()
+                ->end()
             ->end()
             ->end();
     }
 
     private function addPixiesSectionChildren(NodeBuilder $children): void
     {
-        $pixies = $children
+        $pixieRoot = $children
             ->arrayNode('pixies')
             ->arrayPrototype()
             ->children();
 
-        $pixies->scalarNode('version')->end();
-        $pixies->arrayNode('tables')->end();
+        $pixieRoot->scalarNode('version')->defaultValue('1.1')->end();
 
-        $this->addSourceSection($pixies);
+
+        // like pixies, tables are keyed by some value, but have a prototype beneath them of rules, properies, translatableFields, etc.
+        // replace this with
+//        $this->addTablesSection($pixies);
+        $pixieRoot->arrayNode('tables')->end();
+
+        $this->addSourceSection($pixieRoot);
     }
 
-    private function addSourceSection(NodeBuilder $children): void
+    private function addSourceSection(NodeBuilder $pixieRoot): void
     {
-        $source = $children
+        $source = $pixieRoot
             ->arrayNode('source')
             ->children();
 
@@ -196,22 +201,24 @@ class SurvosPixieBundle extends AbstractBundle
         $source
             ->scalarNode('instructions')->end()
             ->scalarNode('notes')->end()
-            ->scalarNode('dir')->end()
-            ->scalarNode('ignore')->end()
+            ->scalarNode('dir')->info('defaults to <projectDir>/data')->end()
+            ->scalarNode('ignore')->info("glob pattern to ignore")->defaultValue("*.zip")->end()
             ->scalarNode('include')->end()
-            ->end(); // End pixies children
+            ->end() // End pixies children
+                ;
+        // this seems like its in the wrong spot.
         $source->end();  // End source children
     }
 
-    private function addGitSection(NodeBuilder $children): void
+    private function addGitSection(NodeBuilder $sourceRoot): void
     {
-        $children
+        $sourceRoot
             ->arrayNode('git')
-            ->children()
-            ->scalarNode('repo')->end()
-            ->scalarNode('lfs')->end()
-            ->scalarNode('lsf_include')->end()
-            ->end()
+                ->children()
+                    ->scalarNode('repo')->end()
+                    ->booleanNode('lfs')->defaultFalse()->end()
+                    ->scalarNode('lsf_include')->end()
+                ->end()
             ->end();
     }
 
@@ -225,7 +232,7 @@ class SurvosPixieBundle extends AbstractBundle
             ->scalarNode('extension')->info("the pixie db extension")->defaultValue('.pixie.db')->end()
             ->scalarNode('db_dir')->info("where to store the pixie db files")->defaultValue('pixie]')->end()
             ->scalarNode('data_root')->info("root for csv/json data")->defaultValue('data')->end()
-            ->scalarNode('transport')->info("default transport for iterate")->defaultNull()->end()
+            ->scalarNode('transport')->info("default transport for iterate, e.g. sync")->defaultNull()->end()
             ->booleanNode('purge_before_import')->info("purge db before import")->defaultValue(false)->end()
             ->integerNode('limit')->info("import, index, translation, etc. limit")->defaultValue(0)->end()
             ->scalarNode('config_dir')->info("location of .pixie.yaml config files")->defaultValue('config/packages/pixie')->end()

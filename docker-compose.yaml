@@ -51,6 +51,20 @@ services:
         networks:
             - rabbitmq_go_net
 
+
+#    installing meilisearch on dokku
+#
+#  # stop meilisearch service
+#    systemctl stop meilisearch
+#  # delete old data
+#    rm -rf /data.ms
+#  # download new update
+#    curl -L https://install.meilisearch.com | sh
+#  # Replace new one
+#    mv meilisearch /usr/bin/meilisearch
+#  # start meilisearch
+#    systemctl start meilisearch
+
     meilisearch:
         image: getmeili/meilisearch:v1.10
         container_name: 'meilisearch'

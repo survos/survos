@@ -43,7 +43,7 @@ class LimeniusLiformBundle extends AbstractBundle implements CompilerPassInterfa
     /**
      * @inheritDoc
      */
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new TransformerCompilerPass());
         $container->addCompilerPass(new ExtensionCompilerPass());
@@ -108,7 +108,7 @@ class LimeniusLiformBundle extends AbstractBundle implements CompilerPassInterfa
         ;
     }
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('Limenius\Liform\Liform')) {
             return;

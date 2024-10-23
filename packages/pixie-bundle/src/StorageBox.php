@@ -579,6 +579,7 @@ class StorageBox
         $columns['json'] = '_extra TEXT'; // original data minus defined properties
         $columns['raw'] = '_raw TEXT'; // original data sent to ->set()
 
+
 //        dd($tableConfig);
 //        array_unshift($columns, $primaryKey);
 
@@ -873,7 +874,7 @@ class StorageBox
                 $results = $statement->execute(
                     $params = [
                         'key' => $key,
-                        "value" => is_string($value) ? $value : json_encode($value)
+                        "value" => is_string($value) ? $value : json_encode($value, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES)
                     ]);
 //                if ($mode === self::MODE_PATCH) dd($key, $value);
 //            $this->db->commit();

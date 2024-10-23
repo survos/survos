@@ -269,9 +269,8 @@ class StorageBox
 
     // @todo: make this an event listener?
     // given the HEADER array, map the key names, for array_combine or csv getRecords
-    public function mapHeader(array $header, string $propertyRule, string $tableName = null, array $regexRules = []): array
+    static public function mapHeader(array $header, string $propertyRule, string $tableName = null, array $regexRules = []): array
     {
-        $tableName = $tableName ?? $this->currentTable;
         // $fieldName is the attribute (json) or column name (csv)
         $newHeaders = [];
 //        $regexRules = $this->regexRules[$tableName] ?? [];
@@ -296,15 +295,26 @@ class StorageBox
                 }
             }
 
-            $newFieldName = match ($propertyRule) {
-                'preserve' => $newFieldName,
-                'snake' => u($newFieldName)->snake()->toString(),
-                'camel' => u($newFieldName)->camel()->toString()
-            };
-            assert(!str_contains(' ', $newFieldName), "invalid $propertyRule property code: [$newFieldName]");
-            $newHeaders[] = $newFieldName;
+            $lastChar = $newFieldName[-1];
+            if (in_array($lastChar, [',', '|', ';'])) {
+                // ugh, terrible side effect!
+//                $this->explodeFields[$newFieldName] = $lastChar;
+                $newFieldName = str_replace($lastChar, '', $newFieldName);
+//                dd($newFieldName);
+            }
+//            if (preg_match($regex, $fieldName, $mm)) {
+
+                $newFieldName = match ($propertyRule) {
+                    'preserve' => $newFieldName,
+                    'snake' => u($newFieldName)->snake()->toString(),
+                    'camel' => u($newFieldName)->camel()->toString()
+                };
+                assert(!str_contains(' ', $newFieldName), "invalid $propertyRule property code: [$newFieldName]");
+                $newHeaders[] = $newFieldName;
+//            }
         }
-        return array_combine($newHeaders, $header);
+        $result =  array_combine($newHeaders, $header);
+        return $result;
     }
 
     public function getColumnMap()

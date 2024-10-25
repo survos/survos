@@ -24,7 +24,7 @@ use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
 
-#[AsCommand('pixie:make', "Execute the build steps to create csv/json")]
+#[AsCommand('pixie:make', "Execute the build steps to create csv/json", aliases: ['pixie:build'])]
 final class PixieMakeCommand extends InvokableServiceCommand
 {
     use RunsCommands;

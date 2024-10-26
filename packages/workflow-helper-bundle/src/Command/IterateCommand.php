@@ -71,10 +71,13 @@ final class IterateCommand extends InvokableServiceCommand
     {
         $transport ??= $defaultTransport;
 
+//        Metadata::for('user'); // ['track' => true, 'identifier' => 'getId'] (alternatively, fetch metadata by a class' alias)
+
 
         // do we need the Config?  Or is it all in the StorageBox
         $workflow = null;
         if (!class_exists($className)) {
+
             $className = str_replace('\\', '\\\\', $className);
         }
         $repo = $this->entityManager->getRepository($className);

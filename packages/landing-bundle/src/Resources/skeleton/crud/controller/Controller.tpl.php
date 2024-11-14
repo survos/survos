@@ -14,7 +14,7 @@ use <?= $repository_full_class_name ?>;
 // use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Survos\LandingBundle\Controller\BaseController;
 
 /**

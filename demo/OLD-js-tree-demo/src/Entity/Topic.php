@@ -17,7 +17,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
 use Survos\Tree\Traits\TreeTrait;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ApiResource(
     normalizationContext: ['groups' => ['Default','jstree','minimum', 'marking','transitions', 'rp']],

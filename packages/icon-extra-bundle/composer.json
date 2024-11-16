@@ -1,9 +1,10 @@
 {
-    "name": "survos/mobile-bundle",
+    "name": "icon-extra-bundle",
     "type": "symfony-bundle",
-    "description": "Bundle with utilities for creating a Symfony-based mobile app",
+    "description": "icon-extra-bundle Bundle",
     "keywords": [
-        "symfony-ux"
+        "symfony-ux",
+        "symfony6"
     ],
     "license": "MIT",
     "require": {
@@ -11,14 +12,11 @@
         "symfony/config": "^6.4 || ^7.0",
         "symfony/dependency-injection": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
-        "twig/twig": "^3.4",
-        "survos/core-bundle": "^1.5.379",
-        "knplabs/knp-menu-bundle": "^3.4",
-        "symfony/event-dispatcher": "^7.0"
+        "twig/twig": "^3.4"
     },
     "autoload": {
         "psr-4": {
-            "Survos\\MobileBundle\\": "src/"
+            "Survos\\IconExtraBundle\\": "src/"
         }
     },
     "require-dev": {

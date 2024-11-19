@@ -16,7 +16,7 @@
         "symfony/dependency-injection": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
         "twig/twig": "^3.4",
-        "survos/installer": "^1.4"
+        "survos/installer": "^1.5"
     },
     "autoload": {
         "psr-4": {

@@ -4102,7 +4102,7 @@
                 "shasum": ""
             },
             "require": {
-                "endroid/installer": "^1.4",
+                "survos/installer":  "^2.0",
                 "knplabs/knp-menu-bundle": "^3.2",
                 "php": "^8.2",
                 "survos/core-bundle": "^1.5.378",

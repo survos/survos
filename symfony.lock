@@ -176,6 +176,9 @@
     "survos/maker-bundle": {
         "version": "1.4.64"
     },
+    "survos/seo-bundle": {
+        "version": "1.5.385"
+    },
     "symfony/console": {
         "version": "6.2",
         "recipe": {

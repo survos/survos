@@ -40,6 +40,7 @@
         "survos/bootstrap-bundle": "^1.4",
         "survos/command-bundle": "^1.5",
         "survos/liform": "^1.0",
+        "survos/seo-bundle": "^1.5",
         "survos/wikidata": "^4.0",
         "symfony/cache": "^6.1",
         "symfony/config": "^6.4 || ^7.0",
@@ -124,13 +125,14 @@
     },
     "config": {
         "allow-plugins": {
-            "composer\/package-versions-deprecated": true,
-            "endroid\/installer": true,
-            "php-http\/discovery": true,
-            "phpro\/grumphp": true,
-            "phpstan\/extension-installer": true,
-            "symfony\/flex": true,
-            "symfony\/runtime": true
+            "composer/package-versions-deprecated": true,
+            "endroid/installer": true,
+            "php-http/discovery": true,
+            "phpro/grumphp": true,
+            "phpstan/extension-installer": true,
+            "symfony/flex": true,
+            "symfony/runtime": true,
+            "survos/installer": true
         },
         "optimize-autoloader": true,
         "preferred-install": {

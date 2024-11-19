@@ -36,8 +36,9 @@ Cut and paste the following to create a new Symfony project with a landing page 
 symfony new FakerDemo --webapp && cd FakerDemo
 bin/console make:controller AppController
 sed  -i "s|'/app'|'/'|" src/Controller/AppController.php # the landing page controller
+composer config allow-plugins.survos/installer true
 composer req survos/faker-bundle
-echo "<ul> {% for i in 0..10 %} <li>{{ person_name() }} <u>{{ internet_email() }}</u> <br />  <i>{{ company_jobTitle() }}</i>, {{ company_company() }}  </li>{% endfor %}</ul>" > templates/app/index.html.twig
+echo "{% extends 'base.html.twig' %} {% block body %}<ul> {% for i in 0..10 %} <li>{{ person_name() }} <u>{{ internet_email() }}</u> <br />  <i>{{ company_jobTitle() }}</i>, {{ company_company() }}  </li>{% endfor %}</ul> {% endblock %}" > templates/app/index.html.twig
 symfony server:start -d
 symfony open:local
 ```

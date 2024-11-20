@@ -228,13 +228,7 @@ class ScraperService
 //        }
 //        $cache->createTable(); // for debugging
 
-        $cache->delete($key);
         // return an array with status_code and optionally content or data (array)
-        if ($this->httpClient instanceof MockHttpClient) {
-            $responseData = $this->httpClient->request($method, $url, $options)->getContent();
-            dd($responseData);
-        }
-        dd($this->httpClient::class);
         $responseData = $cache->get($key, function (ItemInterface $item) use ($url, $options, $parameters, $key, $method) {
 
             $this->logger->info("Missing $key, Fetching " . $url);

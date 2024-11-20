@@ -188,7 +188,8 @@ class ScraperService
         }
 
         assert($this->getCache());
-        if (!$cache = $this->getCache()) {
+        $cache = $this->getCache();
+        if (!$cache) {
             $sqliteFilename = $this->getFullFilename();
             dd($sqliteFilename);
             if (($dir = pathinfo($sqliteFilename, PATHINFO_DIRNAME)) && !file_exists($dir)) {
@@ -197,6 +198,7 @@ class ScraperService
             $cache = new DoctrineDbalAdapter(
                 'sqlite:///' . $sqliteFilename,
             );
+            dd($cache::class);
         }
 
         $options = [
@@ -229,6 +231,10 @@ class ScraperService
 //        $cache->createTable(); // for debugging
 
         // return an array with status_code and optionally content or data (array)
+        if ($this->httpClient instanceof MockHttpClient) {
+            $responseData = $this->httpClient->request($method, $url, $options)->getContent();
+        }
+        dd($this->httpClient::class);
         $responseData = $cache->get($key, function (ItemInterface $item) use ($url, $options, $parameters, $key, $method) {
 
             $this->logger->info("Missing $key, Fetching " . $url);

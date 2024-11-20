@@ -8,7 +8,7 @@ parameters:
 #      - 'src/Resources/skeleton'
 #      - */cache/*
        analyse:
-                  - ./vendor
+          - ./vendor
 
     ignoreErrors:
         # False positive: clients are not dependencies of this project.
@@ -30,6 +30,4 @@ parameters:
         -
             message: '#.*NodeDefinition::children.*#'
             path: ./src/*Bundle.php
-        -
-            message: '#.*NodeParentInterface::(info|scalarNode).*#'
-            path: ./src/*Bundle.php
+

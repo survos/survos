@@ -1,7 +1,5 @@
 <?php
 
-/** generated from /home/tac/g/survos/survos/vendor/survos/maker-bundle/templates/skeleton/bundle/src/Bundle.tpl.php */
-
 namespace Survos\GeoapifyBundle;
 
 use Survos\GeoapifyBundle\Service\GeoapifyService;
@@ -27,10 +25,6 @@ class SurvosGeoapifyBundle extends AbstractBundle
             ->setArgument('$apiKey', $config['api_key'])
 //            ->setArgument('$cache', new Reference('cache.app', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setPublic(true);
-
-        $definition = $builder
-        ->autowire('survos.survos_geoapify_twig', TwigExtension::class)
-            ->addTag('twig.extension');
 
     }
 

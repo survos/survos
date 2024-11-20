@@ -9,12 +9,20 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "symfony/config": "^6.4 || ^7.0",
         "symfony/dependency-injection": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
         "twig/twig": "^3.4",
         "symfony/http-client-contracts": "^3.5"
+    },
+    "scripts": {
+        "phpstan": "phpstan",
+        "phpunit-base": "phpunit tests/",
+        "phpunit": "@phpunit-base --testdox",
+        "phpunit-coverage-text": "@phpunit-base --coverage-text --colors=never",
+        "cs-check": "mkdir -p var/cache && php-cs-fixer fix --dry-run --diff --cache-file=var/cache/.php_cs.cache",
+        "cs-fix": "mkdir -p var/cache && php-cs-fixer fix --diff --cache-file=var/cache/.php_cs.cache"
     },
     "suggest": {
         "symfony/cache-contracts": "Cache the lookups"

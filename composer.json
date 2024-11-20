@@ -104,7 +104,7 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "App\\": "src/",
+            "App\\": "src/"
         },
         "exclude-from-classmap": [
             "packages/location-bundle/Tests/"

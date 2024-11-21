@@ -19,6 +19,7 @@ trait RouteParametersTrait
     public function getUniqueIdentifiers(): array
     {
         if (defined('static::UNIQUE_PARAMETERS')) {
+            $x = [];
             foreach (constant('static::UNIQUE_PARAMETERS') as $parameter => $getter) {
                 $x[$parameter] = $this->{'get' . $getter}();
             }
@@ -38,7 +39,7 @@ trait RouteParametersTrait
     }
 
     /** e.g. MemberDirectory to member_directory */
-    public static function getClassnamePrefix(string $class = null): string
+    public static function getClassnamePrefix(string|null $class = null): string
     {
         if (! $class) {
             $class = get_called_class();

@@ -1,4 +1,4 @@
-name: flysystem-bundle
+name: seo-bundle
 
 on:
   [push, pull_request]
@@ -26,17 +26,16 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - '8.2'
           - '8.3'
           - '8.4'
         symfony-version:
           - '6.4.*'
           - '7.1.*'
-        include:
-          - php-version: '8.2'
-            symfony-version: '6.4.*'
-          - php-version: '8.3'
-            symfony-version: '7.1.*'
+#        include:
+#          - php-version: '8.3'
+#            symfony-version: '6.4.*'
+#          - php-version: '8.3'
+#            symfony-version: '7.1.*'
 
     steps:
       - name: Checkout code
@@ -54,7 +53,7 @@ jobs:
           composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
       - name: Install Composer dependencies
-        uses: ramsey/composer-install@v2
+        uses: ramsey/composer-install@v3
 
       - name: Run PHPStan
         run: composer phpstan

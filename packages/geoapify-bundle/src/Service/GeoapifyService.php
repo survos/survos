@@ -43,6 +43,7 @@ class GeoapifyService
             }
         } else {
             // or use curl?
+            dd($url);
             $response = json_decode(file_get_contents($url), true);
         }
         return $response;

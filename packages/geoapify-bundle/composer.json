@@ -16,6 +16,16 @@
         "twig/twig": "^3.4",
         "symfony/http-client-contracts": "^3.5"
     },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10",
+        "symfony/browser-kit": "^6.4 || ^7.0",
+        "symfony/framework-bundle": "^6.4 || ^7.0",
+        "symfony/phpunit-bridge": "^6.4 || ^7.0",
+        "symfony/twig-bundle": "^6.4 || ^7.0",
+        "symfony/var-dumper": "^6.4 || ^7.0",
+        "symfony/cache-contracts": "^3.4",
+        "phpunit/phpunit": "^10.5"
+    },
     "scripts": {
         "phpstan": "phpstan",
         "phpunit-base": "phpunit tests/",
@@ -32,13 +42,9 @@
             "Survos\\GeoapifyBundle\\": "src/"
         }
     },
-    "require-dev": {
-        "phpstan/phpstan": "^1.10",
-        "symfony/browser-kit": "^6.4 || ^7.0",
-        "symfony/framework-bundle": "^6.4 || ^7.0",
-        "symfony/phpunit-bridge": "^6.4 || ^7.0",
-        "symfony/twig-bundle": "^6.4 || ^7.0",
-        "symfony/var-dumper": "^6.4 || ^7.0",
-        "symfony/cache-contracts": "^3.4"
+    "autoload-dev": {
+        "psr-4": {
+            "Survos\\GeoapifyBundle\\Tests\\": "tests/"
+        }
     }
 }

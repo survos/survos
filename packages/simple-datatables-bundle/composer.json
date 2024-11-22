@@ -1,6 +1,5 @@
 {
     "name": "survos/simple-datatables-bundle",
-    "minimum-stability": "dev",
     "description": "incorporate simple datatables, using twig and stimulus",
     "keywords": [
         "symfony-ux",
@@ -15,13 +14,13 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "symfony/config": "^7.0 || ^6.4",
         "symfony/dependency-injection": "^7.0 || ^6.4",
         "symfony/http-kernel": "^7.0 || ^6.4",
         "symfony/options-resolver": "^7.0 || ^6.4",
         "symfony/ux-twig-component": "^2.9",
-        "survos/core-bundle": "^1.5.394",
+        "survos/core-bundle": "^1.5",
         "twig/twig": "^3.4",
         "symfony/stimulus-bundle": "^2.9"
     },
@@ -33,25 +32,23 @@
     "extra": {
         "branch-alias": {
             "dev-main": "1.6-dev"
-        },
-        "symfony": {
-            "require": "^7.0 || ^6.4"
         }
     },
     "scripts": {
-        "phpstan": "vendor/bin/phpstan analyse"
+        "phpstan": "vendor/bin/phpstan"
     },
     "suggest": {
         "monolog/monolog": "Allows more advanced logging of the application flow"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
-        "phpstan/phpstan": "^1.8",
+        "phpstan/phpstan": "^2.0",
         "symfony/browser-kit": "^7.0 || ^6.4",
         "symfony/framework-bundle": "^7.0 || ^6.4",
         "symfony/phpunit-bridge": "^7.0 || ^6.4",
         "symfony/twig-bundle": "^7.0 || ^6.4",
-        "symfony/var-dumper": "^7.0 || ^6.4"
+        "symfony/var-dumper": "^7.0 || ^6.4",
+        "rector/rector": "dev-main"
     },
     "prefer-stable": true
 }

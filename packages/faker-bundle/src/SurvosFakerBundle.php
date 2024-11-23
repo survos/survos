@@ -20,6 +20,7 @@ class SurvosFakerBundle extends AbstractBundle
     {
         $definition = $builder
             ->autowire('survos.faker_twig', TwigExtension::class)
+            ->setAutoconfigured(true)
             ->addTag('twig.extension');
 
         $definition->setArgument('$seed', $config['seed']);

@@ -4,7 +4,7 @@
     "description": "Scrape and cache web pages",
     "keywords": [
         "symfony-ux",
-        "symfony6"
+        "symfony"
     ],
     "license": "MIT",
     "require": {

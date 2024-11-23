@@ -4,23 +4,17 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-
 use App\Model\Package;
 use HaydenPierce\ClassFinder\ClassFinder;
+use Nadar\PhpComposerReader\AutoloadSection;
+use Nadar\PhpComposerReader\ComposerReader;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symplify\ComposerJsonManipulator\ComposerJsonFactory;
-use Symplify\ComposerJsonManipulator\ValueObject\ComposerJson;
 
 class PackageService
 {
     public function __construct(
-        #[Autowire('%kernel.project_dir%/')]
-        private                     $projectDir,
-//        private KernelInterface $kernel,
-//        private ComposerJsonFactory $composerJsonFactory
-    )
-    {
+        #[Autowire('%kernel.project_dir%')] private $projectDir,
+    ) {
     }
 
     /*
@@ -29,28 +23,35 @@ class PackageService
      */
     public function getPackages(bool $recursive = false): array
     {
-        // @todo: refactor to use plain json
-        $composerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . 'composer.json');
+        $reader = new ComposerReader($this->projectDir . '/composer.json');
+
+        if (!$reader->canRead()) {
+            throw new \Exception("Unable to read the JSON file.");
+        }
+
+        if (!$reader->canWrite()) {
+            throw new \Exception("Unable to write to the JSON file.");
+        }
+
+        $autoLoad = new AutoloadSection($reader);
+
         $packages = [];
-
-//        dd($this->kernel->getBundles());
-
-        foreach ($composerJson->getAutoload()['psr-4'] as $nameSpace => $packagePath) {
+        foreach ($autoLoad->assignIteratorData() as $nameSpace => $packagePath) {
             if (!str_contains($packagePath, 'packages')) {
                 continue;
             }
-            // overkill, but load it here until we need to optimize.
-            $packageComposerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . $packagePath . '../composer.json');
-//                $packages[$nameSpace] = $this->getPackage($packagePath, $nameSpace, $recursive);
-            $package = new Package($packageComposerJson->getShortName(), $packagePath, $nameSpace, $packageComposerJson);
-            $packages[$package->getShortName()] = $package;
+//            // overkill, but load it here until we need to optimize.
+//            $packageComposerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . $packagePath . '../composer.json');
+////                $packages[$nameSpace] = $this->getPackage($packagePath, $nameSpace, $recursive);
+//            $package = new Package($packageComposerJson->getShortName(), $packagePath, $nameSpace, $packageComposerJson);
+//            $packages[$package->getShortName()] = $package;
         }
         return $packages;
     }
 
-    public function getProjectComposerJson(): ComposerJson
+    public function getProjectComposerJson(): ComposerReader
     {
-        return $this->composerJsonFactory->createFromFilePath($this->projectDir . '/composer.json');
+        return new ComposerReader($this->projectDir . '/composer.json');
     }
 
     public function getPackage(string $packageCode)
@@ -72,8 +73,5 @@ class PackageService
 //        } catch (\Exception $exception) {
 //            // not in vendor? in bundles.php?
 //        }
-
     }
-
 }
-

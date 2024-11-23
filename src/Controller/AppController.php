@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Service\PackageService;
 use HaydenPierce\ClassFinder\ClassFinder;
+use Nadar\PhpComposerReader\Package;
+use Nadar\PhpComposerReader\RequireDevSection;
+use Nadar\PhpComposerReader\RequireSection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,10 +23,15 @@ class AppController extends AbstractController
     public function index(PackageService $packageService): Response
     {
         $packages = []; // $packageService->getPackages();
+        $composerReader = $packageService->getProjectComposerJson();
+        $requires = new RequireDevSection($composerReader);
+        $new = new Package($composerReader, 'survos/installer', '^1.5');
+        $requires->add($new);
 
         return $this->render('app/index.html.twig', [
             'packages' => $packages,
-            'composerJson' => $packageService->getProjectComposerJson(),
+            'requires' => $requires->assignIteratorData(),
+            'composerJson' => $composerReader,
             'controller_name' => 'AppController',
         ]);
     }

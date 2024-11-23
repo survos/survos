@@ -1,0 +1,6 @@
+framework:
+    secret: "test"
+    test: ~
+
+survos_seo:
+    maxDescriptionLength: 10

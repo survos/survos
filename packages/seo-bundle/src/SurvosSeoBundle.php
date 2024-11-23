@@ -28,6 +28,7 @@ class SurvosSeoBundle extends AbstractBundle
             ;
 
         $builder->autowire(SeoCollector::class)
+            ->setPublic(true)
             ->setArgument('$seoService', new Reference(SeoService::class))
             ->addTag('data_collector', [
                 'template' => '@SurvosSeo/seo_collector.html.twig'

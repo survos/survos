@@ -24,6 +24,7 @@ class SurvosSeoBundle extends AbstractBundle
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $builder->autowire(SeoService::class)
+            ->setPublic(true)
             ->setArgument('$config', $config)
             ;
 

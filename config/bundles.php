@@ -22,4 +22,5 @@ return [
     Symfony\UX\Icons\UXIconsBundle::class => ['all' => true],
     Symfony\UX\StimulusBundle\StimulusBundle::class => ['all' => true],
     Survos\SeoBundle\SurvosSeoBundle::class => ['all' => true],
+    Survos\SimpleDatatables\SurvosSimpleDatatablesBundle::class => ['all' => true],
 ];

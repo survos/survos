@@ -1,3 +1,0 @@
-survos_auth:
-  resource: '@SurvosLandingBundle/config/routes.php'
-  prefix: '/landing'

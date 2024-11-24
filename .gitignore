@@ -23,10 +23,6 @@
 /phpcs.xml
 ###< squizlabs/php_codesniffer ###
 
-###> phpstan/phpstan ###
-## phpstan.neon
-###< phpstan/phpstan ###
-
 .docker
 /node_modules/
 .phpunit.result.cache

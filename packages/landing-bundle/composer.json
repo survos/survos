@@ -13,9 +13,9 @@
         "ext-zip": "*",
         "meyfa/php-svg": "^0.9.1",
         "symfony/dependency-injection": "^7.0",
-        "symfony/string": "^6.4 || ^7.0 ",
-        "symfony/yaml": "^6.4 || ^7.0 ",
-        "twig/string-extra": "^3.0",
+        "symfony/string": "^6.4 || ^7.1 ",
+        "symfony/yaml": "^6.4 || ^7.1 ",
+        "twig/string-extra": "^3.4",
         "twig/twig": "^3.0"
     },
     "require-dev": {

@@ -144,3 +144,12 @@ SYMFONY_DEPRECATIONS_HELPER='disabled=1' vendor/bin/phpunit
 ## Worth Reading
 
 * https://matemarschalko.medium.com/28-javascript-one-liners-every-senior-developer-needs-to-know-e74bdedc3b3b
+
+
+## Continuous Integration
+
+https://github.com/yokai-php/safe-command-bundle has a next way to handle tests
+
+## Candidates for Symfony 7
+
+* https://github.com/yipikai-studio/geolocation-bundle/blob/1.0/composer.json

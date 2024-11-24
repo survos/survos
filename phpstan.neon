@@ -3,11 +3,12 @@ parameters:
     inferPrivatePropertyTypeFromConstructor: true
     paths:
         - ./src
-#        - ./packages/
+        - ./packages/
 
     excludePaths:
             analyse:
-                - ./packages
+#                - ./packages
+                - packages/providence-bundle
 #                - packages/*/vendor/*
                 - ./packages/*/vendor/*
                 - */cache/*

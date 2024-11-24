@@ -18,7 +18,7 @@ return static function (MBConfig $mbConfig): void {
     $mbConfig->defaultBranch('main');
 
     // how to skip packages in loaded directories?
-    $mbConfig->packageDirectoriesExcludes([__DIR__ . '/packages/landing-bundle']);
+//    $mbConfig->packageDirectoriesExcludes([__DIR__ . '/packages/landing-bundle']);
 
     // what extra parts to add after merge?
     $mbConfig->dataToAppend([

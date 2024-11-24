@@ -84,13 +84,13 @@ interface TranslateApiInterface
      * @param  UploadedFile $file  File to translate (required)
      * @param   $source  Source language code (required)
      * @param   $target  Target language code (required)
-     * @param  |null $apiKey  API key (optional)
+     * @param  string|null $apiKey  API key (optional)
      * @param  int     &$responseCode    The HTTP Response Code
      * @param  array   $responseHeaders  Additional HTTP headers to return with the response ()
      *
      * @return array|object|null
      */
-    public function translateFilePost(UploadedFile $file, $source, $target, ?$apiKey, int &$responseCode, array &$responseHeaders): array|object|null;
+    public function translateFilePost(UploadedFile $file, $source, $target, string|null $apiKey, int &$responseCode, array &$responseHeaders): array|object|null;
 
 
     /**
@@ -101,13 +101,13 @@ interface TranslateApiInterface
      * @param   $q  Text(s) to translate (required)
      * @param   $source  Source language code (required)
      * @param   $target  Target language code (required)
-     * @param  |null $format  Format of source text:  * &#x60;text&#x60; - Plain text  * &#x60;html&#x60; - HTML markup (optional)
-     * @param  |null $apiKey  API key (optional)
+     * @param  string|null $format  Format of source text:  * &#x60;text&#x60; - Plain text  * &#x60;html&#x60; - HTML markup (optional)
+     * @param  string|null $apiKey  API key (optional)
      * @param  int     &$responseCode    The HTTP Response Code
      * @param  array   $responseHeaders  Additional HTTP headers to return with the response ()
      *
      * @return array|object|null
      */
-    public function translatePost($q, $source, $target, ?$format, ?$apiKey, int &$responseCode, array &$responseHeaders): array|object|null;
+    public function translatePost($q, $source, $target, string|null $format, string|null $apiKey, int &$responseCode, array &$responseHeaders): array|object|null;
 
 }

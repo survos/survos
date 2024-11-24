@@ -41,7 +41,7 @@ class TypeMismatchException extends RuntimeException
             $property = '';
         }
 
-        return new static(sprintf(
+        return new self(sprintf(
             'Expected %s%s, but got %s: %s',
             $property,
             $expected_type,

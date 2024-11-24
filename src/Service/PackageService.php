@@ -8,7 +8,9 @@ use App\Model\Package;
 use HaydenPierce\ClassFinder\ClassFinder;
 use Nadar\PhpComposerReader\AutoloadSection;
 use Nadar\PhpComposerReader\ComposerReader;
+use Nadar\PhpComposerReader\RequireSection;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Finder\Finder;
 
 class PackageService
 {
@@ -36,6 +38,24 @@ class PackageService
         $autoLoad = new AutoloadSection($reader);
 
         $packages = [];
+        foreach ((new Finder())->in($this->projectDir . '/packages')->depth(0)->directories() as $directory) {
+            $packageComposer = new ComposerReader($directory->getRealPath() . '/composer.json');
+            $section = new RequireSection($reader);
+
+            foreach ($section as $package) {
+                echo $package->name . ' with ' . $package->constraint;
+                // Check if the package version is greater than a given version constraint.
+                if ($package->greaterThan('^6.5')) {
+                    echo "Numerous releases available!";
+                }
+                dd($package, $section->assignIteratorData(), $directory->getRealPath());
+            }
+
+
+            $requires = $packageComposer->contentSection('require', []);
+
+            dd($directory, $requires);
+        }
         foreach ($autoLoad->assignIteratorData() as $nameSpace => $packagePath) {
             if (!str_contains($packagePath, 'packages')) {
                 continue;

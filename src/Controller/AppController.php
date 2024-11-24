@@ -22,7 +22,7 @@ class AppController extends AbstractController
     #[Route('/', name: 'app_homepage')]
     public function index(PackageService $packageService): Response
     {
-        $packages = []; // $packageService->getPackages();
+        $packages = $packageService->getPackages();
         $composerReader = $packageService->getProjectComposerJson();
         $requires = new RequireDevSection($composerReader);
         $new = new Package($composerReader, 'survos/installer', '^1.5');

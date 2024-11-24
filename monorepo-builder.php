@@ -11,10 +11,27 @@ use Symplify\MonorepoBuilder\Release\ReleaseWorker\SetNextMutualDependenciesRele
 use Symplify\MonorepoBuilder\Release\ReleaseWorker\TagVersionReleaseWorker;
 use Symplify\MonorepoBuilder\Release\ReleaseWorker\UpdateBranchAliasReleaseWorker;
 use Symplify\MonorepoBuilder\Release\ReleaseWorker\UpdateReplaceReleaseWorker;
+use Symplify\MonorepoBuilder\ComposerJsonManipulator\ValueObject\ComposerJsonSection;
 
 return static function (MBConfig $mbConfig): void {
     $mbConfig->packageDirectories([__DIR__ . '/packages']);
     $mbConfig->defaultBranch('main');
+
+    // how to skip packages in loaded directories?
+    $mbConfig->packageDirectoriesExcludes([__DIR__ . '/packages/landing-bundle']);
+
+    // what extra parts to add after merge?
+    $mbConfig->dataToAppend([
+        ComposerJsonSection::AUTOLOAD_DEV => [
+            'psr-4' => [
+                'Symplify\Tests\\' => 'tests',
+            ],
+        ],
+        ComposerJsonSection::REQUIRE_DEV => [
+            'phpstan/phpstan' => '^2.0',
+            'rector/rector' => 'dev-main',
+        ],
+    ]);
 
     // release workers - in order to execute
     $mbConfig->workers([
@@ -28,4 +45,3 @@ return static function (MBConfig $mbConfig): void {
 //        PushNextDevReleaseWorker::class,
     ]);
 };
-

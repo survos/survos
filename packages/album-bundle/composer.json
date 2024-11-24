@@ -1,7 +1,6 @@
 {
     "name": "survos/album-bundle",
     "description": "Webelop Album is a photo management and publishing Symfony bundle",
-    "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
@@ -13,18 +12,27 @@
             "email": "tacman@gmail.com"
         }
     ],
-    "bin": [
-        "bin/photosync"
-    ],
+    "type": "symfony-bundle",
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "doctrine/common": "^3.4",
-        "doctrine/doctrine-bundle": "^1.8|^2.0",
-        "doctrine/orm": "^2.6.3",
+        "doctrine/doctrine-bundle": "^2.7",
+        "doctrine/orm": "^2.12",
         "symfony/routing": "^6.4 || ^7.1",
         "symfony/twig-bundle": "^6.4 || ^7.1",
         "symfony/asset": "^6.4 || ^7.1",
         "symfony/security-bundle": "^6.4 || ^7.1"
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^6.4 || ^7.1",
+        "symfony/framework-bundle": "^6.4 || ^7.1",
+        "doctrine/doctrine-fixtures-bundle": "^3.3",
+        "symfony/yaml": "^6.4 || ^7.1",
+        "symfony/browser-kit": "^6.4 || ^7.1",
+        "symfony/css-selector": "^6.4 || ^7.1",
+        "symfony/validator": "^6.4 || ^7.1",
+        "phpunit/phpunit": "^11.4",
+        "rector/rector": "dev-main"
     },
     "autoload": {
         "psr-4": {
@@ -36,15 +44,7 @@
             "Webelop\\AlbumBundle\\Tests\\": "tests/"
         }
     },
-    "require-dev": {
-        "symfony/phpunit-bridge": "^6.4 || ^7.1",
-        "symfony/framework-bundle": "^6.4 || ^7.1",
-        "doctrine/doctrine-fixtures-bundle": "^3.3",
-        "symfony/yaml": "^6.4 || ^7.1",
-        "symfony/browser-kit": "^6.4 || ^7.1",
-        "symfony/css-selector": "^6.4 || ^7.1",
-        "symfony/validator": "^6.4 || ^7.1",
-        "phpunit/phpunit": "^11.1",
-        "rector/rector": "^1.1"
-    }
+    "bin": [
+        "bin/photosync"
+    ]
 }

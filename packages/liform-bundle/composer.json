@@ -1,7 +1,6 @@
 {
     "name": "survos/liform-bundle",
     "description": "Bundle for Liform: Transform Symfony Forms into Json Schema",
-    "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
@@ -9,20 +8,21 @@
             "email": "nacho@limenius.com"
         }
     ],
+    "type": "symfony-bundle",
+    "require": {
+        "php": "^8.3",
+        "survos/liform": "^2.0",
+        "symfony/dependency-injection": "^6.4 || ^7.1",
+        "symfony/config": "^6.4 || ^7.1",
+        "symfony/http-kernel": "^6.4 || ^7.1"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.12||^2.0"
+    },
     "autoload": {
         "psr-4": {
             "Limenius\\LiformBundle\\": ""
         }
     },
-    "require": {
-        "php": "^8.2",
-        "survos/liform": "^1.5",
-        "symfony/dependency-injection": "^6.4 || ^7.1",
-        "symfony/config": "^6.4 || ^7.1",
-        "symfony/http-kernel": "^6.4 || ^7.1"
-    },
-    "minimum-stability": "stable",
-    "require-dev": {
-        "phpstan/phpstan": "^1.8"
-    }
+    "minimum-stability": "stable"
 }

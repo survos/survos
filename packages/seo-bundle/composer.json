@@ -1,14 +1,14 @@
 {
     "name": "survos/seo-bundle",
     "description": "checks for title and description length in the debug toolbar",
-    "license": "MIT",
-    "type": "symfony-bundle",
     "keywords": [
         "seo",
         "symfony"
     ],
+    "license": "MIT",
+    "type": "symfony-bundle",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "symfony/config": "^6.4 || ^7.1",
         "symfony/dependency-injection": "^6.4 || ^7.1",
         "symfony/http-kernel": "^6.4 || ^7.1",
@@ -17,7 +17,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.6",
-        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan": "^1.12||^2.0",
         "phpunit/phpunit": "^11.4",
         "rector/rector": "dev-main",
         "symfony/browser-kit": "^6.4 || ^7.1",

@@ -14,6 +14,9 @@ class SurvosRevealBundle extends AbstractBundle
 
     const NAME = 'reveal'; // @todo use this for getPaths()
 
+    /**
+     * @param array<mixed> $config
+     */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         // $builder->setParameter('survos_workflow.direction', $config['direction']);
@@ -27,10 +30,16 @@ class SurvosRevealBundle extends AbstractBundle
             ->end();
     }
 
+    /**
+     * @return array<string>
+     */
     public function getPaths(): array
     {
-        $dir = realpath(__DIR__ . '/../assets/');
-        assert(file_exists($dir), 'asset path must exist for the assets in ' . __DIR__);
+        if ($dir = realpath(__DIR__ . '/../assets/')) {
+            if (!file_exists($dir)) {
+                throw new \RuntimeException(sprintf('The directory "%s" does not exist.', $dir));
+            }
+        }
         return [$dir => '@survos/reveal'];
     }
 }

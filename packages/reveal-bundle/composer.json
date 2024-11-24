@@ -1,8 +1,7 @@
 {
     "name": "survos/reveal-bundle",
     "keywords": [
-        "symfony-ux",
-        "symfony6"
+        "symfony-ux"
     ],
     "license": "MIT",
     "type": "symfony-bundle",
@@ -10,7 +9,8 @@
         "php": "^8.3",
         "symfony/config": "^6.4 || ^7.1",
         "symfony/dependency-injection": "^6.4 || ^7.1",
-        "twig/twig": "^3.4"
+        "twig/twig": "^3.4",
+        "survos/core-bundle": "^1.5"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.0",

@@ -11,12 +11,12 @@
     ],
     "require": {
         "php": "^8.2",
-        "survos/core-bundle": "^1.5.395",
-        "symfony/config": "^6.3 || ^7.0",
-        "symfony/dependency-injection": "^6.3 || ^7.0",
-        "symfony/http-kernel": "^6.3 || ^7.0",
+        "survos/core-bundle": "^1.5",
+        "symfony/config": "^6.4 || ^7.1",
+        "symfony/dependency-injection": "^6.4 || ^7.1",
+        "symfony/http-kernel": "^6.4 || ^7.1",
         "twig/twig": "^3.4",
-        "symfony/string": "^6.3 || ^7.0 "
+        "symfony/string": "^6.4 || ^7.1 "
     },
     "require-dev": {
         "api-platform/core": "^3.2",
@@ -33,7 +33,7 @@
             "dev-main": "1.6-dev"
         },
         "symfony": {
-            "require": "^6.3 || ^7.0"
+            "require": "^6.4 || ^7.1"
         }
     },
     "conflict": {

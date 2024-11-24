@@ -21,12 +21,12 @@
         "phpunit/phpunit": "^11.4",
         "rector/rector": "dev-main",
         "symfony/browser-kit": "^6.4 || ^7.1",
-        "symfony/css-selector": "^7.1",
+        "symfony/css-selector": "^6.4 || ^7.1",
         "symfony/framework-bundle": "^6.4 || ^7.1",
         "symfony/phpunit-bridge": "^6.4 || ^7.1",
         "symfony/twig-bundle": "^6.4 || ^7.1",
         "symfony/var-dumper": "^6.4 || ^7.1",
-        "symfony/yaml": "^7.1"
+        "symfony/yaml": "^6.4 || ^7.1"
     },
     "autoload": {
         "psr-4": {

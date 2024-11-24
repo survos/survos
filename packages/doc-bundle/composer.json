@@ -43,7 +43,7 @@
         "behat/behat": "^3.13",
         "friends-of-behat/symfony-extension": "^2.4",
         "phpunit/phpunit": "^11.4",
-        "symfony/framework-bundle": "^7.1"
+        "symfony/framework-bundle": "^6.4 || ^7.1"
     },
     "conflict": {
         "survos/maker-bundle": "<1.2.57",

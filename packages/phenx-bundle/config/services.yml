@@ -1,9 +1,0 @@
-services:
-  phenx.import:
-    class: PhenxBundle\Services\ImportService
-    arguments:
-      - "@doctrine.orm.phenx_entity_manager"
-      - "%kernel.root_dir%"
-      - ALL_DD_03_21_2017.csv
-    calls:
-      - [ setContainer,[ "@service_container" ] ]

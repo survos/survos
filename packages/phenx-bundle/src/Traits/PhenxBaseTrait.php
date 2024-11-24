@@ -4,45 +4,42 @@ namespace Survos\PhenxBundle\Traits;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use function Symfony\Component\String\u;
 
 trait PhenxBaseTrait
 {
     /**
      * @var int
      *
-     * @ORM\Column(name="phenx_id", type="integer")
      * @Groups({"Default"})
-     * @ORM\Id
      */
+    #[ORM\Column(name: 'phenx_id', type: 'integer')]
+    #[ORM\Id]
     private $phenxId;
 
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="code", type="string", length=32, unique=true, nullable=true)
      */
+    #[ORM\Column(name: 'code', type: 'string', length: 32, unique: true, nullable: true)]
     private $code;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="html_page", type="text", nullable=true)
      */
+    #[ORM\Column(name: 'html_page', type: 'text', nullable: true)]
     private $htmlPage;
 
     /**
      * @var array
-     *
-     * @ORM\Column(name="metadata", type="json_array", nullable=true)
      */
+    #[ORM\Column(name: 'metadata', type: 'json_array', nullable: true)]
     private $metadata;
 
     /**
      * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
      */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $title;
 
     /**
@@ -69,7 +66,7 @@ trait PhenxBaseTrait
      */
     public function setHtmlPage($htmlPage)
     {
-        $this->htmlPage = Utility::asciify($htmlPage);
+        $this->htmlPage = u($htmlPage)->toString();
 
         return $this;
     }

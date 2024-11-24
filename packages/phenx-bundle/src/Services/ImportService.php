@@ -2,9 +2,7 @@
 
 namespace Survos\PhenxBundle\Services;
 
-use ApiPlatform\Api\UrlGeneratorInterface;
-use AppBundle\Entity\Survey;
-use AppBundle\Utility;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Doctrine\ORM\EntityManager;
 use PhenxBundle\Entity\Domain;
 use PhenxBundle\Entity\Measure;
@@ -26,7 +24,8 @@ class ImportService
     public function __construct(private EntityManager         $entityManager,
                                 private LoggerInterface       $logger,
                                 private UrlGeneratorInterface $router,
-                                                              $rootPath = '', $csvFile = '')
+                              $rootPath = '',
+                                $csvFile = '')
     {
         // $dir = new FileLocator([$rootPath.'/Resources/data']); // , __DIR__.'/../Resources/data']);
         // $this->csvFile = $dir->locate($csvFile);
@@ -54,95 +53,96 @@ class ImportService
         // creates the csv file to be imported by import_class (to phenx_data)
         //
         $path = "https://www.phenxtoolkit.org/tree.php";
-        $kernel = $this->container->get('kernel');
-        $cache_path = $kernel->locateResource('@PhenxBundle/Resources/data/tree.php.html');
-
-        if ($refresh) {
-            $output->writeln(sprintf("Getting tree from %s\n", $path));
-            $data = file_get_contents($path);
-            file_put_contents($cache_path, $data);
-        } else {
-            $output->writeln(sprintf("Getting cached tree from %s\n", $cache_path));
-            $data = file_get_contents($cache_path);
-        }
-
-        // hack out everything after Measures <span class="tct">
-        $data = preg_replace('{Measures <span class="tct">.*}s', '', $data);
-        if (preg_match_all('{<a href="b\.php\?i=(\d+)">([^<]+)</a>}', $data, $mm, PREG_SET_ORDER)) {
-            $progress = new ProgressBar($output);
-            $progress->start(count($mm));
-
-            $c = 0;
-            $domain_id = $measure_id = 0;
-            foreach ($mm as $m) {
-                $progress->advance();
-                // if % 1000, it's a domain, if % 100 a measure, else proto
-                $id = $m[1];
-                $text = $m[2];
-                if (($id % 10000) == 0) {
-                    $domain_id = $id;
-                    $type = 'domain';
-                } elseif ($id % 100 == 0) {
-                    $type = 'measure';
-                    $measure_id = $id;
-                    // ignore measures
-                } else {
-//                    $protocol_id = $id;
-                    $type = 'protocol';
-                }
-                // printf("\n%s: id-%d, d-%d m-%d p-%d", $m[0], $id, $domain_id, $measure_id, $protocol_id);
-
-                if ($type != $import_type) {
-                    continue;
-                }
-
-                // tweak the text
-                $text = preg_replace('{Protocol \d: }', '', $text);
-
-                $text = preg_replace('{ protocol}i', '', $text); // redundant
-
-                $domainRepo = $this->entityManager->getRepository(Domain::class);
-                $measureRepo = $this->entityManager->getRepository(Measure::class);
-
-
-                switch ($type) {
-                    case 'protocol':
-                        /** @var PhenxProtocol $p */
-                        $p =  $this->entityManager->getRepository(PhenxProtocol::class)->findOneOrCreate(['phenxId' => $id]);
-                        // if the measure has multiple protocols, we need to distiguish them, often in parents, e.g. (adult)
-                        if (preg_match('{\(([^)]+)\)}', $text, $m)) {
-                            $subTitle = $m[1];
-                        } else {
-                            $subTitle = "all";
-                        }
-                        $p
-                            ->setMeasure($this->entityManager->getReference(Measure::class, $measure_id))
-                            // ->setDomainId($domain_id)
-                            ->setTitle($text)
-                            ->setSubTitle($subTitle);
-                        $c++;
-                        break;
-                    case 'measure':
-                        /** @var Measure $d */
-                        $d = $measureRepo->findOneOrCreate(['phenxId' => $id]);
-                        $d
-                            ->setTitle($text)
-                            ->setDomain($this->entityManager->getReference(Domain::class, $domain_id));
-                        // print "$domain_id $id $text.\n";
-                        $c++;
-                        break;
-                    case 'domain':
-                        $d = $domainRepo->findOneOrCreate(['phenxId' => $id]);
-                        $d
-                            ->setTitle($text);
-                        $c++;
-                        break;
-                } // switch
-                // if ($c > 15) break;
-            }
-        }
-        $this->entityManager->flush();
-        $progress->finish();
+        // @todo: not even at this URL anymore.  Maybe they provide data now?
+//        $kernel = $this->container->get('kernel');
+//        $cache_path = $kernel->locateResource('@PhenxBundle/Resources/data/tree.php.html');
+//
+//        if ($refresh) {
+//            $output->writeln(sprintf("Getting tree from %s\n", $path));
+//            $data = file_get_contents($path);
+//            file_put_contents($cache_path, $data);
+//        } else {
+//            $output->writeln(sprintf("Getting cached tree from %s\n", $cache_path));
+//            $data = file_get_contents($cache_path);
+//        }
+//
+//        // hack out everything after Measures <span class="tct">
+//        $data = preg_replace('{Measures <span class="tct">.*}s', '', $data);
+//        if (preg_match_all('{<a href="b\.php\?i=(\d+)">([^<]+)</a>}', $data, $mm, PREG_SET_ORDER)) {
+//            $progress = new ProgressBar($output);
+//            $progress->start(count($mm));
+//
+//            $c = 0;
+//            $domain_id = $measure_id = 0;
+//            foreach ($mm as $m) {
+//                $progress->advance();
+//                // if % 1000, it's a domain, if % 100 a measure, else proto
+//                $id = $m[1];
+//                $text = $m[2];
+//                if (($id % 10000) == 0) {
+//                    $domain_id = $id;
+//                    $type = 'domain';
+//                } elseif ($id % 100 == 0) {
+//                    $type = 'measure';
+//                    $measure_id = $id;
+//                    // ignore measures
+//                } else {
+////                    $protocol_id = $id;
+//                    $type = 'protocol';
+//                }
+//                // printf("\n%s: id-%d, d-%d m-%d p-%d", $m[0], $id, $domain_id, $measure_id, $protocol_id);
+//
+//                if ($type != $import_type) {
+//                    continue;
+//                }
+//
+//                // tweak the text
+//                $text = preg_replace('{Protocol \d: }', '', $text);
+//
+//                $text = preg_replace('{ protocol}i', '', $text); // redundant
+//
+//                $domainRepo = $this->entityManager->getRepository(Domain::class);
+//                $measureRepo = $this->entityManager->getRepository(Measure::class);
+//
+//
+//                switch ($type) {
+//                    case 'protocol':
+//                        /** @var PhenxProtocol $p */
+//                        $p =  $this->entityManager->getRepository(PhenxProtocol::class)->findOneOrCreate(['phenxId' => $id]);
+//                        // if the measure has multiple protocols, we need to distiguish them, often in parents, e.g. (adult)
+//                        if (preg_match('{\(([^)]+)\)}', $text, $m)) {
+//                            $subTitle = $m[1];
+//                        } else {
+//                            $subTitle = "all";
+//                        }
+//                        $p
+//                            ->setMeasure($this->entityManager->getReference(Measure::class, $measure_id))
+//                            // ->setDomainId($domain_id)
+//                            ->setTitle($text)
+//                            ->setSubTitle($subTitle);
+//                        $c++;
+//                        break;
+//                    case 'measure':
+//                        /** @var Measure $d */
+//                        $d = $measureRepo->findOneOrCreate(['phenxId' => $id]);
+//                        $d
+//                            ->setTitle($text)
+//                            ->setDomain($this->entityManager->getReference(Domain::class, $domain_id));
+//                        // print "$domain_id $id $text.\n";
+//                        $c++;
+//                        break;
+//                    case 'domain':
+//                        $d = $domainRepo->findOneOrCreate(['phenxId' => $id]);
+//                        $d
+//                            ->setTitle($text);
+//                        $c++;
+//                        break;
+//                } // switch
+//                // if ($c > 15) break;
+//            }
+//        }
+//        $this->entityManager->flush();
+//        $progress->finish();
 
         return $c;
         // file_put_contents($fn="/usr/sites/sr/scripts/data/phenx_data.txt", $csv);
@@ -249,13 +249,13 @@ class ImportService
                 $choiceFormula = $choices[0];
                 $choices = [];
             } elseif ($d->TYPE == 'enumerated') {
-                $choiceFormula = join(';', array_map(
+                $choiceFormula = implode(';', array_map(
                     function ($choice) {
                         return sprintf("%s=%s", Utility::displayToCode($choice), $choice);
                     }, $choices));
                 $choices = [];
             } else {
-                $choiceFormula = join(';', $choices);
+                $choiceFormula = implode(';', $choices);
                 $choices = [];
             }
 

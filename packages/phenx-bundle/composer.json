@@ -22,7 +22,9 @@
         "symfony/http-kernel": "^6.4 || ^7.1",
         "symfony/options-resolver": "^6.4 || ^7.1",
         "twig/twig": "^3.4",
-        "symfony/dom-crawler": "^6.4 || ^7.1"
+        "symfony/dom-crawler": "^6.4 || ^7.1",
+        "symfony/serializer": "^7.1",
+        "api-platform/core": "^4.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
@@ -31,7 +33,8 @@
         "symfony/framework-bundle": "^6.4 || ^7.1",
         "symfony/phpunit-bridge": "^6.4 || ^7.1",
         "symfony/twig-bundle": "^6.4 || ^7.1",
-        "symfony/var-dumper": "^6.4 || ^7.1"
+        "symfony/var-dumper": "^6.4 || ^7.1",
+        "rector/rector": "dev-main"
     },
     "autoload": {
         "psr-4": {

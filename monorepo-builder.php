@@ -34,6 +34,7 @@ return static function (MBConfig $mbConfig): void {
         ],
     ]);
 
+    // look at find . -maxdepth 1 -exec ls {}/composer.json \; for copying files and dirs.
     // release workers - in order to execute
     $mbConfig->workers([
         UpdateReplaceReleaseWorker::class,

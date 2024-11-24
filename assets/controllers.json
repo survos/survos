@@ -15,6 +15,12 @@
                     "@survos/simple-datatables/style.css": true
                 }
             }
+        },
+        "@symfony/ux-chartjs": {
+            "chart": {
+                "enabled": true,
+                "fetch": "eager"
+            }
         }
     },
     "entrypoints": []

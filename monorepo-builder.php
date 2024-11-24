@@ -29,6 +29,7 @@ return static function (MBConfig $mbConfig): void {
         ],
         ComposerJsonSection::REQUIRE_DEV => [
             'phpstan/phpstan' => '^2.0',
+            'ekino/phpstan-banned-code' => '^3.0',
             'rector/rector' => 'dev-main',
         ],
     ]);

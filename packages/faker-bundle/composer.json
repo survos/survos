@@ -19,7 +19,7 @@
         "survos/installer": "^1.5"
     },
     "require-dev": {
-        "phpstan/phpstan": "^1.12||^2.0"
+        "phpstan/phpstan": "^2.0"
     },
     "autoload": {
         "psr-4": {

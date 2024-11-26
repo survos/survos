@@ -127,9 +127,9 @@
             "php-http/discovery": true,
             "phpro/grumphp": true,
             "phpstan/extension-installer": true,
+            "survos/installer": true,
             "symfony/flex": true,
-            "symfony/runtime": true,
-            "survos/installer": true
+            "symfony/runtime": true
         },
         "optimize-autoloader": true,
         "preferred-install": {
@@ -155,6 +155,7 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "importmap:install": "symfony-cmd"
         },
-        "coverage": "php -d xpcov.enabled=1 vendor/bin/phpunit packages --coverage-html coverage"
+        "coverage": "php -d xpcov.enabled=1 vendor/bin/phpunit packages --coverage-html coverage",
+        "phpstan": "vendor/bin/phpstan"
     }
 }

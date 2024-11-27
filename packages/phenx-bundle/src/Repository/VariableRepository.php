@@ -1,6 +1,6 @@
 <?php
 
-namespace PhenxBundle\Repository;
+namespace Survos\PhenxBundle\Repository;
 
 use AppBundle\Repository\PosseEntityRepository;
 

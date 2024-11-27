@@ -53,13 +53,4 @@ final class AppMenuEventListener implements KnpMenuHelperInterface
 
     }
 
-    /*
-    * @return array The event names to listen to
-    */
-    public static function getSubscribedEvents()
-    {
-        return [
-            KnpMenuEvent::MENU_EVENT => 'onMenuEvent',
-        ];
-    }
 }

@@ -23,9 +23,16 @@
 /phpcs.xml
 ###< squizlabs/php_codesniffer ###
 
-###> phpstan/phpstan ###
-## phpstan.neon
-###< phpstan/phpstan ###
-
 .docker
 /node_modules/
+.phpunit.result.cache
+.phpunit.cache
+
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+.git
+
+html/

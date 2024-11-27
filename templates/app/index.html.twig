@@ -4,20 +4,40 @@
 
 {% block body %}
 
+{#        {% set columns = [#}
+{#            {name: 'id'},#}
+{#            {name: 'title', title: 'name'},#}
+{#            'brand',#}
+{#            'price'#}
+{#        ] %}#}
+    {{ dump(requires) }}
+{#        <twig:simple_datatables#}
+{#                perPage="20"#}
+{#                :caller="_self"#}
+{#                :columns="columns"#}
+{#                :data="requires"#}
+{#        >#}
+{#            <twig:block name="price">#}
+{#                ${{ row.price|number_format(2) }}#}
+{#            </twig:block>#}
+
+{#        </twig:simple_datatables>#}
+
+
     {{ theme }}
-    {% component grid with {
-        data: packages,
-        columns: [
-            'shortName',
-            'description'
-        ]
-    } %}
+{#    {% component grid with {#}
+{#        data: packages,#}
+{#        columns: [#}
+{#            'shortName',#}
+{#            'description'#}
+{#        ]#}
+{#    } %}#}
 
-        {% block description %}
-            {{ row.composerJson.description }}
-        {% endblock %}
+{#        {% block description %}#}
+{#            {{ row.composerJson.description }}#}
+{#        {% endblock %}#}
 
-    {% endcomponent %}
+{#    {% endcomponent %}#}
 
     <div class="row">
 

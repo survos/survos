@@ -60,7 +60,7 @@ class FrontendSettingsLanguageSource
      * @Assert\Type("string")
      * @Type("string")
      */
-    protected ?string $name = null;
+    protected string|null $name = null;
 
     /**
      * Constructor
@@ -113,7 +113,7 @@ class FrontendSettingsLanguageSource
      *
      * @return $this
      */
-    public function setName(?string $name = null): self
+    public function setName(string|null $name = null): self
     {
         $this->name = $name;
 

@@ -9,20 +9,17 @@ use Survos\PhenxBundle\Traits\PhenxBaseTrait;
 
 /**
  * Domain
- *
- * @ORM\Table(name="domain")
- * @ORM\Entity(repositoryClass="PhenxBundle\Repository\DomainRepository")
  */
-
+#[ORM\Entity(repositoryClass: \Survos\PhenxBundle\Repository\DomainRepository::class)]
+#[ORM\Table(name: 'domain')]
 class Domain
 {
     use PhenxBaseTrait;
 
     /**
      * @var Collection|Measure[]
-     *
-     * @ORM\OneToMany(targetEntity="PhenxBundle\Entity\Measure", mappedBy="domain")
      */
+    #[ORM\OneToMany(targetEntity: \PhenxBundle\Entity\Measure::class, mappedBy: 'domain')]
     private $measures;
 
     public function __construct()

@@ -7,21 +7,18 @@ use Survos\PhenxBundle\Traits\PhenxBaseTrait;
 
 /**
  * Protocol
- *
- * @ORM\Table(name="phenx_protocol")
- * @ORM\Entity(repositoryClass="PhenxBundle\Repository\PhenxProtocolRepository")
  */
-
+#[ORM\Entity(repositoryClass: \Survos\PhenxBundle\Repository\PhenxProtocolRepository::class)]
+#[ORM\Table(name: 'phenx_protocol')]
 class PhenxProtocol
 {
 
     use PhenxBaseTrait;
     /**
      * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="PhenxBundle\Entity\Variable", mappedBy="protocol")
-     * @ORM\OrderBy({"orderIdx" = "ASC"})
      */
+    #[ORM\OneToMany(targetEntity: \PhenxBundle\Entity\Variable::class, mappedBy: 'protocol')]
+    #[ORM\OrderBy(['orderIdx' => 'ASC'])]
     private $variables;
 
 
@@ -32,17 +29,15 @@ class PhenxProtocol
 
     /**
      * @var Measure
-     *
-     * @ORM\ManyToOne(targetEntity="PhenxBundle\Entity\Measure", inversedBy="protocols", fetch="EAGER")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="phenx_id", nullable=false, onDelete="CASCADE")
      */
+    #[ORM\ManyToOne(targetEntity: \PhenxBundle\Entity\Measure::class, inversedBy: 'protocols', fetch: 'EAGER')]
+    #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'phenx_id', nullable: false, onDelete: 'CASCADE')]
     private $measure;
 
     /**
      * @var string
-     *
-     * @ORM\Column(type="string", length=128, nullable=true)
      */
+    #[ORM\Column(type: 'string', length: 128, nullable: true)]
     private $subTitle;
 
 

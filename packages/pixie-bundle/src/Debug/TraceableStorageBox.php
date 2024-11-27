@@ -19,7 +19,7 @@ use Symfony\Component\Stopwatch\Stopwatch;
 final class TraceableStorageBox extends StorageBox
 {
 //    private Stopwatch $stopwatch;
-    #[NoReturn] function __construct(private string                    $filename,
+    function __construct(private string                    $filename,
                                      private array                     &$data, // debug data, passed from Pixie
                                      private ?Config $config=null, // for creation only.  Shouldn't be in constructor!
                                      private ?string                   $currentTable = null,
@@ -51,7 +51,7 @@ final class TraceableStorageBox extends StorageBox
         return $this->innerSearchService(__FUNCTION__, \func_get_args());
     }
 
-    public function get(string $key, string $tableName = null, callable $callback=null): ?Item // string|object|array|null
+    public function get(string $key, ?string $tableName = null, ?callable $callback=null): ?Item // string|object|array|null
 //    public function get(string $key, string $table = null): string|object|array|null
     {
         return $this->innerSearchService(__FUNCTION__, \func_get_args());
@@ -88,13 +88,13 @@ final class TraceableStorageBox extends StorageBox
         $this->innerSearchService(__FUNCTION__, \func_get_args());
     }
 
-    public function delete(string $key, string $table = null): bool
+    public function delete(string $key, ?string $table = null): bool
     {
         return $this->innerSearchService(__FUNCTION__, \func_get_args());
     }
 
 
-    public function count(string $table = null, array $where=[]): ?int
+    public function count(?string $table = null, array $where=[]): ?int
     {
         return $this->innerSearchService(__FUNCTION__, \func_get_args());
     }

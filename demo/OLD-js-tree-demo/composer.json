@@ -84,7 +84,7 @@
         "allow-plugins": {
             "symfony/flex": true,
             "symfony/runtime": true,
-            "endroid/installer": true
+            "survos/installer": true
         }
     },
     "autoload": {

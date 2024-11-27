@@ -15,24 +15,21 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SurvosSeoBundle extends AbstractBundle
 {
+    /**
+     * @param array<string, mixed> $config
+     * @param ContainerConfigurator $container
+     * @param ContainerBuilder $builder
+     * @return void
+     */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        // $builder->setParameter('survos_workflow.direction', $config['direction']);
-
-        // twig classes
-//        <services>
-//        <service class="Vich\UploaderBundle\DataCollector\MappingCollector" id="Vich\UploaderBundle\DataCollector\MappingCollector" public="false">
-//            <argument type="service" id="vich_uploader.metadata_reader" />
-//            <tag name="data_collector" template="@VichUploader/Collector/mapping_collector.html.twig"
-// id="vich_uploader.mapping_collector" />
-//        </service>
-//    </services>
-
         $builder->autowire(SeoService::class)
+            ->setPublic(true)
             ->setArgument('$config', $config)
             ;
 
         $builder->autowire(SeoCollector::class)
+            ->setPublic(true)
             ->setArgument('$seoService', new Reference(SeoService::class))
             ->addTag('data_collector', [
                 'template' => '@SurvosSeo/seo_collector.html.twig'
@@ -49,13 +46,18 @@ class SurvosSeoBundle extends AbstractBundle
     {
         $definition->rootNode()
             ->children()
-            ->scalarNode('branding')->defaultValue('')->end()
-            ->integerNode('minTitleLength')->defaultValue(30)->end()
-            ->integerNode('maxTitleLength')->defaultValue(150)->end()
+            ->scalarNode('branding')
+                ->info("branding will be added if the title is short enough.")
+                ->defaultValue('')->end()
+            ->integerNode('minTitleLength')
+                ->info("minimum title length")
+                ->defaultValue(30)->end()
+            ->integerNode('maxTitleLength')
+                ->info("maximum title length")
+                ->defaultValue(150)->end()
             ->integerNode('minDescriptionLength')->defaultValue(10)->end()
             ->integerNode('maxDescriptionLength')->defaultValue(255)->end()
             ->booleanNode('enabled')->defaultTrue()->end()
-//            ->integerNode('min_sunshine')->defaultValue(3)->end()
             ->end();
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Survos\CoreBundle\Entity;
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
+
 use function Symfony\Component\String\u;
 
 trait RouteParametersTrait
 {
-
 //    public function getId(): int|string
 //    {
 //        throw new \Exception("you must implement getId() to use a default unique parameters in " . $this::class);
@@ -19,6 +19,7 @@ trait RouteParametersTrait
     public function getUniqueIdentifiers(): array
     {
         if (defined('static::UNIQUE_PARAMETERS')) {
+            $x = [];
             foreach (constant('static::UNIQUE_PARAMETERS') as $parameter => $getter) {
                 $x[$parameter] = $this->{'get' . $getter}();
             }
@@ -28,17 +29,17 @@ trait RouteParametersTrait
         if (!method_exists($this, 'getId')) {
             throw new \Exception("you must implement getId() to use a default unique parameters in " . $this::class);
         }
-        return [strtolower( (new \ReflectionClass($this))->getShortName() ) . 'Id' => $this->getId()];
+        return [strtolower((new \ReflectionClass($this))->getShortName()) . 'Id' => $this->getId()];
     }
 
     #[Groups(['rp', 'transitions', 'searchable'])]
-    public function getrp(?array $addlParams = []): array
+    public function getRp(?array $addlParams = []): array
     {
         return array_merge($this->getUniqueIdentifiers(), $addlParams);
     }
 
     /** e.g. MemberDirectory to member_directory */
-    public static function getClassnamePrefix(string $class = null): string
+    public static function getClassnamePrefix(string|null $class = null): string
     {
         if (! $class) {
             $class = get_called_class();

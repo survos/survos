@@ -20,6 +20,7 @@ class SurvosFakerBundle extends AbstractBundle
     {
         $definition = $builder
             ->autowire('survos.faker_twig', TwigExtension::class)
+            ->setAutoconfigured(true)
             ->addTag('twig.extension');
 
         $definition->setArgument('$seed', $config['seed']);
@@ -31,7 +32,7 @@ class SurvosFakerBundle extends AbstractBundle
         // since the configuration is short, we can add it here
         $definition->rootNode()
             ->children()
-            ->scalarNode('seed')->defaultValue(null)->end()
+            ->scalarNode('seed')->info('set to some value to get the same fake values on reload')->defaultValue(null)->end()
             ->scalarNode('function_prefix')->defaultValue('')->end()
             ->end();
         ;

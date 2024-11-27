@@ -23,12 +23,13 @@ class CommandController extends AbstractController
     public function __construct(private KernelInterface $kernel,
                                 private ?MessageBusInterface $bus=null,
                                 private array $namespaces=[],
-                                private array $config=[])
+                                private array $config=[]
+    )
     {
         $this->application = new Application($this->kernel);
     }
 
-    #[Route('/commands', name: 'survos_commands')]
+    #[Route('/list', name: 'survos_commands')]
     public function commands(): Response
     {
 
@@ -42,7 +43,7 @@ class CommandController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/run-command/{commandName}', name: 'survos_command')]
+    #[Route(path: '/run/{commandName}', name: 'survos_command')]
     public function runCommand(Request $request, KernelInterface $kernel, string $commandName): Response|array
     {
 //        $commandName = $request->get('commandName');
@@ -121,26 +122,25 @@ class CommandController extends AbstractController
             }
 
             $cliString = join(' ', $cli);
-            if ($form->get('asMessage')->getData()) {
+            if ($form->has('asMessage') && $form->get('asMessage')->getData()) {
                 $envelope = $this->bus->dispatch(new RunCommandMessage($cliString));
-                dump($envelope);
+//                dump($envelope);
                 $result = "$cliString dispatched ";
             } else {
-                dump($application, $cliString);
                     CommandRunner::from($application, $cliString)
                         ->withOutput($output) // any OutputInterface
                         ->run();
-                    dd($output);
-                try {
-                } catch (\Exception $exception) {
-                    dd($cliString, $exception->getMessage());
-                }
+//                    dump($output);
+//                try {
+//                } catch (\Exception $exception) {
+////                    dd($cliString, $exception->getMessage());
+//                }
                 $result = $output->fetch();
             }
-            try {
-            } catch (\Exception $exception) {
-                dd($cliString, $command, $application, $exception->getMessage());
-            }
+//            try {
+//            } catch (\Exception $exception) {
+////                dd($cliString, $command, $application, $exception->getMessage());
+//            }
 
 //                CommandRunner::for($command, 'Bob p@ssw0rd --role ROLE_ADMIN')->run(); // works great
         }
@@ -151,6 +151,7 @@ class CommandController extends AbstractController
 //        CommandRunner::for($command, '--help')->run(); // fails, says --help isn't defined
 
         return $this->render('@SurvosCommand/run.html.twig', [
+            'base' => $this->config['base_layout'],
             'cliString' => $cliString,
             'form' => $form->createView(),
             'result' => $result,

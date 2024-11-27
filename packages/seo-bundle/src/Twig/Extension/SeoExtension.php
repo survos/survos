@@ -19,7 +19,7 @@ final class SeoExtension extends AbstractExtension
 {
 
     public function __construct(
-        private SeoService $seoService,
+        private readonly SeoService $seoService,
     )
     {
 
@@ -49,7 +49,7 @@ final class SeoExtension extends AbstractExtension
     private function process(string $metaElement, string $value): string
     {
         $str = $this->prepareStr($value);
-        $brandingStr = u($this->seoService->getConfigValue('branding'));
+        $brandingStr = u((string)$this->seoService->getConfigValue('branding'))->toString();
         $length = $str->length();
         [$min, $max] = $this->seoService->getMinMax($metaElement);
 
@@ -64,7 +64,7 @@ final class SeoExtension extends AbstractExtension
 
         // Title too short, we add the branding
         if ($length < $this->$min) {
-            $str = $str->ensureEnd($brandingStr->toString());
+            $str = $str->ensureEnd($brandingStr);
         }
 
         // Title too long, we cup

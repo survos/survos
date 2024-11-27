@@ -14,7 +14,6 @@ class Package implements \Stringable
         public string $packageCode,
         public string $packageDir,
         public string $namespace,
-//        public ComposerJson $composerJson
     )
     {
     }
@@ -42,11 +41,6 @@ class Package implements \Stringable
         return ClassFinder::getClassesInNamespace($this->getNamespace(), $recursive ? ClassFinder::RECURSIVE_MODE: ClassFinder::STANDARD_MODE);
     }
 
-    public function getShortName()
-    {
-        return $this->getComposerJson()->getShortName();
-    }
-
 
     /**
      * @return string
@@ -54,14 +48,6 @@ class Package implements \Stringable
     public function getNamespace(): string
     {
         return $this->namespace;
-    }
-
-    /**
-     * @return ComposerJson
-     */
-    public function getComposerJson(): ComposerJson
-    {
-        return $this->composerJson;
     }
 
     public function __toString()

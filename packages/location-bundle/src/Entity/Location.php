@@ -13,14 +13,13 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use Doctrine\DBAL\Types\Types;
-use Stringable;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\LocationBundle\Repository\LocationRepository;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(normalizationContext: ['skip_null_values' => false, 'groups' => ['rp', 'location.read', 'location.tree']])]
@@ -32,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiFilter(OrderFilter::class, properties: ['code', 'stateCode', 'name'], arguments: ['orderParameterName' => 'order'])]
 //#[ApiFilter(MultiFieldSearchFilter::class, properties: ["code", 'countryCode', 'stateCode', 'name'], arguments: ["searchParameterName" => "search"])]
 #[ApiFilter(SearchFilter::class, properties: ['name' => 'partial', 'countryCode' => 'exact', 'stateCode' => 'partial', 'code' => 'partial', 'lvl' => 'exact'])]
-class Location implements Stringable
+class Location implements \Stringable
 {
     public function __construct($code = null, $name = null, ?int $lvl = null)
     {

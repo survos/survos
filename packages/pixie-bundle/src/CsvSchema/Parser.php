@@ -343,6 +343,8 @@ class Parser
 //        assert(count($schema) == count($columns), sprintf("mismatch %d %d",
 //            count($schema), count($columns)));
 
+        // illuminate/collections
+
         $zipper = collect($columns)->zip($schema->getPropertyCodes());
         $valueRules = $this->config['valueRules']??[];
 
@@ -420,7 +422,7 @@ class Parser
         return [$header, $dottedConfig];
 
     }
-    static public function parseConfigHeader(?string $config, string $originalCode=null): ?Property
+    static public function parseConfigHeader(?string $config, ?string $originalCode=null): ?Property
     {
         if (empty($config)) {
             return null;

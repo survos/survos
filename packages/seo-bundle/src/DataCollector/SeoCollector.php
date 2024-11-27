@@ -23,11 +23,11 @@ final class SeoCollector extends DataCollector
     private const CLASS_WARNING = 'yellow';
     private const CLASS_OK = 'green';
 
-    public function __construct(private SeoService $seoService)
+    public function __construct(private readonly SeoService $seoService)
     {
     }
 
-    public function collect(Request $request, Response $response, \Throwable $exception = null): void
+    public function collect(Request $request, Response $response, \Throwable|null $exception = null): void
     {
         $crawler = new Crawler((string) $response->getContent());
 
@@ -41,8 +41,15 @@ final class SeoCollector extends DataCollector
                 'size' => (string) $titleSize,
                 'status' => $this->getTitleClass($titleSize),
             ];
-            $this->data['title'] = $titleInfo;
+        } else {
+            $titleInfo = [
+                'value' => null,
+                'size' => 0,
+                'status' => $this->getTitleClass(0),
+            ];
+
         }
+        $this->data['title'] = $titleInfo;
 
         // Description —————————————————————————————————————————————————————————
         $meta = $crawler->filterXPath('//meta[@name="description"]');

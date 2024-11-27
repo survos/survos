@@ -33,7 +33,6 @@ use Zenstruck\Console\InvokableServiceCommand;
 use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 #[AsCommand('pixie:index', 'create a Meili index"')]
 final class PixieIndexCommand extends InvokableServiceCommand
@@ -65,10 +64,11 @@ final class PixieIndexCommand extends InvokableServiceCommand
         PixieImportService                                                             $pixieImportService,
         #[Argument(description: 'config code')] ?string                                $configCode,
         #[Argument(description: 'sub code, e.g. musdig inst id')] ?string              $subCode=null,
-        #[Option('dir', description: 'dir to pixie')] string                           $dir=null,
-        #[Option('table', description: 'table name(s?), all if not set')] string       $tableFilter=null,
+        #[Option('dir', description: 'dir to pixie')] ?string                           $dir=null,
+        #[Option('table', description: 'table name(s?), all if not set')] ?string       $tableFilter=null,
 //        #[Option(name: 'trans', description: 'fetch the translation strings')] bool $addTranslations=false,
         #[Option(description: "reset the meili index")] ?bool                          $reset=null,
+        #[Option(description: "wait for tasks to finish")] ?bool                          $wait=null,
         #[Option(description: "max number of records per table to export")] int        $limit = 0,
         #[Option(description: "extra data (YAML), e.g. --extra=[core:obj]")] string    $extra = '',
         #[Option('batch', description: "max number of records to batch to meili")] int $batchSize = 1000,
@@ -99,7 +99,6 @@ final class PixieIndexCommand extends InvokableServiceCommand
 
 
         $recordsToWrite=[];
-        $key = $key??'key';
         // now iterate
         foreach ($kv->getTables() as $tableName => $table) {
             if ($tableFilter && ($tableName <> $tableFilter)) {
@@ -143,12 +142,15 @@ final class PixieIndexCommand extends InvokableServiceCommand
                     isTranslation: true,
                     tags: ['fetch']
                 ))->getStorageBox();
-                $transKv->select(TranslationService::ENGINE);
+                // hack until we get a translation bundle working
+                $transKv->select('libre');
+//                $transKv->select(TranslationService::ENGINE);
             } else {
                 $transKv = null;
             }
             foreach ($kv->iterate($tableName) as $idx => $row) {
                 $data = $row->getData();
+                $this->logger->info($row->getKey() . "\n\n" . json_encode($row, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
                 // hack
                 $lang = $row->expected_language()??$config->getSource()->locale;
 //                dd($lang, $row);
@@ -220,9 +222,9 @@ final class PixieIndexCommand extends InvokableServiceCommand
                 if ($batchSize && (($progress = $progressBar->getProgress()) % $batchSize) === 0) {
                     $task = $index->addDocuments($recordsToWrite, $primaryKey);
                     // wait for the first record, so we fail early and catch the error, e.g. meili down, no index, etc.
-                    if (!$progress) {
+                    if ($wait || !$progress) {
       //                $this->io->writeln("Flushing " . count($records));
-                        $results = $this->meiliService->waitForTask($task);
+                        $results = $this->meiliService->waitForTask($task, dataToDump: $recordsToWrite);
                     } else {
 //                        dump($task, count($recordsToWrite), $primaryKey);
                     }

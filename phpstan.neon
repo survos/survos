@@ -2,21 +2,23 @@ parameters:
     level: 0
     inferPrivatePropertyTypeFromConstructor: true
     paths:
-        - ./src
-        - ./packages/
+#        - ./src
+#        - ./packages/seo-bundle
+#        - ./packages/workflow-helper-bundle
+        - ./packages/pixie-bundle
 
     excludePaths:
             analyse:
+#                - ./packages
+                - ./packages/providence-bundle
+                - ./packages/phenx-bundle
+                - ./packages/pixie-bundle/src/Service/TranslationService*
+                - ./packages/pixie-bundle/src/Service/Libre*
+                - ./packages/pixie-bundle/src/EventListener/TranslationRowEventListener*
+                - ./packages/pixie-bundle/src/Command/PixieTranslateCommand.php
+                - ./packages/pixie-bundle/src/Controller/SearchController.php
 #                - packages/*/vendor/*
                 - ./packages/*/vendor/*
                 - */cache/*
 
     ignoreErrors:
-            -
-                message: '#FrameworkConfig not found#'
-                path: packages/
-
-            -
-                message: '#Should not use node with type "Stmt_Echo"#'
-                path: packages/maker-bundle/templates/skeleton/
-

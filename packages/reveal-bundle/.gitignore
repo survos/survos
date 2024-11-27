@@ -15,13 +15,8 @@ Resources/assets/node_modules
 /vendor/
 ###< symfony/framework-bundle ###
 
-###> phpstan/phpstan ###
-phpstan.neon
-###< phpstan/phpstan ###
-
 ###> symfony/phpunit-bridge ###
 .phpunit.result.cache
-/phpunit.xml
 ###< symfony/phpunit-bridge ###
 
 ###> symfony/webpack-encore-bundle ###

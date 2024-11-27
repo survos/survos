@@ -25,7 +25,7 @@ class Building  implements \Stringable, RouteParametersInterface
     #[Gedmo\Slug(fields: ['name'])]
     #[ORM\Column(type: 'string', length: 255)]
     private $code;
-    public function __construct(#[ORM\Column(type: 'string', length: 255)] private ?string $name = null)
+    public function __construct(#[ORM\Column(type: 'string', length: 255)] private string|null $name = null)
     {
         $this->locations = new ArrayCollection();
     }

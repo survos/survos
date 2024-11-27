@@ -9,27 +9,24 @@ use Survos\PhenxBundle\Traits\PhenxBaseTrait;
 
 /**
  * Measure
- *
- * @ORM\Table(name="measure")
- * @ORM\Entity(repositoryClass="PhenxBundle\Repository\MeasureRepository")
  */
+#[ORM\Entity(repositoryClass: \Survos\PhenxBundle\Repository\MeasureRepository::class)]
+#[ORM\Table(name: 'measure')]
 class Measure
 {
     use PhenxBaseTrait;
 
     /**
      * @var Domain
-     *
-     * @ORM\ManyToOne(targetEntity="PhenxBundle\Entity\Domain", inversedBy="measures", fetch="EAGER")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="phenx_id", nullable=false, onDelete="CASCADE")
      */
+    #[ORM\ManyToOne(targetEntity: \PhenxBundle\Entity\Domain::class, inversedBy: 'measures', fetch: 'EAGER')]
+    #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'phenx_id', nullable: false, onDelete: 'CASCADE')]
     private $domain;
 
     /**
      * @var Collection|PhenxProtocol[]
-     *
-     * @ORM\OneToMany(targetEntity="PhenxBundle\Entity\PhenxProtocol", mappedBy="measure")
      */
+    #[ORM\OneToMany(targetEntity: \PhenxBundle\Entity\PhenxProtocol::class, mappedBy: 'measure')]
     private $protocols;
 
 

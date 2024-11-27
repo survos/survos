@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 
@@ -62,7 +62,7 @@ class Location implements \Stringable, RouteParametersInterface
     #[ORM\ManyToOne(targetEntity: \App\Entity\Building::class, inversedBy: 'locations')]
     #[ORM\JoinColumn(nullable: false)]
     private $building;
-    public function __construct(#[ORM\Column(type: 'string', length: 80)] private ?string $name = null)
+    public function __construct(#[ORM\Column(type: 'string', length: 80)] private string|null $name = null)
     {
         $this->children = new ArrayCollection();
     }

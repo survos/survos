@@ -2,14 +2,7 @@
 
 namespace Survos\BunnyBundle\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Http\Discovery\Psr18Client;
-use Psr\Log\LoggerInterface;
-use Survos\CoreBundle\Service\SurvosUtils;
-use Symfony\Component\Cache\CacheItem;
-use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use ToshY\BunnyNet\BaseAPI;
 use ToshY\BunnyNet\Client\BunnyClient;
@@ -21,7 +14,6 @@ class BunnyService
 {
     public function __construct(
         private CacheInterface $cache,
-        private readonly LoggerInterface $logger,
         private readonly HttpClientInterface $client,
         private ?BunnyClient $bunnyClient = null,
         private ?BaseAPI $baseApi = null,
@@ -32,7 +24,7 @@ class BunnyService
         //        private ?string $password = null, // for writing
         private ?EdgeStorageAPI $edgeStorageApi = null,
         private ?string $storageZone = null,
-        private array $zones=[]
+        private array $zones = []
     ) {
 // Create a BunnyClient using any HTTP client implementing "Psr\Http\Client\ClientInterface".
         $this->bunnyClient = new BunnyClient(
@@ -44,7 +36,9 @@ class BunnyService
             $this->storageZone = $this->config['storage_zone'];
         }
         foreach ($this->config['zones'] as $zoneData) {
-            SurvosUtils::assertKeyExists('name', $zoneData);
+            if (!array_key_exists('name', $zoneData)) {
+                throw new \LogicException($this->storageZone . " is not defined in config/packages/survos_bunny.yaml");
+            }
             $this->zones[$zoneData['name']] = $zoneData;
         }
     }
@@ -67,8 +61,12 @@ class BunnyService
     public function getBaseApi(?string $apiKey = null): ?BaseAPI
     {
         if (!$this->baseApi) {
+            $apiKey ??= $this->config['api_key'];
+            if (!$apiKey) {
+                throw new \LogicException('BunnyService requires a base api key');
+            }
             $this->baseApi = new BaseAPI(
-                apiKey: $apiKey ?? $this->config['api_key'],
+                apiKey: $apiKey,
                 client: $this->bunnyClient,
             );
         }
@@ -90,7 +88,7 @@ class BunnyService
     public function uploadFile(
         string $fileName, // the filename on bunny
         mixed $body, // content to write
-        ?string $storageZoneName=null,
+        ?string $storageZoneName = null,
         string $path = '',
         array $headers = [],
     ): BunnyClientResponseInterface {
@@ -105,13 +103,13 @@ class BunnyService
         return $ret;
     }
 
-    public function getEdgeApi(string $storageZone = null, bool $writeAccess = false): EdgeStorageAPI
+    public function getEdgeApi(string|null $storageZone = null, bool $writeAccess = false): EdgeStorageAPI
     {
         if (!$storageZone = $storageZone ?? $this->getStorageZone()) {
             if (!$storageZone = $this->config['storage_zone']) {
                 if (count($this->config['zones']) >= 1) {
                     $storageZone = $this->config['zones'][0]['name'];
-               }
+                }
             }
         }
         assert($storageZone, "Missing storageZone!");
@@ -128,9 +126,9 @@ class BunnyService
         return $this->edgeStorageApi;
     }
 
-    public function getStorageZone(): string
+    public function getStorageZone(): ?string
     {
-        return $this->storageZone?? $this->config['storage_zone'];
+        return $this->storageZone ?? $this->config['storage_zone'] ?? null;
     }
 
     public function getBunnyClient()
@@ -164,6 +162,5 @@ class BunnyService
     public function getZones(): array
     {
         return $this->config['zones'];
-
     }
 }

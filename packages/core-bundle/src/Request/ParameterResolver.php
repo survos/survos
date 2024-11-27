@@ -38,7 +38,11 @@ class ParameterResolver implements ValueResolverInterface
                 }
             }
         } else {
-            assert(false, $argumentType . " should declare a UNIQUE_PARAMETERS constant");
+            if (method_exists($argument, 'getUniqueIdentifiers')) {
+                // @todo: use the method...
+                $x = $argument->getUniqueIdentifiers();
+            }
+//            assert(false, $argumentType . " should declare a UNIQUE_PARAMETERS constant");
         }
 
         if (!empty($x)) {

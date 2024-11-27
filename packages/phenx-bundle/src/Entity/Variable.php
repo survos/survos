@@ -6,72 +6,62 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Variable
- *
- * @ORM\Table(name="variable")
- * @ORM\Entity(repositoryClass="PhenxBundle\Repository\VariableRepository")
  */
+#[ORM\Entity(repositoryClass: \Survos\PhenxBundle\Repository\VariableRepository::class)]
+#[ORM\Table(name: 'variable')]
 class Variable
 {
 //    use ExtraTrait;
-//    use OrderIdxTrait;
+    //    use OrderIdxTrait;
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
     /**
      * @var string
-     *
-     * @ORM\Column(type="string", length=64)
      */
+    #[ORM\Column(type: 'string', length: 64)]
     private $varname;
 
     /**
      * @var string
-     *
-     * @ORM\Column(type="string", length=32)
      */
+    #[ORM\Column(type: 'string', length: 32)]
     private $type;
 
     /**
      * @var PhenxProtocol
-     *
-     * @ORM\ManyToOne(targetEntity="PhenxProtocol", inversedBy="variables", fetch="EAGER")
-     * @ORM\JoinColumn(name="protocol_id", referencedColumnName="phenx_id", nullable=false, onDelete="CASCADE")
      */
-
+    #[ORM\ManyToOne(targetEntity: \PhenxProtocol::class, inversedBy: 'variables', fetch: 'EAGER')]
+    #[ORM\JoinColumn(name: 'protocol_id', referencedColumnName: 'phenx_id', nullable: false, onDelete: 'CASCADE')]
     private $protocol;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="question_text", type="text")
      */
+    #[ORM\Column(name: 'question_text', type: 'text')]
     private $questionText;
 
     /**
      * @var text
-     *
-     * @ORM\Column(type="text")
      */
+    #[ORM\Column(type: 'text')]
     private $description;
 
     /**
      * @var array
-     *
-     * @ORM\Column(name="choices", type="json_array", nullable=true)
      */
+    #[ORM\Column(name: 'choices', type: 'json_array', nullable: true)]
     private $choices;
 
     /**
      * @var string
-     *
-     * @ORM\Column(type="text", nullable=true)
      */
+    #[ORM\Column(type: 'text', nullable: true)]
     private $choiceFormula;
 
     /**

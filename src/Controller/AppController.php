@@ -15,13 +15,17 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class AppController extends AbstractController
 {
-    public function __construct(private PackageService $packageService) {
-
+    public function __construct(
+        private PackageService $packageService
+    ) {
     }
 
     #[Route('/', name: 'app_homepage')]
     public function index(PackageService $packageService): Response
     {
+        // get the bundles from the packages directory, for latest
+        $bundles = $this->packageService->getPackages();
+        dd($bundles);
         $composerReader = $packageService->getProjectComposerJson();
         $data = $composerReader->getContent();
         $scripts = $data['scripts'];
@@ -31,7 +35,6 @@ class AppController extends AbstractController
         $composerReader->writeContent($data);
         $composerReader->runCommand('normalize');
         $composerReader->runCommand('c:c');
-        dd($composerReader->file);
 
         dd($composerReader, $composerReader->getContent(), get_class_methods($composerReader));
         $packages = $packageService->getPackages();
@@ -65,5 +68,4 @@ class AppController extends AbstractController
             'controller_name' => 'AppController',
         ]);
     }
-
 }

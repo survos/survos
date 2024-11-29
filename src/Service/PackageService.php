@@ -38,35 +38,29 @@ class PackageService
         $autoLoad = new AutoloadSection($reader);
 
         $packages = [];
+        $bundles = [];
         foreach ((new Finder())->in($this->projectDir . '/packages')->depth(0)->directories() as $directory) {
-            $packageComposer = new ComposerReader($directory->getRealPath() . '/composer.json');
-            $section = new RequireSection($reader);
-
-            foreach ($section as $package) {
-                echo $package->name . ' with ' . $package->constraint;
-                // Check if the package version is greater than a given version constraint.
-                if ($package->greaterThan('^6.5')) {
-                    echo "Numerous releases available!";
-                }
-                dd($package, $section->assignIteratorData(), $directory->getRealPath());
-            }
-
-
-            $requires = $packageComposer->contentSection('require', []);
-
-            dd($directory, $requires);
-        }
-        foreach ($autoLoad->assignIteratorData() as $nameSpace => $packagePath) {
-            if (!str_contains($packagePath, 'packages')) {
+            $packageComposer = new ComposerReader($composerPath = $directory->getRealPath() . '/composer.json');
+            if (!file_exists($composerPath)) {
+                // e.g. recipes
                 continue;
             }
-//            // overkill, but load it here until we need to optimize.
-//            $packageComposerJson = $this->composerJsonFactory->createFromFilePath($this->projectDir . $packagePath . '../composer.json');
-////                $packages[$nameSpace] = $this->getPackage($packagePath, $nameSpace, $recursive);
-//            $package = new Package($packageComposerJson->getShortName(), $packagePath, $nameSpace, $packageComposerJson);
-//            $packages[$package->getShortName()] = $package;
+            $bundleData = $packageComposer->getContent();
+            $bundles[$bundleData['name']] = $bundleData;
+            $section = new RequireSection($reader);
+
+//            foreach ($section as $package) {
+//                echo $package->name . ' with ' . $package->constraint;
+//                // Check if the package version is greater than a given version constraint.
+//                if ($package->greaterThan('^6.5')) {
+//                    echo "Numerous releases available!";
+//                }
+//            }
+
+            // this builds up a global list of what all our packages require
+            $requires = $packageComposer->contentSection('require', []);
         }
-        return $packages;
+        return $bundles;
     }
 
     public function getProjectComposerJson(): ComposerReader

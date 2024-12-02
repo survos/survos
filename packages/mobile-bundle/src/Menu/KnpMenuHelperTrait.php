@@ -363,7 +363,7 @@ trait KnpMenuHelperTrait
     public function authMenu(AuthorizationCheckerInterface $authorizationChecker,
                              Security $security,
                              ItemInterface                 $menu,
-                             $childOptions = []): MenuItem
+                             $childOptions = []): ItemInterface
     {
 
 

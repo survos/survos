@@ -8,7 +8,7 @@ use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension
 {
-    public function __construct(private array $config)
+    public function __construct(private array $config=[])
     {
     }
 
@@ -24,7 +24,7 @@ class TwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            //            new TwigFunction('function_name', [::class, 'doSomething']),
+                        new TwigFunction('config', fn() => $this->config),
         ];
     }
 }

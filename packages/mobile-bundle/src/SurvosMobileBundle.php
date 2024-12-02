@@ -50,10 +50,11 @@ class SurvosMobileBundle extends AbstractBundle implements CompilerPassInterface
 
     public function process(ContainerBuilder $container): void
     {
-        if (false === $container->hasDefinition('twig')) {
-            assert(false, "missing twig");
-            return;
-        }
+//        if (false === $container->hasDefinition('twig')) {
+//            throw new \RuntimeException('Twig service not found, composer require twig/twig');
+//            assert(false, "missing twig");
+//            return;
+//        }
         $def = $container->getDefinition('twig');
 
         // add the constants to twig to make calling the menu easier.

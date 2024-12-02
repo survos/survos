@@ -343,7 +343,7 @@ export class LocationManagerApp
                             {
                                 "text json": function (dataString) {
                                     let data = JSON.parse(dataString);
-                                    return data['hydra:member'].map( x => {
+                                    return data['member'].map( x => {
                                         return { parent: x.parentId ?? '#', id: x.id, text: x.name };
                                     });
                                 }

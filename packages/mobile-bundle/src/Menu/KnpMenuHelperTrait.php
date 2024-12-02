@@ -47,7 +47,7 @@ trait KnpMenuHelperTrait
         return $subMenu;
     }
 
-    public function addHeading(ItemInterface $menu, string $label, string $icon = null, string $id=null): void
+    public function addHeading(ItemInterface $menu, string $label, ?string $icon = null, ?string $id=null): void
     {
         $item = $this->addMenuItem($menu, [
             'label' => $label,

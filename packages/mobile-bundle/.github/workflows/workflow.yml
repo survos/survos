@@ -30,7 +30,7 @@ jobs:
           - '8.4'
         symfony-version:
           - '6.4.*'
-          - '7.1.*'
+          - '7.2.*'
 #        include:
 #          - php-version: '8.3'
 #            symfony-version: '6.4.*'

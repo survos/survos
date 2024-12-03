@@ -53,9 +53,9 @@ export default class extends Controller {
     connect() {
         super.connect();
         console.log('hello from mobile_controller / ' + this.identifier);
-        ons.ready((x) => {
-            // console.warn("ons is ready, " + this.identifier)
-        });
+        // ons.ready((x) => {
+        //     // console.warn("ons is ready, " + this.identifier)
+        // });
 
         // https://stackoverflow.com/questions/26851516/how-to-open-page-with-ons-tabbar-and-display-specific-tab
         ['init', 'show', 'hide','precache'].forEach( eventName =>

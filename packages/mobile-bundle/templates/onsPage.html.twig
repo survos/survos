@@ -15,6 +15,23 @@
         </ons-toolbar>
     {% endif %}
 
+    <ons-toolbar>
+        <div class="left">
+            <ons-toolbar-button icon="{{ block('page_icon')??tabId }}"></ons-toolbar-button>
+        </div>
+
+        <div class="center">
+            {{ block('title')??'~' }}
+        </div>
+
+        <div class="right">
+            <ons-toolbar-button>-</ons-toolbar-button>
+            <ons-toolbar-button>+</ons-toolbar-button>
+        </div>
+    </ons-toolbar>
+
+
+
 
     {#    {% set toolbarContent = block('toolbar')|default(false) %} #}
     {% if pageId %}

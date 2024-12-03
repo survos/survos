@@ -22,9 +22,8 @@
                   id="menu" collapse {{ stimulus_target('app','menu') }}>
               <ons-page>
                   <ons-list>
-                      <ons-list>
-                          {{ component('mobile_menu', {type: MOBILE_PAGE_MENU, caller: _self}) }}
-                      </ons-list>
+
+                      {{ component('mobile_menu', {type: MOBILE_PAGE_MENU, caller: _self}) }}
 
                       <ons-list-item {{ stimulus_action('app', 'clear', 'click') }}>
                           Clear local storage
@@ -65,13 +64,13 @@
                 {# this dropdown menu icon, click to open #}
                 <div class="left">
                     <ons-toolbar-button {{ stimulus_action(_app_sc,'openMenu', 'click') }}>
-                        <ons-icon icon="md-menu"></ons-icon>
+                        <ons-icon icon="fa-bars"></ons-icon>
                     </ons-toolbar-button>
                 </div>
 
                 <div class="right">
 
-                    <ons-toolbar-button icon="md-translate"></ons-toolbar-button>
+                    <ons-toolbar-button icon="fa-language"></ons-toolbar-button>
 {#                    <select class="select-input xx" {{ stimulus_action('app', 'locale', 'change')}}>#}
 {#                        {% for lang in app.enabled_locales %}#}
 {#                        <option value="{{ lang }}">{{ lang|language_name(lang) }} XX</option>#}

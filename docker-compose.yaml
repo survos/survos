@@ -2,7 +2,7 @@
 
 services:
     database:
-        image: postgres:16.0-alpine
+        image: postgres:17.0-alpine
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: docker
@@ -65,7 +65,7 @@ services:
 #    systemctl start meilisearch
 
     meilisearch:
-        image: getmeili/meilisearch:latest
+        image: getmeili/meilisearch:v1.11.3
         container_name: 'meilisearch'
         ports:
             - 7700:7700

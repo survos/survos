@@ -1,0 +1,84 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+    {% set liipImagineLoaded = true %}
+{#    {% set liipImagineLoaded = false %}#}
+    {% set liipImagineFilter = 'small' %}
+    <h2>Root {{ zoneId }} / {{ path  }}</h2>
+{#    {% for file in files %}#}
+{#        {{ dump(file) }}#}
+{#    {% endfor %}#}
+
+{#    {% endblock %}#}
+{#    {% block x %}#}
+
+    {% set columns = [
+        'type',
+        'path',
+        'lastModified',
+        'fileSize',
+        'extraMetadata',
+    ] %}
+    <twig:simple_datatables
+            perPage="20"
+            :caller="_self"
+            :columns="columns"
+            :data="files"
+    >
+
+        <twig:block name="type">
+            {{ row.type }} {{ row.isFile and row.mimeType ? row.mimeType }}
+            {{ row.visibility  }}
+        </twig:block>
+
+        <twig:block name="lastModified">
+            {{ row.lastModified ? row.lastModified|ago }} {# 1 second ago #}
+        </twig:block>
+
+        <twig:block name="fileSize">
+            {{ row.fileSize|default(false) ? (row.fileSize / (1024*1024))|number_format(1) }}M {# 1 second ago #}
+        </twig:block>
+
+        <twig:block name="path">
+
+
+                {% set path = row.path|lower %}
+                {% if (path ends with '.jpg')
+                    or ( path ends with '.jpeg')
+                    or ( path ends with '.webp')
+                    or ( path ends with '.png')
+
+                %}
+                    {% set runtimeConfig = {} %}
+                    <div>
+
+                    {% for filter in ['medium'] %}
+
+                    {% set thumbUrl = asset(row.path) | imagine_filter(filter, runtimeConfig)  %}
+                    <a href="{{ thumbUrl }}" target="_blank">
+                    {% if liipImagineLoaded %}
+                    <img src="{{ thumbUrl}}" />
+                        {% endif %}
+{#                    <br/><code>{{ thumbUrl }}</code>#}
+                </a>
+                    {% endfor %}
+                    </div>
+            {% endif %}
+            <a href="{{ path(row.type == 'dir' ? 'survos_storage_zone': 'survos_storage_view',
+                {zoneId: zoneId, path: row.path}) }}">
+                {{ row.path }}
+            </a>
+        </twig:block>
+
+        <twig:block name="extraMetadata">
+            {{ row.extraMetadata|json_encode }}
+            {{ dump(row) }}
+        </twig:block>
+
+        <twig:block name="Length">
+            {{ row.IsDirectory ? '(dir)' : (row.Length)|number_format(0) }}
+        </twig:block>
+
+    </twig:simple_datatables>
+{% endblock %}

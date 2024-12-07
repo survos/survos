@@ -53,3 +53,7 @@ EOF
 symfony server:start -d
 symfony open:local
 ```
+
+## Notes
+
+https://freeipapi.com/ is a free service that can be used without an API key (up to 60 requests per minute).  

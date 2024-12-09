@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Survos\ImageClientBundle\Service;
 
+use Survos\ImageClientBundle\Model\ProcessPayload;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ImageClientService
@@ -53,13 +54,16 @@ class ImageClientService
      * @param string|null $callbackUrl The url to call when the process is finished being queued
      * @return iterable
      */
-    public function dispatchProcess(array $urls = [], array $filters=[], ?string $callbackUrl=null)
+    public function dispatchProcess(ProcessPayload $processPayload)
     {
         $params = get_defined_vars();
-        $path = '/dispatch_process/';
         // make the API call
-        return $this->fetch($path, $params);
+        return $this->fetch('/dispatch_process/',
+            [
+                'images' => $processPayload->images,
+                'filters' => $processPayload->filters,
+                'callbackUrl' => $processPayload->callbackUrl,
+            ]);
     }
-
 
 }

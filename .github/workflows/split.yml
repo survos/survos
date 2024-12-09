@@ -24,7 +24,7 @@ jobs:
       matrix:
         # define package to repository map
         # run
-        # gh repo create --public survos/SurvosImageClientBundle  --description
+        # gh repo create --public survos/SurvosSaisBundle  --description
         package:
           - {local_path: 'recipes', split_repository: 'SurvosRecipes'}
 
@@ -52,7 +52,7 @@ jobs:
           - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
           - {local_path: 'ip2location-bundle', split_repository: 'Ip2LocationBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
-          - {local_path: 'image-client-bundle', split_repository: 'SurvosImageClientBundle'}
+          - {local_path: 'sais-bundle', split_repository: 'SurvosSaisBundle'}
           - {local_path: 'pwa-extra-bundle', split_repository: 'SurvosPwaExtraBundle'}
           - {local_path: 'sitemap-parser-bundle', split_repository: 'SurvosSitemapParserBundle'}
           - {local_path: 'pixie-bundle', split_repository: 'SurvosPixieBundle'}

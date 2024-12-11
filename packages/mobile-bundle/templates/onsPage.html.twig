@@ -3,8 +3,10 @@
 
 {% set pageId = block('pageId') is defined ? block('pageId') : false %}
 {% set tabId = block('tabId') is defined ? block('tabId') : false %}
+{# the stimulus controller #}
 {% set _sc = block('pageController') is defined ? block('pageController') : false %}
 <ons-page id="{{ pageId ?: tabId }}" {{ _sc ? stimulus_controller(_sc) }}>
+
     {% if false and pageId %}
         <ons-toolbar>
             <div class="center">Page {{ pageId }} title</div>
@@ -25,6 +27,8 @@
         </div>
 
         <div class="right">
+            {{ onsMeta|default(null)|json_encode }}
+            {{ _self }}
             <ons-toolbar-button>-</ons-toolbar-button>
             <ons-toolbar-button>+</ons-toolbar-button>
         </div>

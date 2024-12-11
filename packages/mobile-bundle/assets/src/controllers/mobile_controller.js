@@ -71,10 +71,8 @@ export default class extends Controller {
                 }
             })
         );
-            // prechange happens on tabs only
+            // prechange happens on tabs only, e.tabItem is the tab that's clicked, before the transition
         document.addEventListener('prechange', (e) => {
-            console.warn(e.type);
-
             // console.log('target', target, e.target.dataset);
 
             let tabItem = e.detail.tabItem;
@@ -84,11 +82,12 @@ export default class extends Controller {
                 // this is the tabItem component, not an HTML element
                 let title = tabItem.getAttribute('label');
                 if (this.hasTitleTarget) {
-                    this.titleTarget.innerHTML = tabItem.getAttribute('label');
+                    this.titleTarget.innerHTML = title;
                 }
+                // 'page', though it's really a tab.
                 let tabPageName = tabItem.getAttribute('page');
                 let eventType = tabPageName + '.' + e.type;
-                console.log('dispatching ' + eventType);
+                console.warn(`dispatching %s`, eventType);
                 document.dispatchEvent(new CustomEvent(eventType, {'detail': e}));
             }
         });

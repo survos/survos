@@ -2,10 +2,11 @@
 
 namespace Survos\MobileBundle;
 
-use Survos\MobileBundle\Event\KnpMenuEvent;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
+use Survos\MobileBundle\Event\KnpMenuEvent;
 use Survos\MobileBundle\Components\MenuComponent;
 use Survos\MobileBundle\Menu\MenuService;
+use Survos\MobileBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,6 +35,9 @@ class SurvosMobileBundle extends AbstractBundle implements CompilerPassInterface
             ->setArgument('$factory', new Reference('knp_menu.factory'))
             ->setArgument('$eventDispatcher', new Reference('event_dispatcher'));
         ;
+
+        $builder->register(TwigExtension::class)
+            ->addTag('twig.extension');
 
         $builder->register(MenuService::class)
             ->setAutowired(true)

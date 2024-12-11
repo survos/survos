@@ -8,23 +8,31 @@ use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension
 {
-    public function __construct(private array $config=[])
+    public function __construct()
     {
     }
 
     public function getFilters(): array
     {
         return [
-            // If your filter generates SAFE HTML, add ['is_safe' => ['html']]
-            // Reference: https://twig.symfony.com/doc/3.x/advanced.html#automatic-escaping
-            new TwigFilter('filter_name', fn (string $s) => '@todo: filter '.$s),
+            new TwigFilter('basename', [$this, 'basename'])
         ];
     }
 
     public function getFunctions(): array
     {
         return [
-                        new TwigFunction('config', fn() => $this->config),
+            new TwigFunction('ons_metadata',
+                fn(string $_self, string $type, array $extra = []) => array_merge($extra, [
+                        'type' => $type,
+                        'templateId' => $this->basename($_self),
+                    ]
+                )),
         ];
+    }
+
+    public function basename(string $_self): string
+    {
+        return basename($_self, '.html.twig');
     }
 }

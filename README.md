@@ -77,7 +77,7 @@ These bundles are used by other bundles (when functionality is shared), but aren
 * [inspection-bundle](packages/inspection-bundle/README.md) Inspects entities to dynamically determine which fields are searchable and sortable.  Also exposes twig methods for generating ApiPlatform links to get and update entities (api-grid and api-tree components use these).
 * [core-bundle](packages/core-bundle/README.md) Utilities to facilitate queries and route parameters.  Used frequently in our demo projects.
 
-Under Developement
+Under Development
 ------------------
 
 These bundles are usable, but not ready for prime-time.

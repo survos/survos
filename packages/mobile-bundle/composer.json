@@ -23,7 +23,7 @@
         "symfony/phpunit-bridge": "^6.4 || ^7.1",
         "symfony/twig-bundle": "^6.4 || ^7.1",
         "symfony/var-dumper": "^6.4 || ^7.1",
-        "symfony/security-bundle": "^7.2"
+        "symfony/security-bundle": "^6.4 || ^7.1"
     },
     "autoload": {
         "psr-4": {

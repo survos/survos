@@ -46,7 +46,31 @@ export default class extends Controller {
         if (e.type === 'postpush') {
             document.dispatchEvent(new CustomEvent(eventType, {detail: e.enterPage.data}));
         }
+    }
 
+    initialize() {
+        super.initialize();
+        console.error("adding a listener");
+        document.addEventListener('ons-tabbar:init', function (event) {
+            var tabBar = event.component;
+            console.error(tabBar);
+            // tabBar.setActiveTab(someIndex);
+        });
+
+        // page events
+        ['init', 'show', 'destroy'].forEach(
+            (eventName) => {
+                console.warn(`Listening for ${eventName}`);
+                document.addEventListener(eventName, function (event) {
+                    console.assert(event.target.id, "Missing id in page");
+                    // when we get an event that matches the page, dispatch it so that dexie can get it
+                    console.warn(`!page ${event.target.id}.${event.type}`, event.target);
+                    // if (event.target.matches('#page1')) {
+                    //     ons.notification.alert('Page 1 is initiated.');
+                    // }
+                }, false);
+            }
+        );
 
     }
 
@@ -58,7 +82,7 @@ export default class extends Controller {
         // });
 
         // https://stackoverflow.com/questions/26851516/how-to-open-page-with-ons-tabbar-and-display-specific-tab
-        ['init', 'show', 'hide','precache'].forEach( eventName =>
+        ['init', 'show', 'hide', 'precache'].forEach(eventName =>
             document.addEventListener(eventName, (e) => {
                 // console.error('%s:%s / %o', e.type, e.target.getAttribute('id'), e.target);
                 // console.info('%s received for %s %o', e.type, e.target.getAttribute('id'), e.target);
@@ -71,7 +95,7 @@ export default class extends Controller {
                 }
             })
         );
-            // prechange happens on tabs only, e.tabItem is the tab that's clicked, before the transition
+        // prechange happens on tabs only, e.tabItem is the tab that's clicked, before the transition
         document.addEventListener('prechange', (e) => {
             // console.log('target', target, e.target.dataset);
 
@@ -114,11 +138,11 @@ export default class extends Controller {
         // e.element.addEventListener('init', e =>console.error(e));
     }
 
-    setDb(db, debug=false) {
+    setDb(db, debug = false) {
         if (db !== this.db) {
             this.db = db;
             if (debug) {
-                db.tables.forEach(t=>
+                db.tables.forEach(t =>
                     t.count().then(c => console.error(t.name + ': ' + c))
                 );
             }
@@ -177,7 +201,7 @@ export default class extends Controller {
     }
 
     getFilter() {
-        return { };
+        return {};
     }
 
 }

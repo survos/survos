@@ -2,6 +2,7 @@
 
 namespace Survos\MobileBundle\Twig;
 
+use Survos\MobileBundle\Model\OnsMeta;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -22,13 +23,24 @@ class TwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('ons_metadata',
-                fn(string $_self, string $type, array $extra = []) => array_merge($extra, [
-                        'type' => $type,
-                        'templateId' => $this->basename($_self),
-                    ]
-                )),
+            new TwigFunction('ons_metadata', [$this, 'getOnsMetaData'])
         ];
+    }
+
+    public function getOnsMetaData(string $_self, string $type, array $extra = []): OnsMeta
+    {
+        // return $this->event??($this->type === 'page' ? 'postpush' : 'prechange');
+
+        $templateId = $this->basename($_self);
+        $triggerEvent = sprintf("%s.%s", $templateId, ($type === 'tab') ? "prechange" : "postpush");
+        // optionsResolver?
+        return new OnsMeta(
+            $templateId,
+            type: $type,
+            triggerEvent: $triggerEvent,
+                store: $extra['store'] ?? null,
+        );
+
     }
 
     public function basename(string $_self): string

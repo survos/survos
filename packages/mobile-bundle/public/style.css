@@ -1,9 +1,11 @@
 /*these are our enhancements to onsen, for reuse with the twig template and dexie components*/
 
-/*.ons-mobile-thumbnail {*/
-/*    width: auto;*/
-/*    height: 70px;*/
-/*}*/
+img.ons-mobile-thumbnail {
+    height: 48px;
+    width: 48px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+}
 
 .ons-mobile-box {
     padding: 0 16px;

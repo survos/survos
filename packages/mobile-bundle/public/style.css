@@ -1,0 +1,22 @@
+/*these are our enhancements to onsen, for reuse with the twig template and dexie components*/
+
+.ons-mobile-thumbnail {
+    width: 40px;
+    height: auto;
+}
+
+.ons-mobile-box {
+    padding: 0 16px;
+}
+
+.ons-mobile-box .ons-page-title {
+    font-weight: 700;
+    margin-top: 20px;
+    margin-bottom: 4px;
+}
+
+.ons-mobile-box .ons-mobile-count {
+    margin-bottom: 20px;
+    display: block;
+}
+

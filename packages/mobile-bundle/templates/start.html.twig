@@ -1,10 +1,8 @@
-{# {% extends "base.html.twig" %} #}
 {% extends "@SurvosMobile/base.html.twig" %}
 
-    {% block stylesheets %}
-        {{ parent() }}
-
-    {% endblock %}
+{#    {% block stylesheets %}#}
+{#        {{ parent() }}#}
+{#    {% endblock %}#}
 
 {% block templates %}
     {% for code, template in templates|default([]) %}

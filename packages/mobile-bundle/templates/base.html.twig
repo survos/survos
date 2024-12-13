@@ -4,19 +4,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <!-- applied to all survos-mobile -->
+
+    <title>{% block title 'SurvosMobile'%}</title>
+
     {#        <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">#}
     {% block stylesheets %}
         <link rel="stylesheet" type="text/css" href="{{ asset('bundles/survosmobile/style.css') }}" ></link>
     {% endblock %}
 
     {% block javascripts %}
-{#        <script src="{{ url('bazinga_jstranslation_js') }}"></script>#}
+        {# perhaps the entry point should be configurable, since it might be mobile_app.  Also, configure if pwa is called #}
         {% block importmap %}{{ importmap('app') }}{% endblock %}
-{#        @todo: pwa#}
     {% endblock %}
 
-{#    {{ pwa() }}#}
-
+    {% block pwa %}
+    {% endblock %}
 
 </head>
 

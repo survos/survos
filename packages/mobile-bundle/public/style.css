@@ -1,9 +1,9 @@
 /*these are our enhancements to onsen, for reuse with the twig template and dexie components*/
 
-.ons-mobile-thumbnail {
-    width: 40px;
-    height: auto;
-}
+/*.ons-mobile-thumbnail {*/
+/*    width: auto;*/
+/*    height: 70px;*/
+/*}*/
 
 .ons-mobile-box {
     padding: 0 16px;
@@ -20,3 +20,33 @@
     display: block;
 }
 
+body .list-item__center {
+    padding: 0 16px;
+}
+.ons-mobile-list-item--material .ons-mobile-list-item--material__left{
+    padding: 10px 0;
+}
+
+.list-item--material .list-item__left img {
+    height: 70px;
+    width: 70px;
+    /*border-radius: 50%;*/
+    object-fit: cover;
+    border: 2px solid #f1f1f1;
+}
+
+body .page--material__content .detail-page-title {
+    font-weight: 700;
+}
+
+.detail-image {
+    height: 50px;
+    width: 50px;
+    background-color: #fff;
+    border: 2px solid #fff;
+    border-radius: 6px;
+}
+
+body .page--material__content .sub-title {
+    font-weight: 600;
+}

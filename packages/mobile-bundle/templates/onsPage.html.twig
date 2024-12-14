@@ -21,7 +21,7 @@
         </div>
 
         <div class="center">
-            {{ onsMeta.type }}
+            {# does not change, this is a tab title #}
             {{ block('title')??'~' }}
         </div>
 
@@ -46,7 +46,8 @@
 {#                    <ons-toolbar-button icon="md-face"></ons-toolbar-button>#}
                 </div>
 
-                <div class="center" {{ stimulus_target('app','page_title') }}>
+                <div class="center" {{ stimulus_target(_app_sc,'pageTitle') }}>
+
                     {{ onsMeta.templateId|trans|title }}
                 </div>
                 <div class="right">

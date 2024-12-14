@@ -159,9 +159,10 @@ export default class extends Controller {
 
     setTitle(title) {
         // only PAGE title change, not tabs
-        if (this.hasTitleTarget) {
-            this.titleTarget.innerHTML = title;
-        }
+        console.assert(this.hasPageTitleTarget, "missing page title target")
+        this.pageTitleTarget.innerHTML = title;
+        // console.assert(this.hasTitleTarget, "missing titleTarget")
+        // this.titleTarget.innerHTML = title;
     }
 
     openMenu(e) {

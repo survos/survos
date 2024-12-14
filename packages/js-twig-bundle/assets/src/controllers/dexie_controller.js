@@ -156,17 +156,6 @@ export default class extends Controller {
             this.openDatabase(this.dbNameValue);
         }
 
-        // maybe is has one but isn't connected?
-        if (this.hasAppOutlet) {
-            // moved to appOutletConnected
-            // get the database from the app.  Create it if it doesn't exist.
-            // this.db = this.appOutlet.getDb();
-            // if (!this.db) {
-            //     this.openDatabase(this.dbNameValue);
-            //     // this.appOutlets.forEach(app => app.setDb(db));
-            //     // this.contentConnected();
-            // }
-        }
     }
 
 
@@ -224,8 +213,7 @@ export default class extends Controller {
     }
 
     appOutletConnected(app, element) {
-        console.error('appOutletConnected');
-        console.warn(app, element);
+        // console.warn(app, element);
         this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
         return;
 
@@ -328,11 +316,6 @@ export default class extends Controller {
         // }
         // // console.log(table);
         // return;
-        if (!this.hasAppOutlet) {
-            console.assert(this.hasAppOutlet, "missing appOutlet, skipping...");
-            return;
-        }
-
         if (this.filter.length) {
             console.log(this.filter);
             if (this.hasAppOutlet)

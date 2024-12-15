@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5c8ceb3489bfcdad7bba76875f74f9df",
+    "content-hash": "6e084855d9f654a1e56a511907dc1384",
     "packages": [
         {
             "name": "api-platform/core",
-            "version": "v4.0.11",
+            "version": "v4.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/core.git",
-                "reference": "b4e5494509372360ed07c2e80263449a267ed4a3"
+                "reference": "f15a338c2a32dbeb6a70f0b6ce2d6c22ec34a485"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/core/zipball/b4e5494509372360ed07c2e80263449a267ed4a3",
-                "reference": "b4e5494509372360ed07c2e80263449a267ed4a3",
+                "url": "https://api.github.com/repos/api-platform/core/zipball/f15a338c2a32dbeb6a70f0b6ce2d6c22ec34a485",
+                "reference": "f15a338c2a32dbeb6a70f0b6ce2d6c22ec34a485",
                 "shasum": ""
             },
             "require": {
@@ -216,9 +216,9 @@
             ],
             "support": {
                 "issues": "https://github.com/api-platform/core/issues",
-                "source": "https://github.com/api-platform/core/tree/v4.0.11"
+                "source": "https://github.com/api-platform/core/tree/v4.0.12"
             },
-            "time": "2024-12-06T11:13:26+00:00"
+            "time": "2024-12-13T14:34:04+00:00"
         },
         {
             "name": "composer/semver",
@@ -573,47 +573,42 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "3.9.3",
+            "version": "4.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "61446f07fcb522414d6cfd8b1c3e5f9e18c579ba"
+                "reference": "dadd35300837a3a2184bd47d403333b15d0a9bd0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/61446f07fcb522414d6cfd8b1c3e5f9e18c579ba",
-                "reference": "61446f07fcb522414d6cfd8b1c3e5f9e18c579ba",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/dadd35300837a3a2184bd47d403333b15d0a9bd0",
+                "reference": "dadd35300837a3a2184bd47d403333b15d0a9bd0",
                 "shasum": ""
             },
             "require": {
-                "composer-runtime-api": "^2",
-                "doctrine/cache": "^1.11|^2.0",
                 "doctrine/deprecations": "^0.5.3|^1",
-                "doctrine/event-manager": "^1|^2",
-                "php": "^7.4 || ^8.0",
+                "php": "^8.1",
                 "psr/cache": "^1|^2|^3",
                 "psr/log": "^1|^2|^3"
             },
             "require-dev": {
                 "doctrine/coding-standard": "12.0.0",
                 "fig/log-test": "^1",
-                "jetbrains/phpstorm-stubs": "2023.1",
+                "jetbrains/phpstorm-stubs": "2023.2",
                 "phpstan/phpstan": "1.12.6",
+                "phpstan/phpstan-phpunit": "1.4.0",
                 "phpstan/phpstan-strict-rules": "^1.6",
-                "phpunit/phpunit": "9.6.20",
-                "psalm/plugin-phpunit": "0.18.4",
+                "phpunit/phpunit": "10.5.30",
+                "psalm/plugin-phpunit": "0.19.0",
                 "slevomat/coding-standard": "8.13.1",
                 "squizlabs/php_codesniffer": "3.10.2",
-                "symfony/cache": "^5.4|^6.0|^7.0",
-                "symfony/console": "^4.4|^5.4|^6.0|^7.0",
-                "vimeo/psalm": "4.30.0"
+                "symfony/cache": "^6.3.8|^7.0",
+                "symfony/console": "^5.4|^6.3|^7.0",
+                "vimeo/psalm": "5.25.0"
             },
             "suggest": {
                 "symfony/console": "For helpful console commands such as SQL execution and import of files."
             },
-            "bin": [
-                "bin/doctrine-dbal"
-            ],
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -666,7 +661,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/dbal/issues",
-                "source": "https://github.com/doctrine/dbal/tree/3.9.3"
+                "source": "https://github.com/doctrine/dbal/tree/4.2.1"
             },
             "funding": [
                 {
@@ -682,7 +677,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-10-10T17:56:43+00:00"
+            "time": "2024-10-10T18:01:27+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -1375,63 +1370,51 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "2.20.0",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "8ed6c2234aba019f9737a6bcc9516438e62da27c"
+                "reference": "69958152e661aa9c14e80d1ee4962863485aa60b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/8ed6c2234aba019f9737a6bcc9516438e62da27c",
-                "reference": "8ed6c2234aba019f9737a6bcc9516438e62da27c",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/69958152e661aa9c14e80d1ee4962863485aa60b",
+                "reference": "69958152e661aa9c14e80d1ee4962863485aa60b",
                 "shasum": ""
             },
             "require": {
                 "composer-runtime-api": "^2",
-                "doctrine/cache": "^1.12.1 || ^2.1.1",
-                "doctrine/collections": "^1.5 || ^2.1",
-                "doctrine/common": "^3.0.3",
-                "doctrine/dbal": "^2.13.1 || ^3.2",
+                "doctrine/collections": "^2.2",
+                "doctrine/dbal": "^3.8.2 || ^4",
                 "doctrine/deprecations": "^0.5.3 || ^1",
                 "doctrine/event-manager": "^1.2 || ^2",
                 "doctrine/inflector": "^1.4 || ^2.0",
                 "doctrine/instantiator": "^1.3 || ^2",
-                "doctrine/lexer": "^2 || ^3",
-                "doctrine/persistence": "^2.4 || ^3",
+                "doctrine/lexer": "^3",
+                "doctrine/persistence": "^3.3.1",
                 "ext-ctype": "*",
-                "php": "^7.1 || ^8.0",
+                "php": "^8.1",
                 "psr/cache": "^1 || ^2 || ^3",
-                "symfony/console": "^4.2 || ^5.0 || ^6.0 || ^7.0",
-                "symfony/polyfill-php72": "^1.23",
-                "symfony/polyfill-php80": "^1.16"
-            },
-            "conflict": {
-                "doctrine/annotations": "<1.13 || >= 3.0"
+                "symfony/console": "^5.4 || ^6.0 || ^7.0",
+                "symfony/var-exporter": "^6.3.9 || ^7.0"
             },
             "require-dev": {
-                "doctrine/annotations": "^1.13 || ^2",
-                "doctrine/coding-standard": "^9.0.2 || ^12.0",
-                "phpbench/phpbench": "^0.16.10 || ^1.0",
-                "phpstan/extension-installer": "~1.1.0 || ^1.4",
-                "phpstan/phpstan": "~1.4.10 || 1.12.6",
-                "phpstan/phpstan-deprecation-rules": "^1",
-                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.6",
+                "doctrine/coding-standard": "^12.0",
+                "phpbench/phpbench": "^1.0",
+                "phpdocumentor/guides-cli": "^1.4",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "1.12.6",
+                "phpstan/phpstan-deprecation-rules": "^1.2",
+                "phpunit/phpunit": "^10.4.0",
                 "psr/log": "^1 || ^2 || ^3",
                 "squizlabs/php_codesniffer": "3.7.2",
-                "symfony/cache": "^4.4 || ^5.4 || ^6.4 || ^7.0",
-                "symfony/var-exporter": "^4.4 || ^5.4 || ^6.2 || ^7.0",
-                "symfony/yaml": "^3.4 || ^4.0 || ^5.0 || ^6.0 || ^7.0",
-                "vimeo/psalm": "4.30.0 || 5.24.0"
+                "symfony/cache": "^5.4 || ^6.2 || ^7.0",
+                "vimeo/psalm": "5.24.0"
             },
             "suggest": {
                 "ext-dom": "Provides support for XSD validation for XML mapping files",
-                "symfony/cache": "Provides cache support for Setup Tool with doctrine/cache 2.0",
-                "symfony/yaml": "If you want to use YAML Metadata Mapping Driver"
+                "symfony/cache": "Provides cache support for Setup Tool with doctrine/cache 2.0"
             },
-            "bin": [
-                "bin/doctrine"
-            ],
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -1472,9 +1455,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/orm/issues",
-                "source": "https://github.com/doctrine/orm/tree/2.20.0"
+                "source": "https://github.com/doctrine/orm/tree/3.3.0"
             },
-            "time": "2024-10-11T11:47:24+00:00"
+            "time": "2024-10-12T20:07:18+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -2665,16 +2648,16 @@
         },
         {
             "name": "league/csv",
-            "version": "9.19.0",
+            "version": "9.20.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/csv.git",
-                "reference": "f81df48a012a9e86d077e74eaff666fd15bfab88"
+                "reference": "553579df208641ada6ffb450b3a151e2fcfa4f31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/csv/zipball/f81df48a012a9e86d077e74eaff666fd15bfab88",
-                "reference": "f81df48a012a9e86d077e74eaff666fd15bfab88",
+                "url": "https://api.github.com/repos/thephpleague/csv/zipball/553579df208641ada6ffb450b3a151e2fcfa4f31",
+                "reference": "553579df208641ada6ffb450b3a151e2fcfa4f31",
                 "shasum": ""
             },
             "require": {
@@ -2748,7 +2731,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-08T08:09:35+00:00"
+            "time": "2024-12-13T15:49:27+00:00"
         },
         {
             "name": "league/oauth2-client",
@@ -3762,7 +3745,7 @@
         },
         {
             "name": "survos/bootstrap-bundle",
-            "version": "1.5.425",
+            "version": "1.5.437",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/BootstrapBundle.git",
@@ -3849,7 +3832,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/BootstrapBundle/issues",
-                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.425"
+                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.437"
             },
             "funding": [
                 {
@@ -3861,7 +3844,7 @@
         },
         {
             "name": "survos/command-bundle",
-            "version": "1.5.425",
+            "version": "1.5.437",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosCommandBundle.git",
@@ -3915,7 +3898,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosCommandBundle/issues",
-                "source": "https://github.com/survos/SurvosCommandBundle/tree/1.5.425"
+                "source": "https://github.com/survos/SurvosCommandBundle/tree/1.5.437"
             },
             "funding": [
                 {
@@ -3927,21 +3910,21 @@
         },
         {
             "name": "survos/core-bundle",
-            "version": "1.5.425",
+            "version": "1.5.437",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosCoreBundle.git",
-                "reference": "f253673b3d9feffcae6534f353d54e40ec13b063"
+                "reference": "a52c3cb4b023635de7c527a8e6c82b16c542d045"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/SurvosCoreBundle/zipball/f253673b3d9feffcae6534f353d54e40ec13b063",
-                "reference": "f253673b3d9feffcae6534f353d54e40ec13b063",
+                "url": "https://api.github.com/repos/survos/SurvosCoreBundle/zipball/a52c3cb4b023635de7c527a8e6c82b16c542d045",
+                "reference": "a52c3cb4b023635de7c527a8e6c82b16c542d045",
                 "shasum": ""
             },
             "require": {
                 "doctrine/common": "^3.4",
-                "doctrine/orm": "^2.12",
+                "doctrine/orm": "^3.2",
                 "php": "^8.3",
                 "symfony/config": "^6.4 || ^7.1",
                 "symfony/dependency-injection": "^6.4 || ^7.1",
@@ -4004,7 +3987,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosCoreBundle/issues",
-                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.425"
+                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.437"
             },
             "funding": [
                 {
@@ -4012,7 +3995,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-12T18:15:09+00:00"
+            "time": "2024-12-12T18:28:33+00:00"
         },
         {
             "name": "survos/installer",
@@ -4133,7 +4116,7 @@
         },
         {
             "name": "survos/seo-bundle",
-            "version": "1.5.425",
+            "version": "1.5.437",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosSeoBundle.git",
@@ -4183,7 +4166,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosSeoBundle/issues",
-                "source": "https://github.com/survos/SurvosSeoBundle/tree/1.5.425"
+                "source": "https://github.com/survos/SurvosSeoBundle/tree/1.5.437"
             },
             "funding": [
                 {
@@ -4195,7 +4178,7 @@
         },
         {
             "name": "survos/simple-datatables-bundle",
-            "version": "1.5.425",
+            "version": "1.5.437",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosSimpleDatatablesBundle.git",
@@ -4260,7 +4243,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosSimpleDatatablesBundle/issues",
-                "source": "https://github.com/survos/SurvosSimpleDatatablesBundle/tree/1.5.425"
+                "source": "https://github.com/survos/SurvosSimpleDatatablesBundle/tree/1.5.437"
             },
             "funding": [
                 {
@@ -6967,71 +6950,6 @@
             ],
             "support": {
                 "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.31.0"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-09-09T11:45:10+00:00"
-        },
-        {
-            "name": "symfony/polyfill-php72",
-            "version": "v1.31.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-php72.git",
-                "reference": "fa2ae56c44f03bed91a39bfc9822e31e7c5c38ce"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php72/zipball/fa2ae56c44f03bed91a39bfc9822e31e7c5c38ce",
-                "reference": "fa2ae56c44f03bed91a39bfc9822e31e7c5c38ce",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2"
-            },
-            "type": "metapackage",
-            "extra": {
-                "thanks": {
-                    "url": "https://github.com/symfony/polyfill",
-                    "name": "symfony/polyfill"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nicolas Grekas",
-                    "email": "p@tchwork.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony polyfill backporting some PHP 7.2+ features to lower PHP versions",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "compatibility",
-                "polyfill",
-                "portable",
-                "shim"
-            ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-php72/tree/v1.31.0"
             },
             "funding": [
                 {
@@ -12552,12 +12470,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "911049078e88e7ccba3db1afe617f0f5daccfdaa"
+                "reference": "8c7e2073d6fdddbde3047b4af78c2a885194b4a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/911049078e88e7ccba3db1afe617f0f5daccfdaa",
-                "reference": "911049078e88e7ccba3db1afe617f0f5daccfdaa",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/8c7e2073d6fdddbde3047b4af78c2a885194b4a3",
+                "reference": "8c7e2073d6fdddbde3047b4af78c2a885194b4a3",
                 "shasum": ""
             },
             "require": {
@@ -12604,7 +12522,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-12T17:49:20+00:00"
+            "time": "2024-12-14T23:29:55+00:00"
         },
         {
             "name": "roave/security-advisories",
@@ -12612,12 +12530,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "1fd8b74024b8938b25df3a9971c7ad9d57d4f592"
+                "reference": "233f7c395ac3b83e3c85aa304f3350bf8897aca5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/1fd8b74024b8938b25df3a9971c7ad9d57d4f592",
-                "reference": "1fd8b74024b8938b25df3a9971c7ad9d57d4f592",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/233f7c395ac3b83e3c85aa304f3350bf8897aca5",
+                "reference": "233f7c395ac3b83e3c85aa304f3350bf8897aca5",
                 "shasum": ""
             },
             "conflict": {
@@ -12941,6 +12859,7 @@
                 "laravel/fortify": "<1.11.1",
                 "laravel/framework": "<6.20.45|>=7,<7.30.7|>=8,<8.83.28|>=9,<9.52.17|>=10,<10.48.23|>=11,<11.31",
                 "laravel/laravel": ">=5.4,<5.4.22",
+                "laravel/pulse": "<1.3.1",
                 "laravel/reverb": "<1.4",
                 "laravel/socialite": ">=1,<2.0.10",
                 "latte/latte": "<2.10.8",
@@ -13166,6 +13085,7 @@
                 "shopware/storefront": "<=6.4.8.1|>=6.5.8,<6.5.8.7-dev",
                 "shopxo/shopxo": "<=6.1",
                 "showdoc/showdoc": "<2.10.4",
+                "shuchkin/simplexlsx": ">=1.0.12,<1.1.12",
                 "silverstripe-australia/advancedreports": ">=1,<=2",
                 "silverstripe/admin": "<1.13.19|>=2,<2.1.8",
                 "silverstripe/assets": ">=1,<1.11.1",
@@ -13203,7 +13123,7 @@
                 "snipe/snipe-it": "<=7.0.13",
                 "socalnick/scn-social-auth": "<1.15.2",
                 "socialiteproviders/steam": "<1.1",
-                "spatie/browsershot": "<3.57.4",
+                "spatie/browsershot": "<5.0.1",
                 "spatie/image-optimizer": "<1.7.3",
                 "spencer14420/sp-php-email-handler": "<1",
                 "spipu/html2pdf": "<5.2.8",
@@ -13455,7 +13375,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-12-10T21:04:50+00:00"
+            "time": "2024-12-13T21:04:51+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -14514,16 +14434,16 @@
         },
         {
             "name": "survos/maker-bundle",
-            "version": "1.5.425",
+            "version": "1.5.437",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosMakerBundle.git",
-                "reference": "5652730a5e473bbc999e7f370ff29f9ef5e3005b"
+                "reference": "3499292aae4b88c99999323f9d365c5c01ad1eef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/SurvosMakerBundle/zipball/5652730a5e473bbc999e7f370ff29f9ef5e3005b",
-                "reference": "5652730a5e473bbc999e7f370ff29f9ef5e3005b",
+                "url": "https://api.github.com/repos/survos/SurvosMakerBundle/zipball/3499292aae4b88c99999323f9d365c5c01ad1eef",
+                "reference": "3499292aae4b88c99999323f9d365c5c01ad1eef",
                 "shasum": ""
             },
             "require": {
@@ -14564,7 +14484,7 @@
             },
             "require-dev": {
                 "doctrine/doctrine-bundle": "^2.7",
-                "doctrine/orm": "^2.12",
+                "doctrine/orm": "^2.12 || ^3.4",
                 "haydenpierce/class-finder": "^0.4.3",
                 "phpstan/phpstan": "^2.0",
                 "squizlabs/php_codesniffer": "^3.7",
@@ -14617,7 +14537,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosMakerBundle/issues",
-                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.425"
+                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.437"
             },
             "funding": [
                 {
@@ -14625,7 +14545,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-12T18:15:15+00:00"
+            "time": "2024-12-15T10:50:54+00:00"
         },
         {
             "name": "symfony/browser-kit",

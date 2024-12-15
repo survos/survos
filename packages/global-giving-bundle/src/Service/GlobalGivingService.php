@@ -19,7 +19,7 @@ class GlobalGivingService
     ) {
     }
 
-    public function fetch(string $path, array $params = [], string $key=null): iterable
+    public function fetch(string $path, array $params = [], ?string $key=null): iterable
     {
 //        public const BASE_URI = 'https://api.globalgiving.org/api/public/projectservice/all/projects?api_key=YOUR_API_KEY&nextProjectId=354";
         $params['api_key'] = $this->apiKey;

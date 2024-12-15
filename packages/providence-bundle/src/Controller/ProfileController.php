@@ -34,7 +34,7 @@ class ProfileController extends AbstractController
 {
     #[Route(path: '/browse', name: 'data_profiles')]
     #[Route(path: '/{projectId}/browse', name: 'project_data_profiles')]
-    public function index(Request $request, ProfileService $profileService, Project $project = null): Response
+    public function index(Request $request, ProfileService $profileService, ?Project $project = null): Response
     {
         $profiles = $profileService->getXmlProfiles();
         return $this->render('data_profile/index.html.twig', [
@@ -78,7 +78,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route(path: '/xml/{profileId}_lists.{_format}', name: 'profile_lists')]
-    public function xml_profile_lists(Request $request, Profile $profile, ProfileService $profileService, string $block = null, string $subBlock = null, $_format = 'html'): Response
+    public function xml_profile_lists(Request $request, Profile $profile, ProfileService $profileService, ?string $block = null, ?string $subBlock = null, $_format = 'html'): Response
     {
         $xmlProfile = $profileService->test($profile->getXml());
         return $this->render("data_profile/lists.html.twig", [
@@ -125,8 +125,8 @@ class ProfileController extends AbstractController
         EntityManagerInterface $entityManager,
         ImportService $importService,
         ImportXmlService $importXmlService,
-        string $block = null,
-        string $subBlock = null,
+        ?string $block = null,
+        ?string $subBlock = null,
         $_format = 'html'
     ): Response {
         //        $profile = $this->profileService->loadXml($profileCode)[0];
@@ -159,8 +159,8 @@ class ProfileController extends AbstractController
         Request $request,
         XmlProfile $xmlProfile,
         ProfileService $profileService,
-        string $block = null,
-        string $subBlock = null,
+        ?string $block = null,
+        ?string $subBlock = null,
         $_format = 'html'
     ): Response {
         // these are the model cores.
@@ -206,8 +206,8 @@ class ProfileController extends AbstractController
         //                                Profile $profile,
         XmlProfile $xmlProfile,
         ProfileService $profileService,
-        string $block = null,
-        string $subBlock = null,
+        ?string $block = null,
+        ?string $subBlock = null,
         $_format = 'html'
     ): Response {
         //        $xmlProfile = $profileService->parseXml($xml = file_get_contents($profile->getFilename()));

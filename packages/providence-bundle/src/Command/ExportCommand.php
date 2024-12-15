@@ -26,7 +26,7 @@ class ExportCommand extends Command
         private LoggerInterface $logger,
         private ProfileService $profileService,
         private ProvidenceService         $providenceService,
-        string $name = null)
+        ?string $name = null)
     {
         parent::__construct($name);
     }

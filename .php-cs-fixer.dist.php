@@ -7,7 +7,7 @@
 //
 
 $finder = PhpCsFixer\Finder::create()
-    ->in([__DIR__ . '/packages/api-grid-bundle/src/Hydra'])
+    ->in([__DIR__ . '/packages/'])
     ;
 
 return (new PhpCsFixer\Config())

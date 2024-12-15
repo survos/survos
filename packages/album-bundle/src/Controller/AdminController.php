@@ -84,7 +84,7 @@ class AdminController extends AbstractController
      *
      * @return Response
      */
-    public function sidebar(string $path = null, string $type = 'folder')
+    public function sidebar(?string $path = null, string $type = 'folder')
     {
         $tags = $folders = [];
         if ('tag' === $type) {
@@ -116,7 +116,7 @@ class AdminController extends AbstractController
      *
      * @return RedirectResponse|Response
      */
-    public function tagEdit(Request $request, int $id = null)
+    public function tagEdit(Request $request, ?int $id = null)
     {
         $em = $this->getDoctrine()->getManager();
 

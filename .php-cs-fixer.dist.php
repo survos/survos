@@ -7,13 +7,14 @@
 //
 
 $finder = PhpCsFixer\Finder::create()
-    ->in([__DIR__ . '/packages/bootstrap-bundle/src/Components'])
-    ->name('Menu*.php');
+    ->in([__DIR__ . '/packages/api-grid-bundle/src/Hydra'])
+    ;
 
 return (new PhpCsFixer\Config())
     ->setFinder($finder)
     ->setRules([
         'nullable_type_declaration_for_default_null_value' => true,
-        '@Symfony' => true,
+//        '@Symfony' => true,
     ]);
+
 

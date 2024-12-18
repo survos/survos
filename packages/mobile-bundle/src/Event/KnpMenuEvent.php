@@ -13,6 +13,7 @@ class KnpMenuEvent extends Event
 {
     public const MOBILE_PAGE_MENU = 'MOBILE_PAGE_MENU';
     public const MOBILE_TAB_MENU = 'MOBILE_TAB_MENU';
+    public const MOBILE_UNLINKED_MENU = 'MOBILE_UNLINKED_MENU';
 
     public function __construct(
         protected ItemInterface $menu,

@@ -118,8 +118,39 @@ curl -OL https://github.com/composer-unused/composer-unused/releases/latest/down
 php composer-unused.phar
 ```
 
+## Ignore dump in production
+
+symfony new ignore-dump-in-production --webapp && cd ignore-dump-in-production
+bin/console make:controller AppController
+sed -i "s|/app|/|" src/Controller/AppController.php
+
+cat <<'EOF' > templates/app/index.html.twig
+{% extends 'base.html.twig' %}
+{% block body %}
+    {% guard function dump  %}
+    {{ dump() }}
+    {% else %}
+    dump cannot be used in production
+    {% endguard %}
+{% endblock %}
+EOF
+
+symfony server:start -d
+symfony open:local
+
+sed -i "s|APP_ENV=dev|APP_ENV=prod|" .env
+bin/console cache:clear
+symfony open:local
+
+sed -i "s|APP_ENV=prod|APP_ENV=dev|" .env
+symfony open:local
+composer require --dev pierstoval/smoke-testing
+
+
+
 
 bin/console make:controller App
+
 cat <<'EOF' > templates/app/index.html.twig
 {% extends 'base.html.twig' %}
 {% block body %}
@@ -127,6 +158,7 @@ cat <<'EOF' > templates/app/index.html.twig
 {% endblock %}
 EOF
 
+composer require --dev pierstoval/smoke-testing
 cat <<'EOF' > tests/AllRoutesTest.php
 <?php
 
@@ -138,6 +170,9 @@ class AllRoutesTest extends SmokeTestStaticRoutes
     // That's all!
 }
 EOF
+
+vendor/bin/phpunit
+
 
 SYMFONY_DEPRECATIONS_HELPER='disabled=1' vendor/bin/phpunit
 

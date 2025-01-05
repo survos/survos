@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6e084855d9f654a1e56a511907dc1384",
+    "content-hash": "8ac5cc303443d4cbd86495e5607cd6b6",
     "packages": [
         {
             "name": "api-platform/core",
@@ -12466,16 +12466,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "dev-main",
+            "version": "2.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "8c7e2073d6fdddbde3047b4af78c2a885194b4a3"
+                "reference": "3f27091368bd935dbbaa8387099792fb20f65f68"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/8c7e2073d6fdddbde3047b4af78c2a885194b4a3",
-                "reference": "8c7e2073d6fdddbde3047b4af78c2a885194b4a3",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/3f27091368bd935dbbaa8387099792fb20f65f68",
+                "reference": "3f27091368bd935dbbaa8387099792fb20f65f68",
                 "shasum": ""
             },
             "require": {
@@ -12491,7 +12491,6 @@
             "suggest": {
                 "ext-dom": "To manipulate phpunit.xml via the custom-rule command"
             },
-            "default-branch": true,
             "bin": [
                 "bin/rector"
             ],
@@ -12514,7 +12513,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/main"
+                "source": "https://github.com/rectorphp/rector/tree/2.0.3"
             },
             "funding": [
                 {
@@ -12522,7 +12521,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-14T23:29:55+00:00"
+            "time": "2024-12-12T15:22:19+00:00"
         },
         {
             "name": "roave/security-advisories",
@@ -15176,7 +15175,6 @@
     "aliases": [],
     "minimum-stability": "beta",
     "stability-flags": {
-        "rector/rector": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,

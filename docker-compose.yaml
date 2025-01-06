@@ -75,6 +75,7 @@ services:
 #            - MEILI_MASTER_KEY=MeiliKey
             - MEILI_NO_ANALYTICS=true
             - MEILI_TASK_WEBHOOK_URL=http://localhost:8002/meili
+        # ./meilisearch --experimental-contains-filter
 
     redis:
         image: redis:latest

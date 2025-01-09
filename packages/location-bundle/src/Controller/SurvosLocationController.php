@@ -19,7 +19,8 @@ class SurvosLocationController extends AbstractController
     protected Service $service;
     private LocationRepository $locationRepository;
 
-    public function __construct(Service $service = null, LocationRepository $locationRepository)
+    public function __construct(Service $service,
+                                LocationRepository $locationRepository)
     {
         $this->service = $service;
         $this->locationRepository = $locationRepository;
@@ -145,7 +146,7 @@ class SurvosLocationController extends AbstractController
         return $this->jsonResponse($data, $request);
     }
 
-    private function jsonResponse($data, Request $request = null, $format='html')
+    private function jsonResponse($data, ?Request $request = null, $format='html')
     {
         if ($request && $request->isXmlHttpRequest()) {
             $format = 'json';

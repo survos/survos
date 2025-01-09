@@ -1,5 +1,12 @@
-{# {% extends "base.html.twig" %} #}
 {% extends "@SurvosMobile/base.html.twig" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('bundles/survosmobile/style.css') }}" ></link>
+{% endblock %}
+
+{#    {% block stylesheets %}#}
+{#        {{ parent() }}#}
+{#    {% endblock %}#}
 
 {% block templates %}
     {% for code, template in templates|default([]) %}
@@ -14,6 +21,7 @@
 
       {{ block('templates') }}
       {{ block('initial_layout_template') }}
+
       <ons-splitter>
           <!-- The side menu -->
           <ons-splitter-side
@@ -22,9 +30,8 @@
                   id="menu" collapse {{ stimulus_target('app','menu') }}>
               <ons-page>
                   <ons-list>
-                      <ons-list>
-                          {{ component('mobile_menu', {type: MOBILE_PAGE_MENU, caller: _self}) }}
-                      </ons-list>
+
+                      {{ component('mobile_menu', {type: MOBILE_PAGE_MENU, caller: _self}) }}
 
                       <ons-list-item {{ stimulus_action('app', 'clear', 'click') }}>
                           Clear local storage
@@ -65,13 +72,13 @@
                 {# this dropdown menu icon, click to open #}
                 <div class="left">
                     <ons-toolbar-button {{ stimulus_action(_app_sc,'openMenu', 'click') }}>
-                        <ons-icon icon="md-menu"></ons-icon>
+                        <ons-icon icon="fa-bars"></ons-icon>
                     </ons-toolbar-button>
                 </div>
 
                 <div class="right">
 
-                    <ons-toolbar-button icon="md-translate"></ons-toolbar-button>
+                    <ons-toolbar-button icon="fa-language"></ons-toolbar-button>
 {#                    <select class="select-input xx" {{ stimulus_action('app', 'locale', 'change')}}>#}
 {#                        {% for lang in app.enabled_locales %}#}
 {#                        <option value="{{ lang }}">{{ lang|language_name(lang) }} XX</option>#}

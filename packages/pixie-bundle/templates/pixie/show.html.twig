@@ -27,6 +27,15 @@
     } %}
     <div class="inner-page">
 
+{#        {{ component('SurvosPixie:db', {pixieCode: pixieCode}) }}#}
+
+{#        <twig:pixie:db :pixieCode="pixieCode" />#}
+{#        <twig:SurvosPixie:db :pixieCode="pixieCode" />#}
+{#        </twig:SurvosPixie:db>#}
+        <twig:pixie:row
+                :data="row.data">
+        </twig:pixie:row>
+
         {# <div class="section-item">
             <div class="item__image">
                 {% for imageField in ['thumbnail','is_shown_by'] %}
@@ -105,7 +114,6 @@
             }) }}
 
         {% endif %}
-    </div>
 
 {% endblock %}
 
@@ -163,6 +171,7 @@
         depth: 'iconoir:depth',
         height: 'circum:line-height',
         width: 'material-symbols:width',
+        length: 'material-symbols:width',
         weight: 'material-symbols:scale'
     } %}
     {% if row.dimensions %}
@@ -221,6 +230,9 @@
         <p>
             universal fields, can be used anywhere in the template with <code>row.var</code>
         </p>
+        <pre>
+            {{ row.data|json_pretty }}
+        </pre>
         <ul class="list-group">
             {% for var in keys|default([]) %}
                 <li class="list-group-item px-0 py-1 border-0">
@@ -386,7 +398,7 @@
                         <div class="fields-text">
                         <span class="align-middle me-2">
                             {% if icon %}
-                                {{ ux_icon(icon, {width:"20px", title: var}) }}
+                                {{ ux_icon(icon, {height: '1em', width:"20px", title: var}) }}
                             {% endif %}
                         </span>
 

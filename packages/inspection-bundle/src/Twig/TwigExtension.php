@@ -2,7 +2,7 @@
 
 namespace Survos\InspectionBundle\Twig;
 
-use ApiPlatform\Api\IriConverterInterface;
+use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Doctrine\Orm\State\CollectionProvider;
 use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\Metadata\GetCollection;
@@ -31,8 +31,8 @@ class TwigExtension extends AbstractExtension
             new TwigFunction('api_item_route', [$this, 'apiItemRoute']),
             new TwigFunction('api_subresource_route', [$this, 'apiCollectionSubresourceRoute']),
 //            new TwigFunction('sortable_fields', [$this, 'sortableFields']),
-//            new TwigFunction('searchable_fields', [$this, 'searchableFields']),
-//            new TwigFunction('search_builder_fields', [$this, 'searchBuilderFields']),
+            new TwigFunction('searchable_fields', [$this, 'searchableFields']),
+            new TwigFunction('search_builder_fields', [$this, 'searchBuilderFields']),
         ];
     }
 
@@ -87,13 +87,13 @@ class TwigExtension extends AbstractExtension
         } else {
             $x = null;
         }
-        try {
-            // this won't work if there are multiple GetCollection routes
-//            $x = $this->inspectionService->getAllUrlsForResource($entityOrClass)[CollectionProvider::class];
-//            $x = $this->iriConverter->getIriFromResource($entityOrClass, operation: new GetCollection(), context: $context);
-        } catch (InvalidArgumentException $exception) {
-            dd($exception);
-        }
+//        try {
+//            // this won't work if there are multiple GetCollection routes
+////            $x = $this->inspectionService->getAllUrlsForResource($entityOrClass)[CollectionProvider::class];
+////            $x = $this->iriConverter->getIriFromResource($entityOrClass, operation: new GetCollection(), context: $context);
+//        } catch (InvalidArgumentException $exception) {
+//            dd($exception);
+//        }
         return $x;
     }
 

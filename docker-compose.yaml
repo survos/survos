@@ -2,7 +2,7 @@
 
 services:
     database:
-        image: postgres:16.0-alpine
+        image: postgres:17.0-alpine
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: docker
@@ -17,7 +17,7 @@ services:
 #            - 32785:32785
         volumes:
 #            - ~/.docker-conf/postgres15:/var/lib/postgresql/data
-            - ./.docker/postgres16:/var/lib/postgresql/data
+            - ./.docker/postgres17:/var/lib/postgresql/data
 
 #    mercure:
 #        image: dunglas/mercure
@@ -65,16 +65,17 @@ services:
 #    systemctl start meilisearch
 
     meilisearch:
-        image: getmeili/meilisearch:latest
+        image: getmeili/meilisearch:v1.12.1
         container_name: 'meilisearch'
         ports:
             - 7700:7700
         volumes:
-            - ./.docker/meili/:/meili_data/
+            - ./.docker/meili-1.12.1/:/meili_data/
         environment:
 #            - MEILI_MASTER_KEY=MeiliKey
             - MEILI_NO_ANALYTICS=true
             - MEILI_TASK_WEBHOOK_URL=http://localhost:8002/meili
+        # ./meilisearch --experimental-contains-filter
 
     redis:
         image: redis:latest

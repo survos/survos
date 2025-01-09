@@ -1,5 +1,5 @@
 parameters:
-    level: 7
+    level: 5
     inferPrivatePropertyTypeFromConstructor: true
     paths:
         - ./src/
@@ -10,6 +10,7 @@ parameters:
        analyse:
                   - ./vendor
 
+    checkFunctionNameCase: false
     ignoreErrors:
         # False positive: clients are not dependencies of this project.
 #        -
@@ -29,3 +30,4 @@ parameters:
         -
             message: '#.*NodeDefinition::children.*#'
             path: ./src/*Bundle.php
+        - '#referenced with incorrect case#'

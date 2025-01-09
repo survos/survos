@@ -44,14 +44,16 @@ final class PixieIndexCommand extends InvokableServiceCommand
     private ProgressBar $progressBar;
 
     public function __construct(
+        #[Autowire('%env(SITE_BASE_URL)%')] private string $baseUrl,
+        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales,
         private LoggerInterface       $logger,
         private ParameterBagInterface $bag,
         private readonly PixieService $pixieService,
         private SerializerInterface $serializer,
         private EventDispatcherInterface $eventDispatcher,
+
         private ?MeiliService $meiliService = null,
         private ?SluggerInterface $asciiSlugger = null,
-        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales=[],
     )
     {
 
@@ -68,7 +70,9 @@ final class PixieIndexCommand extends InvokableServiceCommand
         #[Option('table', description: 'table name(s?), all if not set')] ?string       $tableFilter=null,
 //        #[Option(name: 'trans', description: 'fetch the translation strings')] bool $addTranslations=false,
         #[Option(description: "reset the meili index")] ?bool                          $reset=null,
+        #[Option(name:'trans-table', description: "use the translation table instead of _trans")] ?bool $transTable=null,
         #[Option(description: "wait for tasks to finish")] ?bool                          $wait=null,
+        #[Option(description: "populate translations")] ?bool                          $translations=null,
         #[Option(description: "max number of records per table to export")] int        $limit = 0,
         #[Option(description: "extra data (YAML), e.g. --extra=[core:obj]")] string    $extra = '',
         #[Option('batch', description: "max number of records to batch to meili")] int $batchSize = 1000,
@@ -86,6 +90,12 @@ final class PixieIndexCommand extends InvokableServiceCommand
             return self::FAILURE;
         }
 
+        if ($translations) {
+            $io->error("bin/console pixie:translation --index $configCode");
+            return self::FAILURE;
+
+        }
+
         $this->initialized = true;
         $kv = $pixieService->getStorageBox($configCode, $subCode);
         $pixieDbName = $pixieService->getPixieFilename($configCode, $subCode);
@@ -94,7 +104,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         $config = $pixieService->getConfig($configCode);
 
         if ($tableFilter) {
-            assert($kv->tableExists($tableFilter), "Missing table $tableFilter: \n".join("\n", $kv->getTableNames()));
+            assert($kv->tableExists($tableFilter), "Missing table $tableFilter: \n".implode("\n", $kv->getTableNames()));
         }
 
 
@@ -148,11 +158,17 @@ final class PixieIndexCommand extends InvokableServiceCommand
             } else {
                 $transKv = null;
             }
-            foreach ($kv->iterate($tableName) as $idx => $row) {
+            foreach ($kv->iterate($tableName) as $row) {
                 $data = $row->getData();
                 $this->logger->info($row->getKey() . "\n\n" . json_encode($row, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
                 // hack
                 $lang = $row->expected_language()??$config->getSource()->locale;
+
+                // maybe someday, not worth it now to refactor
+                if ($transTable) {
+//                    $this->
+                }
+
 //                dd($lang, $row);
 //                foreach ($table->getTranslatable() as $translatableProperty) {
 //                    $toTranslate[] = $row->{$translatableProperty}();
@@ -202,9 +218,9 @@ final class PixieIndexCommand extends InvokableServiceCommand
                 SurvosUtils::cleanNullsOfObject($data);
                 // argh, sqlite thing for arrays
                 foreach ($data as $k => $v) {
-                    if (is_string($v) && json_validate($v)) {
+                    if (is_string($v) && strlen($v) && json_validate($v)) {
                         $data->{$k} = json_decode($v);
-                        assert($data->{$k}, $k . " is empty");
+//                        assert($data->{$k}, $k . " is empty [$v] $tableName $configCode $v" . json_encode($data, JSON_PRETTY_PRINT));
                     }
                 }
 
@@ -237,9 +253,14 @@ final class PixieIndexCommand extends InvokableServiceCommand
             }
             $progressBar->finish();
 
-            $task = $index->addDocuments($recordsToWrite, $primaryKey);
-            $recordsToWrite = [];
+            try {
+                $task = $index->addDocuments($recordsToWrite, $primaryKey);
+                $recordsToWrite = [];
+            } catch (\Exception $e) {
+                dd($recordsToWrite, $e->getMessage());
+            }
             $this->meiliService->waitForTask($task);
+            $this->io()->writeln(sprintf("<href=%s?$configCode>Open</>", $this->baseUrl));
 
             // wait, so we can update owner
             // export property counts to kv

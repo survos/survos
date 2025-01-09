@@ -4,8 +4,6 @@ namespace Survos\CrawlerBundle\Command;
 
 //use App\Entity\User;
 use App\Kernel;
-use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Survos\CrawlerBundle\Model\Link;
@@ -34,12 +32,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class CrawlCommand extends Command
 {
     public function __construct(
-        private ManagerRegistry $registry,
         private LoggerInterface $logger,
         private ParameterBagInterface $bag,
         private CrawlerService $crawlerService,
         private RouterInterface $router,
-        string $name = null
+        ?string $name = null
     ) {
         parent::__construct($name);
     }
@@ -154,13 +151,17 @@ class CrawlCommand extends Command
             $loop = 0;
             while ($link = $crawlerService->getUnvisitedLink($username)) {
                 $loop++;
+                $link->incVisits();
 
-                $io->info(sprintf("%s%s as %s (from %s) | %s",
+                $io->info(sprintf("%s/%d %s%s as %s (from %s)",
+                    $link->getRoute(),
+                    $link->getVisits(),
                     $crawlerService->getBaseUrl(true),
                     $link->getPath(),
                     $username ?: 'visitor',
-                    $link->getFoundOn(),
-                    $link->getRoute()));
+                    $link->getFoundOn()
+                ));
+
                 $crawlerService->scrape($link);
                 if ($link->getStatusCode() <> 200) {
                     $this->logger->warning(sprintf("%s %s (%s)",
@@ -192,6 +193,13 @@ class CrawlCommand extends Command
         file_put_contents($outputFilename, json_encode($linksToCrawl, JSON_UNESCAPED_LINE_TERMINATORS + JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
         $io->success(sprintf("File $outputFilename written with %d usernames", count($linksToCrawl)));
 
+        $table = new Table($output);
+        $table->setHeaders(['route','visits']);
+        foreach ($crawlerService->getRouteVisits() as $routeName=>$visits) {
+            $table->addRow([$routeName, $visits]);
+        }
+        $table->render();
+
         return self::SUCCESS;
 
         // user input
@@ -212,8 +220,9 @@ class CrawlCommand extends Command
         $this->domain = parse_url($this->startingLink, PHP_URL_HOST);
 
         $kernel = $this->createKernel();
-        $client = $this->httpClient;
 
+
+        $client = $this->httpClient;
         $crawler = $client->request('GET', $this->startingLink);
 
         dump($this->startingLink);
@@ -370,12 +379,8 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
         });
 
         // @todo: this assumes a local user, it should be a proper login to the endpoint
-        $userClass = $this->crawlerService->getUserClass();
-        $entityManager = $this->registry->getManagerForClass($userClass);
         // code? Username? S.b. configurable.
-        if (! $user = $entityManager->getRepository($userClass)->findOneBy([
-            'code' => $this->username,
-        ])) {
+        if (! $user =  $this->crawlerService->getUser($this->username)) {
             throw new \Exception("Unable to authenticate member " . $this->username);
         }
         // $token = new UsernamePasswordToken($login, $password, $firewall);

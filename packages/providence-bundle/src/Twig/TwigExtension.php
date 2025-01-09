@@ -35,7 +35,7 @@ class TwigExtension extends AbstractExtension
         ];
     }
 
-    public function optionalTrans(?string $id, array $parameters = [], string $domain = null, string $locale = null): ?string
+    public function optionalTrans(?string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): ?string
     {
 //        $locale = $translator->getLocale();
         $catalogue = $this->translator->getCatalogue($locale);

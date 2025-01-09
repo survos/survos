@@ -46,19 +46,43 @@ export default class extends Controller {
         if (e.type === 'postpush') {
             document.dispatchEvent(new CustomEvent(eventType, {detail: e.enterPage.data}));
         }
+    }
 
+    initialize() {
+        super.initialize();
+        console.error("adding a listener");
+        document.addEventListener('ons-tabbar:init', function (event) {
+            var tabBar = event.component;
+            console.error(tabBar);
+            // tabBar.setActiveTab(someIndex);
+        });
+
+        // page events
+        ['init', 'show', 'destroy'].forEach(
+            (eventName) => {
+                console.warn(`Listening for ${eventName}`);
+                document.addEventListener(eventName, function (event) {
+                    console.assert(event.target.id, "Missing id in page");
+                    // when we get an event that matches the page, dispatch it so that dexie can get it
+                    console.warn(`!page ${event.target.id}.${event.type}`, event.target);
+                    // if (event.target.matches('#page1')) {
+                    //     ons.notification.alert('Page 1 is initiated.');
+                    // }
+                }, false);
+            }
+        );
 
     }
 
     connect() {
         super.connect();
         console.log('hello from mobile_controller / ' + this.identifier);
-        ons.ready((x) => {
-            // console.warn("ons is ready, " + this.identifier)
-        });
+        // ons.ready((x) => {
+        //     // console.warn("ons is ready, " + this.identifier)
+        // });
 
         // https://stackoverflow.com/questions/26851516/how-to-open-page-with-ons-tabbar-and-display-specific-tab
-        ['init', 'show', 'hide','precache'].forEach( eventName =>
+        ['init', 'show', 'hide', 'precache'].forEach(eventName =>
             document.addEventListener(eventName, (e) => {
                 // console.error('%s:%s / %o', e.type, e.target.getAttribute('id'), e.target);
                 // console.info('%s received for %s %o', e.type, e.target.getAttribute('id'), e.target);
@@ -71,10 +95,8 @@ export default class extends Controller {
                 }
             })
         );
-            // prechange happens on tabs only
+        // prechange happens on tabs only, e.tabItem is the tab that's clicked, before the transition
         document.addEventListener('prechange', (e) => {
-            console.warn(e.type);
-
             // console.log('target', target, e.target.dataset);
 
             let tabItem = e.detail.tabItem;
@@ -84,11 +106,12 @@ export default class extends Controller {
                 // this is the tabItem component, not an HTML element
                 let title = tabItem.getAttribute('label');
                 if (this.hasTitleTarget) {
-                    this.titleTarget.innerHTML = tabItem.getAttribute('label');
+                    this.titleTarget.innerHTML = title;
                 }
+                // 'page', though it's really a tab.
                 let tabPageName = tabItem.getAttribute('page');
                 let eventType = tabPageName + '.' + e.type;
-                console.log('dispatching ' + eventType);
+                console.warn(`dispatching %s`, eventType);
                 document.dispatchEvent(new CustomEvent(eventType, {'detail': e}));
             }
         });
@@ -115,11 +138,11 @@ export default class extends Controller {
         // e.element.addEventListener('init', e =>console.error(e));
     }
 
-    setDb(db, debug=false) {
+    setDb(db, debug = false) {
         if (db !== this.db) {
             this.db = db;
             if (debug) {
-                db.tables.forEach(t=>
+                db.tables.forEach(t =>
                     t.count().then(c => console.error(t.name + ': ' + c))
                 );
             }
@@ -136,9 +159,10 @@ export default class extends Controller {
 
     setTitle(title) {
         // only PAGE title change, not tabs
-        if (this.hasTitleTarget) {
-            this.titleTarget.innerHTML = title;
-        }
+        console.assert(this.hasPageTitleTarget, "missing page title target")
+        this.pageTitleTarget.innerHTML = title;
+        // console.assert(this.hasTitleTarget, "missing titleTarget")
+        // this.titleTarget.innerHTML = title;
     }
 
     openMenu(e) {
@@ -178,7 +202,7 @@ export default class extends Controller {
     }
 
     getFilter() {
-        return { };
+        return {};
     }
 
 }

@@ -24,7 +24,7 @@ jobs:
       matrix:
         # define package to repository map
         # run
-        # gh repo create --public survos/SurvosXXBundle  --description
+        # gh repo create --public survos/SurvosSaisBundle  --description
         package:
           - {local_path: 'recipes', split_repository: 'SurvosRecipes'}
 
@@ -32,6 +32,7 @@ jobs:
           - {local_path: 'auth-bundle', split_repository: 'SurvosAuthBundle'}
 #          - {local_path: 'album-bundle', split_repository: 'SurvosAlbumBundle'}
           - {local_path: 'bunny-bundle', split_repository: 'SurvosBunnyBundle'}
+          - {local_path: 'bing-news-bundle', split_repository: 'SurvosBingNewsBundle'}
           - {local_path: 'barcode-bundle', split_repository: 'BarcodeBundle'}
           - {local_path: 'bootstrap-bundle', split_repository: 'BootstrapBundle'}
           - {local_path: 'command-bundle', split_repository: 'SurvosCommandBundle'}
@@ -52,6 +53,8 @@ jobs:
           - {local_path: 'liform-bundle', split_repository: 'SurvosLiformBundle'}
           - {local_path: 'ip2location-bundle', split_repository: 'Ip2LocationBundle'}
           - {local_path: 'location-bundle', split_repository: 'LocationBundle'}
+          - {local_path: 'news-api-bundle', split_repository: 'NewsApiBundle'}
+          - {local_path: 'sais-bundle', split_repository: 'SurvosSaisBundle'}
           - {local_path: 'pwa-extra-bundle', split_repository: 'SurvosPwaExtraBundle'}
           - {local_path: 'sitemap-parser-bundle', split_repository: 'SurvosSitemapParserBundle'}
           - {local_path: 'pixie-bundle', split_repository: 'SurvosPixieBundle'}
@@ -64,7 +67,9 @@ jobs:
           - {local_path: 'seo-bundle', split_repository: 'SurvosSeoBundle'}
           - {local_path: 'scraper-bundle', split_repository: 'SurvosScraperBundle'}
           - {local_path: 'simple-datatables-bundle', split_repository: 'SurvosSimpleDatatablesBundle'}
+          - {local_path: 'storage-bundle', split_repository: 'SurvosStorageBundle'}
           - {local_path: 'tree-bundle', split_repository: 'SurvosTreeBundle'}
+          - {local_path: 'the-guardian-bundle', split_repository: 'SurvosGuardianBundle'}
           - {local_path: 'wiki-bundle', split_repository: 'SurvosWikiBundle'}
           - {local_path: 'workflow-helper-bundle', split_repository: 'SurvosWorkflowHelperBundle'}
 

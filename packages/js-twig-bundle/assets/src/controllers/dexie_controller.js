@@ -4,15 +4,10 @@ import {Controller} from "@hotwired/stimulus";
 // now called from the TwigJsComponent Component, so it can pass in a Twig Template
 // combination api-platform, inspection-bundle, dexie and twigjs
 // loads data from API Platform to dexie, renders dexie data in twigjs
-
 // import db from '../db.js';
 import Twig from "twig";
 import Dexie from "dexie";
-import {
-    stimulus_controller,
-    stimulus_action,
-    stimulus_target,
-} from "stimulus-attributes";
+import {stimulus_action, stimulus_controller, stimulus_target,} from "stimulus-attributes";
 
 import Routing from 'fos-routing';
 import RoutingData from '/js/fos_js_routes.js';
@@ -20,12 +15,6 @@ import RoutingData from '/js/fos_js_routes.js';
 Routing.setData(RoutingData);
 
 Twig.extend(function (Twig) {
-    Twig._function.extend('path', (route, routeParams = {}) => {
-        // console.error(routeParams);
-        delete routeParams._keys; // seems to be added by twigjs
-        let path = Routing.generate(route, routeParams);
-        return path;
-    });
     Twig._function.extend(
         "stimulus_controller",
         (
@@ -49,15 +38,24 @@ Twig.extend(function (Twig) {
         (controllerName, r, n = null, a = {}) =>
             stimulus_action(controllerName, r, n, a)
     );
+    Twig._function.extend('path', (route, routeParams = {}) => {
+        // console.error(routeParams);
+        delete routeParams._keys; // seems to be added by twigjs
+        return Routing.generate(route, routeParams);
+    });
 });
 
-/* stimulusFetch: 'lazy' */
+// /* stimulusFetch: 'lazy' */
 export default class extends Controller {
-    static targets = ["content"];
+    static targets = ['content'];
     static values = {
-        twigTemplate: String,
+        twigTemplate: String, // the specific template to render
         twigTemplates: Object,
         refreshEvent: String,
+        type: {
+            type: String,
+            default: "list", // list, item
+        },
         dbName: String,
         caller: String,
         // because passing an object is problematic if empty, just pass the config and parse it.
@@ -78,7 +76,13 @@ export default class extends Controller {
     static outlets = ["app"]; // could pass this in, too.
 
     connect() {
+        // by default, the template id is the caller basename
+        // console.error(this.callerValue);
+
+        console.assert(this.refreshEventValue, "missing refreshEvent");
+        console.assert(this.hasAppOutlet, "missing app outlet");
         console.assert(this.dbNameValue, "missing dbName");
+
         // this.appOutlet.setTitle('test setTitle from appOutlet');
         // this.populateEmptyTables(db, this.configValue['stores']);
 
@@ -89,54 +93,76 @@ export default class extends Controller {
 
         let compiledTwigTemplates = {};
 
+        // these are the templates within the <twig:dexie> component
+        console.error(this.twigTemplatesValue);
         for (const [key, value] of Object.entries(this.twigTemplatesValue)) {
             compiledTwigTemplates[key] = Twig.twig({
-                data: value.trim(),
+                data: value.html.trim(),
             });
         }
         this.compiledTwigTemplates = compiledTwigTemplates;
+
+        // the actual jstwig template code, passed into the renderer
+        // console.error(this.twigTemplateValue);
+        // this should be multiple templates, dispatched as events or populating a target if it exists.
         this.template = Twig.twig({
             data: this.twigTemplateValue,
         });
 
+        document.addEventListener('dexie.load-data', (e) => {
+            if (!window.called) {
+                window.called = true;
+                this.openDatabase(this.dbNameValue);
+            }
 
-        if (this.refreshEventValue) {
-            document.addEventListener(this.refreshEventValue, (e) => {
+            this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
+
+            this.openDatabase(this.dbNameValue);
+            // console.error(event);
+            // the data comes from the topPage data
+            console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
+        });
+
+        // register dexie events that use the database to update a page or tab
+        const eventName = this.refreshEventValue;
+        if (eventName) {
+            console.warn(`Listening for ${eventName}`);
+            document.addEventListener(eventName, (e) => {
                 // the data comes from the topPage data
-                console.log("i heard an  %s event! %o", e.type, e.detail, e, this.refreshEventValue);
+                console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
                 // console.error(e.detail.id, this.storeValue);
+                // @todo: types of events, like detail, list,
                 if (e.detail.hasOwnProperty('id')) {
-
                     let html = this.renderPage(e.detail.id, this.storeValue);
+                    console.warn(html);
                 } else {
                     this.contentConnected();
                 }
             });
+
         }
         // idea: dispatch an event that app_controller listens for and opens the database if it doesn't already exist.
         // there is only one app_controller, so this.db can be share.
         // app should be in the dom, not sure why this.appOutlet not immediately available when dexie connects.
-        console.assert(this.hasAppOutlet, "appOutlet not loaded!");
-        // we shoulddn't need to call this every time, since appOutlet.getDb caches the db.
+        // we shouldn't need to call this every time, since appOutlet.getDb caches the db.
         // console.error('can we get rid of this call?')
+        document.addEventListener('appOutlet.connected', (e) => {
+            // the data comes from the topPage data
+            console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
 
-        if (!window.called) {
-            window.called = true;
-            this.openDatabase(this.dbNameValue);
-        }
+            // console.error(e.detail.id, this.storeValue);
+            // @todo: types of events, like detail, list,
+            if (e.detail.hasOwnProperty('id')) {
+                let html = this.renderPage(e.detail.id, this.storeValue);
+                console.warn(html);
+            } else {
 
-        // maybe is has one but isn't connected?
-        if (this.hasAppOutlet) {
-            // moved to appOutletConnected
-            // get the database from the app.  Create it if it doesn't exist.
-            // this.db = this.appOutlet.getDb();
-            // if (!this.db) {
-            //     this.openDatabase(this.dbNameValue);
-            //     // this.appOutlets.forEach(app => app.setDb(db));
-            //     // this.contentConnected();
-            // }
-        }
+                this.contentConnected();
+            }
+        });
     }
+
+
 
     convertArrayToObject(array, key) {
         return array.reduce((acc, curr) => {
@@ -158,6 +184,7 @@ export default class extends Controller {
 
         // Get the stored hash from localStorage
         const storedHash = localStorage.getItem('databaseHash');
+        console.error(storedHash);
 
         // If the hash parameter is provided and it doesn't match the stored hash
         // or if there's no stored hash, delete the database
@@ -177,12 +204,9 @@ export default class extends Controller {
         await db.open();
         this.db = db;
         window.db = db;
-        console.info("dispatched successfully",this.configValue.stores);
+        console.info(`connection to ${this.dbNameValue} succeeded`, schema, this.configValue.stores);
 
         // this.appOutlet.test("I am from dexie")
-
-
-
         // there should only be one app, but sometimes it appears to be zero.
         // this.appOutlet.setDb(this.db);
         await this.contentConnected();
@@ -193,12 +217,23 @@ export default class extends Controller {
         return this.db;
     }
 
-    appOutletConnectedxx(app, body) {
-        console.log(
+    appOutletConnected(app, element) {
+        // return; // move to regular events
+        // console.warn(app, element);
+        console.error(
             `${this.callerValue}: ${app.identifier}_controller is now connected to ` +
             this.identifier +
             "_controller"
         );
+        if (!window.called) {
+            window.called = true;
+            this.openDatabase(this.dbNameValue);
+        }
+
+        this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
+
+
+        return;
 
         this.appOutlet.setDb(window.db); // ??
 
@@ -224,32 +259,42 @@ export default class extends Controller {
     async populateEmptyTables(db, stores, filteredStores) {
         let shouldReload = false;
         for (const store of stores) {
-            console.log(store,db, 'Doesnt have name?')
             let t = window.db.table(store.name);
+            if (!this.hasAppOutlet) {
+                console.error('missing appOutlet');
+                return;
+            }
+            console.assert(this.appOutlet);
+            // app_controller checks isPopulated to check for reload
+
+            const isPopulated = await this.appOutlet.isPopulated(t);
+            if (isPopulated) {
+                continue;
+            }
+            // const count = await new Promise((resolve, reject) => {
+            //     t.count(count => resolve(count)).catch(reject);
+            // });
+            // if (count > 0) {
+            //     // console.warn("%s already has %d", t.name, count);
+            //     continue; // Move to the next store
+            // }
+            shouldReload = true;
+            console.warn(store.name, store.url);
+            console.warn("%s has no data, loading...", t.name, filteredStores.find((f) => f.name === store.name));
+            // const filteredUrl = filteredStores ? filteredStores.find((f)=> f.name === store.name).url : store.url;
+            const filteredUrl = store.url;
+
+            // console.error(filteredUrl, filteredStores);
+            // Fetch and bulk put data for each page
+            await loadData(filteredUrl, store.name);
+            // console.warn("Done populating.");
             try {
-                const isPopulated = await this.appOutlet.isPopulated(t);
-                if(isPopulated){
-                    continue;
-                }
-                // const count = await new Promise((resolve, reject) => {
-                //     t.count(count => resolve(count)).catch(reject);
-                // });
-                // console.log(count, 'YYYYYYYYYYYYYYY');
-                // if (count > 0) {
-                //     // console.warn("%s already has %d", t.name, count);
-                //     continue; // Move to the next store
-                // }
-                shouldReload = true;
-                console.warn("%s has no data, loading...", t.name,filteredStores.find((f)=> f.name === store.name));
-                const filteredUrl = filteredStores ? filteredStores.find((f)=> f.name === store.name).url : store.url
-                // Fetch and bulk put data for each page
-                await loadData(filteredUrl, store.name);
-                // console.warn("Done populating.");
             } catch (error) {
                 console.error("Error populating table", t.name, error);
             }
         }
-        document.dispatchEvent(new CustomEvent('window.db.availble', {'detail': {dbName: db.name}}));
+        // what listens to this??
+        document.dispatchEvent(new CustomEvent('window.db.available', {'detail': {dbName: db.name}}));
         if (shouldReload) {
             window.location.reload(); // Reload after populating all tables
         }
@@ -257,6 +302,7 @@ export default class extends Controller {
 
     // because this can be loaded by Turbo or Onsen
     async contentConnected() {
+        console.warn("Content is connected! Populate tables if empty")
         // console.error(this.outlets);
         // this.outlets.forEach( (outlet) => console.warn(outlet));
         // if this is fired before the database is open, return, it'll be called later
@@ -271,14 +317,10 @@ export default class extends Controller {
             return;
         }
         // console.error(window.db);
-        // is db a Dexie instance?  It shouldn't be complaining about void;
+        // is db a Dexie instance?  It shouldn't be complaining about void, it thinks it's a console table
         // https://dexie.org/docs/Dexie/Dexie.table()
         let table = window.db.table(this.storeValue);
-        // console.log(table,  this.configValue.stores)
-
-        if (this.hasAppOutlet) {
-            // console.error(this.hasAppOutlet, this.appOutlet.getCurrentProjectId());
-        }
+        // console.error(table,  this.storeValues)
 
         // if (this.filter) {
         //     this.filter = {'owned': true};
@@ -286,19 +328,9 @@ export default class extends Controller {
         // }
         // // console.log(table);
         // return;
-        if (this.hasAppOutlet) {
-            console.warn('hasAppOutlet!')
-            // this.appOutlet.setTitle('hello???');
-            // console.error(this.appOutlet.getFilter());
-            // this.filter = this.appOutlet.getFilter();
-        } else {
-            // let appOutlet = document.getElementById('app_body').getAttribute('id');
-            // appOutlet.setTitle('hello???');
-            console.assert(this.hasAppOutlet, "missing appOutlet");
-            return;
-        }
 
-        if (this.filter) {
+        if (this.filter.length) {
+            console.log(this.filter);
             if (this.hasAppOutlet)
                 try {
                     if (this.appOutlet.getFilter()) {
@@ -315,15 +347,17 @@ export default class extends Controller {
             this.filter = this.appOutlet.getFilter(this.refreshEventValue);
         }
 
-        console.error(this.filter, 'XXXXXXXXXXXXXXXXYYYYYYYYYY');
         // populate the tables after the db is open
-        const modifiedStores = this.appOutlet.getProjectFiltered(this.configValue.stores);
-        console.log('GGGGGGGG', modifiedStores, 'HHHBBBBB', this.db, window.db);
+
+        // const modifiedStores = this.appOutlet.getProjectFiltered(this.configValue.stores);
+        const modifiedStores = [];
+
+
         await this.populateEmptyTables(window.db, this.configValue.stores, modifiedStores);
 
         // this.appOutlet.setTitle('hello???!');
         if (this.keyValue) {
-            console.error(this.keyValue);
+            console.error(this.keyValue, "@render ".this.keyValue);
             // this.renderPage(this.storeValue, this.keyValue);
         } else if (this.filter) {
             table = table.filter((row) => {
@@ -338,13 +372,22 @@ export default class extends Controller {
             });
         }
 
+        table.count().then((c) => {
+            console.assert(c, "missing rows in table");
+        });
 
         table
             .toArray()
             .then((rows) =>
-                this.template.render({rows: rows, globals: this.globalsValue})
+                // render the template with a collection of items
+                 this.template.render({rows: rows, globals: this.globalsValue})
             )
-            .then((html) => (this.element.innerHTML = html));
+            .then((html) => {
+                    this.element.innerHTML = html;
+                }
+            )
+            .catch((e) => console.error(e))
+            .finally((e) => console.log("populated the template with the data"));
     }
 
 
@@ -362,12 +405,13 @@ export default class extends Controller {
         table = table.get(parseInt(key));
         table
             .then((data) => {
-                console.error(data, key, store);
+                    console.error(data, key, store);
                     return {
                         content: this.template.render({
                             data: data,
                             globals: this.globalsValue,
                         }),
+                        // if there's a <twig:block name="title"> use it to render the title
                         title:
                             this.compiledTwigTemplates.hasOwnProperty('title')
                                 ? this.compiledTwigTemplates["title"].render({
@@ -380,8 +424,7 @@ export default class extends Controller {
             )
             .then(
                 ({
-                     content
-                     ,
+                     content,
                      title
                  }
                 ) => {
@@ -402,7 +445,6 @@ export default class extends Controller {
 
 async function loadData(url, tableName) {
     let nextPageUrl = url;
-    console.log('TRRRRRRR', url);
     while (nextPageUrl) {
         console.log("fetching " + nextPageUrl);
         const response = await fetch(nextPageUrl);
@@ -411,13 +453,17 @@ async function loadData(url, tableName) {
 
         // Bulk put data for this page
         const t = window.db.table(tableName);
-        await t.bulkPut(data["hydra:member"])
+        const rows = data["member"];
+        console.log(rows);
+        await t.bulkPut(rows)
             .then((x) => console.log("bulk add", x))
-            .catch((e) => console.error(e));
+        // .catch((e) => console.error(e))
+        ;
 
-        console.warn("Done populating.", data["hydra:member"][1]);
+        console.table(rows[1] ?? []);
+        console.error(data);
 
         // Check if there's a next page
-        nextPageUrl = data["hydra:view"] && data["hydra:view"]["hydra:next"] ? data["hydra:view"]["hydra:next"] : null;
+        nextPageUrl = data["view"] && data["view"]["next"] ? data["view"]["next"] : null;
     }
 }

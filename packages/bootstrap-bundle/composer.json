@@ -14,7 +14,7 @@
     "type": "symfony-bundle",
     "require": {
         "php": "^8.3",
-        "survos/installer": "^1.5",
+        "survos/installer": "^1.4||^2.0",
         "knplabs/knp-menu-bundle": "^3.2",
         "survos/core-bundle": "^1.5",
         "symfony/config": "^6.4 || ^7.1",
@@ -31,7 +31,8 @@
         "phpstan/phpstan": "^2.0",
         "survos/auth-bundle": "^1.5",
         "symfony/security-bundle": "^6.4 || ^7.1",
-        "symfony/translation": "^6.4 || ^7.1"
+        "symfony/translation": "^6.4 || ^7.1",
+        "phpunit/phpunit": "^11.5"
     },
     "autoload": {
         "psr-4": {
@@ -53,7 +54,8 @@
     },
     "config": {
         "allow-plugins": {
-            "survos/installer": true
+            "survos/installer": true,
+            "endroid/installer": true
         }
     },
     "conflict": {

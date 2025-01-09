@@ -5,6 +5,8 @@ namespace Survos\ApiGrid\Command;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use App\Entity\Article;
+use App\Entity\Site;
 use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
@@ -37,7 +39,6 @@ class IndexCommand extends Command
     public function __construct(
         protected ParameterBagInterface $bag,
         protected EntityManagerInterface $entityManager,
-        private SerializerInterface $serializer,
         private LoggerInterface $logger,
         private MeiliService $meiliService,
         private DatatableService $datatableService,
@@ -68,31 +69,23 @@ class IndexCommand extends Command
         $filterArray = $filter ? Yaml::parse($filter) : null;
         $class = $input->getArgument('class');
             $classes = [];
+
+
             // https://abendstille.at/blog/?p=163
             $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
             foreach ($metas as $meta) {
-                // actually, ApiResource or GetCollection
-                $apiRouteAttributes = $meta->getReflectionClass()->getAttributes(ApiResource::class);
-                foreach ($apiRouteAttributes as $attribute) {
-                    $args = $attribute->getArguments();
-                    // @todo: this could also be inside of the operation!
-                    if (array_key_exists('normalizationContext', $args)) {
-                        assert(array_key_exists('groups', $args['normalizationContext']), "Add a groups to " . $meta->getName());
-                        $groups = $args['normalizationContext']['groups'];
-                        if (is_string($groups)) {
-                            $groups = [$groups];
-                        }
-                        if ($class && ($meta->getName() <> $class)) {
-                            continue;
-                        }
-                        $classes[$meta->getName()] = $groups;
-                    }
+                // check argument
+                if ($class && ($meta->getName() <> $class)) {
+                    continue;
                 }
-            }
-        if ($output->isVerbose() && !count($apiRouteAttributes)) {
-            $output->writeln("Skipping $class, not an API Resource");
-        }
 
+                // skip if no groups defined
+                if (!$groups = $this->meiliService->getNormalizationGroups($meta->getName())) {
+                    continue;
+                }
+
+                $classes[$meta->getName()] = $groups;
+            }
 
         $this->io = new SymfonyStyle($input, $output);
 
@@ -121,12 +114,16 @@ class IndexCommand extends Command
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
             $this->meiliService->waitUntilFinished($index);
 
-            if ($this->io->isVerbose()) {
+            if ($this->io->isVeryVerbose()) {
                 $stats = $index->stats();
+                $this->io->title("$indexName stats");
                 $this->io->write(json_encode($stats, JSON_PRETTY_PRINT));
+            }
+
+            if ($this->io->isVerbose()) {
+                $this->io->title("$indexName settings");
                 $this->io->write(json_encode($index->getSettings(), JSON_PRETTY_PRINT));
                 // now what?
-
             }
             $this->io->success($this->getName() . ' ' . $class . ' finished indexing to ' . $indexName);
 
@@ -148,20 +145,10 @@ class IndexCommand extends Command
         $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
         $primaryKey = count($idFields) ? $idFields[0] : 'id';
 
-        $map = [
-            'es' => 'spa',
-            'en' => 'eng',
-            'de' => 'deu',
-            'hi' => 'hin',
-            'fr' => 'fra',
-            'da' => 'dan',
-        ];
-        $searchableAttrs = [];
 
         $localizedAttributes = [];
         foreach ($this->enabledLocales as $locale) {
-            $locale3 = $map[$locale];
-            $localizedAttributes[] = ['locales' => [$locale3],
+            $localizedAttributes[] = ['locales' => [$locale],
                 'attributePatterns' => [sprintf('_translations.%s.*',$locale)]];
         }
 
@@ -169,7 +156,8 @@ class IndexCommand extends Command
 //        $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
 //        $index->updateSettings(); // could do this in one call
 
-            $results = $index->updateSettings($settings = [
+            $results = $index->updateSettings($debug = [
+//                'searchFacets' => false, // search _within_ facets
                 'localizedAttributes' => $localizedAttributes,
                 'displayedAttributes' => ['*'],
                 'filterableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'browsable'),
@@ -179,7 +167,6 @@ class IndexCommand extends Command
                     "maxValuesPerFacet" => $this->meiliService->getConfig()['maxValuesPerFacet']
                 ],
             ]);
-
             $stats = $this->meiliService->waitUntilFinished($index);
         return $index;
     }
@@ -248,11 +235,11 @@ class IndexCommand extends Command
             // for now, just match the groups in the normalization groups of the entity
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
-            assert(array_key_exists('rp', $data), json_encode($data));
+            assert(array_key_exists('rp', $data), "missing rp in $class\n\n" . join("\n", array_keys($data)));
 
             if (!array_key_exists($primaryKey, $data)) {
                 $this->logger->error($msg = "No primary key $primaryKey for " . $class);
-                assert(false, $msg);
+                assert(false, $msg . "\n" . join("\n", array_keys($data)));
                 return ['numberOfDocuments'=>0];
                 break;
             }

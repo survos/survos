@@ -7,6 +7,7 @@ use Survos\CrawlerBundle\Controller\CrawlerController;
 use Survos\CrawlerBundle\Services\CrawlerService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -31,15 +32,21 @@ class SurvosCrawlerBundle extends AbstractBundle
         ;
 
         $builder->autowire(CrawlCommand::class)
-//            ->setArgument('$registry', new Reference('doctrine'))
-            ->setArgument('$logger', new Reference('logger'))
-            ->addTag('console.command');
-        ;
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->setAutowired(true)
+//            ->setArgument('$logger', new Reference('logger'))
+            ->addTag('console.command');;
 
         $crawler_service_id = 'survos.crawler_service';
         $builder
             ->autowire($crawler_service_id, CrawlerService::class)
             ->setPublic(true)
+//            ->setArgument('$entityManager', new Reference('doctrine.orm'))
+            ->setAutowired(true)
+            // arguably not required, since it can run without checking for users
+            ->setArgument('$managerRegistry', new Reference('doctrine', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+//            ->setArgument('$managerRegistry', new Reference('doctrine'))
             ->setArgument('$config', $config)
             ->setArgument('$userClass', $config['user_class'])
             ->setArgument('$loginPath', $config['login_path'])
@@ -53,11 +60,13 @@ class SurvosCrawlerBundle extends AbstractBundle
             ->setArgument('$linkList', [])
             ->setArgument('$username', "")
             ->setArgument('$maxDepth', $config['max_depth'])
-            ->setArgument('$tokenStorage', new Reference('security.untracked_token_storage'))
+//            ->setArgument('$tokenStorage', new Reference('security.untracked_token_storage'))
             ->setArgument('$routesToIgnore', $config['routes_to_ignore'])
             ->setArgument('$pathsToIgnore', $config['paths_to_ignore'])
-            ->setArgument('$sessionStorageFactory',new Reference('session.factory'))
-        ;
+            ->setArgument('$sessionStorageFactory', new Reference('session.factory'))
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->setAutowired(true);;
         $container->services()->alias(CrawlerService::class, $crawler_service_id);
 
         //        $definition->setArgument('$widthFactor', $config['widthFactor']);
@@ -85,8 +94,6 @@ class SurvosCrawlerBundle extends AbstractBundle
             ->scalarNode('submit_button')->defaultValue('.btn')->end()
             ->scalarNode('user_class')->defaultValue('App\\Entity\\User')->end()
             ->scalarNode('max_depth')->defaultValue(1)->end()
-
-            ->end();
-        ;
+            ->end();;
     }
 }

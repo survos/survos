@@ -57,7 +57,7 @@ const contentTypes = {
     'POST': 'application/json'
 };
 
-/* stimulusFetch: 'lazy' */
+// /* stimulusFetch: 'lazy' */
 export default class extends Controller {
     static targets = ['table', 'modal', 'modalBody', 'fieldSearch', 'message'];
     static values = {
@@ -73,7 +73,7 @@ export default class extends Controller {
         viewTotal: {type: Boolean, default: false},
         index: {type: String, default: ''}, // meili
         dom: {type: String, default: 'QBlfrtip'}, // use P for searchPanes
-        searchBuilderFields: {type: String, default: '[]'},
+        searchBuilderColumns: {type: String, default: '[]'},
         filter: String, // json, from queryString, e.g. party=dem
         buttons: String // json, from queryString, e.g. party=dem
     }
@@ -93,6 +93,7 @@ export default class extends Controller {
         let x = columns.map(c => {
             let render = null;
             c.className = c.title;
+            c.searchBuilderType = 'num';
             if (c.twigTemplate) {
                 // console.warn(c.twigTemplate);
                 let template = Twig.twig({
@@ -134,6 +135,10 @@ export default class extends Controller {
                 sortable: (typeof c.sortable)?c.sortable:false,
                 className: c.className
             });
+
+            column.searchBuilder = {
+                type: 'num',
+            }
 
             column.searchPanes = {
                 show: c.browsable,
@@ -232,7 +237,7 @@ export default class extends Controller {
 
         // this.sortableFields = JSON.parse(this.sortableFieldsValue);
         // this.searchableFields = JSON.parse(this.searchableFieldsValue);
-        this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+        this.searchBuilderColumns = JSON.parse(this.searchBuilderColumnsValue);
 
         this.locale = this.localeValue;
         this.viewTotal = true; // this.viewTotalValue;
@@ -643,7 +648,9 @@ export default class extends Controller {
                 preSelect: preSelectArray
             },
             searchBuilder: {
-                columns: this.searchBuilderFields,
+                // columns: this.searchBuilderColumns, // this.searchBuilderFields,
+                columns: ['.lyricsLength'], // this.searchBuilderFields,
+
                 depthLimit: 1,
                 threshold: 0,
                 showEmptyPanes: true
@@ -657,10 +664,11 @@ export default class extends Controller {
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             // https://datatables.net/reference/option/ajax
             ajax: (params, callback, settings) => {
+                console.error(`starting at ${params.start}`);
+                this.messageTarget.innerHTML = `starting at ${params.start}`;
                 this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(this.apiParams);
-                console.error(`starting at ${params.start}`);
                 // console.assert(params.start, `DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
 
                 Object.assign(this.apiParams, this.filter);
@@ -686,8 +694,8 @@ export default class extends Controller {
                         // handle success
                         let hydraData = response.data;
 
-                        var total = hydraData.hasOwnProperty('hydra:totalItems') ? hydraData['hydra:totalItems'] : 999999; // Infinity;
-                        var itemsReturned = hydraData['hydra:member'].length;
+                        var total = hydraData.hasOwnProperty('totalItems') ? hydraData['totalItems'] : 999999; // Infinity;
+                        var itemsReturned = hydraData['member'].length;
                         // let first = (params.page - 1) * params.itemsPerPage;
                         if (params.search.value) {
                             console.log(`dt search: ${params.search.value}`);
@@ -696,7 +704,7 @@ export default class extends Controller {
                         // console.log(`dt request: ${params.length} starting at ${params.start}`);
 
                         // let first = (apiOptions.page - 1) * apiOptions.itemsPerPage;
-                        let d = hydraData['hydra:member'];
+                        let d = hydraData['member'];
                         if (d.length) {
                             console.table(d[0]);
                             // console.log('first result', d[0]);
@@ -720,9 +728,9 @@ export default class extends Controller {
                         // console.error('searchpanes', searchPanes, options);
 
                         // if searchPanes have been sent back from the results, sort them by browseOrder
-                        if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
-                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
-                           searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
+                        if(typeof hydraData['facets'] !== "undefined" && typeof hydraData['facets']['searchPanes'] !== "undefined") {
+                           searchPanesRaw = hydraData['facets']['searchPanes']['options'];
+                           searchPanes = this.sequenceSearchPanes(hydraData['facets']['searchPanes']['options']);
                             console.warn({searchPanes, searchPanesRaw, hydraData})
                         } else {
                            searchPanes.options = options;
@@ -767,7 +775,7 @@ export default class extends Controller {
                         //     pagination_client_items_per_page: true
 
                         // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
-                        let next = hydraData["hydra:view"]['hydra:next'];
+                        let next = hydraData["view"]['next'];
                         // we need the searchpanes options, too.
 
 
@@ -1061,16 +1069,16 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         if (params.searchBuilder && params.searchBuilder.criteria) {
             params.searchBuilder.criteria.forEach((c, index) => {
-                console.warn(c);
-                apiData[c.origData + '[]'] = c.value1;
+                console.warn(c, c.origData);
+                // apiData[c.origData + '[]'] = c.value1;
             });
         }
-        let facets = [];
-        this.facets.forEach(function (column, index) {
-            // if ( column.browsable ) {
-                facets.push(column.name);
-            // }
-        });
+        // let facets = [];
+        // this.facets.forEach(function (column, index) {
+        //     // if ( column.browsable ) {
+        //         facets.push(column.name);
+        //     // }
+        // });
         // console.error({facets});
 
         // we don't do anything with facets!  So we probably don't need the above.
@@ -1079,6 +1087,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 // check the first character for a range filter operator
                 // data is the column field, at least for right now.
                 apiData[column.data] = column.search.value;
+
             }
         });
 
@@ -1086,20 +1095,22 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         apiData.facets = [];
         // this could be replaced with sending a list of facets and skipping this =1, it'd be cleaner
         this.facets.forEach((column, index) => {
-            // if (column.browsable) {
-                apiData.facets.push(column.name);
-                // apiData.facets[column.name] = 1; // old way
-                // this seems odd, it should be a pipe-delimited list
-            // }
+            if (column.browsable) {
+                if (!apiData.facets.includes(column.name)) {
+                    apiData.facets.push(column.name);
+                }
+            }
         });
 
         this.facets.forEach((column, index) => {
             if (column.browsable) {
-                apiData.facets.push(column.name);
-                // apiData.facets[column.name] = 1; // old way
-                // this seems odd, it should be a pipe-delimited list
+                if (!apiData.facets.includes(column.name)) {
+                    apiData.facets.push(column.name);
+                }
             }
         });
+        console.table(apiData.facets);
+        // console.table(apiData);
 
         return apiData;
     }

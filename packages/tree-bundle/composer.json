@@ -15,10 +15,10 @@
     "type": "symfony-bundle",
     "require": {
         "php": "^8.3",
-        "api-platform/core": "^3.2",
+        "api-platform/core": "^3.2||^4.0",
         "doctrine/doctrine-bundle": "^2.7",
-        "doctrine/orm": "^2.12",
-        "doctrine/persistence": "^2.0 || ^3.0",
+        "doctrine/orm": "^2.12||^3.3",
+        "doctrine/persistence": "^2.0 || ^3.0 || ^4.0",
         "stof/doctrine-extensions-bundle": "^1.8",
         "survos/core-bundle": "^1.5",
         "survos/inspection-bundle": "^1.5",
@@ -37,11 +37,17 @@
         "symfony/framework-bundle": "^6.4 || ^7.1",
         "symfony/phpunit-bridge": "^6.4 || ^7.1",
         "symfony/twig-bundle": "^6.4 || ^7.1",
-        "symfony/var-dumper": "^6.4 || ^7.1"
+        "symfony/var-dumper": "^6.4 || ^7.1",
+        "phpunit/phpunit": "^11.4"
     },
     "autoload": {
         "psr-4": {
             "Survos\\Tree\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Survos\\Tree\\Tests\\": "tests/"
         }
     },
     "extra": {

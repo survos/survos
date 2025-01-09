@@ -25,7 +25,7 @@ class MeiliAdminController extends AbstractController
 
     #[Route(path: '/facet/{indexName}/{fieldName}/{max}', name: 'survos_facet_show', methods: ['GET'])]
     public function facet(string $indexName, string $fieldName,
-                          #[MapQueryParameter] string $tableName=null,
+                          #[MapQueryParameter] ?string $tableName=null,
                           int $max = 25): Response
     {
         $index = $this->meili->getIndex($indexName);
@@ -131,7 +131,7 @@ END
     }
 
 
-        #[Route(path: '/stats/{indexName}.{_format}', name: 'survos_index_stats', methods: ['GET'])]
+    #[Route(path: '/stats/{indexName}.{_format}', name: 'survos_index_stats', methods: ['GET'])]
     public function stats(
         string  $indexName,
         Request $request,

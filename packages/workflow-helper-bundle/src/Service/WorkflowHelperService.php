@@ -65,7 +65,7 @@ class WorkflowHelperService
 
 
     // @idea: pass in the repository to make the counts call.
-    public function getMarkingData(WorkflowInterface $workflow, string $class, array $counts = null): array
+    public function getMarkingData(WorkflowInterface $workflow, string $class, ?array $counts = null): array
     {
         $repo = $this->entityManager->getRepository($class);
         if (empty($counts)) {
@@ -120,7 +120,7 @@ class WorkflowHelperService
      * @param $workflowName
      * @return string
      */
-    public function workflowDiagramDigraph($subject=null, string $workflowName=null)
+    public function workflowDiagramDigraph($subject=null, ?string $workflowName=null)
     {
         if ($subject) {
             $workflow = $this->getWorkflow($subject, $workflowName);
@@ -299,7 +299,10 @@ class WorkflowHelperService
         $transition = $message->getTransitionName();
         $workflow = $this->getWorkflow($object, $flowName);
         if (!$workflow->can($object, $transition)) {
-            return; //
+            foreach ($workflow->buildTransitionBlockerList($object, $transition) as $blocker) {
+                $this->logger->info($blocker->getMessage());
+            }
+            return;
         }
 
         if ($workflow->can($object, $transition)) {

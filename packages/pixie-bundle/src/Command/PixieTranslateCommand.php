@@ -140,7 +140,7 @@ final class PixieTranslateCommand extends InvokableServiceCommand
             $stopwatch = new Stopwatch();
             $stopwatch->start('eventName');;
             foreach ($tKv->iterate('source') as $hash => $sourceItem) {
-                $sourceStrings[$hash] = trim($sourceItem->text());
+                $sourceStrings[$hash] = trim((string) $sourceItem->text());
             }
             $event = $stopwatch->stop('eventName');
             foreach ($event->getPeriods() as $period) {
@@ -159,7 +159,7 @@ final class PixieTranslateCommand extends InvokableServiceCommand
 
             $progressBar = new ProgressBar($io, $count);
             $rows = $tKv->iterate($engine, $where, max: $limit);
-            foreach ($rows as $idx => $tItem) {
+            foreach ($rows as $tItem) {
                 $progressBar->advance();
                 $targetLocale = $tItem->target();
                 $text = $sourceStrings[$tItem->hash()] ?? '';
@@ -504,7 +504,7 @@ final class PixieTranslateCommand extends InvokableServiceCommand
             $tKv->beginTransaction();
             $rows = $kv->iterate($tableName, $where);
             $progressBar = new ProgressBar($this->io(), $tableCount);
-            foreach ($rows as $itemKey => $item) {
+            foreach ($rows as $item) {
 
                 $progressBar->advance();
                 $data = $item->getData(true);
@@ -525,7 +525,8 @@ final class PixieTranslateCommand extends InvokableServiceCommand
                         $sourceLocale,
                         $sourceLocale);
 
-                    if (!$tKv->has($sourceKeys['hash'])) {
+                    if (!$tKv->has($hash = $sourceKeys['hash'])) {
+                        dd("$hash missing from source!  It should happen during import");
                         $sourceKeys['table_name'] = $tableName;
                         $sourceKeys['prop'] = $translatableField;
                         $tKv->set($sourceKeys, 'source');

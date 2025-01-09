@@ -5,6 +5,8 @@ namespace Survos\PixieBundle\Controller;
 use App\Entity\Core;
 use App\Entity\Instance;
 use League\Csv\Reader;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Survos\PixieBundle\Event\StorageBoxEvent;
 use Survos\PixieBundle\Message\PixieTransitionMessage;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Item;
@@ -37,12 +39,13 @@ class PixieController extends AbstractController
     const TRANSITION_RESET='_reset';
 
     public function __construct(
-        private ParameterBagInterface  $bag,
-        private PixieService           $pixieService,
-        private ?UrlGeneratorInterface  $urlGenerator=null,
-        private ?MessageBusInterface $bus=null,
-        private ?WorkflowHelperService $workflowHelperService = null,
-        private ?ChartBuilderInterface $chartBuilder = null,
+        private readonly ParameterBagInterface  $bag,
+        private readonly PixieService           $pixieService,
+        private EventDispatcherInterface $eventDispatcher,
+        private readonly ?UrlGeneratorInterface  $urlGenerator=null,
+        private readonly ?MessageBusInterface $bus=null,
+        private readonly ?WorkflowHelperService $workflowHelperService = null,
+        private readonly ?ChartBuilderInterface $chartBuilder = null,
     )
     {
 
@@ -145,8 +148,8 @@ class PixieController extends AbstractController
         }
         $conf = $this->pixieService->getConfig($pixieCode);
 
-        assert($item, "no item in $pixieCode.$tableName in for $key");
-
+        $tKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($pixieCode, isTranslation: true))->getStorageBox();
+        // the fields themselves should have the hash codes, the _translations has the translations
         $this->pixieService->populateRecordWithRelations($item, $conf, $kv);
         // what a pain, we need to store this somewhere else!
 
@@ -156,6 +159,18 @@ class PixieController extends AbstractController
         if (!$item) {
             throw new NotFoundHttpException("No item $key in $tableName / $pixieCode");
         }
+//        $keys = [];
+//        foreach ($table->getTranslatable() as $field) {
+//            if ($key = $item->$field()) {
+//                foreach ($tKv->iterate('libre', ['hash' => $key]) as $tItem) {
+//                    dump($field, $tItem->text());
+//                }
+//                $keys[] = $item->$field();
+//            }
+//        }
+//        dd($keys, $item->getData(), $table->getTranslatable());
+        assert($item, "no item in $pixieCode.$tableName in for $key");
+
 
         if ($request?->get('_route') == 'pixie_transition') {
             if ($transition == self::TRANSITION_RESET) {
@@ -230,8 +245,8 @@ class PixieController extends AbstractController
 
     private function flattenArray(array $array): array
     {
-        foreach ($array as $idx => $row) {
-            foreach ($row as $var => $value) {
+        foreach ($array as $row) {
+            foreach ($row as $value) {
                 if (is_iterable($value)) {
 
 //                    $row[$var] = $this->flattenArray($value);  json_encode($value, JSON_UNESCAPED_SLASHES);
@@ -288,7 +303,7 @@ class PixieController extends AbstractController
         if ($_format == 'json') {
             $flattenRows = [];
             $idx = 0;
-            foreach ($iterator as $key => $item) {
+            foreach ($iterator as $item) {
                 $row = (array)$item->getData();
 //                assert($row, "Invalid data in $key " . $kv->getFilename());
                 $idx++;
@@ -404,7 +419,6 @@ class PixieController extends AbstractController
         #[MapQueryParameter] int $limit = 50
     ): array|Response
     {
-
         return $this->render('@SurvosPixie/pixie/index.html.twig', [
             'dir' => $this->pixieService->getConfigDir(),
         ]);
@@ -481,9 +495,9 @@ class PixieController extends AbstractController
             $values[] = $count['count'];
             // @todo: composer require phpcolor/bootstrap-colors
             $colors[] = sprintf('rgb(%d, %d, %d)',
-                rand(0, 255),
-                rand(0, 255),
-                rand(0, 255)
+                random_int(0, 255),
+                random_int(0, 255),
+                random_int(0, 255)
             );
         }
         if (!$chartBuilder) {
@@ -549,7 +563,7 @@ class PixieController extends AbstractController
                     if ($chartData) {
                         $charts[$property->getCode()] = $chartData;
                     }
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     // probably a migration is needed.
                 }
             }

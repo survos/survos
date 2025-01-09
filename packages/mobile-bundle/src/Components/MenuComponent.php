@@ -48,7 +48,7 @@ class MenuComponent
 
     public string $wrapperClass;
 
-    public function mount(string $type,  string $caller = null, array $path = [], array $options = [])
+    public function mount(string $type,  ?string $caller = null, array $path = [], array $options = [])
     {
         assert($caller);
         $this->type = $type;

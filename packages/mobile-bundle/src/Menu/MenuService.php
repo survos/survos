@@ -10,6 +10,7 @@ use Survos\MobileBundle\Menu\KnpMenuHelperInterface;
 use Survos\MobileBundle\Menu\KnpMenuHelperTrait;
 
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -21,6 +22,7 @@ class MenuService implements KnpMenuHelperInterface
     use KnpMenuHelperTrait;
 
     public function __construct(
+        #[Autowire('%kernel.environment%')] protected string $env,
         private readonly ?Security             $security=null,
         private ?AuthorizationCheckerInterface $authorizationChecker=null,
     )
@@ -49,25 +51,12 @@ class MenuService implements KnpMenuHelperInterface
                 id: 'user_menu'
             );
 
-            if ($this->authService) {
-                $this->add($subMenu, 'oauth_profile');
-            }
+//            if ($this->authService??null) {
+//                $this->add($subMenu, 'oauth_profile');
+//            }
 
             // if there's a profile
             $subMenu->setExtra('btn', 'btn btn-info');
-
-            // @todo: add custom user links, like profile
-
-            if ($this->isGranted('IS_IMPERSONATOR')) {
-                $this->add($subMenu, external: false, uri: $this->impersonateUrlGenerator->generateExitPath('/'), label: 'exit impersonation');
-            }
-
-            if ($this->isGranted('ROLE_ALLOWED_TO_SWITCH')) {
-                $this->addHeading($subMenu, 'Impersonate...');
-                foreach ($this->usersToImpersonate as $item) {
-                    $this->add($subMenu, external: false, uri: $this->generateImpersonationPath($item), label: $item);
-                }
-            }
 
             $this->add($subMenu, 'app_logout', label: 'layout.logout',
                 translationDomain: $translationDomain,
@@ -202,11 +191,6 @@ class MenuService implements KnpMenuHelperInterface
             throw new \Exception("try composer require symfony/security-bundle to use this feature");
         }
         return $this->authorizationChecker->isGranted($attribute, $subject);
-    }
-
-    public function generateImpersonationPath(string $identifier): string
-    {
-        return $this->impersonateUrlGenerator->generateImpersonationPath($identifier);
     }
 
 }

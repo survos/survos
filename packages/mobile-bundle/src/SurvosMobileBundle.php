@@ -2,10 +2,11 @@
 
 namespace Survos\MobileBundle;
 
-use Survos\MobileBundle\Event\KnpMenuEvent;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
+use Survos\MobileBundle\Event\KnpMenuEvent;
 use Survos\MobileBundle\Components\MenuComponent;
 use Survos\MobileBundle\Menu\MenuService;
+use Survos\MobileBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -35,6 +36,9 @@ class SurvosMobileBundle extends AbstractBundle implements CompilerPassInterface
             ->setArgument('$eventDispatcher', new Reference('event_dispatcher'));
         ;
 
+        $builder->register(TwigExtension::class)
+            ->addTag('twig.extension');
+
         $builder->register(MenuService::class)
             ->setAutowired(true)
             ->setArgument(
@@ -50,10 +54,11 @@ class SurvosMobileBundle extends AbstractBundle implements CompilerPassInterface
 
     public function process(ContainerBuilder $container): void
     {
-        if (false === $container->hasDefinition('twig')) {
-            assert(false, "missing twig");
-            return;
-        }
+//        if (false === $container->hasDefinition('twig')) {
+//            throw new \RuntimeException('Twig service not found, composer require twig/twig');
+//            assert(false, "missing twig");
+//            return;
+//        }
         $def = $container->getDefinition('twig');
 
         // add the constants to twig to make calling the menu easier.

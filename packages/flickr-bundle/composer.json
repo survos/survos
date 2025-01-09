@@ -13,7 +13,7 @@
         "symfony/dependency-injection": "^6.4 || ^7.1",
         "symfony/http-kernel": "^6.4 || ^7.1",
         "twig/twig": "^3.4",
-        "samwilson/phpflickr": "^5.1",
+        "samwilson/phpflickr": "^6.0",
         "survos/installer": "^1.5"
     },
     "require-dev": {

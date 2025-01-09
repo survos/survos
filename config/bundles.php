@@ -23,4 +23,5 @@ return [
     Survos\SeoBundle\SurvosSeoBundle::class => ['all' => true],
     Survos\SimpleDatatables\SurvosSimpleDatatablesBundle::class => ['all' => true],
     Symfony\UX\Chartjs\ChartjsBundle::class => ['all' => true],
+    Survos\FlickrBundle\SurvosFlickrBundle::class => ['all' => true],
 ];

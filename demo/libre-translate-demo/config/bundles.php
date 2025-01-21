@@ -12,4 +12,5 @@ return [
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
     Survos\LibreTranslateBundle\SurvosLibreTranslateBundle::class => ['all' => true],
+    Survos\SaisBundle\SurvosSaisBundle::class => ['all' => true],
 ];

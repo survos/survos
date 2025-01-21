@@ -14,13 +14,13 @@
 
     <table>
         <tbody>
-        {% for idx, headline in headlines.articles %}
+        {% for idx, product in products %}
         <tr>
             <td>
-                <img style="width: 100px" src="{{ headline.urlToImage }}" />
+                <img style="width: 100px" src="{{ product.thumbnail }}" />
             </td>
             <td>
-                {{ headline.title }}
+                {{ product.title }}
                 <br />
                 <i>
                     {{ translations[idx] }}

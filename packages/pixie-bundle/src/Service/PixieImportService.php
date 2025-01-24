@@ -322,6 +322,7 @@ class PixieImportService
 
 //                $event = new FetchTranslationObjectEvent($row, )
 //                    $sourceString = $row[$tKey];
+                    if (0)
                     if (count($table->getTranslatable())) {
 
                         $sourceLocale = $config->getSource()->locale ?? $row['locale'] ?? null;
@@ -370,11 +371,13 @@ class PixieImportService
                 $count = $kv->count();
                 $this->logger->info($kv->getFilename() . '/' . $kv->getSelectedTable() . " now has " . $count);
                 if ($tKv->inTransaction()) {
+                    dump('$tKv commit');
                     $tKv->commit();
                 }
             }
         }
         if ($kv->inTransaction()) {
+            dump('$tKv commit');
             $kv->commit();
         }
 
@@ -386,6 +389,7 @@ class PixieImportService
             storageBox: $kv));
 
         if ($iKv->inTransaction()) {
+            dump('iKv commit');
             $iKv->commit();
         }
 
@@ -602,10 +606,11 @@ class PixieImportService
                                             keys: ['label']
                                         )
                                     );
+                                    $tKv->select(TranslationService::SOURCE);
 //                                    dump($event->translationModel);
                                     foreach ($event->translationModels as $translationModel) {
-                                        if (!$tKv->has($translationModel->getHash(), 'source')) {
-                                            $tKv->set($translationModel->toArray(), 'source');
+                                        if (!$tKv->has($translationModel->getHash(), preloadKeys: true)) {
+                                            $tKv->set($translationModel->toArray()); // , preloadKeys: true
                                         }
                                     }
                                     // the label and _translations have been set

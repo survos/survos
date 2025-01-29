@@ -38,6 +38,7 @@
         "sabre/xml": "^4.0",
         "survos/bootstrap-bundle": "^1.4",
         "survos/command-bundle": "^1.5",
+        "survos/flickr-bundle": "^1.5",
         "survos/liform": "^2.0",
         "survos/seo-bundle": "^1.5",
         "survos/simple-datatables-bundle": "^1.5",

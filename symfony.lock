@@ -185,6 +185,9 @@
     "survos/core-bundle": {
         "version": "1.4.68"
     },
+    "survos/flickr-bundle": {
+        "version": "1.5.490"
+    },
     "survos/maker-bundle": {
         "version": "1.4.64"
     },

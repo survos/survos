@@ -125,7 +125,7 @@ $entityClassName,
         $class->addImplement($fullInterfaceClass);
         $class->addAttribute(Workflow::class, ['supports' => [$entityClassName], 'name' => 'self::WORKFLOW_NAME']);
         $class->addConstant('WORKFLOW_NAME', $workflowClass);
-        $method = $class->addMethod('_construct');
+        $method = $class->addMethod('__construct');
 
         // catches everything
         $method = $class->addMethod('onGuard')

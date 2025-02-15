@@ -59,6 +59,8 @@ jobs:
           - {local_path: 'sitemap-parser-bundle', split_repository: 'SurvosSitemapParserBundle'}
           - {local_path: 'pixie-bundle', split_repository: 'SurvosPixieBundle'}
           - {local_path: 'js-twig-bundle', split_repository: 'JsTwigBundle'}
+          - {local_path: 'key-value-bundle', split_repository: 'SurvosKeyValueBundle'}
+          - {local_path: 'bad-bot-bundle', split_repository: 'bad-bot-bundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'mobile-bundle', split_repository: 'SurvosMobileBundle'}
           - {local_path: 'meili-admin-bundle', split_repository: 'SurvosMeiliAdminBundle'}

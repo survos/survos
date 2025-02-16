@@ -72,6 +72,7 @@ jobs:
           - {local_path: 'storage-bundle', split_repository: 'SurvosStorageBundle'}
           - {local_path: 'tree-bundle', split_repository: 'SurvosTreeBundle'}
           - {local_path: 'the-guardian-bundle', split_repository: 'SurvosGuardianBundle'}
+          - {local_path: 'thumb-hash-bundle', split_repository: 'thumb-hash-bundle'}
           - {local_path: 'wiki-bundle', split_repository: 'SurvosWikiBundle'}
           - {local_path: 'workflow-helper-bundle', split_repository: 'SurvosWorkflowHelperBundle'}
 

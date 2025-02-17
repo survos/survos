@@ -5,6 +5,7 @@ namespace Survos\ThumbHashBundle;
 
 use Survos\ThumbHashBundle\Service\BlurService;
 use Survos\ThumbHashBundle\Service\ThumbHashService;
+use Survos\ThumbHashBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -20,15 +21,17 @@ class SurvosThumbHashBundle extends AbstractBundle
 
         // twig classes
 
-/*
-$definition = $builder
-->autowire('survos.barcode_twig', BarcodeTwigExtension::class)
-->addTag('twig.extension');
+        $builder
+            ->autowire(TwigExtension::class)
+            ->addTag('twig.extension')
+            ->setArgument('$config', $config)
+        ;
+        /*
 
-$definition->setArgument('$widthFactor', $config['widthFactor']);
-$definition->setArgument('$height', $config['height']);
-$definition->setArgument('$foregroundColor', $config['foregroundColor']);
-*/
+        $definition->setArgument('$widthFactor', $config['widthFactor']);
+        $definition->setArgument('$height', $config['height']);
+        $definition->setArgument('$foregroundColor', $config['foregroundColor']);
+        */
 
     }
 

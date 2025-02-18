@@ -19,7 +19,7 @@ class TwigExtension extends AbstractExtension
             // If your filter generates SAFE HTML, add ['is_safe' => ['html']]
             // Reference: https://twig.symfony.com/doc/3.x/advanced.html#automatic-escaping
             new TwigFilter('blurUrl', fn(?string $s): ?string =>
-            $s ? Thumbhash::toDataURL(Thumbhash::convertStringToHash($s)): null)
+            $s ? Thumbhash::toDataURL(Thumbhash::convertStringToHash($s)): null )
         ];
     }
 

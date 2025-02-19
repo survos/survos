@@ -85,10 +85,9 @@ class ThumbHashService
      * @throws \ImagickPixelIteratorException
      * @throws \ImagickException
      */
-    static public function extract_size_and_pixels_with_imagick_pixel_iterator($content): array
+    static public function extract_size_and_pixels_with_imagick_pixel_iterator($content, int $maxWidth=100, int $maxHeight=100): array
     {
         // @todo: inject max
-        $max = 100; // thumbhash php is locked to this :-(
         // Create a new Imagick object and read the image from the binary data provided.
         $image = new Imagick();
         $image->readImageBlob($content);
@@ -96,8 +95,8 @@ class ThumbHashService
         // Get the width and height of the image.
         $width = $image->getImageWidth();
         $height = $image->getImageHeight();
-        if ($width > $max || $height > $max) {
-            throw new \LogicException("Hash fails on images larger than $max x $max");
+        if ($width > $maxWidth || $height > $maxHeight) {
+            throw new \LogicException("Hash fails on images larger than $maxWidth x $maxHeight");
         }
 
 

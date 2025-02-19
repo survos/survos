@@ -2,7 +2,7 @@
 
 namespace Survos\ThumbHashBundle\Twig;
 
-use Thumbhash\Thumbhash;
+use Survos\ThumbHashBundle\Service\Thumbhash;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;

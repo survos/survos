@@ -65,12 +65,12 @@ services:
 #    systemctl start meilisearch
 
     meilisearch:
-        image: getmeili/meilisearch:v1.12.4
+        image: getmeili/meilisearch:v1.13.0
         container_name: 'meilisearch'
         ports:
             - 7700:7700
         volumes:
-            - ./.docker/meili-1.12.1/:/meili_data/
+            - ./.docker/meili-1.13.0/:/meili_data/
         environment:
 #            - MEILI_MASTER_KEY=MeiliKey
             - MEILI_NO_ANALYTICS=true

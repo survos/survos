@@ -2,26 +2,27 @@
 
 namespace Survos\PixieBundle\Command;
 
+use Survos\PixieBundle\Entity\OriginalImage;
+use App\Event\RowEvent;
 use App\Metadata\ITableAndKeys;
+use App\Repository\CoreRepository;
+use Survos\PixieBundle\Service\SqliteService;
+use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
-use Survos\PixieBundle\Event\CsvHeaderEvent;
+use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\PixieBundle\Event\ImportFileEvent;
-use Survos\PixieBundle\Event\RowEvent;
 use Survos\PixieBundle\Event\StorageBoxEvent;
-use Survos\PixieBundle\Model\Config;
-use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieImportService;
+use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\StorageBox;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\Yaml\Yaml;
 use Zenstruck\Console\Attribute\Argument;
 use Zenstruck\Console\Attribute\Option;
 use Zenstruck\Console\InvokableServiceCommand;
@@ -29,7 +30,7 @@ use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
 
-#[AsCommand('pixie:import', 'Import csv to Pixie, a file or directory of files"', aliases: ['import', 'p:imp'])]
+#[AsCommand('pixie:import', 'Import csv to Entity, a file or directory of files"', aliases: ['import', 'p:imp'])]
 final class PixieImportCommand extends InvokableServiceCommand
 {
     use RunsCommands;
@@ -43,8 +44,11 @@ final class PixieImportCommand extends InvokableServiceCommand
         private LoggerInterface                            $logger,
         private ParameterBagInterface                      $bag,
         private readonly PixieService                      $pixieService,
-        private EventDispatcherInterface $eventDispatcher,
+        private EntityManagerInterface                     $pixieEntityManager,
+        private EventDispatcherInterface                   $eventDispatcher,
         #[Autowire('%env(SITE_BASE_URL)%')] private string $baseUrl,
+        private CoreRepository $coreRepository,
+        private readonly SqliteService $sqliteService,
     )
     {
 
@@ -79,7 +83,7 @@ final class PixieImportCommand extends InvokableServiceCommand
         $envLimit = getenv('IMPORT_LIMIT'); // use export IMPORT_LIMIT
         $populate ??= true;
         $translate ??= false;
-        $index = is_null($index) ? true : $index;
+        $index = is_null($index) ? false : $index;
 
         $config = $pixieService->getConfig($configCode);
         assert($config, "Missing $configCode");
@@ -99,7 +103,7 @@ final class PixieImportCommand extends InvokableServiceCommand
 //            $config = $configWithCsv;
 //        }
 //
-//        if (!file_exists($config) && (file_exists($configInPackages = $this->bag->get('kernel.project_dir') . "/config/packages/Pixie/$config"))) {
+//        if (!file_exists($config) && (file_exists($configInPackages = $this->bag->get('kernel.project_dir') . "/config/packages/Entity/$config"))) {
 //            $config = $configInPackages;
 //        }
 //
@@ -108,6 +112,10 @@ final class PixieImportCommand extends InvokableServiceCommand
 //        }
 
         $pixieDbName = $pixieService->getPixieFilename($configCode, $subCode);
+
+        // new database
+        $pixieEm = $this->sqliteService->getPixieEntityManager($configCode);
+
         if (!file_exists($dirName = pathinfo($pixieDbName, PATHINFO_DIRNAME))) {
             mkdir($dirName, 0777, true);
         }
@@ -128,6 +136,9 @@ final class PixieImportCommand extends InvokableServiceCommand
         if ($envLimit && (($limit == 0) || $envLimit < $limit)) {
             $limit = $envLimit;
         }
+        $this->progressBar = SurvosUtils::createProgressBar($io, $limit ?: $this->total);
+//        $progressBar = SurvosUtils::createProgressBar($this->io(), null);
+
 //        dd($limit, $envLimit);
         // ack, what is the different between createKv and getStorageBox()?
         $pixieImportService->import($configCode, $subCode, null,
@@ -137,20 +148,42 @@ final class PixieImportCommand extends InvokableServiceCommand
                 'tags' => $tags ? explode(",", $tags) : [],
             ],
             overwrite: $overwrite, pattern: $pattern,
-            callback: function ($row, $idx, StorageBox $kv) use ($batch, $limit) {
+            callback: function ($row, \Survos\PixieBundle\Model\Table $table, $idx, StorageBox $kv) use ($batch, $limit, $pixieEm) {
+            $this->progressBar->advance();
+                $this->pixieEntityManager->flush();
+
+            // moved to importService
+//                if (!$core = $pixieEm->getRepository(Core::class)->find($coreCode = $table->getName())) {
+//                    $core = new Core($coreCode);
+//                    $pixieEm->persist($core);
+//                }
+//                $instanceCode = $row[$table->getPkName()];
+//                if (!$instance = $pixieEm->getRepository(Instance::class)->findOneBy(['code' => $instanceCode])) {
+//                    $instance = new Instance($core, $instanceCode);
+//                    $pixieEm->persist($instance);
+//                }
+//                $core->addInstance($instance);
+//                $instance->setLabel($row['label']);
+
+
                 $finished = $limit ? $idx > ($limit) : false;
 //                dd($limit, $idx, $finished, $batch);
                 if ($finished || (($idx % $batch) == 0)) {
-                    $this->logger->info("Saving $batch, now at $idx of $limit");
+//                    $this->logger->info("Saving $batch, now at $idx of $limit");
                     if ($kv->inTransaction()) {
                         $kv->commit();
                         $kv->beginTransaction();
                     }
+
+                    $this->pixieEntityManager->flush();
+//                    $this->pixieEntityManager->clear();
                 };
 //                return true; // return true to continue
                 return $limit ? !$finished : true; // break if we've hit the limit
             });
 
+
+        $pixieEm->flush();
         $kv = $this->pixieService->getStorageBox($configCode, $subCode);
 
         $consoleTable = new Table($io);
@@ -194,9 +227,12 @@ final class PixieImportCommand extends InvokableServiceCommand
         $this->io()->writeln(sprintf("<href=%s>%s</>", $url, $url));
         $kv->close();
 
+        $this->pixieEntityManager->flush();
+
         $iKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($configCode, mode: ITableAndKeys::PIXIE_IMAGE))->getStorageBox();
         $iKv->select(ITableAndKeys::IMAGE_TABLE);
         $this->io()->writeln("Images in iKv: " . $iKv->count(ITableAndKeys::IMAGE_TABLE));
+        $this->io()->writeln("Images in image db: " . $this->pixieEntityManager->getRepository(OriginalImage::class)->count());
         return self::SUCCESS;
     }
 
@@ -239,8 +275,8 @@ final class PixieImportCommand extends InvokableServiceCommand
         }
 
         $count= $count??$this->total??0;
-        $this->io()->writeln("Init progressBar with " . $count);
-        $this->progressBar = new ProgressBar($this->io()->output(), $count);
+//        $this->io()->writeln("Init progressBar with " . $count);
+//        $this->progressBar = new ProgressBar($this->io()->output(), $count);
 //        $this->progressBar->setProgress(0);
 //        $this->progressBar->setFormat(OutputInterface::VERBOSITY_VERBOSE);
 //        $this->progressBar->start();
@@ -262,6 +298,7 @@ final class PixieImportCommand extends InvokableServiceCommand
         switch ($event->type) {
             case $event::PRE_LOAD:
                 if (empty($this->progressBar)) {
+                    $this->progressBar->setMaxSteps($event->context['count']);
 //                    $this->progressBar = new ProgressBar($this->io()->output());
                 }
                 break;

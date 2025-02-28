@@ -3,6 +3,9 @@
 namespace Survos\PixieBundle\Command;
 
 use App\Metadata\ITableAndKeys;
+use App\Repository\Pixie\RowRepository;
+use Survos\PixieBundle\Service\SqliteService;
+use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Service\MeiliService;
@@ -52,6 +55,9 @@ final class PixieIndexCommand extends InvokableServiceCommand
         private readonly PixieService $pixieService,
         private SerializerInterface $serializer,
         private EventDispatcherInterface $eventDispatcher,
+        private EntityManagerInterface $pixieEntityManager,
+        private RowRepository $rowRepository,
+        private SqliteService $sqliteService,
 
         private ?MeiliService $meiliService = null,
         private ?SluggerInterface $asciiSlugger = null,
@@ -81,6 +87,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
     ): int
     {
         $configCode ??= getenv('PIXIE_CODE');
+        $pixieEm = $this->sqliteService->getPixieEntityManager($configCode);
         if (is_null($reset)) {
             $reset = true;
         }
@@ -107,8 +114,49 @@ final class PixieIndexCommand extends InvokableServiceCommand
             assert($kv->tableExists($tableFilter), "Missing table $tableFilter: \n".implode("\n", $kv->getTableNames()));
         }
 
+        $primaryKey = 'pixie_key';
+        $indexName = $configCode;
+        $index = $this->meiliService->getIndex($indexName, $primaryKey);
+        if ($reset) {
+            $summary[$indexName]['reset'] = 'yes';
+            $this->meiliService->reset($indexName);
+        }
+
+        $tableName = 'obj';
+        $index = $this->configureIndex($config, $indexName, $tableName);
 
         $recordsToWrite=[];
+        $qb = $this->rowRepository->createQueryBuilder('row');
+        $progressBar = SurvosUtils::createProgressBar($io, $this->rowRepository->count());
+
+        foreach ($progressBar->iterate($qb->getQuery()->toIterable()) as $row) {
+            $rowData = $this->serializer->normalize($row, 'array', ['groups' => ['row.read']]);
+            dd($rowData);
+//        foreach ($qb->getQuery()->toIterable() as $row) {
+            $row->pixie_key = $row->getId(); // $this->asciiSlugger->slug($row->getKey())->toString();
+
+            $recordsToWrite[] = $row;
+            if ($batchSize && (($progress = $progressBar->getProgress()) % $batchSize) === 0) {
+                $task = $index->addDocuments($recordsToWrite, $primaryKey);
+                // wait for the first record, so we fail early and catch the error, e.g. meili down, no index, etc.
+                if ($wait || !$progress) {
+                    //                $this->io->writeln("Flushing " . count($records));
+//                        ($tableName=='obj') && dd($recordsToWrite);
+                    $results = $this->meiliService->waitForTask($task, dataToDump: $recordsToWrite);
+
+                } else {
+//                        dump($task, count($recordsToWrite), $primaryKey);
+                }
+                $recordsToWrite = [];
+            }
+            if ($limit && ($progressBar->getProgress() >= $limit)) {
+                break;
+            }
+        }
+        $progressBar->finish();
+        $this->io()->writeln(".");
+
+        return self::SUCCESS;
         $summary = [];
         // now iterate
         foreach ($kv->getTables() as $tableName => $table) {
@@ -144,6 +192,10 @@ final class PixieIndexCommand extends InvokableServiceCommand
             // yikes, we need to configure all facets unless we have a different index for each table
 
             $progressBar = new ProgressBar($io, $kv->count($tableName));
+            $progressBar->setFormat(
+                "<fg=white;bg=cyan> %status:-45s%</>\n%current%/%max% [%bar%] %percent:3s%%\n🏁  %estimated:-21s% %memory:21s%"
+            );
+
             $primaryKey = 'pixie_key'; // $kv->getPrimaryKey($tableName); // ??
             $count = 0;
             $batchCount = 0;
@@ -161,6 +213,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
                 mode: PixieInterface::PIXIE_IMAGE_SUFFIX,
                 tags: ['fetch'] //??
             ))->getStorageBox();
+
 
             $iKv->select(ITableAndKeys::IMAGE_TABLE);
 
@@ -283,12 +336,12 @@ final class PixieIndexCommand extends InvokableServiceCommand
             } catch (\Exception $e) {
                 dd($recordsToWrite, $e->getMessage());
             }
-            $this->meiliService->waitForTask($task);
+//            $this->meiliService->waitForTask($task);
 
             // wait, so we can update owner
             // export property counts to kv
             $stats = $index->stats();
-            assert(!$stats['isIndexing']);
+            assert(!$stats['isIndexing'], json_encode($stats));
             unset($stats['isIndexing']);
 //            dd($stats, $index->getSettings());
             $io->success($stats['numberOfDocuments'] . " $configCode.$tableName documents");
@@ -331,7 +384,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
 //        dump($configData, $config->getVersion());
 //        dd($dirOrFilename, $config, $configFilename, $pixieService->getPixieFilename($configCode));
 
-        // Pixie databases go in datadir, not with their source? Or defined in the config
+        // Entity databases go in datadir, not with their source? Or defined in the config
 
         $table = new Table($this->io()->output());
         foreach ($summary as $indexName=>$data) {
@@ -394,7 +447,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
             ]);
 //        dd($results, $settings);
         // wait until the index is set up.
-//        $stats = $this->meiliService->waitUntilFinished($index);
+        $stats = $this->meiliService->waitUntilFinished($index);
         return $index;
     }
 

@@ -4,18 +4,15 @@
 
 namespace Survos\PixieBundle;
 
-use Survos\ApiGrid\Components\ItemGridComponent;
-use Survos\ApiGrid\Controller\GridController;
+use App\Command\PixieMediaCommand;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\PixieBundle\Command\IterateCommand;
-use Survos\PixieBundle\Command\PixieMakeCommand;
 use Survos\PixieBundle\Command\PixieExportCommand;
 use Survos\PixieBundle\Command\PixieImportCommand;
 use Survos\PixieBundle\Command\PixieIndexCommand;
-use Survos\PixieBundle\Command\PixieMediaCommand;
+use Survos\PixieBundle\Command\PixieMakeCommand;
 use Survos\PixieBundle\Command\PixiePrepareCommand;
 use Survos\PixieBundle\Command\PixieSyncCommand;
-use Survos\PixieBundle\Command\PixieTranslateCommand;
 use Survos\PixieBundle\Components\DatabaseComponent;
 use Survos\PixieBundle\Components\RowComponent;
 use Survos\PixieBundle\Controller\PixieController;
@@ -23,17 +20,17 @@ use Survos\PixieBundle\Controller\SearchController;
 use Survos\PixieBundle\CsvSchema\Parser;
 use Survos\PixieBundle\DataCollector\PixieDataCollector;
 use Survos\PixieBundle\Debug\TraceableStorageBox;
-use Survos\PixieBundle\Event\CsvHeaderEvent;
 use Survos\PixieBundle\EventListener\CsvHeaderEventListener;
+use Survos\PixieBundle\EventListener\PixieControllerEventListener;
 use Survos\PixieBundle\EventListener\TranslationRowEventListener;
 use Survos\PixieBundle\Menu\PixieItemMenu;
 use Survos\PixieBundle\Menu\PixieMenu;
 use Survos\PixieBundle\Service\LibreTranslateService;
 use Survos\PixieBundle\Service\PixieConvertService;
-use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieImportService;
-use Survos\PixieBundle\Service\SqliteService;
+use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieTranslationService;
+use Survos\PixieBundle\Service\SqliteService;
 use Survos\PixieBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
@@ -91,7 +88,7 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             ->setAutowired(true)
         ;
 
-        foreach ([DatabaseComponent::class, RowComponent::class] as $componentClass) {
+        foreach ([DatabaseComponent::class, RowComponent::class, SqliteService::class] as $componentClass) {
             $builder->register($componentClass)
                 ->setPublic(true)
                 ->setAutowired(true)
@@ -123,7 +120,7 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                 ->setAutoconfigured(true)
                 ->setPublic(true);
         }
-        $builder->autowire(SqliteService::class)
+        $builder->autowire(SqliteServce::class)
             ->setAutowired(true)
             ->setPublic(true);
 
@@ -192,7 +189,7 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
         ;
 
         // register our listener.  We could disable or set priority in the config
-        foreach ([TranslationRowEventListener::class, CsvHeaderEventListener::class] as $listenerClass) {
+        foreach ([TranslationRowEventListener::class, CsvHeaderEventListener::class, PixieControllerEventListener::class] as $listenerClass) {
             $builder->register($listenerClass)
                 ->setAutowired(true)
                 ->setAutoconfigured(true)

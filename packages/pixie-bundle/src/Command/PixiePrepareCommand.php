@@ -2,16 +2,13 @@
 
 namespace Survos\PixieBundle\Command;
 
+use App\Event\RowEvent;
 use JsonMachine\Items;
 use Psr\Log\LoggerInterface;
-use Survos\PixieBundle\Event\CsvHeaderEvent;
 use Survos\PixieBundle\Event\ImportFileEvent;
-use Survos\PixieBundle\Event\RowEvent;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Service\PixieConvertService;
 use Survos\PixieBundle\Service\PixieService;
-use Survos\PixieBundle\Service\PixieImportService;
-use Survos\PixieBundle\StorageBox;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
@@ -93,7 +90,7 @@ final class PixiePrepareCommand extends InvokableServiceCommand
 //            $config = $configWithCsv;
 //        }
 //
-//        if (!file_exists($config) && (file_exists($configInPackages = $this->bag->get('kernel.project_dir') . "/config/packages/Pixie/$config"))) {
+//        if (!file_exists($config) && (file_exists($configInPackages = $this->bag->get('kernel.project_dir') . "/config/packages/Entity/$config"))) {
 //            $config = $configInPackages;
 //        }
 //

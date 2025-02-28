@@ -7,41 +7,152 @@
  */
 declare(strict_types=1);
 
+
 namespace Survos\PixieBundle\Service;
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\Persistence\ManagerRegistry;
 use \PDO;
+use Survos\PixieBundle\Model\Config;
+use Survos\PixieBundle\StorageBox;
+use Survos\PixieBundle\Model\Property;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class SqliteService
 {
-    public function __construct()
+    public function __construct(
+        private EntityManagerInterface $pixieEntityManager,
+        private readonly ManagerRegistry $managerRegistry,
+        #[Autowire('%kernel.project_dir%')] private string $projectDir,
+        #[Autowire('%env(DATABASE_PIXIE_URL)%')] private readonly string $pixieTemplateFilename
+    )
     {
     }
 
-
-    public function playWithSqliteSchema(string $sourceReferences)
+    public function dbName(string $code, bool $throwErrorIfMissing=true): string
     {
-
-        if (!file_exists($sourceReferences)) {
-            // https://write.corbpie.com/sqlite3-with-php-creating-a-database-and-connecting-to-it/
-            $db = new PDO('sqlite:' . $sourceReferences, '', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $params = $this->pixieEntityManager->getConnection()->getParams();
+        $dbName = str_replace('pixie_template', $code, $params['path']);
+        if ($throwErrorIfMissing) {
+            assert(file_exists($dbName), $dbName);
         }
-        $connectionParams = [
-            'path' => $sourceReferences,
-            'driver' => 'pdo_sqlite',
-        ];
-            $conn = DriverManager::getConnection($connectionParams);
-            $sm = $conn->createSchemaManager();
-            $fromSchema = $sm->introspectSchema();
+        return $dbName;
 
-            $tables = [];
-            foreach ($fromSchema->getTables() as $table) {
-                $columns = [];
-                foreach ($table->getColumns() as $column) {
-                    $tables[$table->getName()]['columns'][] = $column->getName();
-                }
+
+        $path = pathinfo($params['path'], PATHINFO_DIRNAME);
+        $withoutRoot = str_replace($this->projectDir, '', $path);
+
+        $dbName = $this->projectDir  . $withoutRoot . '/' . $code . '.db';
+//        dd($path, $dbName, $code);
+//        dump($dbName, $this->pixieTemplateFilename);
+//        $fullDbName = $this->projectDir . '/' . pathinfo($dbName, PATHINFO_BASENAME);
+
+//        assert(!str_contains($code, '.db'), $code);
+//        return $code . '.db';
+    }
+
+    public function getPixieEntityManager(string $code): EntityManagerInterface
+    {
+        $conn = $this->pixieEntityManager->getConnection();
+        $params = $conn->getParams();
+        $conn->selectDatabase($this->dbName($code));
+        return $this->pixieEntityManager;
+    }
+
+    public function migrateDatabase(
+//        string $dbName,
+        Config $config)
+    {
+        // get the template first (./c d:sch:update --force --em=pixie)
+        $conn = $this->pixieEntityManager->getConnection();
+
+        $fromSchemaManager = $conn->createSchemaManager();
+        $fromSchema = $fromSchemaManager->introspectSchema();
+
+        //        $conn->selectDatabase($dbName);
+        $toDbName = $this->dbName($config->code, false);
+        $schemaTool = new SchemaTool($this->pixieEntityManager);
+        // now prep for the new database
+//        $em = $this->getPixieEntityManager($config->code);
+
+        // from doctrine:schema:update
+//        $classes = $this->pixieEntityManager->getMetadataFactory()->getAllMetadata();
+//        $toSchema   = $schemaTool->getSchemaFromMetadata($classes);
+//        $sqls = $schemaTool->getUpdateSchemaSql($classes);
+
+//        dd($sqls);
+//        $fromSchema = $schemaTool->createSchemaForComparison($toSchema);
+//        return $this->platform->getAlterSchemaSQL($schemaDiff);
+
+        $toConnection = DriverManager::getConnection( ['path' => $toDbName, 'driver' => 'pdo_sqlite'] );
+        $toSchemaMananger = $toConnection->createSchemaManager();
+        $toSchema = $toSchemaMananger->introspectSchema();
+//        $fromSchemaManager = $fromConnection->createSchemaManager();
+//        $fromSchema = $fromSchemaManager->introspectSchema();
+
+        $comparator = $fromSchemaManager->createComparator();
+        $schemaDiff = $comparator->compareSchemas( $toSchema, $fromSchema);
+        $myPlatform = $conn->getDatabasePlatform();
+        $queries = $myPlatform->getAlterSchemaSQL($schemaDiff);
+        foreach ($queries as $query) {
+            try {
+//            dump(diffSql: $diffSql, q: $queries);
+                $toConnection->executeQuery($query);
+            } catch (\Exception $exception) {
+                dd($exception->getMessage());
+                // it already exists.
             }
-            // @todo: use our Model tables
+        }
+
+
+        // templates?
+        $config = StorageBox::fix($config);
+        $views = [];
+        foreach ($tables = $config->getTables() as $table) {
+            $fieldNames = array_map(fn(Property $property) => $property->getCode(),
+                iterator_to_array($table->getProperties()));
+
+            $fields = array_map(fn(Property $property) =>
+            sprintf("json_extract(data, '$.%s') as %s",
+                $property->getCode(),
+                $property->getCode()
+            ),
+                iterator_to_array($table->getProperties()));
+
+            $view = 'v_' . $table->getName();
+            $views[] = "DROP view if exists $view";
+//             $x = "select json_extract(_data, '\$.$label') as label from row";
+            $views[] = sprintf("CREATE VIEW $view (%s) AS
+                SELECT %s
+                 from row where core_id = '%s'",
+                implode(', ', $fieldNames),
+                implode(', ', $fields),
+                $table->getName())
+            ;
+
+            foreach ($table->getProperties() as $property) {
+            }
+        }
+        foreach ($views as $view) {
+            try {
+                $toConnection->executeQuery($view);
+            } catch (\Exception $exception) {
+                dd($exception->getMessage(), $view);
+            }
+        }
+
+//        dd($schemaDiff, $schemaDiff->isEmpty());
+        return $toConnection;
+        $tables = [];
+        foreach ($fromSchema->getTables() as $table) {
+            $columns = [];
+            foreach ($table->getColumns() as $column) {
+                $tables[$table->getName()]['columns'][] = $column->getName();
+            }
+        }
+        // @todo: use our Model tables
 //        try {
 //        } catch (\Exception $exception) {
 //            dd($exception, $sourceReferences);
@@ -86,7 +197,7 @@ class SqliteService
         $diffs = $myPlatform->getAlterSchemaSQL($schemaDiff);
 
         $sc->introspectSchema();
-        $newSchema = $sm->introspectSchema();
+        $newSchema = $fromSchemaManager->introspectSchema();
         foreach ($newSchema->getTables() as $table) {
             $columns = [];
             foreach ($table->getColumns() as $column) {

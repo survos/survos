@@ -57,7 +57,7 @@ class StorageBox
      * @param array $tablesToCreate The ADDITIONAL tables to create with writing.  Others may already exist.
      */
     function __construct(private readonly string                              $filename,
-                                     array                                       &$data, // debug data, passed from Pixie
+                                     array                                       &$data, // debug data, passed from Entity
                                      private ?Config                             $config = null, // for creation only.  Shouldn't be in constructor!
 //                                     private array                     $tablesToCreate = [],
 //                                     private ?array                     $regexRules = [],
@@ -134,7 +134,7 @@ class StorageBox
         // we are over-calling fix!
         static $fixed=[];
         if (in_array($config->code, $fixed)) {
-            return $config;
+//            return $config;
         }
         $fixed[] = $config->code;
         foreach ($config->getTables() as $tableName => $table) {
@@ -928,6 +928,8 @@ class StorageBox
         $table = $this->getTable($tableName);
         $keyName = $table->getPkName();
         $props = $table->getPropertiesByCode();
+
+        // remove extra columns from json with https://sqlite.org/forum/info/5928225848d0409f
 
         // e.g. updating marking
         if ($mode === self::MODE_PATCH) {

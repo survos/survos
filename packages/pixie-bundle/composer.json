@@ -55,7 +55,8 @@
         "meilisearch/meilisearch-php": "^1.11",
         "symfony/security-bundle": "^6.4 || ^7.1",
         "rector/rector": "dev-main",
-        "survos/libre-translate-bundle": "^1.5"
+        "survos/libre-translate-bundle": "^1.5",
+        "doctrine/orm": "^3.3"
     },
     "autoload": {
         "psr-4": {

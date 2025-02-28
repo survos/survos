@@ -6,6 +6,7 @@
 {#templateId: this.templateId,#}
 {#templateType: this.type,#}
 
+{{ _sc }}
 <div {{ attributes }}
         {{ stimulus_controller(_sc, {
             refreshEvent: this.refreshEvent,

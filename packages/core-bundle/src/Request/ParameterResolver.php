@@ -55,7 +55,10 @@ class ParameterResolver implements ValueResolverInterface
         }
 
         if (!empty($lookupParams)) {
+            $em = $this->entityManager;
+            $conn = $em->getConnection();
             $repository = $this->entityManager->getRepository($argumentType);
+            dump($lookupParams, $this->entityManager, $conn, $argument, $argumentType, $repository, $repository::class);
 //            if (count($lookupParams) > 1) dd($lookupParams);
             if ($entity = $repository->findOneBy($lookupParams)) {
 //                $history[$param] = $entity;

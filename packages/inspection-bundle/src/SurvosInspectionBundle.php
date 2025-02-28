@@ -2,6 +2,7 @@
 
 namespace Survos\InspectionBundle;
 
+use Survos\InspectionBundle\Controller\InspectionController;
 use Survos\InspectionBundle\Services\InspectionService;
 use Survos\InspectionBundle\Twig\TwigExtension;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
@@ -28,6 +29,14 @@ class SurvosInspectionBundle extends AbstractBundle
             ->setAutoconfigured(true)
         ;
 
+        // idea: extend SurvosAbstractBundle
+        array_map(fn(string $controllerClass) => $builder->autowire($controllerClass)
+            ->setAutoconfigured(true)
+            ->addTag('container.service_subscriber')
+            ->addTag('controller.service_arguments'),
+        [
+            InspectionController::class
+        ]);
 
         $definition = $builder
             ->setDefinition('survos.inspection_twig', new Definition(TwigExtension::class))

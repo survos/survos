@@ -19,7 +19,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class SaisQueueCommand extends Command
 {
     public function __construct(
-        private HttpClientInterface $httpClient,
         private SaisClientService $saisService,
     )
     {

@@ -97,7 +97,7 @@ final class PixieMenu implements KnpMenuHelperInterface
         }
 
         if ($tableName && $this->isGranted('ROLE_ADMIN')) {
-            $this->addHeading($menu, label: "Pixie Breadcrumbs!");
+            $this->addHeading($menu, label: "Entity Breadcrumbs!");
             $tableRp = ['tableName' => $tableName, 'pixieCode' => $pixieCode];
             $this->add($menu, 'pixie_meili_browse', $tableRp, label: 'Search ' . $tableName);
             if ($key = $event->getOption('itemKey')) {

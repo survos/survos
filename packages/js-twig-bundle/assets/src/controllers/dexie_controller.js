@@ -45,7 +45,7 @@ Twig.extend(function (Twig) {
     });
 });
 
-// /* stimulusFetch: 'lazy' */
+// /* stimulusFetch: 'lazyxx' */
 export default class extends Controller {
     static targets = ['content'];
     static values = {
@@ -86,7 +86,7 @@ export default class extends Controller {
         // this.appOutlet.setTitle('test setTitle from appOutlet');
         // this.populateEmptyTables(db, this.configValue['stores']);
 
-        // console.warn("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
+        console.warn("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
         this.filter = this.filterValue ? JSON.parse(this.filterValue) : false;
         // console.error(this.callerValue, this.filterValue, this.filter);
         // compile the template
@@ -110,6 +110,7 @@ export default class extends Controller {
         });
 
         document.addEventListener('dexie.load-data', (e) => {
+            console.error('heard: dexie.load-data');
             if (!window.called) {
                 window.called = true;
                 this.openDatabase(this.dbNameValue);

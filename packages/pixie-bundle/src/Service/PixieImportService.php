@@ -4,10 +4,19 @@ namespace Survos\PixieBundle\Service;
 
 // see https://github.com/bungle/web.php/blob/master/sqlite.php for a wrapper without PDO
 
-use App\Event\FetchTranslationEvent;
+use Survos\PixieBundle\Service\SqliteService;
+use Survos\PixieBundle\Entity\Core;
+use Survos\PixieBundle\Entity\Instance;
+use Survos\PixieBundle\Entity\Row;
+//use Survos\PixieBundle\Entity\TranslateText;
+use Survos\PixieBundle\Entity\TranslateText;
 use App\Event\FetchTranslationObjectEvent;
 use App\Metadata\ITableAndKeys;
-use App\Service\SourceService;
+use App\Repository\CoreRepository;
+use App\Repository\Pixie\RowRepository;
+use App\Repository\Pixie\TranslateTextRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use JsonMachine\Items;
 use League\Csv\Info;
 use League\Csv\Reader;
 use League\Csv\SyntaxError;
@@ -23,14 +32,10 @@ use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Table;
 use Survos\PixieBundle\Model\Translation;
 use Survos\PixieBundle\StorageBox;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function Symfony\Component\String\u;
-use \JsonMachine\Items;
 
 
 class PixieImportService
@@ -39,8 +44,15 @@ class PixieImportService
         private readonly PixieService             $pixieService,
         private readonly LoggerInterface          $logger,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private EntityManagerInterface            $pixieEntityManager,
+        private CoreRepository                    $coreRepository,
+        private RowRepository                     $rowRepository,
+        private TranslateTextRepository           $translateTextRepository,
+        private readonly SerializerInterface      $serializer, private readonly SqliteService $sqliteService,
         public bool                               $purgeBeforeImport = false,
-        private array                             $listsByLabel = []
+        private array                             $listsByLabel = [],
+        /** array<Core[]> */
+        private array                             $cores = []
 
     )
     {
@@ -61,9 +73,21 @@ class PixieImportService
         if (!$config) {
             $config = $this->pixieService->getConfig($pixieCode);
         }
+        $this->sqliteService->getPixieEntityManager($pixieCode);
 
         // the json files, slightly processed in :prepare, no csv
         $dirOrFilename = $this->pixieService->getSourceFilesDir($pixieCode, subCode: $subCode) . "/json";
+        $counts = [];
+        if (file_exists($metaFileInfoFilename = $dirOrFilename . '/_files.json')) {
+            $fileInfo = json_decode(file_get_contents($dirOrFilename . '/_files.json'), true);
+            foreach ($fileInfo as $fInfo) {
+                $ff = $fInfo['name'];
+                $counts[realpath($ff)] = $fInfo['count'];
+            }
+        } else {
+            $this->logger->warning($metaFileInfoFilename . " does not exist");
+        }
+
 
         assert(file_exists($dirOrFilename), "Missing $dirOrFilename");
         $finder = new Finder();
@@ -106,7 +130,7 @@ class PixieImportService
         // @todo: figure out a better way to handle images
         $iKv = $this->eventDispatcher->dispatch(
             new StorageBoxEvent($pixieCode,
-                mode: 'image') // ITableAndKeys::PIXIE_IMAGE)
+                mode: ITableAndKeys::IMAGE_TABLE)
         )->getStorageBox();
 
         /* maybe hold off on related tables right now?
@@ -131,10 +155,16 @@ class PixieImportService
 //        dd($fileMap, $config->getFiles(), $config, $filesByTablename);
 //        foreach ($kv->getFiles())
         // $fn is the csv filename
+
+        foreach ($this->coreRepository->findAll() as $core) {
+            $this->cores[$core->getCoreCode()] = $core;
+        }
         foreach (array_values($config->getFiles()) as $tableName) {
             if ($pattern && !str_contains((string)$tableName, $pattern)) {
                 continue;
             }
+
+            $this->getCore($tableName);
             SurvosUtils::assertKeyExists($tableName, $filesByTablename, "Missing table $tableName look for filename, not table");
             $filenames = $filesByTablename[$tableName];
             foreach ($filenames as $fn) {
@@ -210,28 +240,36 @@ class PixieImportService
                 }
                 $iKv->beginTransaction();
                 $kv->beginTransaction(); // so that events that populate related tables are persisted.  Meh.
+                // preload
                 $event = $this->eventDispatcher->dispatch(new RowEvent(
-                    $config->code, $tableName,
+                    $config->code,
+                    $tableName,
                     null,
                     config: $config,
                     action: self::class,
                     type: RowEvent::PRE_LOAD,
-                    storageBox: $kv,
-                    imageStorageBox: $iKv,
-                    context: $context));
+                    context: ['count' =>  $counts[$fn]??0]));
 
-                $input = new ArgvInput();
-                $output = new ConsoleOutput();
-                $symfonyStyle = new SymfonyStyle($input, $output);
+//                /* PROGRESSBAR!!!! */
+//                $input = new ArgvInput();
+//                $output = new ConsoleOutput();
+//                $symfonyStyle = new SymfonyStyle($input, $output);
+//                $progressBar = new ProgressBar($output, $total = $counts[$fn]??0);
+//                if ($total) {
+//                    $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s%(estimated) %memory:6s% -- %message%');
+//                } else {
+//                    $progressBar->setFormat(' %current% [%bar%] %elapsed:6s% %memory:6s% -- %message%');
+//                }
 
-                $progressBar = new ProgressBar($output);
+//                $progressBar->setFormat(OutputInterface::VERBOSITY_VERBOSE);
                 $pk = $kv->getPrimaryKey($tableName);
-                // this is the json/csv iterator
-                foreach ($iterator as $idx => $row) {
-                    $progressBar->advance();
+                // this is the json/csv iterator, $rowObj comes from json/csv
+                foreach ($iterator as $idx => $rowObj) {
+//                    $progressBar->advance();
                     if ($startingAt && ($idx < $startingAt)) {
                         continue;
                     }
+//                    $progressBar->setMessage("idx: $idx");
 
                     // if it's json, remap the keys.
                     $reverse = array_flip($headers);
@@ -239,80 +277,85 @@ class PixieImportService
 //                    if (false)
                     if ($ext === 'json') {
                         $mappedRow = [];
-                        // if new values after first row
-                        $remainingHeaders = array_keys((array)$row);
+                        // if new values after first rowObj
+                        $remainingHeaders = array_keys((array)$rowObj);
                         foreach ($headers as $header => $headerOrig) {
-                            $mappedRow[$header] = $row->{$headerOrig} ?? null;
+                            $mappedRow[$header] = $rowObj->{$headerOrig} ?? null;
                         }
 
 
-                        // handle keys that aren't in the mapped header, which is too dependent on the first row data
-                        $unhandledKeys = array_diff($x = array_keys((array)$row), $y = array_keys($mappedRow));
+                        // handle keys that aren't in the mapped header, which is too dependent on the first rowObj data
+                        $unhandledKeys = array_diff($x = array_keys((array)$rowObj), $y = array_keys($mappedRow));
                         foreach ($unhandledKeys as $newKey) {
                             if (!array_key_exists($newKey, $reverse)) {
 //                                    assert(false, "new key $newKey missing in $tableName \n" .
-//                                        json_encode($row, JSON_PRETTY_PRINT) . "\n\n" .
+//                                        json_encode($rowObj, JSON_PRETTY_PRINT) . "\n\n" .
 //                                        json_encode($reverse, JSON_PRETTY_PRINT) . "
-//                                    add $newKey to required fields so it exists in the first row"
+//                                    add $newKey to required fields so it exists in the first rowObj"
 //                                    );
-                                $mappedRow[$newKey] = $row->{$newKey} ?? null;
+                                $mappedRow[$newKey] = $rowObj->{$newKey} ?? null;
                             } else {
                             }
                         }
                         // if there are new headers, add them
-//                        dd(row: $row, mappedRow: $mappedRow, );
-//                            $row = $mappedRow;
-                        $row = (object)$mappedRow;
+//                        dd(rowObj: $rowObj, mappedRow: $mappedRow, );
+//                            $rowObj = $mappedRow;
+                        $rowObj = (object)$mappedRow;
                     }
-                    assert($row);
+                    assert($rowObj);
 
-                    // just check the first row
+                    // just check the first rowObj
                     if ($idx == 0) {
-                        assert(property_exists($row, $pk),
+                        assert(property_exists($rowObj, $pk),
                             $tableName . " should have primaryKey `$pk`  " .
-                            json_encode($row, JSON_PRETTY_PRINT));
+                            json_encode($rowObj, JSON_PRETTY_PRINT));
                     }
 
-//                    $row = $event->row;
+//                    $rowObj = $event->rowObj;
 
-                    if (!$row->{$pkName} ?? null) {
+                    if (!$rowObj->{$pkName} ?? null) {
                         // e.g. empty excel rows.  Could handle in the grid:excel-to-csv
-                        $this->logger->error("Empty pk, skipping row " . $idx);
-//                        dd($row, $pkName, $idx);
+                        $this->logger->error("Empty pk, skipping rowObj " . $idx);
+//                        dd($rowObj, $pkName, $idx);
                         continue;
                     }
-                    SurvosUtils::assertKeyExists($pkName, $row, "in $fn");
-                    $id = $row->{$pkName} ?? null;
-                    assert($id, "no primary key in $tableName row " . json_encode($row, JSON_PRETTY_PRINT));
+
+                    SurvosUtils::assertKeyExists($pkName, $rowObj, "in $fn");
+                    $id = $rowObj->{$pkName} ?? null;
+                    assert($id, "no primary key in $tableName rowObj " . json_encode($rowObj, JSON_PRETTY_PRINT));
                     $exists = $kv->has($id, preloadKeys: true);
-                    $row = $this->applyDataRules($row, $dataRules);
-                    if (!$row) {
-                        dd($row, $idx, $tableName);
+                    $rowObj = $this->applyDataRules($rowObj, $dataRules);
+                    if (!$rowObj) {
+                        dd($rowObj, $idx, $tableName);
                         continue;
                     }
-                    $event = $this->eventDispatcher->dispatch(new RowEvent(
+                    $row = $this->addRow($rowObj, $table);
+
+                    // _before_ row is created.
+                    $rowEvent = new RowEvent(
                         $config->code,
                         $tableName,
-                        key: $row[$pk] ?? null,
-                        row: $row,
+                        item: $row,
+                        key: $rowObj[$pk] ?? null,
+                        row: $rowObj,
                         index: $idx,
                         action: self::class,
-                        storageBox: $kv,
-                        imageStorageBox: $iKv,
-                        context: $context));
-                    $row = $event->row;
-                    // handling relations could be its own RowEvent too, for now it's here
-//                dd($row);
-                    $row = $this->handleRelations($kv, $config, $pixieCode, $table, $row);
-//                    dd(afterRelations: $row);
-                    $event->row = $row;
-//                $tableName=='obj' && dd($row['classification'], $event->row['classification']);
+                        context: $context);
 
-//                $tableName == 'obj' && dd($row);
+                    $event = $this->eventDispatcher->dispatch($rowEvent);
+                    $rowObj = $event->row;
+                    // handling relations could be its own RowEvent too, for now it's here
+//                dd($rowObj);
+                    $rowObj = $this->handleRelations($kv, $config, $pixieCode, $table, $rowObj);
+//                    dd(afterRelations: $rowObj);
+                    $event->row = $rowObj;
+//                $tableName=='obj' && dd($rowObj['classification'], $event->rowObj['classification']);
+
+//                $tableName == 'obj' && dd($rowObj);
 
                     if ($callback) {
                         // for batching
-                        if (!$continue = $callback($row, $idx, $kv)) {
+                        if (!$continue = $callback($rowObj, $table, $idx, $kv)) {
                             break;
                         }
                     }
@@ -334,36 +377,55 @@ class PixieImportService
                     // add the source strings to the translation table
 
 
-//                $event = new FetchTranslationObjectEvent($row, )
-//                    $sourceString = $row[$tKey];
+//                $event = new FetchTranslationObjectEvent($rowObj, )
+//                    $sourceString = $rowObj[$tKey];
                     if (count($table->getTranslatable())) {
 
-                        $sourceLocale = $config->getSource()->locale ?? $row['locale'] ?? null;
+                        $sourceLocale = $config->getSource()->locale ?? $rowObj['locale'] ?? null;
                         if (!$sourceLocale) {
-                            dd($row);
+                            dd($rowObj);
                         }
 
-//                        dump(row: $row, transFields: $table->getTranslatable());
+                        $row = $this->addRow($rowObj, $table);
+                        dd($id, $tableName, raw: $rowObj, row: $row);
+
+//                        dump(rowObj: $rowObj, transFields: $table->getTranslatable());
 
                         if (class_exists(FetchTranslationObjectEvent::class)) {
                             // for source table, Not libre, which happens during pixie:trans --queue
+                            // complicated, but this also adds the text hash to the rowObj values
                             $event = $this->eventDispatcher->dispatch(
                                 new FetchTranslationObjectEvent(
-                                    $row, // or $item?
+                                    $rowObj, // or $item?
                                     pixieCode: $pixieCode,
                                     sourceLanguage: $sourceLocale,
                                     targetLanguage: $sourceLocale,
                                     table: $tableName, // for debugging,
-                                    key: $row[$table->getPkName()],
+                                    key: $rowObj[$table->getPkName()],
                                     keys: $table->getTranslatable()
                                 ));
 
 //                            dd($event->translationModels, $tKv->getSelectedTable());
                             // this populates the source table of the translation database,
-//                            dump($row);
-                            $row = $event->getNormalizedData();
-//                            dump($row);
+//                            dump($rowObj);
+                            $rowObj = $event->getNormalizedData();
+//                            dump($rowObj);
+                            /** @var Translation $transModel */
                             foreach ($event->translationModels as $transModel) {
+                                /** @var $tt TranslateText */
+                                if (!$tt = $this->translateTextRepository->find($transModel->getHash())) {
+                                    $tt = new TranslateText(
+                                        $transModel->getText(),
+                                        $sourceLocale,
+                                        $transModel->getHash(),
+                                    );
+                                    $this->pixieEntityManager->persist($tt);
+                                }
+                                $tt->setExtra([
+                                    'core' =>  $tableName, // for debugging,
+                                    'key' =>  $rowObj[$table->getPkName()],
+                                ]);
+
                                 if (!$kv->has($transModel->getHash(), PixieInterface::PIXIE_STRING_TABLE)) {
                                     $kv->set($transModel->toArray(), PixieInterface::PIXIE_STRING_TABLE);
                                 }
@@ -371,20 +433,22 @@ class PixieImportService
                         }
                     }
 
-//                    ($tableName == 'loc') && dd($row);
+//                    ($tableName == 'loc') && dd($rowObj);
 
-                    assert($row['license'] ?? '' <> 'Copyrighted', "invalid license");
+                    assert($rowObj['license'] ?? '' <> 'Copyrighted', "invalid license");
+                        assert($tableName === $table->getName());
+                        $this->addRow($rowObj, $table);
+                        $kv->set($rowObj, $table->getName());
                     try {
-                        $kv->set($row, $tableName);
                     } catch (\Exception $e) {
-                        dd($kv->getFilename(), $kv, $e, $kv->getSelectedTable(), row: $row);
+                        dd($kv->getFilename(), $e, $kv->getSelectedTable(), row: $rowObj);
                     }
 
                     if ($limit && ($idx >= $limit - 1)) break;
-//            dd($kv->get($row['id']));
-                    // dd($row); break;
-                    $progressBar->finish();
+//            dd($kv->get($rowObj['id']));
+                    // dd($rowObj); break;
                 }
+//                $progressBar->finish();
                 $kv->commit();
                 $count = $kv->count();
                 $this->logger->info($kv->getFilename() . '/' . $kv->getSelectedTable() . " now has " . $count);
@@ -397,9 +461,10 @@ class PixieImportService
             $kv->commit();
         }
 
+        // museum-specific handling, in Service or Workflow
         $event = $this->eventDispatcher->dispatch(new RowEvent(
-            $config->code, $tableName, null,
-            imageStorageBox: $iKv,
+            $config->code, $tableName,
+            null,
             action: self::class,
             type: RowEvent::POST_LOAD,
             storageBox: $kv));
@@ -664,6 +729,9 @@ class PixieImportService
                                 }
                                 // populate the related table
                                 $relatedRow[PixieInterface::TRANSLATED_STRINGS] = $_t;
+
+                                $this->addRow($relatedRow, $relatedTable);
+
                                 $kv->set($relatedRow, $relatedTableName);
 //                                $kv->set($relatedRow, $relatedTableName, properties: [
 //                                    '_t' => $_t,
@@ -729,6 +797,56 @@ class PixieImportService
             }
         }
         return $row;
+    }
+
+    /** add to the database, to core, etc. */
+    public function addRow(array|object $row, Table $table): Row
+    {
+        $pkName = $table->getPkName();
+        $tableName = $table->getName();
+
+        $id = $row[$pkName]; // unique within core
+        $core = $this->getCore($tableName);
+
+        $rowId = Row::RowIdentifier($core, $id);
+        /** @var Row $r */
+        if (!$r = $this->rowRepository->find($rowId)) {
+            $r = new Row($core, $id);
+            assert($r->getId() === $rowId, "$rowId is not " . $r->getId());
+            $this->pixieEntityManager->persist($r);
+        }
+        $r->setLabel($row[Instance::DB_LABEL_FIELD]);
+
+//        $row = json_encode($row, JSON_FORCE_OBJECT);
+        $r->setData($row);
+        return $r;
+
+    }
+
+    /**
+     * @param mixed $tableName
+     * @return void
+     */
+    public function getCore(string $tableName): Core
+    {
+//        if (!$core = $this->coreRepository->find($tableName)) {
+        if (!$core = $this->cores[$tableName]??null) {
+
+            $core = new Core($tableName);
+            foreach ($this->coreRepository->findAll() as $existingCore) {
+                dump($existingCore->getCode(), $existingCore);
+            }
+            $this->pixieEntityManager->persist($core);
+            assert($this->pixieEntityManager->contains($core));
+            $this->cores[$tableName] = $core;
+            dump($tableName, array_keys($this->cores));
+        }
+        if (!$this->pixieEntityManager->contains($core)) {
+            dd($core, $this->cores);
+        }
+//        dd($this->serializer->serialize($core, 'json', ['groups' => 'core.read']));
+        return $core;
+
     }
 
 }

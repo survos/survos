@@ -25,11 +25,19 @@ use Survos\PixieBundle\EventListener\PixieControllerEventListener;
 use Survos\PixieBundle\EventListener\TranslationRowEventListener;
 use Survos\PixieBundle\Menu\PixieItemMenu;
 use Survos\PixieBundle\Menu\PixieMenu;
+use Survos\PixieBundle\Repository\CoreRepository;
+use Survos\PixieBundle\Repository\InstanceRepository;
+use Survos\PixieBundle\Repository\OriginalImageRepository;
+use Survos\PixieBundle\Repository\RowRepository;
+use Survos\PixieBundle\Repository\TranslateTextRepository;
+use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\LibreTranslateService;
 use Survos\PixieBundle\Service\PixieConvertService;
 use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieTranslationService;
+use Survos\PixieBundle\Service\ReferenceService;
+use Survos\PixieBundle\Service\RelationService;
 use Survos\PixieBundle\Service\SqliteService;
 use Survos\PixieBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -88,7 +96,14 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             ->setAutowired(true)
         ;
 
-        foreach ([DatabaseComponent::class, RowComponent::class, SqliteService::class] as $componentClass) {
+        foreach ([DatabaseComponent::class, RowComponent::class, SqliteService::class, CoreService::class,
+                     InstanceRepository::class,
+                     OriginalImageRepository::class,
+                     RelationService::class,
+                     CoreRepository::class,
+                     RowRepository::class,
+                     TranslateTextRepository::class,
+                     ReferenceService::class] as $componentClass) {
             $builder->register($componentClass)
                 ->setPublic(true)
                 ->setAutowired(true)

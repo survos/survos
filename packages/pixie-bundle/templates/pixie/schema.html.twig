@@ -3,11 +3,29 @@
 {% block title %}{{ pixieCode }} Tables{% endblock %}
 
 {% block body %}
-    Schema
+    Schema from <code>config.tables</code>
     {% for tableName, table in config.tables %}
-        <li>
+        <div class="row">
+            <div class="col-md-6">
+                    {{ block('pixie_table') }}
+            </div>
+            <div class="col-md-6">
+                {% set core = cores[tableName]|default(null) %}
+                {% if core %}
+                <li>Instances: {{ core.instanceCount }}</li>
+                <li>Rows: {{ core.rows|length }}</li>
+                <li>idFieldCode: {{ core.idFieldCode }}</li>
+                <li>relatedCounts: {{ core.relatedCounts|json_encode }}</li>
+                {% endif %}
+                {{ dump(core) }}
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block pixie_table %}
         <a href="{{ path('pixie_table', {pixieCode: pixieCode, tableName: tableName}) }}">
-            Browse {{ tableName }}
+            Browse Table {{ tableName }}
         </a>
             {% set columns = [
                 'code',
@@ -22,10 +40,11 @@
                     :data="table.properties"
                     :columns="columns"
             >
+                <twig:block name="code">
+                    Column {{ row.code }}
+                </twig:block>
                 <twig:block name="settings">
                     {{ row.settings|length ? row.settings|json_encode }}
                 </twig:block>
             </twig:simple_datatables>
-        </li>
-    {% endfor %}
 {% endblock %}

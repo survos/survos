@@ -1,5 +1,9 @@
 <?php
 
+
+// NOT PERSISTED, maybe we can remove it.  Used during spreadsheet import
+
+
 namespace Survos\PixieBundle\Entity;
 
 use App\Entity\ProjectCoreInterface;
@@ -258,6 +262,7 @@ class FieldMap implements RouteParametersInterface, StatsInterface, ProjectCoreI
 
     public function __construct(?Spreadsheet $spreadsheet = null, ?string $code = null, ?Core $core = null, ?Sheet $firstSheet = null)
     {
+        assert(false, "@can this be removed?  It was used during importing a spreadsheet");
         $this->initId($code);
         if ($spreadsheet) {
             $spreadsheet->addFieldMap($this);

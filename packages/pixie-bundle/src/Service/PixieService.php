@@ -4,6 +4,8 @@ namespace Survos\PixieBundle\Service;
 
 // see https://github.com/bungle/web.php/blob/master/sqlite.php for a wrapper without PDO
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Survos\BootstrapBundle\Event\KnpMenuEvent;
 use Survos\PixieBundle\CsvSchema\Parser;
@@ -16,6 +18,7 @@ use Survos\PixieBundle\Model\Item;
 use Survos\PixieBundle\Model\Property;
 use Survos\PixieBundle\Model\Source;
 use Survos\PixieBundle\Model\Table;
+use Survos\PixieBundle\Repository\CoreRepository;
 use Survos\PixieBundle\StorageBox;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -41,16 +44,18 @@ class PixieService
     public function __construct(
 //        #[Autowire('%kernel.debug%')] private readonly bool                                        $isDebug,
 
-        private readonly bool                       $isDebug = false,
-        private array                               $data = [],
-        private readonly string                     $extension = "pixie.db",
-        private readonly string                     $dbDir = 'pixie',
-        private readonly string                     $dataRoot = 'data', //
-        private readonly string                     $configDir = 'config/packages/pixie',
-        private array                               $bundleConfig = [],
+        private EntityManagerInterface    $pixieEntityManager,
+        private SqliteService             $sqliteService, private readonly CoreRepository $coreRepository,
+        private readonly bool             $isDebug = false,
+        private array                     $data = [],
+        private readonly string           $extension = "pixie.db",
+        private readonly string           $dbDir = 'pixie',
+        private readonly string           $dataRoot = 'data', //
+        private readonly string           $configDir = 'config/packages/pixie',
+        private array                     $bundleConfig = [],
         #[Autowire('%kernel.project_dir%')]
-        private readonly ?string                    $projectDir = null,
-        private readonly ?LoggerInterface           $logger = null,
+        private readonly ?string          $projectDir = null,
+        private readonly ?LoggerInterface $logger = null,
         private readonly ?Stopwatch                 $stopwatch = null,
         private readonly ?PropertyAccessorInterface $accessor = null,
         private readonly ?SerializerInterface       $serializer = null,
@@ -151,6 +156,9 @@ class PixieService
                            ?Config $config = null,
     ): StorageBox
     {
+        // this selects the proper database so when others access the em it is the right one
+        $this->sqliteService->getPixieEntityManager($pixieCode);
+
         assert(!str_contains($pixieCode, "/"), "pass in pixieCode, not filename");
 //        assert($filename, $pixieCode . " $filename ");
 
@@ -295,6 +303,16 @@ class PixieService
             dd($code, $property);
         }
         return $templates;
+
+    }
+
+    public function importConfigToCore(Config $config): void
+    {
+        $coreCode = $config->getCode();
+        if (!$this->coreRepository)
+        // map config to core fields, then only use Core/Fields and not Table/Columns
+        dd($config);
+
 
     }
 

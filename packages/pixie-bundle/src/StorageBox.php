@@ -7,6 +7,7 @@ namespace Survos\PixieBundle;
 // consider: https://github.com/morris/dop for binding arrays as parameters and sub-queries
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\Schema;
+use JetBrains\PhpStorm\Deprecated;
 use \PDO;
 use Psr\Log\LoggerInterface;
 use Survos\CoreBundle\Service\SurvosUtils;
@@ -35,6 +36,7 @@ use function Symfony\Component\String\u;
  * @license Apache 2.0
  */
 
+#[Deprecated]
 class StorageBox
 {
     const MODE_REPLACE = 'replace';
@@ -907,6 +909,7 @@ class StorageBox
         // _raw, if patch then read first and merge
     ): mixed
     {
+        assert(false, "@todo: move to pixieEm\n$key\n\n" . json_encode($value, JSON_PRETTY_PRINT));
         // this isn't true for image and translation tables
 //        SurvosUtils::assertKeyExists(PixieTranslationService::TRANSLATION_KEY, $value);
 //        dump($value[PixieTranslationService::TRANSLATION_KEY], $value); assert(false);

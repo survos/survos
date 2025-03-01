@@ -114,6 +114,9 @@ final class PixieMenu implements KnpMenuHelperInterface
     {
         $menu = $event->getMenu();
         $options = $event->getOptions();
+        if(str_contains($event->getOption('caller'), 'pixie')) {
+//            dump($event);
+        }
         return;
 
         // we could put the specific active pixie, and a link to all pixies.

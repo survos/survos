@@ -31,7 +31,7 @@ class SqliteService
     {
     }
 
-    public function dbName(string $code, bool $throwErrorIfMissing=true): string
+    public function dbName(string $code, bool $throwErrorIfMissing=false): string
     {
         $params = $this->pixieEntityManager->getConnection()->getParams();
         $dbName = str_replace('pixie_template', $code, $params['path']);

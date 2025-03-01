@@ -12,9 +12,9 @@ use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Entity\TranslateText;
 use App\Event\FetchTranslationObjectEvent;
 use App\Metadata\ITableAndKeys;
-use App\Repository\CoreRepository;
-use App\Repository\Pixie\RowRepository;
-use App\Repository\Pixie\TranslateTextRepository;
+use Survos\PixieBundle\Repository\RowRepository;
+use Survos\PixieBundle\Repository\TranslateTextRepository;
+use Survos\PixieBundle\Repository\CoreRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use League\Csv\Info;
@@ -45,14 +45,15 @@ class PixieImportService
         private readonly LoggerInterface          $logger,
         private readonly EventDispatcherInterface $eventDispatcher,
         private EntityManagerInterface            $pixieEntityManager,
+        private CoreService                    $coreService,
         private CoreRepository                    $coreRepository,
         private RowRepository                     $rowRepository,
         private TranslateTextRepository           $translateTextRepository,
-        private readonly SerializerInterface      $serializer, private readonly SqliteService $sqliteService,
+        private readonly SerializerInterface      $serializer,
+        private readonly SqliteService $sqliteService,
         public bool                               $purgeBeforeImport = false,
         private array                             $listsByLabel = [],
         /** array<Core[]> */
-        private array                             $cores = []
 
     )
     {
@@ -156,15 +157,12 @@ class PixieImportService
 //        foreach ($kv->getFiles())
         // $fn is the csv filename
 
-        foreach ($this->coreRepository->findAll() as $core) {
-            $this->cores[$core->getCoreCode()] = $core;
-        }
         foreach (array_values($config->getFiles()) as $tableName) {
             if ($pattern && !str_contains((string)$tableName, $pattern)) {
                 continue;
             }
 
-            $this->getCore($tableName);
+            $this->coreService->getCore($tableName);
             SurvosUtils::assertKeyExists($tableName, $filesByTablename, "Missing table $tableName look for filename, not table");
             $filenames = $filesByTablename[$tableName];
             foreach ($filenames as $fn) {
@@ -346,7 +344,7 @@ class PixieImportService
                     $rowObj = $event->row;
                     // handling relations could be its own RowEvent too, for now it's here
 //                dd($rowObj);
-                    $rowObj = $this->handleRelations($kv, $config, $pixieCode, $table, $rowObj);
+                    $rowObj = $this->handleRelations($kv, $row, $config, $pixieCode, $table, $rowObj);
 //                    dd(afterRelations: $rowObj);
                     $event->row = $rowObj;
 //                $tableName=='obj' && dd($rowObj['classification'], $event->rowObj['classification']);
@@ -597,6 +595,7 @@ class PixieImportService
      * @return array $row modified row, side effect of creating lists.
      */
     public function handleRelations(?StorageBox $kv,
+                                    Row $item,
                                     Config      $config,
                                     string      $pixieCode,
                                     Table       $table,
@@ -641,9 +640,9 @@ class PixieImportService
                 if (!array_key_exists($relatedTableName, $this->listsByLabel)) {
                     $this->listsByLabel[$relatedTableName] = [];
                     // eh, don't we have this as a pixie table?
-                    foreach ($kv->iterate($relatedTableName) as $relatedRow) {
-                        $this->listsByLabel[$relatedTableName][$relatedRow->label()] =
-                            $relatedRow->getKey();
+                    foreach ($kv->iterate($relatedTableName) as $relatedRowData) {
+                        $this->listsByLabel[$relatedTableName][$relatedRowData->label()] =
+                            $relatedRowData->getKey();
                     }
                 }
                 $isMultiple = is_array($label); // @todo: define in @list or @rel
@@ -669,7 +668,7 @@ class PixieImportService
                         if ($valueType === '@code') {
                             //
                         } elseif (in_array($valueType, ['@label', '@labels'])) {
-//                                dd($relatedRow);
+//                                dd($relatedRowData);
                             if (!$sourceLang = $row['locale'] ?? null) {
                                 if (!$sourceLang = $config->getSource()->locale) {
                                     assert(false, "unable to get source language");
@@ -677,24 +676,24 @@ class PixieImportService
                                 }
                             }
                             $relatedId = TranslationClientService::calcHash($label, $sourceLang);
-                            $relatedRow = [
+                            $relatedRowData = [
                                 'label' => trim($label),
 //                                    '_locale' => $sourceLang, // should every row have a locale?
                             ];
-                            $_t[$sourceLang][PixieInterface::TRANSLATION_LABEL] = $relatedRow['label'];
+                            $_t[$sourceLang][PixieInterface::TRANSLATION_LABEL] = $relatedRowData['label'];
 
-//                            ($relatedTableName == 'loc') && dd($relatedRow, $relatedTable);
+//                            ($relatedTableName == 'loc') && dd($relatedRowData, $relatedTable);
 
                             if (count($relatedTable->getTranslatable())) {
 
 
                                 // this is to get the orig strings.  No database lookup
-//                            dump($relatedRow);
+//                            dump($relatedRowData);
                                 // it seems like a lot of work to get the source hash, but it also modifies the $row and adds hash.  I think.
                                 // candidate for review
                                 if (class_exists(FetchTranslationObjectEvent::class)) {
                                     $event = $this->eventDispatcher->dispatch(
-                                        new FetchTranslationObjectEvent($relatedRow,
+                                        new FetchTranslationObjectEvent($relatedRowData,
                                             $sourceLang,
                                             $sourceLang,
                                             storageBox: $kv,
@@ -712,33 +711,44 @@ class PixieImportService
 //                                        dd($translationModel->toArray(), $translationModel->getHash());
                                         // same as in handleRelations, need to refactor.
 
-                                        if (!$kv->has($translationModel->getHash(), table: PixieInterface::PIXIE_STRING_TABLE, preloadKeys: true)) {
-                                            $kv->set($translationModel->toArray(), PixieInterface::PIXIE_STRING_TABLE);
+                                        if (!$tt = $this->translateTextRepository->find($translationModel->getHash())) {
+                                            $tt = new TranslateText(
+                                                $translationModel->getText(),
+                                                $translationModel->getSource(),
+                                                $translationModel->getHash()
+                                            );
+                                            $this->pixieEntityManager->persist($tt);
                                         }
+
+//                                        if (!$kv->has($translationModel->getHash(), table: PixieInterface::PIXIE_STRING_TABLE, preloadKeys: true)) {
+//                                            $kv->set($translationModel->toArray(), PixieInterface::PIXIE_STRING_TABLE);
+//                                        }
                                     }
 
                                     // the label and _translations have been set
-                                    $relatedRow = $event->getNormalizedData();
-//                                    dd($relatedRow);
+                                    $relatedRowData = $event->getNormalizedData();
+//                                    dd($relatedRowData);
                                     // set the related row field to the hash, not the text
-                                    $relatedId = $relatedRow[PixieInterface::TRANSLATION_LABEL]; //
-//                                    dd($relatedId, $relatedRow, $relatedTableName, $_t);
+                                    $relatedId = $relatedRowData[PixieInterface::TRANSLATION_LABEL]; //
+//                                    dd($relatedId, $relatedRowData, $relatedTableName, $_t);
                                     // replace the key with the translation key
-                                    $relatedRow[$pkName] = $relatedId;
-//                                dd(related: $relatedRow);
+                                    $relatedRowData[$pkName] = $relatedId;
+//                                dd(related: $relatedRowData);
                                 }
                                 // populate the related table
-                                $relatedRow[PixieInterface::TRANSLATED_STRINGS] = $_t;
+                                $relatedRowData[PixieInterface::TRANSLATED_STRINGS] = $_t;
 
-                                $this->addRow($relatedRow, $relatedTable);
+                                $relatedRow = $this->addRow($relatedRowData, $relatedTable);
+                                dd($relatedRowData, $relatedTable, $relatedId, $relatedRow);
 
-                                $kv->set($relatedRow, $relatedTableName);
-//                                $kv->set($relatedRow, $relatedTableName, properties: [
+
+                                $kv->set($relatedRowData, $relatedTableName);
+//                                $kv->set($relatedRowData, $relatedTableName, properties: [
 //                                    '_t' => $_t,
 //                                ]);
 //                                $kv->commit();
 //                                $newItem = $kv->get($relatedId, $relatedTableName);
-////                                dd($pkName, $relatedRow, $newItem, $newItem->getData());
+////                                dd($pkName, $relatedRowData, $newItem, $newItem->getData());
 //                                $kv->beginTransaction();
                                 $this->listsByLabel[$relatedTableName][$label] = $relatedId;
                             } else {
@@ -799,14 +809,14 @@ class PixieImportService
         return $row;
     }
 
-    /** add to the database, to core, etc. */
+    /** the one and only place it's add to the database, to core, etc. */
     public function addRow(array|object $row, Table $table): Row
     {
         $pkName = $table->getPkName();
         $tableName = $table->getName();
 
         $id = $row[$pkName]; // unique within core
-        $core = $this->getCore($tableName);
+        $core = $this->coreService->getCore($tableName);
 
         $rowId = Row::RowIdentifier($core, $id);
         /** @var Row $r */
@@ -823,30 +833,6 @@ class PixieImportService
 
     }
 
-    /**
-     * @param mixed $tableName
-     * @return void
-     */
-    public function getCore(string $tableName): Core
-    {
-//        if (!$core = $this->coreRepository->find($tableName)) {
-        if (!$core = $this->cores[$tableName]??null) {
 
-            $core = new Core($tableName);
-            foreach ($this->coreRepository->findAll() as $existingCore) {
-                dump($existingCore->getCode(), $existingCore);
-            }
-            $this->pixieEntityManager->persist($core);
-            assert($this->pixieEntityManager->contains($core));
-            $this->cores[$tableName] = $core;
-            dump($tableName, array_keys($this->cores));
-        }
-        if (!$this->pixieEntityManager->contains($core)) {
-            dd($core, $this->cores);
-        }
-//        dd($this->serializer->serialize($core, 'json', ['groups' => 'core.read']));
-        return $core;
-
-    }
 
 }

@@ -3,7 +3,7 @@
 namespace Survos\PixieBundle\Command;
 
 use App\Metadata\ITableAndKeys;
-use App\Repository\Pixie\RowRepository;
+use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Service\SqliteService;
 use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;

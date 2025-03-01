@@ -10,7 +10,7 @@ class ImportFileEvent extends Event
 
     public function __construct(
         public string $filename,
-        public string $pixieDbName
+        public ?string $pixieDbName=null
     )
     {
     }

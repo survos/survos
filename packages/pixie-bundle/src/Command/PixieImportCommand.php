@@ -5,12 +5,13 @@ namespace Survos\PixieBundle\Command;
 use Survos\PixieBundle\Entity\OriginalImage;
 use App\Event\RowEvent;
 use App\Metadata\ITableAndKeys;
-use App\Repository\CoreRepository;
+
 use Survos\PixieBundle\Service\SqliteService;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
+use Survos\PixieBundle\Repository\CoreRepository;
 use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\PixieBundle\Event\ImportFileEvent;
 use Survos\PixieBundle\Event\StorageBoxEvent;
@@ -53,6 +54,14 @@ final class PixieImportCommand extends InvokableServiceCommand
     {
 
         parent::__construct();
+        $this->setHelp(sprintf(<<<EOL
+import /json files into Row entities with _raw data and label.  
+dispatches PixieImportEvent with _raw
+does not create relations
+creates raw stats
+EOL
+        ));
+
     }
 
     public function __invoke(

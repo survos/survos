@@ -1,7 +1,15 @@
-{% extends 'base.html.twig' %}
+{% extends '@SurvosPixie/pixie/layout.html.twig' %}
 
 {% block body %}
     <h1>{{ pixieCode }}</h1>
+
+    {% for core in cores %}
+        <li>
+            {{ core.code }}
+            iCount: {{ core.instanceCount }}
+            rCount: {{ core.rows|length }}
+        </li>
+    {% endfor %}
     <div class="col-xxl-3 col-sm-6 project-card">
         <div class="card card-height-100 overflow-hidden">
             <div class="p-3 bg-info-subtle">

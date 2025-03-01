@@ -2,13 +2,14 @@
 
 namespace Survos\PixieBundle\Controller;
 
-use App\Repository\CoreRepository;
-use App\Repository\Pixie\RowRepository;
+use Survos\PixieBundle\Repository\RowRepository;
+use Survos\PixieBundle\Repository\CoreRepository;
 //use Survos\PixieBundle\Service\SqliteService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Survos\PixieBundle\Entity\Owner;
 use Survos\PixieBundle\Entity\Row;
+use Survos\PixieBundle\Entity\Core;
 use Survos\PixieBundle\Event\StorageBoxEvent;
 use Survos\PixieBundle\Message\PixieTransitionMessage;
 use Survos\PixieBundle\Meta\PixieInterface;
@@ -109,6 +110,11 @@ class PixieController extends AbstractController
             }
         }
         assert($property, $propertyCode);
+        $cores = [];
+        foreach ($this->coreRepository->findAll() as $core) {
+            $cores[$core->getCode()] = $core;
+        }
+        dd($cores);
 
         $chart = $this->getChartData($property, $tableName, $kv, limit:  $limit);
         return
@@ -117,6 +123,7 @@ class PixieController extends AbstractController
             'property' => $property,
             'tableName' => $tableName,
             'pixieCode' => $pixieCode,
+                'cores' => $cores,
             'chart' => $chart
         ];
 
@@ -282,6 +289,7 @@ class PixieController extends AbstractController
     #[Route('/browse/{pixieCode}/{tableName}.{_format}', name: 'pixie_browse')]
     public function browse(
         Request                      $request,
+        Core $core,
         string                       $pixieCode,
         string                       $tableName,
         string                       $_format = 'html',
@@ -291,6 +299,7 @@ class PixieController extends AbstractController
         #[MapQueryParameter] int     $offset = 0,
     ): Response
     {
+        dd($core);
         // see SearchController for meili and the public-facing browse
         $kv = $this->pixieService->getStorageBox($pixieCode);
         $where = [];
@@ -450,7 +459,7 @@ class PixieController extends AbstractController
 
     #[Route('/{pixieCode}/home', name: 'pixie_homepage')]
     #[Route('/{pixieCode}', name: 'pixie_overview')]
-    public function overview(
+    public function info(
         string                   $pixieCode,
         #[MapQueryParameter] int $limit = 100
     ): Response
@@ -472,7 +481,10 @@ class PixieController extends AbstractController
 //        dd($this->pixieEntityManager->getRepository(Row::class)->count());
 //        dd($this->rowRepository->count());
 
+        // order?
+        $cores = [];
         foreach ($this->coreRepository->findAll() as $core) {
+            $cores[] = $core;
 //            dd($core);
         }
         $kv = $this->pixieService->getStorageBox($pixieCode);
@@ -495,6 +507,8 @@ class PixieController extends AbstractController
             'data' => $data,
             'limit' => $limit,
 //            'kv' => $kv,
+        // @todo: harmonize cores and tables
+            'cores' => $cores,
             'tables' => $tables,
             'pixieCode' => $pixieCode,
             'config' => $this->pixieService->getConfig($pixieCode)
@@ -508,11 +522,17 @@ class PixieController extends AbstractController
         string                   $pixieCode,
     ): array
     {
+        $cores = [];
+        foreach ($this->coreRepository->findAll() as $core) {
+            $cores[$core->getCode()] = $core;
+        }
+
         $pixieFilename = $this->pixieService->getPixieFilename($pixieCode);
             return [
             'kv' => $this->pixieService->getStorageBox($pixieCode),
             'config' => $this->pixieService->getConfig($pixieCode),
             'pixieCode' => $pixieCode,
+                'cores' => $cores,
         ];
     }
 
@@ -631,13 +651,12 @@ class PixieController extends AbstractController
         #[MapQueryParameter] int $limit = 25
     ): array
     {
-        $counts = $this->rowRepository->getCounts('coreCode');
-        dd($counts);
+//        $counts = $this->rowRepository->getCounts('core');
+//        dd($counts);
         $core = $this->coreRepository->find($tableName);
+        // row or instance?
         $count = $core->getRows()->count();
-        dd($count, $core);
         // now core, not table!
-        $core  =
         $pixieFilename = $this->pixieService->getPixieFilename($pixieCode);
         assert(file_exists($pixieFilename));
         $kv = $this->pixieService->getStorageBox($pixieCode);

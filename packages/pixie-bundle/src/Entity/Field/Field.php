@@ -1,4 +1,4 @@
-<?php // at the OWNER level
+<?php // at the OWNER level, maps from pixie Column model
 
 namespace Survos\PixieBundle\Entity\Field;
 

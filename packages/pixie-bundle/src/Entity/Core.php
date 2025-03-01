@@ -56,6 +56,8 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
         AccessTrait,
         RouteParametersTrait;
 
+    public const array UNIQUE_PARAMETERS = ['tableName' => 'code'];
+
 //    #[ORM\Column(type: 'string', length: 255, nullable: false)]
 //    #[Assert\Length(max: 255, maxMessage: 'The code cannot be longer than {{ limit }} characters')]
     #[Groups(['core.read'])]

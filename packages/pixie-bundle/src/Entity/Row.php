@@ -29,7 +29,7 @@ class Row implements MarkingInterface, \Stringable
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::JSON, nullable: true)]
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
     private ?array $data = null;
 
     /**
@@ -69,7 +69,7 @@ class Row implements MarkingInterface, \Stringable
         return $this;
     }
 
-    public function getData(): ?object
+    public function getData(): ?array
     {
         return $this->data;
     }

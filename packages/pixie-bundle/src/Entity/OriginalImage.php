@@ -13,17 +13,18 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 #[ORM\Entity(repositoryClass: OriginalImageRepository::class)]
 class OriginalImage
 {
+    use TimestampableEntity;
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $thumbUrl = null;
 
-    #[ORM\Column]
-    #[Gedmo\Timestampable(on:"create")]
-    private ?\DateTimeImmutable $createdAt;
+//    #[ORM\Column]
+//    #[Gedmo\Timestampable(on:"create")]
+//    private ?\DateTimeImmutable $createdAt;
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
+//    public function getCreatedAt(): ?\DateTimeImmutable
+//    {
+//        return $this->createdAt;
+//    }
 
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]

@@ -33,7 +33,8 @@ class RelationService
             ->execute();
     }
 
-    public function addRelation(Instance $leftInstance, string $rightInstanceCode,
+    public function addRelation(Instance $leftInstance,
+                                string $rightInstanceCode,
                                 RelationField $relationField,
 //                                RelationField $RelationField,
                                 Instance $rightInstance): Relation

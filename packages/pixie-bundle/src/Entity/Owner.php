@@ -41,6 +41,7 @@ use Zenstruck\Metadata;
 #[ORM\Entity(repositoryClass: OwnerRepository::class)]
 #[ORM\UniqueConstraint(name: 'owner_code', columns: ['code'])]
 #[UniqueEntity(fields: ['code'])]
+#[UniqueEntity(fields: ['id'])]
 //#[ApiResource(
 //    shortName: 'owner',
 //    operations: [new Get(), new Put(), new Delete(), new Patch(), new GetCollection(name: self::BROWSE_ROUTE)],
@@ -182,6 +183,15 @@ class Owner implements \Stringable,  // Entity\Owner!
     #[Groups(['owner.read'])]
     private ?int $imageCount = null;
 
+    /**
+     * @var Collection<int, Core>
+     */
+    #[ORM\OneToMany(targetEntity: Core::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $cores;
+
+    #[ORM\Column(length: 7)]
+    private ?string $locale = null;
+
     public function __construct(?string $code = null, ?string $source = null, ?array $hit = null)
     {
         $this->initId($code);
@@ -203,6 +213,7 @@ class Owner implements \Stringable,  // Entity\Owner!
         $this->marking = self::PLACE_NEW;
         $this->ownerMembers = new ArrayCollection();
         $this->fields = new ArrayCollection();
+        $this->cores = new ArrayCollection();
     }
 
     public function getName(): ?string
@@ -673,6 +684,48 @@ class Owner implements \Stringable,  // Entity\Owner!
     public function setImageCount(?int $imageCount): static
     {
         $this->imageCount = $imageCount;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Core>
+     */
+    public function getCores(): Collection
+    {
+        return $this->cores;
+    }
+
+    public function addCore(Core $core): static
+    {
+        if (!$this->cores->contains($core)) {
+            $this->cores->add($core);
+            $core->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCore(Core $core): static
+    {
+        if ($this->cores->removeElement($core)) {
+            // set the owning side to null (unless already changed)
+            if ($core->getOwner() === $this) {
+                $core->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(string $locale): static
+    {
+        $this->locale = $locale;
 
         return $this;
     }

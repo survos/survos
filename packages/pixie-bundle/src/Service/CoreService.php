@@ -33,6 +33,7 @@ use Survos\PixieBundle\Entity\FieldSet;
 use Survos\PixieBundle\Entity\Instance;
 use Survos\PixieBundle\Entity\InstanceCategory;
 use Survos\PixieBundle\Entity\InstanceInterface;
+use Survos\PixieBundle\Entity\Owner;
 use Survos\PixieBundle\Entity\Project;
 use Survos\PixieBundle\Repository\CoreRepository;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -687,25 +688,27 @@ class CoreService
     /**
      * @param mixed $tableName
      */
-    public function getCore(string $tableName): Core
+    public function getCore(string $tableName, ?Owner $owner=null): Core
     {
         if (empty($this->cores)) {
             foreach ($this->coreRepository->findAll() as $core) {
+                if ($owner) {
+                    assert($core->getOwner() === $owner);
+                }
                 $this->cores[$core->getCoreCode()] = $core;
             }
         }
 
 //        if (!$core = $this->coreRepository->find($tableName)) {
         if (!$core = $this->cores[$tableName]??null) {
-
-            $core = new Core($tableName);
-            foreach ($this->coreRepository->findAll() as $existingCore) {
-                dump($existingCore->getCode(), $existingCore);
-            }
+            $core = new Core($tableName, $owner);
+//            foreach ($this->coreRepository->findAll() as $existingCore) {
+//                dump($existingCore->getCode(), $existingCore);
+//            }
             $this->pixieEntityManager->persist($core);
             assert($this->pixieEntityManager->contains($core));
             $this->cores[$tableName] = $core;
-            dump($tableName, array_keys($this->cores));
+//            dump($tableName, array_keys($this->cores));
         }
         if (!$this->pixieEntityManager->contains($core)) {
             dd($core, $this->cores);

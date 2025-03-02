@@ -13,10 +13,10 @@ interface InstanceInterface extends IdInterface, TranslatableFieldsProxyInterfac
 
     public function getClass(): string;
 
-    public function getImages(): array;
-
-    public function setImages(array $images): self;
-
+//    public function getImages(): array;
+//
+//    public function setImages(array $images): self;
+//
     //    public function setRelations(ArrayCollection $relations): self;
     //    public function getRelations(): ArrayCollection;
     //    public function addRelation(Relation $relation): self;

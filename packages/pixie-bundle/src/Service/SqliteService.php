@@ -58,7 +58,6 @@ class SqliteService
         $conn = $this->pixieEntityManager->getConnection();
         $params = $conn->getParams();
         $conn->selectDatabase($this->dbName($code));
-        dump($this->dbName($code), $code);
         return $this->pixieEntityManager;
     }
 
@@ -67,11 +66,12 @@ class SqliteService
         Config $config)
     {
         // get the template first (./c d:sch:update --force --em=pixie)
-        $conn = $this->pixieEntityManager->getConnection();
+        $pixieConn = $this->pixieEntityManager->getConnection();
+        $databasePlatform = $pixieConn->getDatabasePlatform();
         $templateName = $this->dbName('pixie_template', true);
 //        $conn->selectDatabase($templateName);
         try {
-            $fromSchemaManager = $conn->createSchemaManager();
+            $fromSchemaManager = $pixieConn->createSchemaManager();
             $fromSchema = $fromSchemaManager->introspectSchema();
         } catch (\Exception $e) {
             dd($e->getMessage(), $x);
@@ -88,10 +88,10 @@ class SqliteService
 //        $classes = $this->pixieEntityManager->getMetadataFactory()->getAllMetadata();
 //        $toSchema   = $schemaTool->getSchemaFromMetadata($classes);
 //        $sqls = $schemaTool->getUpdateSchemaSql($classes);
-
 //        dd($sqls);
 //        $fromSchema = $schemaTool->createSchemaForComparison($toSchema);
 //        return $this->platform->getAlterSchemaSQL($schemaDiff);
+        $comparator = $fromSchemaManager->createComparator();
 
         $toConnection = DriverManager::getConnection( ['path' => $toDbName, 'driver' => 'pdo_sqlite'] );
         $toSchemaMananger = $toConnection->createSchemaManager();
@@ -99,11 +99,9 @@ class SqliteService
 //        $fromSchemaManager = $fromConnection->createSchemaManager();
 //        $fromSchema = $fromSchemaManager->introspectSchema();
 
-        $comparator = $fromSchemaManager->createComparator();
+        assert($toSchema <> $fromSchema);
         $schemaDiff = $comparator->compareSchemas( $toSchema, $fromSchema);
-        $myPlatform = $conn->getDatabasePlatform();
-        $queries = $myPlatform->getAlterSchemaSQL($schemaDiff);
-        dd($queries);
+        $queries = $databasePlatform->getAlterSchemaSQL($schemaDiff);
         foreach ($queries as $query) {
             try {
 //            dump(diffSql: $diffSql, q: $queries);
@@ -113,7 +111,6 @@ class SqliteService
                 // it already exists.
             }
         }
-
 
         // templates?
         $config = StorageBox::fix($config);
@@ -150,8 +147,6 @@ class SqliteService
                 dd($exception->getMessage(), $view);
             }
         }
-
-        dd($schemaDiff, $schemaDiff->isEmpty(), $toDbName);
         return $toConnection;
         $tables = [];
         foreach ($fromSchema->getTables() as $table) {
@@ -167,7 +162,7 @@ class SqliteService
 //        }
 
 
-//        $queries = $schemaDiff->toSql($myPlatform); // queries to get from one to another schema.
+//        $queries = $schemaDiff->toSql($databasePlatform); // queries to get from one to another schema.
 
         // now do a diff so we can keep the dbs in sync
 //            $diffSql = join(';', $queries);
@@ -195,14 +190,15 @@ class SqliteService
         $myForeign->addColumn("user_id", "integer");
 //        $myForeign->addForeignKeyConstraint($myTable, ["user_id"], ["id"], ["onUpdate" => "CASCADE"]);
 
+
         $queries = $schema->toSql($conn->getDatabasePlatform()); // get queries to create this schema.
 
         $schemaManager = $conn->createSchemaManager();
         $comparator = $schemaManager->createComparator();
         $schemaDiff = $comparator->compareSchemas($fromSchema, $schema);
 
-        $myPlatform = $conn->getDatabasePlatform();
-        $diffs = $myPlatform->getAlterSchemaSQL($schemaDiff);
+        $databasePlatform = $conn->getDatabasePlatform();
+        $diffs = $databasePlatform->getAlterSchemaSQL($schemaDiff);
 
         $sc->introspectSchema();
         $newSchema = $fromSchemaManager->introspectSchema();
@@ -216,7 +212,7 @@ class SqliteService
 
         return [$tables, $diffs];
 
-//        foreach ($schemaDiff->toSql($myPlatform) as $sql) {
+//        foreach ($schemaDiff->toSql($databasePlatform) as $sql) {
 //            dump($sql);
 //            $conn->executeQuery($sql);
 //        }

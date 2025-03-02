@@ -12,8 +12,8 @@ class KeyValue
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
     private $data = [];
 
-    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
-    private $rawData = [];
+//    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+//    private $rawData = [];
 
     public function getData(): ?array
     {
@@ -42,15 +42,15 @@ class KeyValue
         return count($this->data);
     }
 
-    public function getRawData(): ?array
-    {
-        return $this->rawData;
-    }
-
-    public function setRawData(?array $rawData): self
-    {
-        $this->rawData = $rawData;
-
-        return $this;
-    }
+//    public function getRawData(): ?array
+//    {
+//        return $this->rawData;
+//    }
+//
+//    public function setRawData(?array $rawData): self
+//    {
+//        $this->rawData = $rawData;
+//
+//        return $this;
+//    }
 }

@@ -176,6 +176,10 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
     #[ORM\OneToMany(targetEntity: Row::class, mappedBy: 'core', orphanRemoval: true)]
     private Collection $rows;
 
+    #[ORM\ManyToOne(inversedBy: 'cores')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Owner $owner = null;
+
 
     /**
      * @return string|null
@@ -251,9 +255,13 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
     }
 
     public function __construct(
-        ?string $code=null
+        ?string $code=null,
+        ?Owner $owner=null,
     )
     {
+        if ($owner) {
+            $owner->addCore($this);
+        }
         assert($code);
             $this->initId($code);
 //        $this->coreDictionary = $dictionaries['core_icons'];
@@ -1243,6 +1251,18 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
                 $row->setCore(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOwner(): ?Owner
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?Owner $owner): static
+    {
+        $this->owner = $owner;
 
         return $this;
     }

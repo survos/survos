@@ -147,6 +147,7 @@ class StorageBox
 
 //            $tableName=='obj' && dd($internalProperties, table: $table, uses: $table->getUses(), extends: $table->getExtends());
 //            $tableName=='obj' && dd($config, $table, $tableName, $newProperties);
+            if (false) // this handles extends, which we dont use with the doctrine schema
             if ($extends = $table->getExtends()) {
                 SurvosUtils::assertKeyExists($extends, $templates);
                 /** @var Table $templateTable */
@@ -189,7 +190,7 @@ class StorageBox
 //            $tableX = $config->tables[$tableName];
             $table->setProperties($newProperties);
             $table->setName($tableName);
-            assert($table->getPkName(), $tableName);
+            assert($table->getPkName(), $tableName . " is missing a pkName " . $config->code);
 //            $tableName=='image' && dump(__LINE__, __METHOD__, $newProperties, $table->getPkName());
 //            dd($tableX, $table);
             assert(count($newProperties), "no new properties $tableName");
@@ -216,16 +217,16 @@ class StorageBox
 
     public function createTables(Config $config): void
     {
-        if ($this->db->inTransaction()) {
-            $this->db->commit();
-        }
-            $sth = $this->db->query($sql = "SELECT name FROM sqlite_master where type='table'");
-        try {
-        } catch (\Exception $e) {
-            throw new \Exception("Unable to create/use : " . $config->code . "\n" . $e->getMessage());
-        }
-        $this->schemaTables = $sth->fetchAll(PDO::FETCH_COLUMN); // load the existing tables
-        $this->beginTransaction();
+//        if ($this->db->inTransaction()) {
+//            $this->db->commit();
+//        }
+//            $sth = $this->db->query($sql = "SELECT name FROM sqlite_master where type='table'");
+//        try {
+//        } catch (\Exception $e) {
+//            throw new \Exception("Unable to create/use : " . $config->code . "\n" . $e->getMessage());
+//        }
+//        $this->schemaTables = $sth->fetchAll(PDO::FETCH_COLUMN); // load the existing tables
+//        $this->beginTransaction();
         if ($hasTranslations = true) {
             $table = (new Table(
                 name: ($tableName = PixieInterface::PIXIE_STRING_TABLE) ,
@@ -274,16 +275,17 @@ class StorageBox
 //            }
 
         }
-        $this->commit();
+//        $this->commit();
 
         // auto-create, or at least validate
+        if (0)
         foreach ($config->getTables() as $tableName => $table) {
             assert($table instanceof Table, $tableName);
             foreach ($table->getProperties() as $property) {
                 assert($property instanceof Property, json_encode($property));
 
                 if ($list = $property->getListTableName()) {
-                    assert($this->hasTable($list), "until auto-create works, create a table for each list, $list");
+//                    assert($this->hasTable($list), "until auto-create works, create a table for each list, $list");
 //                $listTable = $this->getTable($tableName);
                 }
             }
@@ -357,10 +359,10 @@ class StorageBox
     public function select(string $tableName): self
     {
         $tables = $this->getTableNames(); // not cached!
-        assert(count($tables), "no tables in $this->filename");
-        if (!in_array($tableName, $tables)) {
-            throw new \LogicException("$tableName $this->filename is not in tables:\n\n" . implode("\n", $tables));
-        };
+//        assert(count($tables), "no tables in $this->filename");
+//        if (!in_array($tableName, $tables)) {
+//            throw new \LogicException("$tableName $this->filename is not in tables:\n\n" . implode("\n", $tables));
+//        };
         $this->currentTable = $tableName;
         return $this;
 
@@ -666,13 +668,13 @@ class StorageBox
         );
 //        ($tableName=='str') && dd($sql, $table->getIndexes());
 //        dd($columns, $indexSql, $sql, $primaryKey);
-        try {
-            $result = $this->db->exec($sql);
-//if ($tableName === 'obj') dd($sql);
-        } catch
-        (\Exception $exception) {
-            dd($exception, $sql, $columns, $indexSql);
-        }
+//        try {
+//            $result = $this->db->exec($sql);
+////if ($tableName === 'obj') dd($sql);
+//        } catch
+//        (\Exception $exception) {
+//            dd($exception, $sql, $columns, $indexSql);
+//        }
 //        ($tableName==='obj') && dd($sql, $result, $indexes);
 //        dump($tableName, $sql);
         // still in a transaction, can't do this yet, wait until all tables are created.

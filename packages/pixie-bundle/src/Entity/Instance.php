@@ -21,6 +21,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Tree\Traits\NestedSetEntity;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait;
 use Survos\ApiGrid\Api\Filter\JsonSearchFilter;
@@ -37,6 +38,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 use function Symfony\Component\String\u;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 //use App\Traits\InstanceJsonTrait;
 
@@ -91,7 +93,8 @@ use function Symfony\Component\String\u;
 ])]
 #[ApiFilter(MultiFieldSearchFilter::class, properties: ['label', 'code'])]
 //#[Gedmo\Tree(type: 'nested')]
-class Instance implements IdInterface,
+class Instance implements
+    IdInterface,
     TranslatableInterface,
     TranslatableFieldsProxyInterface,
     CoreInterface, // constants
@@ -99,21 +102,22 @@ class Instance implements IdInterface,
 //    AsBarcodeInterface,
 //    Translatable,
     RouteParametersInterface,
-    ImportDataInterface,
-    InstanceInterface,
-    UuidAttributeInterface,
+//    ImportDataInterface,
+//    InstanceInterface,
+//    UuidAttributeInterface,
     \Stringable
 {
-    use UuidAttributeTrait;
+//    use UuidAttributeTrait;
 //    use CollectiveAccessTrait;
-    use NestedEntityTrait;
 //    use ImportDataTrait;
     use InstanceTrait;
     use TranslatableTrait;
     use TranslatableFieldsProxyTrait;
+    use CoreIdTrait;
+
+//    use NestedEntityTrait;
 //    use NestedSetEntity;
 //    use RouteParametersTrait;
-    use CoreIdTrait;
 
     //    #[ORM\Id]
     //    #[ORM\GeneratedValue]
@@ -127,8 +131,8 @@ class Instance implements IdInterface,
     protected Core $core;
 
     //
-    #[ORM\Embedded(class: "KeyValue", columnPrefix: "import_")]
-    private ?KeyValue $importDataWrapper = null;
+//    #[ORM\Embedded(class: "KeyValue", columnPrefix: "import_")]
+//    private ?KeyValue $importDataWrapper = null;
 
     public const DB_CODE_FIELD = 'code';
     public const DB_LABEL_FIELD = 'label';
@@ -174,8 +178,8 @@ class Instance implements IdInterface,
         }
         assert(isset($this->id), " id is not set during __construct");
         assert($this->getId(), "missing uuid after construct");
-        $this->children = new ArrayCollection();
-        $this->importDataWrapper = null; //  = new KeyValue(); ?
+//        $this->children = new ArrayCollection();
+//        $this->importDataWrapper = null; //  = new KeyValue(); ?
         $this->leftRelations = new ArrayCollection();
         $this->rightRelations = new ArrayCollection();
         $this->instanceCategories = new ArrayCollection();
@@ -184,17 +188,17 @@ class Instance implements IdInterface,
     }
 
 //    #[Gedmo\TreeParent]
-    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: "children")]
-    #[ORM\JoinColumn(name: "ancestor_id", referencedColumnName: "id", onDelete: "CASCADE")]
-    #[Assert\Valid()]
-    #[Groups(['instance.write'])]
-    private $parent;
+//    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: "children")]
+//    #[ORM\JoinColumn(name: "ancestor_id", referencedColumnName: "id", onDelete: "CASCADE")]
+//    #[Assert\Valid()]
+//    #[Groups(['instance.write'])]
+//    private $parent;
 
 //    #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'instances')]
 //    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
 //    #[Groups(['instance.write'])]
 //    #[ACConfig(coreClass: Project::class)]
-    protected Project $project;
+//    protected Project $project;
 
     #[Groups(['instance.tree', 'instance.read'])]
     public function getParentId(): ?Uuid
@@ -202,11 +206,11 @@ class Instance implements IdInterface,
         return $this->getParent() ? $this->getParent()->getId() : null;
     }
 
-    #[ORM\OneToMany(targetEntity: self::class, mappedBy: "parent")]
-    #[ORM\OrderBy([
+//    #[ORM\OneToMany(targetEntity: self::class, mappedBy: "parent")]
+//    #[ORM\OrderBy([
 //        'left' => 'ASC',
-    ])]
-    private $children;
+//    ])]
+//    private $children;
 
     #[ORM\OneToMany(mappedBy: 'leftInstance', targetEntity: Relation::class, orphanRemoval: true)]
     private Collection $leftRelations;

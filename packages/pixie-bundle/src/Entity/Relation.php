@@ -17,9 +17,9 @@ use Survos\PixieBundle\Traits\IdTrait;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: RelationRepository::class)]
-#[ORM\UniqueConstraint(name: 'core_relation_code', columns: ['core_id', 'code'])]
-#[UniqueEntity(['projectCore','code'])]
-#[ORM\Index('relation_core', ['core'])]
+//#[ORM\UniqueConstraint(name: 'core_relation_code', columns: ['core_id', 'code'])]
+#[UniqueEntity(['core','code'])]
+//#[ORM\Index('relation_core', columns: ['core_id'])]
 
 class Relation implements ProjectInterface, ProjectCoreInterface, IdInterface, AsBarcodeInterface, RouteParametersInterface, \Stringable
 {

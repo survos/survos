@@ -2,6 +2,7 @@
 
 namespace Survos\PixieBundle\Command;
 
+use App\Repository\OwnerRepository;
 use Survos\PixieBundle\Entity\OriginalImage;
 use App\Event\RowEvent;
 use App\Metadata\ITableAndKeys;
@@ -48,8 +49,8 @@ final class PixieImportCommand extends InvokableServiceCommand
         private EntityManagerInterface                     $pixieEntityManager,
         private EventDispatcherInterface                   $eventDispatcher,
         #[Autowire('%env(SITE_BASE_URL)%')] private string $baseUrl,
-        private CoreRepository $coreRepository,
-        private readonly SqliteService $sqliteService,
+        private CoreRepository                             $coreRepository,
+        private readonly SqliteService                     $sqliteService, private readonly OwnerRepository $ownerRepository,
     )
     {
 
@@ -95,6 +96,7 @@ EOL
         $index = is_null($index) ? false : $index;
 
         $config = $pixieService->getConfig($configCode);
+        // make sure the local owner is set.
         assert($config, "Missing $configCode");
         $sourceDir = $pixieService->getSourceFilesDir($configCode, subCode: $subCode);
         assert(is_dir($sourceDir), "Invalid source dir: $sourceDir");
@@ -196,11 +198,12 @@ EOL
         $kv = $this->pixieService->getStorageBox($configCode, $subCode);
 
         $consoleTable = new Table($io);
-        $consoleTable->setHeaders(['table', 'count']);
+        $consoleTable->setHeaders(['table', 'count','url']);
         // these counts should match up with the meili facet counts
 
         foreach ($config->getTables() as $table) {
             $count = $kv->count($table->getName());
+            $url = sprintf("%s://%s", $configCode, $subCode);
 //            $kv->beginTransaction();
 //            $kv->set([
 //                'id' => $table->getName(),

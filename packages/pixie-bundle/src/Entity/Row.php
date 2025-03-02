@@ -1,6 +1,7 @@
 <?php
 
 namespace Survos\PixieBundle\Entity;
+// ./c make:entity Survos\\PixieBundle\\Entity\\Row
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -40,6 +41,9 @@ class Row implements MarkingInterface, \Stringable
     #[ORM\OneToMany(targetEntity: OriginalImage::class, mappedBy: 'row', orphanRemoval: true)]
     private Collection $images;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $raw = null;
+
     public function __construct(?Core $core=null, ?string $id=null)
     {
         $this->initCoreId($core, $id);
@@ -76,7 +80,7 @@ class Row implements MarkingInterface, \Stringable
         return $this->data;
     }
 
-    public function getRaw(string $key, mixed $default=null, bool $throwErrorIfMissing = true): mixed
+    public function getRawValue(string $key, mixed $default=null, bool $throwErrorIfMissing = true): mixed
     {
         return $this->data[$key] ?? $default;
     }
@@ -126,5 +130,16 @@ class Row implements MarkingInterface, \Stringable
         }
 
         return $this;
+    }
+
+    public function setRaw(?array $raw): static
+    {
+        $this->raw = $raw;
+
+        return $this;
+    }
+    public function getRaw(): ?array
+    {
+        return $this->raw;
     }
 }

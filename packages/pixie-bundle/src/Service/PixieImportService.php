@@ -12,6 +12,7 @@ use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Entity\TranslateText;
 use App\Event\FetchTranslationObjectEvent;
 use App\Metadata\ITableAndKeys;
+use Survos\PixieBundle\Repository\InstanceRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\TranslateTextRepository;
 use Survos\PixieBundle\Repository\CoreRepository;
@@ -47,6 +48,7 @@ class PixieImportService
         private EntityManagerInterface            $pixieEntityManager,
         private CoreService                    $coreService,
         private CoreRepository                    $coreRepository,
+        private InstanceRepository $instanceRepository,
         private RowRepository                     $rowRepository,
         private TranslateTextRepository           $translateTextRepository,
         private readonly SerializerInterface      $serializer,
@@ -328,6 +330,7 @@ class PixieImportService
                         continue;
                     }
                     $row = $this->addRow($rowObj, $table);
+                    dump(beforeRowEvent: $row, data: $row->getData());
 
                     // _before_ row is created.
                     $rowEvent = new RowEvent(
@@ -342,6 +345,7 @@ class PixieImportService
 
                     $event = $this->eventDispatcher->dispatch($rowEvent);
                     $rowObj = $event->row;
+                    dd(obj: $rowObj);
                     // handling relations could be its own RowEvent too, for now it's here
 //                dd($rowObj);
                     $rowObj = $this->handleRelations($kv, $row, $config, $pixieCode, $table, $rowObj);
@@ -385,10 +389,10 @@ class PixieImportService
                         }
 
                         $row = $this->addRow($rowObj, $table);
-                        dd($id, $tableName, raw: $rowObj, row: $row);
+//                        dd($id, $tableName, raw: $rowObj, row: $row);
 
 //                        dump(rowObj: $rowObj, transFields: $table->getTranslatable());
-
+if (0) // @todo: translation
                         if (class_exists(FetchTranslationObjectEvent::class)) {
                             // for source table, Not libre, which happens during pixie:trans --queue
                             // complicated, but this also adds the text hash to the rowObj values
@@ -436,7 +440,7 @@ class PixieImportService
                     assert($rowObj['license'] ?? '' <> 'Copyrighted', "invalid license");
                         assert($tableName === $table->getName());
                         $this->addRow($rowObj, $table);
-                        $kv->set($rowObj, $table->getName());
+//                        $kv->set($rowObj, $table->getName());
                     try {
                     } catch (\Exception $e) {
                         dd($kv->getFilename(), $e, $kv->getSelectedTable(), row: $rowObj);
@@ -739,10 +743,10 @@ class PixieImportService
                                 $relatedRowData[PixieInterface::TRANSLATED_STRINGS] = $_t;
 
                                 $relatedRow = $this->addRow($relatedRowData, $relatedTable);
-                                dd($relatedRowData, $relatedTable, $relatedId, $relatedRow);
+//                                dd($relatedRowData, $relatedTable, $relatedId, $relatedRow);
 
 
-                                $kv->set($relatedRowData, $relatedTableName);
+//                                $kv->set($relatedRowData, $relatedTableName);
 //                                $kv->set($relatedRowData, $relatedTableName, properties: [
 //                                    '_t' => $_t,
 //                                ]);
@@ -817,8 +821,19 @@ class PixieImportService
 
         $id = $row[$pkName]; // unique within core
         $core = $this->coreService->getCore($tableName);
-
         $rowId = Row::RowIdentifier($core, $id);
+
+        if (0) {
+            if (!$instance = $this->instanceRepository->find($rowId)) {
+                $instance = $core->createInstance($id);
+                assert($rowId == $instance->getId(), "$rowId <> " . $instance->getId());
+                $this->pixieEntityManager->persist($instance);
+            }
+            $this->pixieEntityManager->flush();
+            dd($instance);
+        }
+
+
         /** @var Row $r */
         if (!$r = $this->rowRepository->find($rowId)) {
             $r = new Row($core, $id);

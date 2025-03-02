@@ -13,8 +13,6 @@ use App\Entity\ImportDataInterface;
 use App\Entity\TranslatableFieldsProxyInterface;
 use App\Entity\UuidAttributeInterface;
 use App\Filters\UriFacetFilter;
-use App\Repository\InstanceRepository;
-use App\Traits\CoreIdTrait;
 use App\Traits\InstanceTrait;
 use App\Traits\NestedEntityTrait;
 use App\Traits\TranslatableFieldsProxyTrait;
@@ -34,6 +32,7 @@ use Survos\PixieBundle\Entity\Field\Field;
 use Survos\PixieBundle\Entity\Field\FieldInterface;
 use Survos\PixieBundle\Entity\Field\RelationField;
 use Survos\PixieBundle\Entity\Relation as Relation;
+use Survos\PixieBundle\Traits\CoreIdTrait;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -166,7 +165,7 @@ class Instance implements IdInterface,
         if ($core && !$id) {
             $id = $core->createInstanceId($code);
         }
-        $this->initId($core, $code);
+        $this->initId(id: $id, code: $code);
         if ($core) {
             $core->addInstance($this);
 //            $this->setLocale($core->getProject()->getLocale());

@@ -5,7 +5,7 @@ namespace Survos\PixieBundle\Entity;
 use App\Entity\IdInterface;
 use App\Entity\ProjectInterface;
 use App\Repository\InstanceCategoryRepository;
-use App\Traits\IdTrait;
+use Survos\PixieBundle\Traits\IdTrait;
 use App\Traits\ProjectTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;

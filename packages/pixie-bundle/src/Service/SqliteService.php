@@ -58,6 +58,7 @@ class SqliteService
         $conn = $this->pixieEntityManager->getConnection();
         $params = $conn->getParams();
         $conn->selectDatabase($this->dbName($code));
+        dump($this->dbName($code), $code);
         return $this->pixieEntityManager;
     }
 
@@ -67,12 +68,18 @@ class SqliteService
     {
         // get the template first (./c d:sch:update --force --em=pixie)
         $conn = $this->pixieEntityManager->getConnection();
-
-        $fromSchemaManager = $conn->createSchemaManager();
-        $fromSchema = $fromSchemaManager->introspectSchema();
+        $templateName = $this->dbName('pixie_template', true);
+//        $conn->selectDatabase($templateName);
+        try {
+            $fromSchemaManager = $conn->createSchemaManager();
+            $fromSchema = $fromSchemaManager->introspectSchema();
+        } catch (\Exception $e) {
+            dd($e->getMessage(), $x);
+        }
 
         //        $conn->selectDatabase($dbName);
         $toDbName = $this->dbName($config->code, false);
+//        dd($toDbName, $templateName);
         $schemaTool = new SchemaTool($this->pixieEntityManager);
         // now prep for the new database
 //        $em = $this->getPixieEntityManager($config->code);
@@ -96,6 +103,7 @@ class SqliteService
         $schemaDiff = $comparator->compareSchemas( $toSchema, $fromSchema);
         $myPlatform = $conn->getDatabasePlatform();
         $queries = $myPlatform->getAlterSchemaSQL($schemaDiff);
+        dd($queries);
         foreach ($queries as $query) {
             try {
 //            dump(diffSql: $diffSql, q: $queries);
@@ -143,7 +151,7 @@ class SqliteService
             }
         }
 
-//        dd($schemaDiff, $schemaDiff->isEmpty());
+        dd($schemaDiff, $schemaDiff->isEmpty(), $toDbName);
         return $toConnection;
         $tables = [];
         foreach ($fromSchema->getTables() as $table) {

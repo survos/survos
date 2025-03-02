@@ -7,7 +7,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use App\Entity\TranslatableFieldsProxyInterface;
 use App\Entity\UuidAttributeInterface;
 use App\Repository\FieldSetRepository;
-use App\Traits\IdTrait;
+use Survos\PixieBundle\Traits\IdTrait;
 use App\Traits\ProjectCoreTrait;
 use App\Traits\TranslatableFieldsProxyTrait;
 use App\Traits\UuidAttributeTrait;

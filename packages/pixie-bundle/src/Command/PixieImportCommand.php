@@ -241,6 +241,7 @@ EOL
         $iKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($configCode, mode: ITableAndKeys::PIXIE_IMAGE))->getStorageBox();
         $iKv->select(ITableAndKeys::IMAGE_TABLE);
         $this->io()->writeln("Images in iKv: " . $iKv->count(ITableAndKeys::IMAGE_TABLE));
+
         $this->io()->writeln("Images in image db: " . $this->pixieEntityManager->getRepository(OriginalImage::class)->count());
         return self::SUCCESS;
     }

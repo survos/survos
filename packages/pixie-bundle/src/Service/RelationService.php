@@ -3,10 +3,8 @@
 
 namespace Survos\PixieBundle\Service;
 
-use App\Repository\RelationRepository;
-use App\Service\AppService;
 use Doctrine\ORM\EntityManagerInterface;
-use Survos\PixieBundle\{Entity\Instance};
+use Survos\PixieBundle\{Entity\Instance, Repository\RelationRepository};
 use Survos\PixieBundle\Entity\Core;
 use Survos\PixieBundle\Entity\Field\RelationField;
 use Survos\PixieBundle\Entity\FieldSet;
@@ -17,9 +15,9 @@ use function Symfony\Component\String\u;
 class RelationService
 {
     public function __construct(
-        private readonly RelationRepository $relationRepository,
-        private readonly EntityManagerInterface $em,
-        private readonly AppService $appService,
+        private readonly RelationRepository     $relationRepository,
+        private readonly EntityManagerInterface $pixieEntityManager,
+        private readonly ?AppService             $appService = null,
     ) {
     }
 
@@ -70,7 +68,7 @@ class RelationService
         /** @var Relation $relation */
         foreach ($relations as $relation) {
             /** @var InstanceInterface $rightInstance */
-            if ($rightInstance = $this->em->find($relation->getRelationField()->getRightCore()->getEntityClass(), $relation->getRightInstanceId())) {
+            if ($rightInstance = $this->pixieEntityManager->find($relation->getRelationField()->getRightCore()->getEntityClass(), $relation->getRightInstanceId())) {
                 $relation->setRightInstance($rightInstance);
                 $instance->addRelation($relation);
             }
@@ -134,7 +132,7 @@ class RelationService
                     leftCore: $projectCore,
                     rightCore: $relatedProjectCore
                 ))->setLabel($label);
-                $this->em->persist($relationField);
+                $this->pixieEntityManager->persist($relationField);
                 if ($fieldSet) {
                     $fieldSet->addField($relationField);
                 }
@@ -149,13 +147,13 @@ class RelationService
                         ->setIsReverse(true)
                         ->setLabel($reverseLabel);
                     $reverseFieldSet->addField($reverseRelationField);
-                    $this->appService->validate($reverseFieldSet);
+                    $this->appService?->validate($reverseFieldSet);
 
                 }
             }
             $relationField->setCurrentLocale($projectCore->getProjectLocale()); // hack, not persisted or needed
 //            $relationField->getImportFields()
-            $this->appService->validate($relationField);
+            $this->appService?->validate($relationField);
 
             $seen[$relationField->__toString()] = $relationField;
 //            dd($seen, $key, $relationField->getId(), $relationField->getCode());

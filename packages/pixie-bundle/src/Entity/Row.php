@@ -2,17 +2,19 @@
 
 namespace Survos\PixieBundle\Entity;
 
-use App\Repository\Pixie\RowRepository;
-use App\Traits\CoreIdTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Survos\PixieBundle\Repository\RowRepository;
+use Survos\PixieBundle\Traits\CoreIdTrait;
 use Survos\WorkflowBundle\Traits\MarkingInterface;
 use Survos\WorkflowBundle\Traits\MarkingTrait;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: RowRepository::class)]
+//#[ORM\Index(name: 'xxx', columns: ['core_id'])]
+//#[ORM\Index(name: 'xxxXXX', fields: ['core'])]
 #[Groups(['row.read'])]
 class Row implements MarkingInterface, \Stringable
 {

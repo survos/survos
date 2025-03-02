@@ -7,7 +7,7 @@ use App\Entity\IdInterface;
 use App\Entity\ProjectCoreInterface;
 use App\Entity\ProjectInterface;
 use App\Repository\ReferenceRepository;
-use App\Traits\IdTrait;
+use Survos\PixieBundle\Traits\IdTrait;
 use App\Traits\ProjectCoreTrait;
 use App\Traits\ProjectTrait;
 use Doctrine\DBAL\Types\Types;

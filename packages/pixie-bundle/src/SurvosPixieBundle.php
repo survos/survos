@@ -28,6 +28,9 @@ use Survos\PixieBundle\Menu\PixieMenu;
 use Survos\PixieBundle\Repository\CoreRepository;
 use Survos\PixieBundle\Repository\InstanceRepository;
 use Survos\PixieBundle\Repository\OriginalImageRepository;
+use Survos\PixieBundle\Repository\OwnerRepository;
+use Survos\PixieBundle\Repository\ReferenceRepository;
+use Survos\PixieBundle\Repository\RelationRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\TranslateTextRepository;
 use Survos\PixieBundle\Service\CoreService;
@@ -97,6 +100,9 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
         ;
 
         foreach ([DatabaseComponent::class, RowComponent::class, SqliteService::class, CoreService::class,
+                     ReferenceRepository::class,
+                     RelationRepository::class,
+                     OwnerRepository::class, // maybe better to have Settings or a different name at least
                      InstanceRepository::class,
                      OriginalImageRepository::class,
                      RelationService::class,

@@ -13,9 +13,8 @@ use ApiPlatform\Metadata\Put;
 use App\Entity\App\Entity\Pixie\OwnerMember;
 use App\Entity\IdInterface;
 use App\Entity\UuidAttributeInterface;
-use App\Repository\Pixie\OwnerRepository;
 use App\Service\SourceService;
-use App\Traits\IdTrait;
+use Survos\PixieBundle\Traits\IdTrait;
 use App\Traits\UuidAttributeTrait;
 use App\Workflow\OwnerWorkflowInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -30,6 +29,7 @@ use Survos\CoreBundle\Entity\RouteParametersTrait;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Item;
 use Survos\PixieBundle\Entity\Field\Field;
+use Survos\PixieBundle\Repository\OwnerRepository;
 use Survos\WorkflowBundle\Attribute\Workflow;
 use Survos\WorkflowBundle\Traits\MarkingInterface;
 use Survos\WorkflowBundle\Traits\MarkingTrait;
@@ -41,27 +41,27 @@ use Zenstruck\Metadata;
 #[ORM\Entity(repositoryClass: OwnerRepository::class)]
 #[ORM\UniqueConstraint(name: 'owner_code', columns: ['code'])]
 #[UniqueEntity(fields: ['code'])]
-#[ApiResource(
-    shortName: 'owner',
-    operations: [new Get(), new Put(), new Delete(), new Patch(), new GetCollection(name: self::BROWSE_ROUTE)],
-    normalizationContext: [
-        'groups' => ['owner.read', 'instance.id', 'rp', 'translation', 'marking', 'locale', '_translations'],
-    ],
-    denormalizationContext: [
-        'groups' => ['write'],
-    ],
-)]
-#[GetCollection(
-    name: self::MEILI_ROUTE,
-    shortName: 'meili_owner',
-    uriTemplate: "meili/mus_Owner",
-//    uriTemplate: "meili/{indexName}",
-//    uriVariables: ["indexName"],
-    provider: MeiliSearchStateProvider::class,
-    normalizationContext: [
-        'groups' => ['project.read', 'tree', 'rp', 'marking'],
-    ]
-)]
+//#[ApiResource(
+//    shortName: 'owner',
+//    operations: [new Get(), new Put(), new Delete(), new Patch(), new GetCollection(name: self::BROWSE_ROUTE)],
+//    normalizationContext: [
+//        'groups' => ['owner.read', 'instance.id', 'rp', 'translation', 'marking', 'locale', '_translations'],
+//    ],
+//    denormalizationContext: [
+//        'groups' => ['write'],
+//    ],
+//)]
+//#[GetCollection(
+//    name: self::MEILI_ROUTE,
+//    shortName: 'meili_owner',
+//    uriTemplate: "meili/mus_Owner",
+////    uriTemplate: "meili/{indexName}",
+////    uriVariables: ["indexName"],
+//    provider: MeiliSearchStateProvider::class,
+//    normalizationContext: [
+//        'groups' => ['project.read', 'tree', 'rp', 'marking'],
+//    ]
+//)]
 # #[ApiFilter(MultiFieldSearchFilter::class, properties: ['name', 'projectCountBin', 'calcMeiliObjectCount', 'subdomain', 'projectsWithObjects', 'code','countryCode', 'projectCount', 'source','marking','locale'])]
 //#[ORM\UniqueConstraint(name: 'project_name', columns: ['name'])]
 #[UniqueEntity(fields: ['code'])]

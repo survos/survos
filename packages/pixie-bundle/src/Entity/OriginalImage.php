@@ -2,12 +2,13 @@
 
 namespace Survos\PixieBundle\Entity;
 
-use App\Repository\Pixie\OriginalImageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Survos\SaisBundle\Service\SaisClientService;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 #[ORM\Entity(repositoryClass: OriginalImageRepository::class)]
 class OriginalImage
@@ -17,7 +18,12 @@ class OriginalImage
 
     #[ORM\Column]
     #[Gedmo\Timestampable(on:"create")]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?\DateTimeImmutable $createdAt;
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
 
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]

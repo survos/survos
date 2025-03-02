@@ -15,7 +15,7 @@ use App\Entity\StatsInterface;
 use App\Traits\AccessTrait;
 use App\Traits\ProjectCoreTrait;
 use App\Traits\ProjectTrait;
-use App\Traits\StatsTrait;
+use Survos\PixieBundle\Traits\StatsTrait;
 use CodeInc\StripAccents\StripAccents;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

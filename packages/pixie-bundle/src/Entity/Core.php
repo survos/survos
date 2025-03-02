@@ -16,7 +16,7 @@ use App\Entity\Sheet;
 use App\Repository\CoreRepository;
 use App\Service\AppService;
 use App\Traits\AccessTrait;
-use App\Traits\IdTrait;
+use Survos\PixieBundle\Traits\IdTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -138,6 +138,7 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
     private Collection $instances;
 
     #[ORM\OneToMany(mappedBy: 'core', targetEntity: Relation::class, orphanRemoval: true)]
+    #[ORM\JoinColumn(nullable: false, name: 'xxx')]
     private Collection $relations;
 
 //    #[ORM\OneToMany(mappedBy: 'projectCore', targetEntity: Sheet::class, orphanRemoval: true)]
@@ -851,9 +852,9 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
     }
 
     // mostly used by barcode and import.  ripe for refactoring
-    public function createInstance(): Instance
+    public function createInstance(string $code): Instance
     {
-        $instance = new Instance();
+        $instance = new Instance($this, $code, $this->createInstanceId($code));
         $this->addInstance($instance);
         return $instance;
     }

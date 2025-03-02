@@ -1,11 +1,10 @@
 <?php
 
-// aka Classification, like relations, but are specific to a primary table, e.g. Location Type, Object Type.
+        // aka Classification, like relations, but are specific to a primary table, e.g. Location Type, Object Type.
 //    perhaps if we supported filtered relations, we could combine them.
 
 namespace Survos\PixieBundle\Entity\Field;
 
-use App\Repository\FieldRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,7 +15,6 @@ use Survos\PixieBundle\Entity\FieldSet;
 #[ORM\Entity(repositoryClass: FieldRepository::class)]
 class CategoryField extends Field
 {
-
     public const TYPE = 'type';
     public const SOURCE = 'source';
     public const ACCESSION = 'accession';
@@ -25,9 +23,12 @@ class CategoryField extends Field
     public const CONDITION = 'cond';
     public const CURATED_SECTION = 'section';
 //    public const LOCATION = 'loc';
-    public const CATEGORY_TYPES = [self::TYPE, self::SOURCE, self::ACCESSION, self::DEACCESSION, self::CURATED_SECTION, self::CONDITION, self::STATUS]; // , self::LABEL];
+    public const CATEGORY_TYPES = [
+        self::TYPE, self::SOURCE, self::ACCESSION,
+        self::DEACCESSION, self::CURATED_SECTION, self::CONDITION, self::STATUS
+    ]; // , self::LABEL];
 
-    #[ORM\OneToMany(mappedBy: 'categoryField', targetEntity: Category::class, cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(Category::class, mappedBy: 'categoryField', cascade: ['persist'], orphanRemoval: true)]
     private Collection $categories;
 
     public function __construct(Core $core, ?string $code = null, ?FieldSet $fieldSet = null)
@@ -99,7 +100,6 @@ class CategoryField extends Field
             // set the owning side to null (unless already changed)
             if ($category->getCategoryField() === $this) {
                 $category->setCategoryField(null);
-
             }
         }
 
@@ -111,7 +111,7 @@ class CategoryField extends Field
         return $this->getCategories()->filter(fn (Category $category) => Category::slug($catgoryCode) === $category->getCode())->first() ?: null;
     }
 
-    static public function getTypeSpecificFields(): array
+    public static function getTypeSpecificFields(): array
     {
         return ['internalCode'];
     }
@@ -120,6 +120,4 @@ class CategoryField extends Field
     {
         return sprintf('%s (%s)', $this->getLabel() ?: '@' . $this->getCode(), $this->getInternalCode());
     }
-
-
 }

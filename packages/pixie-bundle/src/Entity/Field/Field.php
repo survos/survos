@@ -17,9 +17,7 @@ use App\Model\InstanceData;
 use App\Repository\FieldRepository;
 use App\Service\AppService;
 use App\Traits\AccessTrait;
-use App\Traits\IdTrait;
 use App\Traits\ImportKeyTrait;
-use App\Traits\StatsTrait;
 use App\Traits\TranslatableFieldsProxyTrait;
 use App\Traits\UuidAttributeTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -37,6 +35,8 @@ use Survos\PixieBundle\Entity\FieldSet;
 use Survos\PixieBundle\Entity\ImportKeyInterface;
 use Survos\PixieBundle\Entity\Instance;
 use Survos\PixieBundle\Entity\Owner;
+use Survos\PixieBundle\Traits\IdTrait;
+use Survos\PixieBundle\Traits\StatsTrait;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -57,7 +57,7 @@ class Field implements
     IdInterface,
     StatsInterface,
 //    ProjectInterface,
-    ImportKeyInterface,
+//    ImportKeyInterface,
     UuidAttributeInterface,
     TranslatableInterface,
     TranslatableFieldsProxyInterface,

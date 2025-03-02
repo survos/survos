@@ -57,7 +57,11 @@
         "symfony/security-bundle": "^6.4 || ^7.1",
         "rector/rector": "dev-main",
         "survos/libre-translate-bundle": "^1.5",
-        "doctrine/orm": "^3.3"
+        "doctrine/orm": "^3.3",
+        "survos/sais-bundle": "^1.5",
+        "stof/doctrine-extensions-bundle": "^1.13",
+        "api-platform/core": "^4.1",
+        "zenstruck/class-metadata": "*"
     },
     "autoload": {
         "psr-4": {
@@ -72,7 +76,8 @@
         "allow-plugins": {
             "survos/installer": true,
             "endroid/installer": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "zenstruck/class-metadata": true
         }
     },
     "minimum-stability": "dev"

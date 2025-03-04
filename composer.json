@@ -158,6 +158,7 @@
             "importmap:install": "symfony-cmd"
         },
         "coverage": "php -d xpcov.enabled=1 vendor/bin/phpunit packages --coverage-html coverage",
-        "phpstan": "vendor/bin/phpstan"
+        "phpstan": "vendor/bin/phpstan",
+        "openapi": "bin/console api:openapi:export -o openapi.json"
     }
 }

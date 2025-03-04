@@ -38,7 +38,7 @@ class InspectionController extends AbstractController
 //            dd($schemaProperties, $schema, $details); // , $class, $details[$class]);
 //        }
 
-        return $this->render('analysis/entities.html.twig', [
+        return $this->render('@SurvosInspection/entities.html.twig', [
             'openapi' => $openapi??null,
             'spec' => $data
 //            'schemas' => $openapi->getSerializableData()->components->schemas, // $openapi->components->schemas,
@@ -76,7 +76,7 @@ class InspectionController extends AbstractController
             return $carry;
         }, []);
         $accessor = new PropertyAccessor();
-        return $this->render('analysis/reflection.html.twig', [
+        return $this->render('@SurvosInspection/reflection.html.twig', [
             'classes' => $details,
         ]);
 

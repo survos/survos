@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Service\MeiliService;
+use Survos\CoreBundle\Service\SurvosUtils;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -28,6 +29,7 @@ use Symfony\Component\Intl\Languages;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Yaml\Yaml;
+use Zenstruck\Alias;
 
 #[AsCommand(
     name: 'grid:index',
@@ -68,6 +70,11 @@ class IndexCommand extends Command
         $filter = $input->getOption('filter');
         $filterArray = $filter ? Yaml::parse($filter) : null;
         $class = $input->getArgument('class');
+        if (!class_exists($class)) {
+            if (class_exists(Alias::class)) {
+                $class = Alias::classFor('user');
+            }
+        }
             $classes = [];
 
 
@@ -81,6 +88,9 @@ class IndexCommand extends Command
 
                 // skip if no groups defined
                 if (!$groups = $this->meiliService->getNormalizationGroups($meta->getName())) {
+//                    if ($input->ver) {
+                        $output->writeln("Skipping {$class}: no normalization groups for " . $meta->getName());
+//                    }
                     continue;
                 }
 
@@ -144,6 +154,7 @@ class IndexCommand extends Command
         $settings = $this->datatableService->getSettingsFromAttributes($class);
         $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
         $primaryKey = count($idFields) ? $idFields[0] : 'id';
+//        dd($settings, $idFields, $primaryKey);
 
 
         $localizedAttributes = [];
@@ -196,7 +207,9 @@ class IndexCommand extends Command
             }
 //            $qb->andWhere($filter);
         }
-        $total = (clone $qb)->select("count(e.{$index->getPrimaryKey()})")->getQuery()->getSingleScalarResult();
+
+
+        $total = (clone $qb)->select("count(e.{$primaryKey})")->getQuery()->getSingleScalarResult();
         $this->io->title("Indexing $class ($total records, batches of $batchSize) ");
         if (!$total) {
             return ['numberOfDocuments'=>0];
@@ -236,9 +249,9 @@ class IndexCommand extends Command
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
             assert(array_key_exists('rp', $data), "missing rp in $class\n\n" . join("\n", array_keys($data)));
-
             if (!array_key_exists($primaryKey, $data)) {
                 $this->logger->error($msg = "No primary key $primaryKey for " . $class);
+                SurvosUtils::assertKeyExists($primaryKey, $data);
                 assert(false, $msg . "\n" . join("\n", array_keys($data)));
                 return ['numberOfDocuments'=>0];
                 break;

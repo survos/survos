@@ -473,7 +473,6 @@ class PixieController extends AbstractController
         $sm = $conn->createSchemaManager();
         foreach ($sm->listViews() as $view) {
             $viewCode = $view->getName();
-            dump($view);
             try {
                 $pdoResult = $conn->executeQuery("SELECT * FROM $viewCode limit $limit");
                 $data[$viewCode] = $pdoResult->fetchAllAssociative();
@@ -482,7 +481,7 @@ class PixieController extends AbstractController
             }
         }
         // $sm->listDatabases(), is not supported by sqlite
-        dd($data,  $sm->listViews(), $sm->listTables());
+//        dd($data,  $sm->listViews(), $sm->listTables());
 
         // the controller listener should do this.  We could also add $config to the params
         $config = $this->pixieService->selectConfig($pixieCode);

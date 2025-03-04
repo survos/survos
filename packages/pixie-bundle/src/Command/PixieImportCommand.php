@@ -4,9 +4,11 @@ namespace Survos\PixieBundle\Command;
 
 use App\Repository\OwnerRepository;
 use Survos\PixieBundle\Entity\OriginalImage;
+use Survos\PixieBundle\Entity\Str;
 use App\Metadata\ITableAndKeys;
 use Survos\PixieBundle\Entity\Owner;
 use Survos\PixieBundle\Event\RowEvent;
+use Survos\PixieBundle\Model\Translation;
 use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\SqliteService;
@@ -176,8 +178,10 @@ EOL
             overwrite: $overwrite, pattern: $pattern,
             callback: function ($row, \Survos\PixieBundle\Model\Table $table, $idx, StorageBox $kv) use ($batch, $limit) {
                 $this->progressBar->advance();
+//                dd($row);
+//                dd($this->progressBar->getProgress(), $this->progressBar->getMaxSteps());
                 // testing only
-                $this->pixieEntityManager->flush();
+//                $this->pixieEntityManager->flush();
 
             // moved to importService
 //                if (!$core = $pixieEm->getRepository(Core::class)->find($coreCode = $table->getName())) {
@@ -266,7 +270,10 @@ EOL
 //        $iKv->select(ITableAndKeys::IMAGE_TABLE);
 //        $this->io()->writeln("Images in iKv: " . $iKv->count(ITableAndKeys::IMAGE_TABLE));
 
-        $this->io()->writeln("Images in image db: " . $this->pixieEntityManager->getRepository(OriginalImage::class)->count());
+        $this->io()->writeln("Images in image db: " .
+            $this->pixieEntityManager->getRepository(OriginalImage::class)->count());
+        $this->io()->writeln("Translations: " .
+            $this->pixieEntityManager->getRepository(Str::class)->count());
         return self::SUCCESS;
     }
 
@@ -334,7 +341,7 @@ EOL
 
         switch ($event->type) {
             case $event::PRE_LOAD:
-                if (empty($this->progressBar)) {
+                if (!empty($this->progressBar)) {
                     $this->progressBar->setMaxSteps($event->context['count']);
 //                    $this->progressBar = new ProgressBar($this->io()->output());
                 }

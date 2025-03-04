@@ -4,7 +4,9 @@ namespace Survos\PixieBundle\Service;
 
 // see https://github.com/bungle/web.php/blob/master/sqlite.php for a wrapper without PDO
 
+use Survos\PixieBundle\Entity\OriginalImage;
 use Survos\PixieBundle\Entity\Owner;
+use Survos\PixieBundle\Model\OriginalImage as OriginalImageModel;
 use Survos\PixieBundle\Service\SqliteService;
 use Survos\PixieBundle\Entity\Core;
 use Survos\PixieBundle\Entity\Instance;
@@ -18,6 +20,7 @@ use Survos\PixieBundle\Repository\InstanceRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\StrRepository;
 use Survos\PixieBundle\Repository\CoreRepository;
+use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use League\Csv\Info;
@@ -53,6 +56,7 @@ class PixieImportService
         private CoreService                       $coreService,
 //        private ImportHandler                     $importHandler,
         private CoreRepository                    $coreRepository,
+        private OriginalImageRepository $originalImageRepository,
         private InstanceRepository                $instanceRepository,
         private RowRepository                     $rowRepository,
         private StrRepository                     $translateTextRepository,
@@ -60,6 +64,7 @@ class PixieImportService
         private readonly SqliteService            $sqliteService,
         public bool                               $purgeBeforeImport = false,
         private array                             $listsByLabel = [],
+
         /** array<Core[]> */
 
     )
@@ -273,7 +278,24 @@ class PixieImportService
                     // handling relations could be its own RowEvent too, for now it's here
 //                dd($rowObj);
                     //
+
+                        // since we already have a row id, we can create the related images from the raw data.
+                    // $this->importService (injected!) ->processImages()
+                    /** @var OriginalImageModel $original */
+                    foreach ($rowObj['originalImages'] as $original) {
+                        // for use when sais isn't populated
+                        $rowObj['originalUrl'] = $original->imageUrl;
+                        $thumb = $original->context['thumb']??null;
+                        $rowObj['thumburl'] = $thumb;
+                        $imageEntity =  $this->addImage($row, $original, $thumb );
+                    }
+//                    $row['saisImages'][] = $item->addImage($imageEntity);
+                    $saisImages[] = $imageEntity;
+
                     $rowObj = $this->handleRelations($kv, $row, $config, $pixieCode, $table, $owner, $rowObj);
+
+//                    $rowObj = $this->handleImages($kv, $row, $config, $pixieCode, $table, $owner, $rowObj);
+
 //                    dd(afterRelations: $rowObj);
                     $event->row = $rowObj; // is this needed?
 //                $tableName=='obj' && dd($rowObj['classification'], $event->rowObj['classification']);
@@ -304,75 +326,13 @@ class PixieImportService
 
 //                $event = new FetchTranslationObjectEvent($rowObj, )
 //                    $sourceString = $rowObj[$tKey];
-                    if (count($table->getTranslatable())) {
+//                    assert($rowObj == $event->getNormalizedData());
+//                    dd($rowObj, $event->getNormalizedData());
 
-                        $sourceLocale = $config->getSource()->locale ?? $rowObj['locale'] ?? null;
-                        if (!$sourceLocale) {
-                            dd($rowObj);
-                        }
-
-                        // is this needed?  We have already added it above
-//                        $row = $this->addRow($rowObj, $table, $owner); // tr
-//                        dd($id, $tableName, raw: $rowObj, row: $row);
-
-//                        dump(rowObj: $rowObj, transFields: $table->getTranslatable());
-                        if (0) // @todo: translation
-                            if (class_exists(FetchTranslationObjectEvent::class)) {
-                                // for source table, Not libre, which happens during pixie:trans --queue
-                                // complicated, but this also adds the text hash to the rowObj values
-                                $trEvent = $this->eventDispatcher->dispatch(
-                                    new FetchTranslationObjectEvent(
-                                        $rowObj, // or $item?
-                                        pixieCode: $pixieCode,
-                                        sourceLanguage: $sourceLocale,
-                                        targetLanguage: $sourceLocale,
-                                        table: $tableName, // for debugging,
-                                        key: $rowObj[$table->getPkName()],
-                                        keys: $table->getTranslatable()
-                                    ));
-
-//                            dd($event->translationModels, $tKv->getSelectedTable());
-                                // this populates the source table of the translation database,
-//                            dump($rowObj);
-                                $rowObj = $event->getNormalizedData();
-//                            dump($rowObj);
-                                /** @var Translation $transModel */
-                                foreach ($trEvent->translationModels as $transModel) {
-                                    /** @var $tt Str */
-                                    if (!$tt = $this->translateTextRepository->find($transModel->getHash())) {
-                                        $tt = new Str(
-                                            $transModel->getText(),
-                                            $sourceLocale,
-                                            $transModel->getHash(),
-                                        );
-                                        $this->entityManager->persist($tt);
-                                    }
-                                    $tt->setExtra([
-                                        'core' => $tableName, // for debugging,
-                                        'key' => $rowObj[$table->getPkName()],
-                                    ]);
-
-//                                    if (!$kv->has($transModel->getHash(), PixieInterface::PIXIE_STRING_TABLE)) {
-//                                        $kv->set($transModel->toArray(), PixieInterface::PIXIE_STRING_TABLE);
-//                                    }
-                                }
-                            }
-                        }
-                    }
-
-//                    ($tableName == 'loc') && dd($rowObj);
-
-                    assert($rowObj['license'] ?? '' <> 'Copyrighted', "invalid license");
-                    assert($tableName === $table->getName());
-                    // again?  unlike with KV, we don't need to keep setting it, the em handles that.
-//                    $this->addRow($rowObj, $table, $owner); // again??
-//                        $kv->set($rowObj, $table->getName());
-//                    try {
-//                    } catch (\Exception $e) {
-//                        dd($kv->getFilename(), $e, $kv->getSelectedTable(), row: $rowObj);
-//                    }
-
+                    $rowObj = $this->handleTranslations($table, $config, $rowObj, $pixieCode, $tableName);
                     if ($limit && ($idx >= $limit - 1)) break;
+                }
+
             }
         }
 
@@ -389,6 +349,23 @@ class PixieImportService
 
         return $kv;
 
+    }
+
+    public function addImage(Row $row, OriginalImageModel $original, ?string $thumbUrl=null): OriginalImage
+    {
+//        $pixieEm = $this->sqliteService->getPixieEntityManager($original->root);
+//        dump($this->pixieEntityManager->getConnection()->getDriver());
+        /** @var OriginalImage */
+        if (!$image = $this->originalImageRepository->find($original->getKey())) {
+            // create the entity
+            $image = new OriginalImage($original->imageUrl, $original->getKey(), $original->root);
+            $row->addImage($image);
+            $this->entityManager->persist($image);
+        }
+        if ($thumbUrl) {
+            $image->setThumbUrl($thumbUrl);
+        }
+        return $image;
     }
 
     public function createKv(array   $fileMap,
@@ -881,6 +858,67 @@ class PixieImportService
 //                            . json_encode($rowObj, JSON_PRETTY_PRINT)
             );
         }
+    }
+
+    /**
+     * @param Table $table
+     * @param Config|null $config
+     * @param array $rowObj
+     * @return array
+     */
+    public function handleTranslations(Table $table, ?Config $config, array $rowObj): array
+    {
+
+        if (count($table->getTranslatable())) {
+
+            $sourceLocale = $config->getSource()->locale ?? $rowObj['locale'] ?? null;
+            if (!$sourceLocale) {
+                dd($rowObj);
+            }
+            $tableName = $table->getName();
+
+            // is this needed?  We have already added it above
+//                        $row = $this->addRow($rowObj, $table, $owner); // tr
+//                        dd($id, $tableName, raw: $rowObj, row: $row);
+
+//                        dump(rowObj: $rowObj, transFields: $table->getTranslatable());
+                if (class_exists(FetchTranslationObjectEvent::class)) {
+                    // for source table, Not libre, which happens during pixie:trans --queue
+                    // complicated, but this also adds the text hash to the rowObj values
+                    $trEvent = $this->eventDispatcher->dispatch(
+                        new FetchTranslationObjectEvent(
+                            $rowObj, // or $item?
+                            pixieCode: $config->getCode(),
+                            sourceLanguage: $sourceLocale,
+                            targetLanguage: $sourceLocale,
+                            table: $table->getName(), // for debugging,
+                            key: $rowObj[$table->getPkName()],
+                            keys: $table->getTranslatable()
+                        ));
+
+//                            dd($event->translationModels, $tKv->getSelectedTable());
+                    // this populates the source table of the translation database,
+//                            dump($rowObj);
+//                            dump($rowObj);
+                    /** @var Translation $transModel */
+                    foreach ($trEvent->translationModels as $transModel) {
+                        /** @var $tt Str */
+                        if (!$tt = $this->translateTextRepository->find($transModel->getHash())) {
+                            $tt = new Str(
+                                $transModel->getText(),
+                                $sourceLocale,
+                                $transModel->getHash(),
+                            );
+                            $this->entityManager->persist($tt);
+                        }
+                        $tt->setExtra([
+                            'core' => $tableName, // for debugging,
+                            'key' => $rowObj[$table->getPkName()],
+                        ]);
+                    }
+                }
+        }
+        return $rowObj;
     }
 
 

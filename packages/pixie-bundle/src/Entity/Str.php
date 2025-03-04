@@ -2,12 +2,12 @@
 
 namespace Survos\PixieBundle\Entity;
 
-use App\Repository\Pixie\TranslateTextRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Survos\PixieBundle\Repository\StrRepository;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: TranslateTextRepository::class)]
+#[ORM\Entity(repositoryClass: StrRepository::class)]
 class Str
 {
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]

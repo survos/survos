@@ -5,6 +5,8 @@
 namespace Survos\PixieBundle;
 
 use App\Command\PixieMediaCommand;
+use App\Service\Handler\BelvedereHandler;
+use App\Service\Handler\LarcoHandler;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\PixieBundle\Command\IterateCommand;
 use Survos\PixieBundle\Command\PixieExportCommand;
@@ -26,14 +28,17 @@ use Survos\PixieBundle\EventListener\TranslationRowEventListener;
 use Survos\PixieBundle\Menu\PixieItemMenu;
 use Survos\PixieBundle\Menu\PixieMenu;
 use Survos\PixieBundle\Repository\CoreRepository;
+use Survos\PixieBundle\Repository\FieldRepository;
 use Survos\PixieBundle\Repository\InstanceRepository;
 use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Survos\PixieBundle\Repository\OwnerRepository;
 use Survos\PixieBundle\Repository\ReferenceRepository;
 use Survos\PixieBundle\Repository\RelationRepository;
 use Survos\PixieBundle\Repository\RowRepository;
-use Survos\PixieBundle\Repository\TranslateTextRepository;
+use Survos\PixieBundle\Repository\StrRepository;
+use Survos\PixieBundle\Repository\TableRepository;
 use Survos\PixieBundle\Service\CoreService;
+use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\LibreTranslateService;
 use Survos\PixieBundle\Service\PixieConvertService;
 use Survos\PixieBundle\Service\PixieImportService;
@@ -101,6 +106,11 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
 
         foreach ([DatabaseComponent::class, RowComponent::class, SqliteService::class, CoreService::class,
                      ReferenceRepository::class,
+                     ImportHandler::class,
+
+//                     LarcoHandler::class,
+//                     BelvedereHandler::class,
+
                      RelationRepository::class,
                      OwnerRepository::class, // maybe better to have Settings or a different name at least
                      InstanceRepository::class,
@@ -108,7 +118,9 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                      RelationService::class,
                      CoreRepository::class,
                      RowRepository::class,
-                     TranslateTextRepository::class,
+                     StrRepository::class,
+                     TableRepository::class,
+                     FieldRepository::class,
                      ReferenceService::class] as $componentClass) {
             $builder->register($componentClass)
                 ->setPublic(true)
@@ -117,6 +129,12 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             ;
         }
 
+        $builder->register(ImportHandler::class)
+            ->setPublic(true)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+//            ->setArgument('$handlers', Auto)
+        ;
 
         $builder->register(PixieConvertService::class)
             ->setAutowired(true)
@@ -186,7 +204,7 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                      PixieExportCommand::class,
 //                     PixieTranslateCommand::class,
                      IterateCommand::class,
-                     PixieMediaCommand::class,
+//                     PixieMediaCommand::class,
                      PixieIndexCommand::class,
                      PixieSyncCommand::class,
                      PixieMakeCommand::class] as $commandClass) {

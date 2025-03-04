@@ -4,20 +4,20 @@ namespace Survos\PixieBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Survos\PixieBundle\Entity\TranslateText;
+use Survos\PixieBundle\Entity\Str;
 
 /**
- * @extends ServiceEntityRepository<TranslateText>
+ * @extends ServiceEntityRepository<Str>
  */
-class TranslateTextRepository extends ServiceEntityRepository
+class StrRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, TranslateText::class);
+        parent::__construct($registry, Str::class);
     }
 
 //    /**
-//     * @return TranslateText[] Returns an array of TranslateText objects
+//     * @return Str[] Returns an array of Str objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -31,7 +31,7 @@ class TranslateTextRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?TranslateText
+//    public function findOneBySomeField($value): ?Str
 //    {
 //        return $this->createQueryBuilder('t')
 //            ->andWhere('t.exampleField = :val')

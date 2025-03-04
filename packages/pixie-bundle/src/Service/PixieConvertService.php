@@ -47,7 +47,7 @@ class PixieConvertService
     {
 
         if (!$config) {
-            $config = $this->pixieService->getConfig($pixieCode);
+            $config = $this->pixieService->selectConfig($pixieCode);
         }
 
         // the csv/json files

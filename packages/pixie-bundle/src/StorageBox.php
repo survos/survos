@@ -79,6 +79,7 @@ class StorageBox
         $path = $this->filename;
 
         // PDO creates the db if it doesn't exist, so check after
+        if (0) // skip creating, everything should be in pixieEntityManager now
         if (!file_exists($path)) {
             $dir = pathinfo($path, PATHINFO_DIRNAME);
             if (!file_exists($dir)) {
@@ -185,6 +186,7 @@ class StorageBox
                     $table->setPkName($primaryKey);
                     $property->setIndex('PRIMARY');
                 }
+
             }
 
 //            $tableX = $config->tables[$tableName];
@@ -291,7 +293,6 @@ class StorageBox
             }
         }
 
-        assert(!$this->db->inTransaction());
     }
 
     public function addFormatter(callable $callable)
@@ -358,7 +359,7 @@ class StorageBox
 
     public function select(string $tableName): self
     {
-        $tables = $this->getTableNames(); // not cached!
+//        $tables = $this->getTableNames(); // not cached!
 //        assert(count($tables), "no tables in $this->filename");
 //        if (!in_array($tableName, $tables)) {
 //            throw new \LogicException("$tableName $this->filename is not in tables:\n\n" . implode("\n", $tables));
@@ -747,6 +748,7 @@ class StorageBox
      */
     public function query(string $sql, array $variables = []): \PDOStatement
     {
+        assert(false, $sql);
         static $preparedStatements = [];
         // cache prepared statements
         if (empty($preparedStatements[$this->filename][$sql])) {
@@ -1252,7 +1254,7 @@ class StorageBox
     public function getTableNames(): array
     {
         // this does a query!!
-//        assert(false, $this->filename);
+        assert(false, $this->filename);
         $sth = $this->query("SELECT name FROM sqlite_master WHERE type='table';");
         $tableNames = $sth->fetchAll(PDO::FETCH_COLUMN);
         return $tableNames;

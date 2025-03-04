@@ -6,17 +6,17 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Survos\CoreBundle\Traits\QueryBuilderHelperTrait;
-use Survos\PixieBundle\Entity\Row;
+use Survos\PixieBundle\Entity\Table;
 
 /**
- * @extends ServiceEntityRepository<Row>
+ * @extends ServiceEntityRepository<Table>
  */
-class RowRepository extends ServiceEntityRepository implements QueryBuilderHelperInterface
+class TableRepository extends ServiceEntityRepository implements QueryBuilderHelperInterface
 {
     use QueryBuilderHelperTrait;
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Row::class);
+        parent::__construct($registry, Table::class);
     }
 
 }

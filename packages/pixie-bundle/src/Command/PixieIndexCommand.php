@@ -87,7 +87,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
     ): int
     {
         $configCode ??= getenv('PIXIE_CODE');
-        $pixieEm = $this->sqliteService->getPixieEntityManager($configCode);
+        $pixieEm = $this->sqliteService->setPixieEntityManager($configCode);
         if (is_null($reset)) {
             $reset = true;
         }
@@ -108,7 +108,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         $pixieDbName = $pixieService->getPixieFilename($configCode, $subCode);
 //        assert(realpath($pixieDbName) == $kv->getFilename(), "$pixieDbName <> " . $kv->getFilename());
         $io->title("Reading $pixieDbName");
-        $config = $pixieService->getConfig($configCode);
+        $config = $pixieService->selectConfig($configCode);
 
         if ($tableFilter) {
             assert($kv->tableExists($tableFilter), "Missing table $tableFilter: \n".implode("\n", $kv->getTableNames()));

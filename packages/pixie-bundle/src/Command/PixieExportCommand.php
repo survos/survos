@@ -54,7 +54,7 @@ final class PixieExportCommand extends InvokableServiceCommand
         $configCode ??= getenv('PIXIE_CODE');
         $this->initialized = true;
         $kv = $pixieService->getStorageBox($configCode);
-        $config = $pixieService->getConfig($configCode);
+        $config = $pixieService->selectConfig($configCode);
         assert($config, $config->getConfigFilename());
         if (empty($dirOrFilename)) {
             $dirOrFilename = $pixieService->getSourceFilesDir($configCode);

@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TranslateTextRepository::class)]
-class TranslateText
+class Str
 {
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
     private array $t = [];

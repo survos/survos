@@ -23,7 +23,7 @@ class Row implements MarkingInterface, \Stringable
     use MarkingTrait;
 
     #[ORM\ManyToOne(inversedBy: 'rows')] # , cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'row_core', nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     protected Core $core;
 
     #[ORM\Column(length: 255)]

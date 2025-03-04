@@ -4,9 +4,11 @@ namespace Survos\PixieBundle\Command;
 
 use App\Repository\OwnerRepository;
 use Survos\PixieBundle\Entity\OriginalImage;
-use App\Event\RowEvent;
 use App\Metadata\ITableAndKeys;
-
+use Survos\PixieBundle\Entity\Owner;
+use Survos\PixieBundle\Event\RowEvent;
+use Survos\PixieBundle\Service\CoreService;
+use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\SqliteService;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
@@ -23,6 +25,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Zenstruck\Console\Attribute\Argument;
@@ -32,7 +35,7 @@ use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
 
-#[AsCommand('pixie:import', 'Import csv to Entity, a file or directory of files"', aliases: ['import', 'p:imp'])]
+#[AsCommand('pixie:import', 'Import csv to Row Entities, a file or directory of files"', aliases: ['import', 'p:imp'])]
 final class PixieImportCommand extends InvokableServiceCommand
 {
     use RunsCommands;
@@ -46,11 +49,14 @@ final class PixieImportCommand extends InvokableServiceCommand
         private LoggerInterface                            $logger,
         private ParameterBagInterface                      $bag,
         private readonly PixieService                      $pixieService,
+        #[Target('pixieEntityManager')]
         private EntityManagerInterface                     $pixieEntityManager,
         private EventDispatcherInterface                   $eventDispatcher,
         #[Autowire('%env(SITE_BASE_URL)%')] private string $baseUrl,
         private CoreRepository                             $coreRepository,
-        private readonly SqliteService                     $sqliteService, private readonly OwnerRepository $ownerRepository,
+        private ImportHandler                              $importHandler,
+        private readonly SqliteService                     $sqliteService,
+        private readonly OwnerRepository                   $ownerRepository, private readonly CoreService $coreService,
     )
     {
 
@@ -58,8 +64,15 @@ final class PixieImportCommand extends InvokableServiceCommand
         $this->setHelp(sprintf(<<<EOL
 import /json files into Row entities with _raw data and label.  
 dispatches PixieImportEvent with _raw
-does not create relations
+creates relations (?)
+creates strings for translation
+creates images
+
 creates raw stats
+
+The next step is to process the rows (map the raw values to fields) with 
+
+    ./c workflow:iterate row --marking=new --transition=process
 EOL
         ));
 
@@ -95,7 +108,7 @@ EOL
         $translate ??= false;
         $index = is_null($index) ? false : $index;
 
-        $config = $pixieService->getConfig($configCode);
+        $config = $pixieService->selectConfig($configCode);
         // make sure the local owner is set.
         assert($config, "Missing $configCode");
         $sourceDir = $pixieService->getSourceFilesDir($configCode, subCode: $subCode);
@@ -124,15 +137,17 @@ EOL
 
         $pixieDbName = $pixieService->getPixieFilename($configCode, $subCode);
 
-        // new database
-        $pixieEm = $this->sqliteService->getPixieEntityManager($configCode);
+        $config = $this->pixieService->selectConfig($configCode);
 
-        if (!file_exists($dirName = pathinfo($pixieDbName, PATHINFO_DIRNAME))) {
-            mkdir($dirName, 0777, true);
-        }
+//        if (!file_exists($dirName = pathinfo($pixieDbName, PATHINFO_DIRNAME))) {
+//            mkdir($dirName, 0777, true);
+//        }
         $io->title(sprintf("Reading %s, writing %s", $sourceDir, $pixieDbName));
 
         if ($reset) {
+            // hmm, how do do this now?  Maybe in migrate?
+            $this->io()->error("Reset is no longer supported.");
+            return self::FAILURE;
             $this->pixieService->destroy($pixieDbName);
         }
         $this->total = $total;
@@ -159,8 +174,9 @@ EOL
                 'tags' => $tags ? explode(",", $tags) : [],
             ],
             overwrite: $overwrite, pattern: $pattern,
-            callback: function ($row, \Survos\PixieBundle\Model\Table $table, $idx, StorageBox $kv) use ($batch, $limit, $pixieEm) {
-            $this->progressBar->advance();
+            callback: function ($row, \Survos\PixieBundle\Model\Table $table, $idx, StorageBox $kv) use ($batch, $limit) {
+                $this->progressBar->advance();
+                // testing only
                 $this->pixieEntityManager->flush();
 
             // moved to importService
@@ -181,10 +197,10 @@ EOL
 //                dd($limit, $idx, $finished, $batch);
                 if ($finished || (($idx % $batch) == 0)) {
 //                    $this->logger->info("Saving $batch, now at $idx of $limit");
-                    if ($kv->inTransaction()) {
-                        $kv->commit();
-                        $kv->beginTransaction();
-                    }
+//                    if ($kv->inTransaction()) {
+//                        $kv->commit();
+//                        $kv->beginTransaction();
+//                    }
 
                     $this->pixieEntityManager->flush();
 //                    $this->pixieEntityManager->clear();
@@ -194,15 +210,20 @@ EOL
             });
 
 
-        $pixieEm->flush();
+        $this->pixieEntityManager->flush();
         $kv = $this->pixieService->getStorageBox($configCode, $subCode);
 
         $consoleTable = new Table($io);
         $consoleTable->setHeaders(['table', 'count','url']);
         // these counts should match up with the meili facet counts
 
+
+        // ack
+        $owner = $this->pixieEntityManager->find(Owner::class, $configCode);
         foreach ($config->getTables() as $table) {
-            $count = $kv->count($table->getName());
+            $core = $this->coreService->getCore($table->getName(), $owner);
+            $count = $core->getRows()->count();
+//            $count = -3; // $kv->count($table->getName());
             $url = sprintf("%s://%s", $configCode, $subCode);
 //            $kv->beginTransaction();
 //            $kv->set([
@@ -237,13 +258,13 @@ EOL
         $url = str_replace('https://', 'https://' . $locale . '.', $this->baseUrl);
         $url .= "/$configCode";
         $this->io()->writeln(sprintf("<href=%s>%s</>", $url, $url));
-        $kv->close();
+//        $kv->close();
 
         $this->pixieEntityManager->flush();
 
-        $iKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($configCode, mode: ITableAndKeys::PIXIE_IMAGE))->getStorageBox();
-        $iKv->select(ITableAndKeys::IMAGE_TABLE);
-        $this->io()->writeln("Images in iKv: " . $iKv->count(ITableAndKeys::IMAGE_TABLE));
+//        $iKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($configCode, mode: ITableAndKeys::PIXIE_IMAGE))->getStorageBox();
+//        $iKv->select(ITableAndKeys::IMAGE_TABLE);
+//        $this->io()->writeln("Images in iKv: " . $iKv->count(ITableAndKeys::IMAGE_TABLE));
 
         $this->io()->writeln("Images in image db: " . $this->pixieEntityManager->getRepository(OriginalImage::class)->count());
         return self::SUCCESS;
@@ -308,6 +329,9 @@ EOL
     #[AsEventListener(event: RowEvent::class)]
     public function importRow(RowEvent $event): void
     {
+        // @todo: inject the handler based on the configCode
+        // https://symfonycasts.com/screencast/dependency-injection-attributes
+
         switch ($event->type) {
             case $event::PRE_LOAD:
                 if (empty($this->progressBar)) {
@@ -316,6 +340,10 @@ EOL
                 }
                 break;
             case $event::LOAD:
+//                $row = $this->importHandler->prepare($event->configCode, $event->row);
+//                dd($this->importHandler);
+
+
                 $this->progressBar?->advance();
                 if (($event->index % 1000) == 0) {
 

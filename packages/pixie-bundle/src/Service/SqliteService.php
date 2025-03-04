@@ -23,15 +23,30 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 class SqliteService
 {
     public function __construct(
-        private EntityManagerInterface $pixieEntityManager,
-        private readonly ManagerRegistry $managerRegistry,
-        #[Autowire('%kernel.project_dir%')] private string $projectDir,
+        private EntityManagerInterface                                   $pixieEntityManager,
+        private readonly ManagerRegistry                                 $managerRegistry,
+        #[Autowire('%kernel.project_dir%')] private string               $projectDir,
         #[Autowire('%env(DATABASE_PIXIE_URL)%')] private readonly string $pixieTemplateFilename
     )
     {
     }
 
-    public function dbName(string $code, bool $throwErrorIfMissing=false): string
+
+    /**
+     * Really SETs the pixie EM.
+     *
+     * @param string $code
+     * @return EntityManagerInterface
+     */
+    public function setPixieEntityManager(string $code): EntityManagerInterface
+    {
+        assert(false, " use pixieService->getConfig that does the switch as well, selectConfig woulbe be better");
+        $conn = $this->pixieEntityManager->getConnection();
+        $conn->selectDatabase($this->dbName($code));
+        return $this->pixieEntityManager;
+    }
+
+    public function dbName(string $code, bool $throwErrorIfMissing = false): string
     {
         $params = $this->pixieEntityManager->getConnection()->getParams();
         $dbName = str_replace('pixie_template', $code, $params['path']);
@@ -40,25 +55,6 @@ class SqliteService
         }
         return $dbName;
 
-
-        $path = pathinfo($params['path'], PATHINFO_DIRNAME);
-        $withoutRoot = str_replace($this->projectDir, '', $path);
-
-        $dbName = $this->projectDir  . $withoutRoot . '/' . $code . '.db';
-//        dd($path, $dbName, $code);
-//        dump($dbName, $this->pixieTemplateFilename);
-//        $fullDbName = $this->projectDir . '/' . pathinfo($dbName, PATHINFO_BASENAME);
-
-//        assert(!str_contains($code, '.db'), $code);
-//        return $code . '.db';
-    }
-
-    public function getPixieEntityManager(string $code): EntityManagerInterface
-    {
-        $conn = $this->pixieEntityManager->getConnection();
-        $params = $conn->getParams();
-        $conn->selectDatabase($this->dbName($code));
-        return $this->pixieEntityManager;
     }
 
     public function migrateDatabase(
@@ -93,14 +89,26 @@ class SqliteService
 //        return $this->platform->getAlterSchemaSQL($schemaDiff);
         $comparator = $fromSchemaManager->createComparator();
 
-        $toConnection = DriverManager::getConnection( ['path' => $toDbName, 'driver' => 'pdo_sqlite'] );
+        $toConnection = DriverManager::getConnection(['path' => $toDbName, 'driver' => 'pdo_sqlite']);
+        // https://til.simonwillison.net/sqlite/enabling-wal-mode
+        // https://www.powersync.com/blog/sqlite-optimizations-for-ultra-high-performance
+        foreach ([
+            'pragma journal_mode = WAL',
+            'pragma synchronous = normal',
+            'pragma journal_size_limit = 6144000'
+                 ] as $pragma) {
+            $toConnection->executeQuery($pragma);
+
+            // @todo: PRAGMA journal_mode=delete; to turn off, maybe before export or something
+        }
+
         $toSchemaMananger = $toConnection->createSchemaManager();
         $toSchema = $toSchemaMananger->introspectSchema();
 //        $fromSchemaManager = $fromConnection->createSchemaManager();
 //        $fromSchema = $fromSchemaManager->introspectSchema();
 
         assert($toSchema <> $fromSchema);
-        $schemaDiff = $comparator->compareSchemas( $toSchema, $fromSchema);
+        $schemaDiff = $comparator->compareSchemas($toSchema, $fromSchema);
         $queries = $databasePlatform->getAlterSchemaSQL($schemaDiff);
         foreach ($queries as $query) {
             try {
@@ -115,16 +123,22 @@ class SqliteService
         // templates?
         $config = StorageBox::fix($config);
         $views = [];
+        $actualFields = ['label', 'code', 'id'];
         foreach ($tables = $config->getTables() as $table) {
             $fieldNames = array_map(fn(Property $property) => $property->getCode(),
                 iterator_to_array($table->getProperties()));
 
-            $fields = array_map(fn(Property $property) =>
-            sprintf("json_extract(data, '$.%s') as %s",
-                $property->getCode(),
-                $property->getCode()
-            ),
+            $fields = array_map(fn(Property $property) => in_array($property->getCode(), $actualFields)
+                ? "row." . $property->getCode()
+                : sprintf("json_extract(data, '$.%s') as %s",
+                    $property->getCode(),
+                    $property->getCode()
+                ),
                 iterator_to_array($table->getProperties()));
+//            foreach ($actualFields as $actualField) {
+//                $fieldNames[] = $actualField;
+//                $fields[] = $actualField;
+//            }
 
             $view = 'v_' . $table->getName();
             $views[] = "DROP view if exists $view";
@@ -134,8 +148,8 @@ class SqliteService
                  from row where core_id = '%s'",
                 implode(', ', $fieldNames),
                 implode(', ', $fields),
-                $table->getName())
-            ;
+                $table->getName());
+//                 from row inner join core on (row.core_id = core.id) where core.id = '%s'",
 
             foreach ($table->getProperties() as $property) {
             }

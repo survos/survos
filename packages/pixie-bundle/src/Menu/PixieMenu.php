@@ -51,8 +51,10 @@ final class PixieMenu implements KnpMenuHelperInterface
         }
 
         if (!$this->isGranted('ROLE_ADMIN')) {
-            return;
+//            return;
         }
+        $config = $this->pixieService->selectConfig($pixieCode);
+        $owner = $config->getOwner();
         $this->add($menu, 'pixie_browse_configs');
 
             $this->addHeading($menu, $pixieCode);
@@ -61,8 +63,18 @@ final class PixieMenu implements KnpMenuHelperInterface
             }
             // get from config? Or ?
             $this->addHeading($menu, '|');
-            $kv = $this->pixieService->getStorageBox($pixieCode);
 
+            // now coreCode?  but could be other table, like category or lst, right?
+        $tableName = $event->getOption('tableName');
+        $subMenu = $this->addSubmenu($menu, $tableName ?: "choose");
+        $this->add($subMenu, 'pixie_overview', ['pixieCode' => $pixieCode]);
+        foreach ($owner->getCores() as $core) {
+            $tableRp = ['tableName' => $core->getCode(), 'pixieCode' => $pixieCode];
+            $this->add($subMenu, 'pixie_meili_browse', $tableRp, label: $core->getCode());
+        }
+
+            return;
+            $kv = $this->pixieService->getStorageBox($pixieCode);
             $tableName = $event->getOption('tableName');
                 $subMenu = $this->addSubmenu($menu, $tableName ?: "choose");
                 $this->add($subMenu, 'pixie_overview', ['pixieCode' => $pixieCode]);

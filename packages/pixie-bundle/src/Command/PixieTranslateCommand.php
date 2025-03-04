@@ -105,7 +105,7 @@ final class PixieTranslateCommand extends InvokableServiceCommand
         $tKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($configCode, isTranslation: true))->getStorageBox();
 //        $tKv = $this->translationService->getTranslationStorageBox($pixieCode);
 //        dd($tKv->getFilename());
-        $config = $this->pixieService->getConfig($configCode);
+        $config = $this->pixieService->selectConfig($configCode);
 
         if ($target==='') {
             $locales = []; // skip translation, just insert into source
@@ -388,7 +388,7 @@ final class PixieTranslateCommand extends InvokableServiceCommand
         $pixieService = $this->pixieService;
         // the base pixie (that we're updating)
         $kv = $pixieService->getStorageBox($pixieCode);
-        $config = $pixieService->getConfig($pixieCode);
+        $config = $pixieService->selectConfig($pixieCode);
 
         // the translations.
         $tKv->select(PixieTranslationService::ENGINE);
@@ -489,7 +489,7 @@ final class PixieTranslateCommand extends InvokableServiceCommand
         $tKv->select(PixieTranslationService::ENGINE); // since we're writing
         $pixieService = $this->pixieService;
         $kv = $pixieService->getStorageBox($pixieCode);
-        $config = $pixieService->getConfig($pixieCode);
+        $config = $pixieService->selectConfig($pixieCode);
 
         $where = [];
         if ($marking) {

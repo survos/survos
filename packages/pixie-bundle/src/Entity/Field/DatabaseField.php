@@ -42,7 +42,7 @@ public function __set($property, $value) {
     public function __construct(?string $code = null, ?Core $core=null, ?FieldSet $fieldSet = null, ?string $internalCode=null)
     {
 //        dump($code . ' in ' . $this::class);
-        parent::__construct($code, $core, $fieldSet);
+        parent::__construct($code, $core->getOwner(), $fieldSet);
         $this->setType(Field::TYPE_INTRINSIC);
         if ($internalCode) {
             $this->setInternalCode($internalCode);

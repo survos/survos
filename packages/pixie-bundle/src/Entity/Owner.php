@@ -192,6 +192,12 @@ class Owner implements \Stringable,  // Entity\Owner!
     #[ORM\Column(length: 7)]
     private ?string $locale = null;
 
+    /**
+     * @var Collection<int, Table>
+     */
+    #[ORM\OneToMany(targetEntity: Table::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $tables;
+
     public function __construct(?string $code = null, ?string $source = null, ?array $hit = null)
     {
         $this->initId($code);
@@ -214,6 +220,7 @@ class Owner implements \Stringable,  // Entity\Owner!
         $this->ownerMembers = new ArrayCollection();
         $this->fields = new ArrayCollection();
         $this->cores = new ArrayCollection();
+        $this->tables = new ArrayCollection();
     }
 
     public function getName(): ?string
@@ -726,6 +733,36 @@ class Owner implements \Stringable,  // Entity\Owner!
     public function setLocale(string $locale): static
     {
         $this->locale = $locale;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Table>
+     */
+    public function getTables(): Collection
+    {
+        return $this->tables;
+    }
+
+    public function addTable(Table $table): static
+    {
+        if (!$this->tables->contains($table)) {
+            $this->tables->add($table);
+            $table->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTable(Table $table): static
+    {
+        if ($this->tables->removeElement($table)) {
+            // set the owning side to null (unless already changed)
+            if ($table->getOwner() === $this) {
+                $table->setOwner(null);
+            }
+        }
 
         return $this;
     }

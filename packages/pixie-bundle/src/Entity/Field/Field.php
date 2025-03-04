@@ -30,11 +30,13 @@ use Survos\GridGroupBundle\CsvSchema\Parser;
 use Survos\GridGroupBundle\Model\Property;
 use Survos\PixieBundle\Entity\Category;
 use Survos\PixieBundle\Entity\Core;
+use Survos\PixieBundle\Entity\CoreInterface;
 use Survos\PixieBundle\Entity\CustomField;
 use Survos\PixieBundle\Entity\FieldSet;
 use Survos\PixieBundle\Entity\ImportKeyInterface;
 use Survos\PixieBundle\Entity\Instance;
 use Survos\PixieBundle\Entity\Owner;
+use Survos\PixieBundle\Traits\CoreIdTrait;
 use Survos\PixieBundle\Traits\IdTrait;
 use Survos\PixieBundle\Traits\StatsTrait;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -47,7 +49,14 @@ use function Symfony\Component\String\u;
 //#[ORM\UniqueConstraint(name: 'pc_field_internal_code', columns: ['owner_id', 'core_id', 'internal_code'])]
 #[ORM\UniqueConstraint(name: 'owner_field', columns: ['owner_id', 'code'])]
 #[ORM\InheritanceType('SINGLE_TABLE')]
-//#[ORM\DiscriminatorColumn(name: 'discr', type: 'string')]
+//#[ORM\DiscriminatorColumn(name: 'type', type: 'string')]
+#[ORM\DiscriminatorMap(['intrinsic' => DatabaseField::class,
+    'cat' => CategoryField::class,
+    'ref' => ReferenceField::class,
+    'meas' => MeasurementField::class,
+    'attr' => AttributeField::class,
+    'rel' => RelationField::class])]
+
 #[UniqueEntity('id')]
 //#[Assert\EnableAutoMapping()]
 class Field implements
@@ -61,17 +70,19 @@ class Field implements
     UuidAttributeInterface,
     TranslatableInterface,
     TranslatableFieldsProxyInterface,
+    CoreInterface,
     \Stringable
 {
 //    use ProjectCoreTrait;
     use IdTrait;
+    use CoreIdTrait;
 //    use ProjectTrait;
     use StatsTrait;
     use UuidAttributeTrait;
     use TranslatableFieldsProxyTrait;
     use ImportKeyTrait;
     use AccessTrait;
-    use RouteParametersTrait;
+//    use RouteParametersTrait;
 
     public const TRANSLATION_CODE = 'field';
     static function getTranslationCode():string { return self::TRANSLATION_CODE; } // candidate for trait
@@ -245,15 +256,17 @@ class Field implements
                 $this->setOrderIdx($owner->getFields()->count()+1);
             };
         }
-        $this->setLocale($owner->getLocale());
-        $this->setTranslations(new ArrayCollection());
+
+//        $this->setLocale($owner->getLocale());
+//        $this->setTranslations(new ArrayCollection());
 //        $this->setOrderIdx($this->getCore()->getFields()->count() * 10);
 //        $this->type = $this->getClassFromFieldType()
     }
 
     static public function createId(string $code, ?Owner $owner=null): string
     {
-        return sprintf("%s-%s", $owner->getCode(), $code);
+        return $code; // for now, skip owner, too messy
+//        return sprintf("%s-%s", $owner->getCode(), $code);
     }
 
     public function isMultiField(): ?bool

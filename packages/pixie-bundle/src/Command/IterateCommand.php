@@ -72,7 +72,7 @@ final class IterateCommand extends InvokableServiceCommand
         if ($image) {
 //            $tKv = $pixieService->getTra
         }
-        $config = $pixieService->getConfig($pixieCode);
+        $config = $pixieService->selectConfig($pixieCode);
         assert($kv->tableExists($tableName), "Missing table $tableName: \n" . implode("\n", $kv->getTableNames()));
 
         $table = $config->getTables()[$tableName];

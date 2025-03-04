@@ -46,7 +46,7 @@ class AttributeField extends Field
 
     public function __construct(?string $code = null, ?Core $core=null, ?FieldSet $fieldSet = null)
     {
-        parent::__construct($code, $core, $fieldSet);
+        parent::__construct($code, $core->getOwner(), $fieldSet);
         $this->setType(Field::TYPE_ATTRIBUTE);
     }
 

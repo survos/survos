@@ -8,6 +8,23 @@
             {{ core.code }}
             iCount: {{ core.instanceCount }}
             rCount: {{ core.rows|length }}
+
+            {% set columns = [
+                'id',
+                'label',
+                'coreCode'
+            ] %}
+            {% set rows = data[core.code]??[] %}
+            {% if rows|length %}
+            <twig:simple_datatables
+                    :perPage="5"
+                    :caller="_self"
+                    :data="data[core.code]??[]"
+                    :columns="columns"
+            >
+
+            </twig:simple_datatables>
+            {% endif %}
         </li>
     {% endfor %}
     <div class="col-xxl-3 col-sm-6 project-card">

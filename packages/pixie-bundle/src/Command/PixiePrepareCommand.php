@@ -69,7 +69,7 @@ final class PixiePrepareCommand extends InvokableServiceCommand
 //        }
 
         $index = is_null($index) ? true : $index;
-        $config = $pixieService->getConfig($configCode);
+        $config = $pixieService->selectConfig($configCode);
         $sourceDir = $pixieService->getSourceFilesDir($configCode, subCode: $subCode);
 //        dd($sourceDir);
         $rawDir = $sourceDir ."/raw";

@@ -2,6 +2,7 @@
 
 namespace Survos\PixieBundle\Model;
 
+use Survos\PixieBundle\Entity\Owner;
 use Symfony\Component\Yaml\Yaml;
 
 class Config
@@ -30,7 +31,8 @@ class Config
         private string $visibility=self::VISIBILITY_PUBLIC,
         private readonly array           $data=[],
         public ?string $dataDir = null, // set in service, kinda hacky
-        public ?string $pixieFilename = null // set in service, kinda hacky, the sqlite file
+        public ?string $pixieFilename = null, // set in service, kinda hacky, the sqlite file
+        private ?Owner $owner=null,
 
     )
     {
@@ -40,6 +42,17 @@ class Config
 //
 //            $this->data = Yaml::parseFile($this->filename);
 //        }
+    }
+
+    public function getOwner(): ?Owner
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?Owner $owner): Config
+    {
+        $this->owner = $owner;
+        return $this;
     }
 
     public function getVisibility(): string

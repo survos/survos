@@ -46,14 +46,16 @@ use Symfony\Component\Validator\Constraints as Assert;
     new GetCollection()], shortName: 'projectCores',
     denormalizationContext: ['groups' => ['projectCore.write']],
     normalizationContext: ['groups' => ['core.read', 'rp']])]
-class Core implements CoreInterface, RouteParametersInterface, AccessInterface, \Stringable, MarkingInterface
+class Core implements CoreInterface, RouteParametersInterface,
+//    AccessInterface,
+    \Stringable, MarkingInterface
 {
 //    use CodeIdentifierTrait,
     use
         IdTrait,
         MarkingTrait,
 //        InstanceTrait,
-        AccessTrait,
+//        AccessTrait,
         RouteParametersTrait;
 
     public const array UNIQUE_PARAMETERS = ['tableName' => 'code'];
@@ -701,7 +703,7 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
             }
 
             $field->setCore($this);
-            $this->getProject()->addField($field);
+//            $this->getProject()->addField($field);
         }
         if (($field::class == DatabaseField::class) && ($field->getInternalCode() == Instance::DB_CODE_FIELD)) {
             $this->setIdFieldCode($field->getCode());
@@ -710,8 +712,7 @@ class Core implements CoreInterface, RouteParametersInterface, AccessInterface, 
         return $this;
     }
 
-    public
-    function removeField(Field $field): self
+    public function removeField(Field $field): self
     {
         if ($this->fields->removeElement($field)) {
             // set the owning side to null (unless already changed)

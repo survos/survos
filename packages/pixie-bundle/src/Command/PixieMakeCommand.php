@@ -52,7 +52,7 @@ final class PixieMakeCommand extends InvokableServiceCommand
         $this->initialized = true;
         $dry ??= false; // if null, false
         $configCode ??= getenv('PIXIE_CODE');
-        $config = $pixieService->getConfig($configCode);
+        $config = $pixieService->selectConfig($configCode);
         $source = $config->getSource();
         $build ??= true;
         if ($build) {

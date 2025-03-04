@@ -32,10 +32,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
-// this is neede for the trait, not sure why, but it fails without it.
+// this is needed for the trait, not sure why, but it fails without it.
 
 // #[ApiResource(operations: [new Get(), new Put(), new Delete(), new Patch(), new Post(uriTemplate: 'lsts'), new GetCollection()], shortName: 'lsts', denormalizationContext: ['groups' => ['write']], normalizationContext: ['groups' => ['read', 'tree']])]
-#[CATable('ca_lists', Lst::class, tableName: 'lists')]
 #[Gedmo\Tree(type: 'nested')]
 #[ORM\Entity(repositoryClass: LstRepository::class)]
 #[ORM\Table]
@@ -57,8 +56,6 @@ class Lst extends CoreEntity implements IdInterface, ProjectInterface, ListItemI
     use InstanceTrait;
     use NestedSetEntity;
 
-    final public const CA_TABLE_NAME = 'ca_lists';
-
     final public const API_SHORTNAME = 'lsts';
 
 //    #[Groups(['write'])]
@@ -78,13 +75,8 @@ class Lst extends CoreEntity implements IdInterface, ProjectInterface, ListItemI
         //  = new KeyValue(); ?
     }
 
-    /**
-     * Doctrine(int) **caType(0)
-     * *dbType(integer)
-     * *sysList() **default(null)
-     */
     #[CAField('list_id', description: 'Unique numeric identifier used by CollectiveAccess internally to identify this list', caType: 0)]
-    #[ORM\Column(name: 'list_id', nullable: true, type: 'integer', options: [
+    #[ORM\Column(name: 'list_id', type: 'integer', nullable: true, options: [
         'comment' => 'CollectiveAccess id',
     ])]
     private ?int $listId = null;

@@ -10,6 +10,8 @@ use Psr\Log\LoggerInterface;
 use Survos\BootstrapBundle\Event\KnpMenuEvent;
 use Survos\PixieBundle\CsvSchema\Parser;
 use Survos\PixieBundle\Debug\TraceableStorageBox;
+use Survos\PixieBundle\Entity\Owner;
+use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Event\StorageBoxEvent;
 use Survos\PixieBundle\Message\PixieTransitionMessage;
 use Survos\PixieBundle\Meta\PixieInterface;
@@ -45,7 +47,8 @@ class PixieService
 //        #[Autowire('%kernel.debug%')] private readonly bool                                        $isDebug,
 
         private EntityManagerInterface    $pixieEntityManager,
-        private SqliteService             $sqliteService, private readonly CoreRepository $coreRepository,
+        private SqliteService             $sqliteService,
+        private readonly CoreRepository $coreRepository,
         private readonly bool             $isDebug = false,
         private array                     $data = [],
         private readonly string           $extension = "pixie.db",
@@ -69,6 +72,7 @@ class PixieService
 //        $this->denormalizer = $this->serializer; // ->denormalize($this->data, DenormalizerInterface::class);
     }
 
+
     /**
      * if null, use the value in survos_pixie.yaml, so dev can be less
      *
@@ -86,7 +90,7 @@ class PixieService
         if (!$filename) {
             $filename = $pixieCode;
         }
-        $dir = $this->getPixieDbDir() . "/$pixieCode";
+        $dir = $this->getPixieDbDir(); // no longer nested . "/$pixieCode";
         if ($autoCreateDir && !is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
@@ -156,9 +160,8 @@ class PixieService
                            ?Config $config = null,
     ): StorageBox
     {
+        // ideally we could drop this and get the configuration data without the file
         // this selects the proper database so when others access the em it is the right one
-        $this->sqliteService->getPixieEntityManager($pixieCode);
-
         assert(!str_contains($pixieCode, "/"), "pass in pixieCode, not filename");
 //        assert($filename, $pixieCode . " $filename ");
 
@@ -166,7 +169,7 @@ class PixieService
             $filename = $this->getPixieFilename($pixieCode, $subCode);
         }
         if ($createFromConfig && !$config) {
-            $config = $this->getConfig($pixieCode);
+            $config = $this->selectConfig($pixieCode);
         }
         // always parse config so we have it.  certainly could be optimized
 //        if ($createFromConfig)
@@ -174,7 +177,7 @@ class PixieService
             if (!$config) {
 //                assert(false, "Pass in config for now.");
                 // filename? Or code???  ugh,
-                $config = $this->getConfig($pixieCode);
+                $config = $this->selectConfig($pixieCode);
 
             }
             // the array! someday the model.
@@ -266,7 +269,7 @@ class PixieService
                      ->in($this->getConfigDir())->sortByName()->reverseSorting() as $file) {
             // we can optimize later...
             $code = $file->getFilenameWithoutExtension();
-            $config = $this->getConfig($code);
+            $config = $this->selectConfig($code);
             assert($config, "invalid config $code");
 
             $resolvedDataPath = $this->resolveFilename($config->getSourceFilesDir(), 'data');
@@ -316,22 +319,24 @@ class PixieService
 
     }
 
+
     // @todo: add custom dataDir, etc.
-    public function getConfig(string $pixieCode): ?Config
+    public function selectConfig(string $pixieCode, bool $switchDatabase = true): ?Config
     {
-        assert($pixieCode);
         static $configCache = null;
+
+        if ($switchDatabase) {
+            $conn = $this->pixieEntityManager->getConnection();
+            $conn->selectDatabase($this->sqliteService->dbName($pixieCode));
+        }
         if (null === $configCache) {
             $configCache = $this->getConfigFiles();
         }
-
-//        if ($extends = $table->getExtends()) {
-//            // deserialize
-//        }
-
+        $owner = $this->pixieEntityManager->getRepository(Owner::class)->find($pixieCode);
         if ($config = $configCache[$pixieCode] ?? null) {
             $config = StorageBox::fix($config, $this->getTemplates());
         }
+        $config->setOwner($owner);
         return $config;
 
         dd($pixieCode, $this->bundleConfig);
@@ -457,7 +462,7 @@ class PixieService
     {
         assert(!$autoCreate);
         if (!$config) {
-            if (!$config = $this->getConfig($pixieCode)) {
+            if (!$config = $this->selectConfig($pixieCode)) {
                 return null;
             }
 
@@ -613,5 +618,19 @@ class PixieService
 
     }
 
+    public function getCountsByCore(): array
+    {
+        $countsByCore = $this->pixieEntityManager->getRepository(Row::class)->createQueryBuilder('s')
+            ->join('s.core', 'core')
+            ->groupBy('core.code')
+            ->select(["core.id as coreCode, count(s) as count"])
+            ->getQuery()
+            ->getArrayResult();
+//        dd($countsByCore);
+        foreach ($countsByCore as $x) {
+            $data[$x['coreCode']] = $x;
+        }
+        return $data;
+    }
 
 }

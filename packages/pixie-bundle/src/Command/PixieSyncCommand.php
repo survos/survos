@@ -62,7 +62,7 @@ final class PixieSyncCommand extends InvokableServiceCommand
         }
         $configCode ??= getenv('PIXIE_CODE');
         $this->initialized = true;
-        $config = $pixieService->getConfig($configCode);
+        $config = $pixieService->selectConfig($configCode);
         assert($config, $config->getConfigFilename());
         if (empty($dirOrFilename)) {
             $dirOrFilename = $pixieService->getSourceFilesDir($configCode);

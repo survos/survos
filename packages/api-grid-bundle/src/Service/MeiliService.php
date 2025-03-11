@@ -137,7 +137,7 @@ class MeiliService
             };
             if ($status == 'failed') {
                 if ($stopOnError) {
-                    $this->logger->warning(json_encode($dataToDump ?? [], JSON_PRETTY_PRINT+JSON_UNESCAPED_SLASHES));
+                    $this->logger?->warning(json_encode($dataToDump ?? [], JSON_PRETTY_PRINT+JSON_UNESCAPED_SLASHES));
                     throw new \Exception("Task has failed " . $task['error']['message']);
                 }
             }
@@ -231,7 +231,7 @@ class MeiliService
             if ($exception->httpStatus === 404) {
                 if ($autoCreate) {
                     $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]));
-//            $this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]);
+            $this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]);
                     $index = $client->getIndex($indexName);
                 } else {
                     $index = null;

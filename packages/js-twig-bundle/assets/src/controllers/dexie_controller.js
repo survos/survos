@@ -1,5 +1,14 @@
 import {Controller} from "@hotwired/stimulus";
 
+/* make sure this loaded eagerly in assets/controllers.json, so that the listeners are available!
+"@survos/js-twig-bundle": {
+    "dexie": {
+        "enabled": true,
+            "fetch": "eager",
+            "autoimport": []
+    },
+ */
+
 // https://javascript.plainenglish.io/12-best-practices-for-writing-asynchronous-javascript-like-a-pro-5ac4cb95d3c8
 // now called from the TwigJsComponent Component, so it can pass in a Twig Template
 // combination api-platform, inspection-bundle, dexie and twigjs
@@ -45,7 +54,7 @@ Twig.extend(function (Twig) {
     });
 });
 
-// /* stimulusFetch: 'lazyxx' */
+/* stimulusFetch: 'eager' */
 export default class extends Controller {
     static targets = ['content'];
     static values = {

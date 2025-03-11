@@ -182,6 +182,9 @@ class Core implements CoreInterface, RouteParametersInterface,
     #[ORM\JoinColumn(nullable: false)]
     private ?Owner $owner = null;
 
+    #[ORM\Column]
+    private int $rowCount = 0;
+
 
     /**
      * @return string|null
@@ -1239,6 +1242,7 @@ class Core implements CoreInterface, RouteParametersInterface,
         if (!$this->rows->contains($row)) {
             $this->rows->add($row);
             $row->setCore($this);
+            $this->rowCount++;
         }
 
         return $this;
@@ -1247,6 +1251,7 @@ class Core implements CoreInterface, RouteParametersInterface,
     public function removeRow(Row $row): static
     {
         if ($this->rows->removeElement($row)) {
+            $this->rowCount;
             // set the owning side to null (unless already changed)
             if ($row->getCore() === $this) {
                 $row->setCore(null);
@@ -1264,6 +1269,18 @@ class Core implements CoreInterface, RouteParametersInterface,
     public function setOwner(?Owner $owner): static
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getRowCount(): ?int
+    {
+        return $this->rowCount;
+    }
+
+    public function setRowCount(int $rowCount): static
+    {
+        $this->rowCount = $rowCount;
 
         return $this;
     }

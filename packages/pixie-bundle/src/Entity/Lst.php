@@ -38,6 +38,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Gedmo\Tree(type: 'nested')]
 #[ORM\Entity(repositoryClass: LstRepository::class)]
 #[ORM\Table]
+#[ORM\Index(name: 'lst_parent', fields: ['parent'])]
 #[ORM\UniqueConstraint(name: 'lsts_project_plus_code', columns: ['code'])]
 #[UniqueEntity(fields: ['project', 'code'])]
 #[ApiFilter(filterClass: SearchFilter::class, properties: [

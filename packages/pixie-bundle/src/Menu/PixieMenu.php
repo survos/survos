@@ -58,7 +58,7 @@ final class PixieMenu implements KnpMenuHelperInterface
         $this->add($menu, 'pixie_browse_configs');
 
             $this->addHeading($menu, $pixieCode);
-            foreach (['pixie_schema','flickr_slideshow'] as $pixieRoute) {
+            foreach (['pixie_schema','flickr_slideshow','pixie_images'] as $pixieRoute) {
                 $this->add($menu, $pixieRoute, ['pixieCode' => $pixieCode]);
             }
             // get from config? Or ?

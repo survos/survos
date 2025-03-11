@@ -15,6 +15,7 @@ class OriginalImage
 {
     use TimestampableEntity;
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['row.images'])]
     private ?string $thumbUrl = null;
 
 //    #[ORM\Column]
@@ -36,7 +37,7 @@ class OriginalImage
      */
     public function __construct(
         #[ORM\Column(type: Types::TEXT)]
-        #[Groups(['row.read'])]
+        #[Groups(['row.images'])]
         private ?string $url = null,
 
         #[ORM\Column(length: 32)]

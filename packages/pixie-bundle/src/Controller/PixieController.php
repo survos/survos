@@ -2,6 +2,7 @@
 
 namespace Survos\PixieBundle\Controller;
 
+use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\CoreRepository;
 //use Survos\PixieBundle\Service\SqliteService;
@@ -57,7 +58,7 @@ class PixieController extends AbstractController
         private RowRepository                   $rowRepository,
         private SqliteService                   $sqliteService,
         private PixieTranslationService         $translationService,
-        private readonly RequestStack           $requestStack, private readonly CoreRepository $coreRepository, private readonly CoreService $coreService,
+        private readonly RequestStack           $requestStack, private readonly CoreRepository $coreRepository, private readonly CoreService $coreService, private readonly OriginalImageRepository $originalImageRepository,
         private readonly ?UrlGeneratorInterface $urlGenerator=null,
         private readonly ?MessageBusInterface   $bus=null,
         private readonly ?WorkflowHelperService $workflowHelperService = null,
@@ -588,12 +589,11 @@ class PixieController extends AbstractController
         #[MapQueryParameter] int $limit = 100,
     ): array
     {
-        $pixieFilename = $this->pixieService->getPixieFilename($pixieCode);
-        $iKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($pixieCode, mode: PixieInterface::IMAGE_TABLE))->getStorageBox();
+        $config = $this->pixieService->selectConfig($pixieCode);
+
         return [
-            'iKv' => $iKv,
-            'kv' => $this->pixieService->getStorageBox($pixieCode),
-            'config' => $this->pixieService->selectConfig($pixieCode),
+            'images' => $this->originalImageRepository->findBy([], [], $limit),
+            'config' => $config,
             'pixieCode' => $pixieCode,
         ];
     }

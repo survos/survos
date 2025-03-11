@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: InstanceTextRepository::class)]
+#[ORM\Index(name:'instance_text_core', fields: ['core'])]
 class InstanceText
 {
     #[ORM\Id]

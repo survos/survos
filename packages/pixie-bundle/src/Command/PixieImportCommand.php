@@ -9,6 +9,7 @@ use App\Metadata\ITableAndKeys;
 use Survos\PixieBundle\Entity\Owner;
 use Survos\PixieBundle\Event\RowEvent;
 use Survos\PixieBundle\Model\Translation;
+use Survos\PixieBundle\Repository\TableRepository;
 use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\SqliteService;
@@ -58,7 +59,7 @@ final class PixieImportCommand extends InvokableServiceCommand
         private CoreRepository                             $coreRepository,
         private ImportHandler                              $importHandler,
         private readonly SqliteService                     $sqliteService,
-        private readonly OwnerRepository                   $ownerRepository, private readonly CoreService $coreService,
+        private readonly OwnerRepository                   $ownerRepository, private readonly CoreService $coreService, private readonly TableRepository $tableRepository,
     )
     {
 
@@ -226,14 +227,16 @@ EOL
         $owner = $this->pixieEntityManager->find(Owner::class, $configCode);
         foreach ($config->getTables() as $table) {
             $core = $this->coreService->getCore($table->getName(), $owner);
-            $count = $core->getRows()->count();
+            $count = $core->getRowCount();
 //            $count = -3; // $kv->count($table->getName());
             $url = sprintf("%s://%s", $configCode, $subCode);
+            // table? Or core?
+//            $this->tableRepository->
 //            $kv->beginTransaction();
 //            $kv->set([
 //                'id' => $table->getName(),
 //                'count' => $count
-//            ], '_tables');
+//              ], '_tables');
 //            $kv->commit();
             $consoleTable->addRow([$table->getName(), $count]);
         }

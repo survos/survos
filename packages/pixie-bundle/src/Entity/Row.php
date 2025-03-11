@@ -14,8 +14,7 @@ use Survos\WorkflowBundle\Traits\MarkingTrait;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: RowRepository::class)]
-//#[ORM\Index(name: 'xxx', columns: ['core_id'])]
-//#[ORM\Index(name: 'xxxXXX', fields: ['core'])]
+#[ORM\Index(name: 'row_core', fields: ['core'])]
 #[Groups(['row.read'])]
 class Row implements MarkingInterface, \Stringable
 {
@@ -39,6 +38,7 @@ class Row implements MarkingInterface, \Stringable
      * @var Collection<int, OriginalImage>
      */
     #[ORM\OneToMany(targetEntity: OriginalImage::class, mappedBy: 'row', orphanRemoval: true)]
+    #[Groups(['row.images'])]
     private Collection $images;
 
     #[ORM\Column(nullable: true)]
@@ -47,6 +47,7 @@ class Row implements MarkingInterface, \Stringable
     public function __construct(?Core $core=null, ?string $id=null)
     {
         $this->initCoreId($core, $id);
+        $core->addRow($this); // if this is too slow, update rowCount here.
         $this->images = new ArrayCollection();
     }
 
@@ -98,6 +99,12 @@ class Row implements MarkingInterface, \Stringable
     }
 
     public function __toString()
+    {
+        return $this->getId();
+    }
+
+    // this is the meilisearch Key
+    public function getKey()
     {
         return $this->getId();
     }

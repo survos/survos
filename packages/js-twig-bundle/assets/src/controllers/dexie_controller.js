@@ -138,14 +138,19 @@ export default class extends Controller {
         if (eventName) {
             console.warn(`Listening for ${eventName}`);
             document.addEventListener(eventName, (e) => {
+                console.log(window.app);
                 // the data comes from the topPage data
                 console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
+                console.error('@get the db and pass it to the template');
+                document.getElementById('test').innerHTML = "hello this is " + e.type;
+
                 // console.error(e.detail.id, this.storeValue);
                 // @todo: types of events, like detail, list,
                 if (e.detail.hasOwnProperty('id')) {
                     let html = this.renderPage(e.detail.id, this.storeValue);
                     console.warn(html);
                 } else {
+
                     this.contentConnected();
                 }
             });

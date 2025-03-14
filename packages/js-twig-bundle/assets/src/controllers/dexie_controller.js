@@ -144,6 +144,8 @@ export default class extends Controller {
                 console.error('@get the db and pass it to the template');
                 document.getElementById('test').innerHTML = "hello this is " + e.type;
 
+                console.error(this.storeValue, this.filter);
+                // set rows = await query the dexie for the rows.
                 // console.error(e.detail.id, this.storeValue);
                 // @todo: types of events, like detail, list,
                 if (e.detail.hasOwnProperty('id')) {

@@ -27,7 +27,7 @@ controller: {{ _sc }}
 
     {# idea: each twig block passed in could have it's own target? #}
     <h3>The content div for {{ caller }} with {{ this.store }} is below.</h3>
-    <div {{ stimulus_target(_sc, 'content') }}>
+    <div id="dexie-content-{{ this.store }}" {{ stimulus_target(_sc, 'content') }}>
         The content {{ _self }} // {{ this.store }}
     </div>
 

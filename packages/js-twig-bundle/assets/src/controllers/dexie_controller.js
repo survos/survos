@@ -85,6 +85,8 @@ export default class extends Controller {
     static outlets = ["app"]; // could pass this in, too.
 
     connect() {
+        console.error('starting content ' + this.contentTarget.innerHTML);
+        this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
         // by default, the template id is the caller basename
         // console.error(this.callerValue);
 
@@ -137,22 +139,73 @@ export default class extends Controller {
         const eventName = this.refreshEventValue;
         if (eventName) {
             console.warn(`Listening for ${eventName}`);
+            console.warn("Current content: " + this.contentTarget.innerHTML);
             document.addEventListener(eventName, (e) => {
                 console.log(window.app);
                 // the data comes from the topPage data
                 console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
-                console.error('@get the db and pass it to the template');
-                document.getElementById('test').innerHTML = "hello this is " + e.type;
+                // console.error('@get the db and pass it to the template');
+                // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
-                var that = this;
-                window.app.db[this.storeValue].count().then(function (count) {
-                    alert("There are " + count + " " + that.storeValue + " in the database");
+                let store = this.storeValue;
+                store = 'products'; // @todo: populate the other tables
+                let table = window.app.db[store];
+
+                table
+                    .toArray()
+                    .then((rows) => {
+                        // render the template with a collection of items
+                        let x =  this.template.render({rows: rows,
+                            storeName: this.storeValue,
+                            globals: this.globalsValue});
+                        console.log(x);
+                        this.contentTarget.innerHTML = x;
+                    })
+                    // .then((html) => {
+                    //     console.warn(html);
+                    //         this.contentTarget.innerHTML = html;
+                    //     }
+                    // )
+                    .catch((e) => console.error(e))
+                    .finally((e) => console.log("populated the template with the data"));
+                return;
+
+                table.count().then((count) => {
+                    let html = "There are " + count + " " + store + " in the database";
+                    this.contentTarget.innerHTML = html;
+                    let data = table.rows;
+                    console.error(store, html, data);
+                    if (this.compiledTwigTemplates.hasOwnProperty('twig_template')) {
+                        html = this.compiledTwigTemplates["twig_template"].render({
+                            data: data,
+                            globals: this.globalsValue,
+                        });
+                        console.error(html);
+                    }
+                    this.contentTarget.innerHTML = html;
+                    console.error(html, this.contentTarget);
+                    // inject the result
+
                 });
+                return;
+                table
+                    .toArray()
+                    .then((rows) =>
+                        // render the template with a collection of items
+                        this.template.render({rows: rows, globals: this.globalsValue})
+                    )
+                    .then((html) => {
+                            this.element.innerHTML = html;
+                        }
+                    )
+                    .catch((e) => console.error(e))
+                    .finally((e) => console.log("populated the template with the data"));
 
                 console.error(this.storeValue, this.filter);
                 // set rows = await query the dexie for the rows.
                 // console.error(e.detail.id, this.storeValue);
                 // @todo: types of events, like detail, list,
+                return;
                 if (e.detail.hasOwnProperty('id')) {
                     let html = this.renderPage(e.detail.id, this.storeValue);
                     console.warn(html);
@@ -236,7 +289,7 @@ export default class extends Controller {
         console.info(
             "at this point, the tables should be populated and db should be open"
         );
-        return this.db;
+        // return this.db;
     }
 
     appOutletConnected(app, element) {
@@ -341,7 +394,8 @@ export default class extends Controller {
         // console.error(window.db);
         // is db a Dexie instance?  It shouldn't be complaining about void, it thinks it's a console table
         // https://dexie.org/docs/Dexie/Dexie.table()
-        let table = window.db.table(this.storeValue);
+        let table = window.db.table('items');
+        // let table = window.db.table(this.storeValue);
         // console.error(table,  this.storeValues)
 
         // if (this.filter) {

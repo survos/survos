@@ -6,7 +6,7 @@
 {#templateId: this.templateId,#}
 {#templateType: this.type,#}
 
-{{ _sc }}
+controller: {{ _sc }}
 <div {{ attributes }}
         {{ stimulus_controller(_sc, {
             refreshEvent: this.refreshEvent,
@@ -24,7 +24,9 @@
             controllerOutlets = { 'app': '#app' }
         ) }}>
 
+
     {# idea: each twig block passed in could have it's own target? #}
+    <h3>The content div for {{ caller }} with {{ this.store }} is below.</h3>
     <div {{ stimulus_target(_sc, 'content') }}>
         {{ _self }}
         The content from the twig+js with dexie data will be rendered here. DexieTwig<i>Component</i>

@@ -155,7 +155,8 @@ export default class extends Controller {
                     .toArray()
                     .then((rows) => {
                         // render the template with a collection of items
-                        let x =  this.template.render({rows: rows,
+                        let x =  this.template.render({
+                            rows: rows,
                             storeName: this.storeValue,
                             globals: this.globalsValue});
                         console.log(x);

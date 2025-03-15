@@ -144,6 +144,11 @@ export default class extends Controller {
                 console.error('@get the db and pass it to the template');
                 document.getElementById('test').innerHTML = "hello this is " + e.type;
 
+                var that = this;
+                window.app.db[this.storeValue].count().then(function (count) {
+                    alert("There are " + count + " " + that.storeValue + " in the database");
+                });
+
                 console.error(this.storeValue, this.filter);
                 // set rows = await query the dexie for the rows.
                 // console.error(e.detail.id, this.storeValue);

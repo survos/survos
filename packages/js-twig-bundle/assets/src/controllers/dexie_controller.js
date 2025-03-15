@@ -148,8 +148,8 @@ export default class extends Controller {
                 // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
                 let store = this.storeValue;
-                store = 'products'; // @todo: populate the other tables
                 let table = window.app.db[store];
+                console.error(store, table);
 
                 table
                     .toArray()

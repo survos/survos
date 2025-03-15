@@ -85,8 +85,8 @@ export default class extends Controller {
     static outlets = ["app"]; // could pass this in, too.
 
     connect() {
-        console.error('starting content ' + this.contentTarget.innerHTML);
-        this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
+        console.error(`starting content ` + this.refreshEventValue  + ' ' +  this.contentTarget.innerHTML);
+        // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
         // by default, the template id is the caller basename
         // console.error(this.callerValue);
 
@@ -149,8 +149,6 @@ export default class extends Controller {
 
                 let store = this.storeValue;
                 let table = window.app.db[store];
-                console.error(store, table);
-
                 table
                     .toArray()
                     .then((rows) => {
@@ -159,8 +157,10 @@ export default class extends Controller {
                             rows: rows,
                             storeName: this.storeValue,
                             globals: this.globalsValue});
-                        console.log(x);
-                        this.contentTarget.innerHTML = x;
+                        console.log("About to insert rendered template into contentTarget");
+                        if (this.contentTarget) {
+                            this.contentTarget.innerHTML = x;
+                        }
                     })
                     // .then((html) => {
                     //     console.warn(html);

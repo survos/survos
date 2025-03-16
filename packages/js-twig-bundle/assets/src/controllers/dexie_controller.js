@@ -85,6 +85,9 @@ export default class extends Controller {
     static outlets = ["app"]; // could pass this in, too.
 
     connect() {
+        
+        this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
+
         console.error(`starting content ` + this.refreshEventValue  + ' ' +  this.contentTarget.innerHTML);
         // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
         // by default, the template id is the caller basename

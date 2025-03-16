@@ -167,6 +167,15 @@ class PixieController extends AbstractController
         #[MapQueryParameter] int     $limit = 5
     ): array|Response
     {
+        $core = null;
+        $this->pixieService->selectConfig($tableName);
+        assert(false, "@todo: use pixieEntityManager instead");
+        $this->rowRepository->findBy([
+            'core' => $core,
+            'tableName' => $tableName,
+        'key' => $key,
+        ]);
+
         $kv = $this->pixieService->getStorageBox($pixieCode);
         $kv->select($tableName);
         $pk = $kv->getPrimaryKey($tableName);

@@ -5,7 +5,6 @@ namespace Survos\PixieBundle\Service;
 // see https://github.com/bungle/web.php/blob/master/sqlite.php for a wrapper without PDO
 
 use App\Event\FetchTranslationObjectEvent;
-use App\Event\RowEvent;
 use JsonMachine\Items;
 use League\Csv\Info;
 use League\Csv\Reader;
@@ -13,6 +12,7 @@ use League\Csv\SyntaxError;
 use Psr\Log\LoggerInterface;
 use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\PixieBundle\Event\CsvHeaderEvent;
+use Survos\PixieBundle\Event\RowEvent;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Table;
 use Survos\PixieBundle\StorageBox;

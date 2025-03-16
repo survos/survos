@@ -94,7 +94,8 @@ final class PixieIndexCommand extends InvokableServiceCommand
     ): int
     {
         $configCode ??= getenv('PIXIE_CODE');
-        $pixieEm = $this->sqliteService->setPixieEntityManager($configCode);
+        $this->pixieService->selectConfig($configCode);
+//        $pixieEm = $this->sqliteService->setPixieEntityManager($configCode);
         $reset ??= true;
 
         if (!$this->meiliService) {
@@ -145,15 +146,15 @@ final class PixieIndexCommand extends InvokableServiceCommand
             if ($reset) {
                 $this->addTask($indexApi->delete($indexName));
             }
-            $this->configureIndex($config, $index, $tableName);
+            $this->configureIndex($config, $indexApi, $tableName);
 
             $primaryKey = 'pixie_key'; // $kv->getPrimaryKey($tableName); // ??
 
             $iQb = $this->originalImageRepository->createQueryBuilder('i');
-            $this->indexCoreRows($core, $index, $configCode, $batchSize, $limit);
+            $this->indexCoreRows($core, $indexApi, $configCode, $batchSize, $limit);
             try {
                 if (count($recordsToWrite)) {
-                    $this->addTask($index->addDocuments($recordsToWrite, $primaryKey), "final dispatch", $recordsToWrite);
+                    $this->addTask($indexApi->addDocuments($recordsToWrite, $primaryKey), "final dispatch", $recordsToWrite);
                     $recordsToWrite = [];
                 }
             } catch (\Exception $e) {
@@ -174,7 +175,8 @@ final class PixieIndexCommand extends InvokableServiceCommand
 
 
             // dispatch a message that updates the database with meili
-                $stats = $index->stats();
+            // this is synchronous!
+                $stats = $indexApi->stats();
                 assert(!$stats['isIndexing'], json_encode($stats));
                 unset($stats['isIndexing']);
 //            dd($stats, $index->getSettings());
@@ -195,7 +197,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
                 $table = new Table($this->io());
                 $table->setHeaders(['attributes', 'value']);
 //            $io->write(json_encode($stats, JSON_PRETTY_PRINT));
-                foreach ($index->getSettings() as $var=>$value) {
+                foreach ($indexApi->getSettings() as $var=>$value) {
                     if (str_contains($var, 'Attributes')) {
                         $table->addRow([$var, json_encode($value)]);
                     }
@@ -474,7 +476,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
 //                $data->pixie_key = $this->asciiSlugger->slug(sprintf("%s_%s", $tableName, $row->getKey()))->toString();
 
             $tableName = $core->getCode(); // a mess. @todo: cleanup!
-            $data->coreId = $tableName;
+//            $data->coreId = $tableName;
             $data->table = $tableName;
             $data->rp = [
                 'pixieCode' => $configCode,

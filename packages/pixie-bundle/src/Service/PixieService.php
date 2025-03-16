@@ -333,11 +333,19 @@ class PixieService
         if (null === $configCache) {
             $configCache = $this->getConfigFiles();
         }
-        $owner = $this->pixieEntityManager->getRepository(Owner::class)->find($pixieCode);
-        if ($config = $configCache[$pixieCode] ?? null) {
-            $config = StorageBox::fix($config, $this->getTemplates());
+        try {
+            // this is the owner in the sqlite file, not in the app.
+            if ($config = $configCache[$pixieCode] ?? null) {
+                $config = StorageBox::fix($config, $this->getTemplates());
+            }
+            // not sure this should be here -- selectConfig is called during migrate, and owner doesn't yet exist!
+            $owner = $this->pixieEntityManager->getRepository(Owner::class)->find($pixieCode);
+            $config->setOwner($owner);
+        } catch (\Exception $e) {
+//            assert(false);
+            $this->logger->warning(" creating " . $pixieCode . "\n\n" . $e->getMessage());
+//            return null;
         }
-        $config->setOwner($owner);
         return $config;
 
         dd($pixieCode, $this->bundleConfig);
@@ -659,7 +667,7 @@ class PixieService
             $fromSchemaManager = $pixieConn->createSchemaManager();
             $fromSchema = $fromSchemaManager->introspectSchema();
         } catch (\Exception $e) {
-            dd($e->getMessage(), $x);
+            dd($e->getMessage(), $config->getCode());
         }
 
         //        $conn->selectDatabase($dbName);
@@ -698,7 +706,7 @@ class PixieService
 //        $fromSchemaManager = $fromConnection->createSchemaManager();
 //        $fromSchema = $fromSchemaManager->introspectSchema();
 
-        assert($toSchema <> $fromSchema);
+        assert($toSchema !== $fromSchema);
         $schemaDiff = $comparator->compareSchemas($toSchema, $fromSchema);
         $queries = $databasePlatform->getAlterSchemaSQL($schemaDiff);
         foreach ($queries as $query) {

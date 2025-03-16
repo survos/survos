@@ -282,15 +282,15 @@ class PixieImportService
                         // since we already have a row id, we can create the related images from the raw data.
                     // $this->importService (injected!) ->processImages()
                     /** @var OriginalImageModel $original */
-                    foreach ($rowObj['originalImages'] as $original) {
+                    foreach ($rowObj['originalImages']??[] as $original) {
                         // for use when sais isn't populated
                         $rowObj['originalUrl'] = $original->imageUrl;
                         $thumb = $original->context['thumb']??null;
                         $rowObj['thumburl'] = $thumb;
                         $imageEntity =  $this->addImage($row, $original, $thumb );
+                        $saisImages[] = $imageEntity;
                     }
 //                    $row['saisImages'][] = $item->addImage($imageEntity);
-                    $saisImages[] = $imageEntity;
 
                     $rowObj = $this->handleRelations($kv, $row, $config, $pixieCode, $table, $owner, $rowObj);
 

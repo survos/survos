@@ -63,7 +63,6 @@ class CoreService
         private EntityManagerInterface $pixieEntityManager,
         private FormFactoryInterface                          $formFactory,
         private readonly CoreRepository $coreRepository,
-        private ?Liform                                        $liform=null,
         private array                             $cores = []
 
     ) {
@@ -688,26 +687,28 @@ class CoreService
     /**
      * @param mixed $tableName
      */
-    public function getCore(string $tableName, ?Owner $owner=null): Core
+    public function getCore(string $tableName, Owner $owner): Core
     {
-        if (empty($this->cores)) {
+
+        $ownerCode = $owner->getCode();
+        if (empty($this->cores[$owner->getCode()])) {
             foreach ($this->coreRepository->findAll() as $core) {
-                if ($owner) {
-                    assert($core->getOwner() === $owner);
-                }
-                $this->cores[$core->getCoreCode()] = $core;
+                assert($core->getOwner() === $owner);
+                $this->cores[$owner->getCode()][$core->getCoreCode()] = $core;
             }
         }
 
 //        if (!$core = $this->coreRepository->find($tableName)) {
-        if (!$core = $this->cores[$tableName]??null) {
+//        if (!$core = $this->cores[$owner->getCode()][$tableName]??null) {
+        if (!$core = $this->coreRepository->findOneBy(['code' => $tableName])) {
             $core = new Core($tableName, $owner);
 //            foreach ($this->coreRepository->findAll() as $existingCore) {
 //                dump($existingCore->getCode(), $existingCore);
 //            }
             $this->pixieEntityManager->persist($core);
+            $this->entityManager->flush(); // hack
             assert($this->pixieEntityManager->contains($core));
-            $this->cores[$tableName] = $core;
+            $this->cores[$ownerCode][$tableName] = $core;
 //            dump($tableName, array_keys($this->cores));
         }
         if (!$this->pixieEntityManager->contains($core)) {

@@ -329,13 +329,7 @@ class PixieService
 
         if ($switchDatabase) {
             $conn = $this->pixieEntityManager->getConnection();
-            var_dump("SENDING PIXIECODE $pixieCode TO DBNAME");
-            var_dump($pixieCode);
             $toDbName = $this->dbName($pixieCode);
-            var_dump("received dbname");
-            var_dump($toDbName);
-            dump("call db select");
-            dump($toDbName);
             $conn->selectDatabase($toDbName);
         }
         if (null === $configCache) {
@@ -655,19 +649,12 @@ class PixieService
     public function dbName(string $code, bool $throwErrorIfMissing = false): string
     {
         //dd($this->pixieTemplateUrl);
-        var_dump("dbName received code ");
-        var_dump($code);
         $params = $this->pixieEntityManager->getConnection()->getParams();
-        var_dump("dbName received params ");
-        var_dump($params);
-
         //$dbName = str_replace('pixie_template', $code, $params['path']);
         $dbName = str_replace(pathinfo($params['path'],PATHINFO_FILENAME), $code, $params['path']);
         if ($throwErrorIfMissing) {
             assert(file_exists($dbName), $dbName);
         }
-        var_dump("dbName OUT : ");
-        var_dump($dbName);
         return $dbName;
 
     }

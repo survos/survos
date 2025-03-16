@@ -328,7 +328,8 @@ class PixieService
 
         if ($switchDatabase) {
             $conn = $this->pixieEntityManager->getConnection();
-            $conn->selectDatabase($this->dbName($pixieCode));
+            $toDbName = $this->dbName($pixieCode);
+            $conn->selectDatabase($toDbName);
         }
         if (null === $configCache) {
             $configCache = $this->getConfigFiles();
@@ -338,7 +339,7 @@ class PixieService
             if ($config = $configCache[$pixieCode] ?? null) {
                 $config = StorageBox::fix($config, $this->getTemplates());
             }
-            // not sure this should be here -- selectConfig is called during migrate, and owner doesn't yet exist!
+            // not sure this should be here -- selectConfig is called during migrate, and owner doesn't yet exist
             $owner = $this->pixieEntityManager->getRepository(Owner::class)->find($pixieCode);
             $config->setOwner($owner);
         } catch (\Exception $e) {

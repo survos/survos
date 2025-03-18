@@ -98,25 +98,18 @@ export default class extends Controller {
                     console.log(e.detail.tabItem);
                     document.dispatchEvent(new CustomEvent(eventType, {'detail': e}));
                 }
-
                 //catch page after in
                 if (e.type === 'page:afterin') {
                     let pageName = e.detail.name;
-                    console.log('page in');
-                    console.log(e);
-                    console.log(pageName);
-                    //alert(e.detail.route.params.id);
                     //add id to event detail
-                    e.detail.id = e.detail.route.params.id;
-                    //alert(e.detail.id);
-
-                    document.dispatchEvent(new CustomEvent("obra.refresh", 
+                    if (e.detail && e.detail.route && e.detail.route.params) {
+                        e.detail.id = e.detail.route.params.id;
+                    }
+                    document.dispatchEvent(new CustomEvent(e.detail.route.params.page + ".refresh", 
                         {
                             'detail': e.detail,
                         }
                     ));
-
-                    //alert('page in');
                 }
             })
         );

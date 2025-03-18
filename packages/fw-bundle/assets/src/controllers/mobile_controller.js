@@ -85,7 +85,7 @@ export default class extends Controller {
         //     // console.warn("ons is ready, " + this.identifier)
         // });
 
-        // https://stackoverflow.com/questions/26851516/how-to-open-page-with-ons-tabbar-and-display-specific-tab
+        // https://framework7.io/docs/page#page-events
         ['init', 'show', 'hide', 'precache',"page:afterin"].forEach(eventName =>
             document.addEventListener(eventName, (e) => {
                 // console.error('%s:%s / %o', e.type, e.target.getAttribute('id'), e.target);

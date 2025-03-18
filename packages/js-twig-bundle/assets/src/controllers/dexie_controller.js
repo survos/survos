@@ -207,19 +207,19 @@ export default class extends Controller {
                     .catch((e) => console.error(e))
                     .finally((e) => console.log("populated the template with the data"));
 
-                console.error(this.storeValue, this.filter);
+                console.error(this.storeValue, this.filter, e.detail);
                 // set rows = await query the dexie for the rows.
                 // console.error(e.detail.id, this.storeValue);
-                // @todo: types of events, like detail, list,
-                return;
+                // @todo: types of events, like detail, list
                 if (e.detail.hasOwnProperty('id')) {
                     let html = this.renderPage(e.detail.id, this.storeValue);
                     console.warn(html);
-                } else {
 
+                } else {
                     this.contentConnected();
                 }
             });
+            return;
 
         }
         // idea: dispatch an event that app_controller listens for and opens the database if it doesn't already exist.

@@ -86,7 +86,7 @@ export default class extends Controller {
         // });
 
         // https://stackoverflow.com/questions/26851516/how-to-open-page-with-ons-tabbar-and-display-specific-tab
-        ['init', 'show', 'hide', 'precache'].forEach(eventName =>
+        ['init', 'show', 'hide', 'precache',"page:afterin"].forEach(eventName =>
             document.addEventListener(eventName, (e) => {
                 // console.error('%s:%s / %o', e.type, e.target.getAttribute('id'), e.target);
                 // console.info('%s received for %s %o', e.type, e.target.getAttribute('id'), e.target);
@@ -95,7 +95,28 @@ export default class extends Controller {
                     let tabPageName = tabItem.getAttribute('page');
                     let eventType = tabPageName + '.' + e.type;
                     console.log('dispatching ' + eventType);
+                    console.log(e.detail.tabItem);
                     document.dispatchEvent(new CustomEvent(eventType, {'detail': e}));
+                }
+
+                //catch page after in
+                if (e.type === 'page:afterin') {
+                    let pageName = e.detail.name;
+                    console.log('page in');
+                    console.log(e);
+                    console.log(pageName);
+                    //alert(e.detail.route.params.id);
+                    //add id to event detail
+                    e.detail.id = e.detail.route.params.id;
+                    //alert(e.detail.id);
+
+                    document.dispatchEvent(new CustomEvent("obra.refresh", 
+                        {
+                            'detail': e.detail,
+                        }
+                    ));
+
+                    //alert('page in');
                 }
             })
         );

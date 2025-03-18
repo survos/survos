@@ -144,6 +144,7 @@ export default class extends Controller {
             console.warn(`Listening for ${eventName}`);
             console.warn("Current content: " + this.contentTarget.innerHTML);
             document.addEventListener(eventName, (e) => {
+                //
                 console.log(window.app);
                 // the data comes from the topPage data
                 console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
@@ -157,6 +158,7 @@ export default class extends Controller {
                     .then((rows) => {
                         // render the template with a collection of items
                         let x =  this.template.render({
+                            id : e.detail.id,
                             rows: rows,
                             storeName: this.storeValue,
                             globals: this.globalsValue});

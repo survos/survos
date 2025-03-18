@@ -151,29 +151,36 @@ export default class extends Controller {
                 // console.error('@get the db and pass it to the template');
                 // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
-                let store = this.storeValue;
-                let table = window.app.db[store];
-                table
-                    .toArray()
-                    .then((rows) => {
-                        // render the template with a collection of items
-                        let x =  this.template.render({
-                            id : e.detail.id,
-                            rows: rows,
-                            storeName: this.storeValue,
-                            globals: this.globalsValue});
-                        console.log("About to insert rendered template into contentTarget");
-                        if (this.contentTarget) {
-                            this.contentTarget.innerHTML = x;
-                        }
-                    })
-                    // .then((html) => {
-                    //     console.warn(html);
-                    //         this.contentTarget.innerHTML = html;
-                    //     }
-                    // )
-                    .catch((e) => console.error(e))
-                    .finally((e) => console.log("populated the template with the data"));
+                if (e.detail.hasOwnProperty('id')) {
+                    this.renderPage(e.detail.id, this.storeValue);
+                    //console.warn(html);
+
+                } else {
+                    let store = this.storeValue;
+                    let table = window.app.db[store];
+                    table
+                        .toArray()
+                        .then((rows) => {
+                            // render the template with a collection of items
+                            let x =  this.template.render({
+                                rows: rows,
+                                storeName: this.storeValue,
+                                globals: this.globalsValue});
+                            console.log("About to insert rendered template into contentTarget");
+                            if (this.contentTarget) {
+                                this.contentTarget.innerHTML = x;
+                            }
+                        })
+                        // .then((html) => {
+                        //     console.warn(html);
+                        //         this.contentTarget.innerHTML = html;
+                        //     }
+                        // )
+                        .catch((e) => console.error(e))
+                        .finally((e) => console.log("populated the template with the data"));
+                }
+
+                
                 return;
 
                 table.count().then((count) => {
@@ -482,7 +489,7 @@ export default class extends Controller {
         // console.error("page data", this.appOutlet.navigatorTarget.topPage.data);
         // let key = this.appOutlet.navigatorTarget.topPage.data.id;
         // console.error(this.appOutlet.navigatorTarget.topPage.data, key);
-        let table = window.db.table(store);
+        let table = window.app.db[store];
 
         table = table.get(parseInt(key));
         table
@@ -514,7 +521,8 @@ export default class extends Controller {
                     console.log(title);
                     if (this.hasAppOutlet) {
                         console.error(title);
-                        this.appOutlet.setTitle(title);
+                        //commented for now (avoid error)
+                        ///this.appOutlet.setTitle(title);
                     }
                 }
             )

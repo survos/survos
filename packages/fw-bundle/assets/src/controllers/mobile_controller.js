@@ -150,6 +150,7 @@ export default class extends Controller {
             }
         );
 
+        // these look like onsen events!
         this.navigatorTarget.addEventListener('prepush', this.eventPreDebug);
         this.navigatorTarget.addEventListener('prepop', this.eventPreDebug);
         this.navigatorTarget.addEventListener('postpush', this.eventPostDispatch);

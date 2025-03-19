@@ -152,6 +152,7 @@ export default class extends Controller {
                 // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
                 if (e.detail.hasOwnProperty('id')) {
+                    window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/");
                     this.renderPage(e.detail.id, this.storeValue);
                     //console.warn(html);
 

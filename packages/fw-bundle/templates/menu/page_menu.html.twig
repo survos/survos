@@ -3,7 +3,13 @@
 {% block root %}
     <!-- {{ _self }} -->
     {% set listAttributes = item.childrenAttributes %}
-    {{ block('list') -}}
+
+    <div class="list menu-list">
+        <ul>
+            {{ block('list') -}}
+        </ul>
+    </div>
+
 {% endblock %}
 
 {% block heading %}
@@ -15,35 +21,36 @@
     {% set icon = item.attributes.icon|default('fa-question-mark') %}
     {% set badge = item.extras.badge|default(false) %}
     {% set route = item.name %} {#  really the pageId that's loaded #}
+
     {% if item.attributes.style|default('') == 'header' %}
         {{ block('heading') }}
     {% else %}
-            {% if item.linkAttributes.target|default('') == '_blank' %}
+        {% if item.linkAttributes.target|default('') == '_blank' %}
                 <a target="_blank" href="{{ item.uri }}">
                     {{ block('label') }}
                 </a>
-                {% else %}
-                    <a href="{{ item.uri }}">
-                        {{ route }}
+        {% else %}
+            <li>
+                <a href="{{ item.uri }}" class="item-content item-link panel-close">
+                    {% if icon %}
+                    <div class="item-media">
+                        <twig:ux:icon name="{{icon}}" />
+                    </div>
+                    {% endif %}
+                    <div class="item-inner">
+                        <div class="item-title">
+                        {# {{ route }} #}
+                        {{ item.label|trans }}
+                        </div>
+                    </div>
+                </a>
 
-                    </a>
-        @wrap in f7-link?
-            {{ stimulus_action('app', 'loadPage', 'click', {
-                route: route,
-                extras: item.extras
-            }) }}
-        {% endif %}
-    >
-        {% endif %}
-        {% if icon %}
-        <div class="left">
-            icon {{ icon }}
-        </div>
-        {% endif %}
+            </li>
 
-        {{ item.label|trans }}
-    @end-f7
-
+        {% endif %}
+    
+    {% endif %}
+        
 
 {% endblock %}
 

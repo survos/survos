@@ -164,6 +164,7 @@ export default class extends Controller {
                             // render the template with a collection of items
                             let x =  this.template.render({
                                 rows: rows,
+                                window: window,
                                 storeName: this.storeValue,
                                 globals: this.globalsValue});
                             console.log("About to insert rendered template into contentTarget");
@@ -505,6 +506,7 @@ export default class extends Controller {
                             this.compiledTwigTemplates.hasOwnProperty('title')
                                 ? this.compiledTwigTemplates["title"].render({
                                     data: data,
+                                    window: window,
                                     globals: this.globalsValue,
                                 })
                                 : 'no title'

@@ -152,13 +152,16 @@ export default class extends Controller {
                 // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
                 if (e.detail.hasOwnProperty('id')) {
-                    window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/");
+                    window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/",{
+                        animate : false,
+                    });
                     this.renderPage(e.detail.id, this.storeValue);
                     //console.warn(html);
 
                 } else {
                     let store = this.storeValue;
-                    let table = window.app.db[store];
+                    let db = window.db;
+                    let table = db.table(store);
                     table
                         .toArray()
                         .then((rows) => {
@@ -409,7 +412,7 @@ export default class extends Controller {
         // console.error(window.db);
         // is db a Dexie instance?  It shouldn't be complaining about void, it thinks it's a console table
         // https://dexie.org/docs/Dexie/Dexie.table()
-        let table = window.db.table('items');
+        let table = window.db.table(this.storeValue);
         // let table = window.db.table(this.storeValue);
         // console.error(table,  this.storeValues)
 

@@ -703,10 +703,9 @@ class CoreService
         if (!$core = $this->coreRepository->findOneBy(['code' => $tableName])) {
             $core = new Core($tableName, $owner);
 //            foreach ($this->coreRepository->findAll() as $existingCore) {
-//                dump($existingCore->getCode(), $existingCore);
+//                dump($existingCore->get   Code(), $existingCore);
 //            }
             $this->pixieEntityManager->persist($core);
-            $this->entityManager->flush(); // hack
             assert($this->pixieEntityManager->contains($core));
             $this->cores[$ownerCode][$tableName] = $core;
 //            dump($tableName, array_keys($this->cores));

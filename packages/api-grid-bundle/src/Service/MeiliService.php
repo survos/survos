@@ -1,5 +1,7 @@
 <?php
 
+// really this should extend, use or decorate MeiliService in MeiliAdminBundle
+
 namespace Survos\ApiGrid\Service;
 
 use ApiPlatform\Metadata\ApiResource;

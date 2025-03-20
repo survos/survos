@@ -47,7 +47,8 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
     public function process(ContainerBuilder $container): void
     {
 
-        // for now, look for workflows defined in config/packages/workflow.php
+        $workflows = $container->findTaggedServiceIds('workflows');
+        // for now, lookd for workflows defined in config/packages/workflow.php
         // @todo: scan for classes that implement SurvosWorkflowInterface or something
 
 

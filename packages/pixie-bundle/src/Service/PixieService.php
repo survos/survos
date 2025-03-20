@@ -328,6 +328,8 @@ class PixieService
         static $configCache = null;
 
         if ($switchDatabase) {
+            $this->pixieEntityManager->flush();
+            $this->pixieEntityManager->clear();
             $conn = $this->pixieEntityManager->getConnection();
             $toDbName = $this->dbName($pixieCode);
             $conn->selectDatabase($toDbName);

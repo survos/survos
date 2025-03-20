@@ -499,7 +499,7 @@ class PixieController extends AbstractController
 
         $countsByCore = $this->pixieService->getCountsByCore();
         foreach ($countsByCore as $code => $count) {
-            $core = $this->coreService->getCore($code);
+            $core = $this->coreService->getCore($code, $config->getOwner());
             $data[$code] = $core->getRows()->slice(0, $limit); // $this->rowRepository->findBy(['core.id' => $code], [], $limit);
         }
 
@@ -558,16 +558,23 @@ class PixieController extends AbstractController
     {
         // @todo: make automatic!
         $config = $this->pixieService->selectConfig($pixieCode);
+
+        // the actual schema.  From the museum point of view, maybe not that interesting.
+//        $pixieConn = $this->pixieEntityManager->getConnection();
+//        $fromSchemaManager = $pixieConn->createSchemaManager();
+//        $fromSchema = $fromSchemaManager->introspectSchema();
+//        dd($fromSchema);
+
+
+
         $cores = [];
         foreach ($this->coreRepository->findAll() as $core) {
             $cores[$core->getCode()] = $core;
         }
-
-        $pixieFilename = $this->pixieService->getPixieFilename($pixieCode);
             return [
                 'owner' => $config->getOwner(),
-            'kv' => $this->pixieService->getStorageBox($pixieCode),
-            'config' => $this->pixieService->selectConfig($pixieCode),
+//            'kv' => $this->pixieService->getStorageBox($pixieCode),
+            'config' => $config,
             'pixieCode' => $pixieCode,
                 'cores' => $cores,
         ];
@@ -579,7 +586,6 @@ class PixieController extends AbstractController
         string                   $pixieCode,
     ): array
     {
-        $pixieFilename = $this->pixieService->getPixieFilename($pixieCode);
         $kv = $this->pixieService->getStorageBox($pixieCode);
         return [
             'tableName' => 'str', // @todo: move pixie metadata to bundle

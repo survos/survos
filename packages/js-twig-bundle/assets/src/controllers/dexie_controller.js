@@ -9,7 +9,7 @@ import {Controller} from "@hotwired/stimulus";
     },
  */
 
-// https://javascript.plainenglish.io/12-best-practices-for-writing-asynchronous-javascript-like-a-pro-5ac4cb95d3c8
+// https://medium.com/@chandantechie/10-best-practices-for-writing-asynchronous-javascript-like-a-pro-2cb3a14587ba
 // now called from the TwigJsComponent Component, so it can pass in a Twig Template
 // combination api-platform, inspection-bundle, dexie and twigjs
 // loads data from API Platform to dexie, renders dexie data in twigjs
@@ -82,12 +82,12 @@ export default class extends Controller {
             type: String,
             default: "{}",
         }, // {status: 'queued'}
-        // order: Object // e.g. {dateAdded: 'DESC'} (could be array?)
+        // order: Object // e.g. {dateAdded: 'DESC'} (could be an array?)
     };
-    static outlets = ["app"]; // could pass this in, too.
+    static outlets = ["app"]; // can this be passed in?
 
     connect() {
-        
+
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
 
         console.error(`starting content ` + this.refreshEventValue  + ' ' +  this.contentTarget.innerHTML);
@@ -187,7 +187,7 @@ export default class extends Controller {
                         .finally((e) => console.log("populated the template with the data"));
                 }
 
-                
+
                 return;
 
                 table.count().then((count) => {
@@ -397,7 +397,7 @@ export default class extends Controller {
 
     // because this can be loaded by Turbo or Onsen
     async contentConnected() {
-        console.warn("Content is connected! Populate tables if empty")
+            console.warn("Content is connected! Populate tables if empty")
         // console.error(this.outlets);
         // this.outlets.forEach( (outlet) => console.warn(outlet));
         // if this is fired before the database is open, return, it'll be called later
@@ -539,6 +539,12 @@ export default class extends Controller {
     }
 
 }
+
+/*
+load all the rows in a json-ld (e.g. api-platform) endpoint
+
+The dexie database must be connected and initialized this is called.
+ */
 
 async function loadData(url, tableName) {
     let nextPageUrl = url;

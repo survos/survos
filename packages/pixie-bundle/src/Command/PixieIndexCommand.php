@@ -390,6 +390,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
     {
         $total = 0;
         $primaryKey = $index->getPrimaryKey();
+        $batchCount = 0;
 
 //        $count = $this->rowRepository->count(['core' => $core]);
         $qb = $this->rowRepository->createQueryBuilder('row')
@@ -507,14 +508,16 @@ final class PixieIndexCommand extends InvokableServiceCommand
 
             $recordsToWrite[] = $data;
 //                $row->getKey() == 56185 && dd(dataToWrite: $data, row: $row;
-//                if (++$batchCount >= $batchSize) {
-//                    $batchCount = 0;
-//                    $index->addDocuments($recordsToWrite);
-//                    dd($recordsToWrite);
-//                    $recordsToWrite = [];
-//                }
+                if (++$batchCount >= $batchSize) {
+                    $batchCount = 0;
+                    $index->addDocuments($recordsToWrite);
+                    $recordsToWrite = [];
+                }
 
-            if ($batchSize && (($progress = $progressBar->getProgress()) % $batchSize) === 0) {
+            assert($batchSize > 0);
+            $progress = $progressBar->getProgress();
+//            dd($progress,$batchSize);
+            if ( (($progress+1) % $batchSize) === 0) {
                 $this->addTask($index->addDocuments($recordsToWrite, $primaryKey), context: [
                     'records' => $recordsToWrite,
                     'primaryKey' => $primaryKey,
@@ -530,7 +533,20 @@ final class PixieIndexCommand extends InvokableServiceCommand
                 $recordsToWrite = [];
             }
         }
+        if (count($recordsToWrite)) {
+            $this->addTask($index->addDocuments($recordsToWrite, $primaryKey), context: [
+                'records' => $recordsToWrite,
+                'primaryKey' => $primaryKey,
+            ]);
+
+        }
+
         return $total;
+    }
+
+    private function addDocuments()
+    {
+
     }
 
 

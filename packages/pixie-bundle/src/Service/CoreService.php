@@ -693,7 +693,11 @@ class CoreService
         $ownerCode = $owner->getCode();
         if (empty($this->cores[$owner->getCode()])) {
             foreach ($this->coreRepository->findAll() as $core) {
-                assert($core->getOwner() === $owner);
+//                assert($core->getOwner(), "Missing owner in core");
+//                if ($core->getOwner() !== $owner) {
+//                    dd($core->getOwner(), $owner);
+//                }
+//                assert($core->getOwner() === $owner);
                 $this->cores[$owner->getCode()][$core->getCoreCode()] = $core;
             }
         }

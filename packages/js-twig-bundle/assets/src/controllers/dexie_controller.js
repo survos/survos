@@ -130,11 +130,11 @@ export default class extends Controller {
             if (!window.called) {
                 window.called = true;
                 this.openDatabase(this.dbNameValue);
+            } else {
+                this.openDatabase(this.dbNameValue);
             }
 
             this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
-
-            this.openDatabase(this.dbNameValue);
             // console.error(event);
             // the data comes from the topPage data
             console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
@@ -294,6 +294,7 @@ export default class extends Controller {
         // this opens the database for every dexie connection!
         console.assert(this.dbNameValue, "Missing dbName in dexie_controller");
         const db = new Dexie(this.dbNameValue);
+        console.error(this.dbNameValue, this.configValue);
         let schema = this.convertArrayToObject(this.configValue.stores);
         db.version(this.versionValue).stores(schema);
         await db.open();
@@ -318,7 +319,7 @@ export default class extends Controller {
         console.error(
             `${this.callerValue}: ${app.identifier}_controller is now connected to ` +
             this.identifier +
-            "_controller"
+            "_controller (appOutletConnected)"
         );
         if (!window.called) {
             window.called = true;

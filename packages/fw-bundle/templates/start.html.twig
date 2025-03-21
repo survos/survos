@@ -116,7 +116,9 @@
 
   {% endblock %}
 {% block initial_layout_template %}
-    block initial_layout_template
+    {% set tabs = [
+        'info', 'locations'
+    ] %}
     <div id="app" {{ stimulus_controller('app') }}>
 
         <!-- Your main view, should have "view-main" class -->
@@ -136,31 +138,15 @@
                 <div class="toolbar toolbar-bottom tabbar-icons">
                     <div class="toolbar-inner">
                         {{ component('mobile_menu', {type: MOBILE_TAB_MENU, caller: _self}) }}
-
-{#                        <a href="#view-home" class="tab-link tab-link-active">#}
-{#                            <i class="icon f7-icons if-not-md">house_fill</i>#}
-{#                            <twig:ux:icon name="tabler:home-filled" />#}
-{#                            <span class="tabbar-label">Home</span>#}
-{#                        </a>#}
-{#                        <a href="#view-catalog" class="tab-link">#}
-{#                            <i class="icon f7-icons if-not-md">square_list_fill</i>#}
-{#                            <i class="icon material-icons if-md">view_list</i>#}
-{#                            <span class="tabbar-label">Catalog</span>#}
-{#                        </a>#}
-{#                        <a href="#view-settings" class="tab-link">#}
-{#                            <i class="icon f7-icons if-not-md">gear</i>#}
-{#                            <i class="icon material-icons if-md">settings</i>#}
-{#                            <span class="tabbar-label">Settings</span>#}
-{#                        </a>#}
                     </div>
                 </div>
 
-
-                <!-- Scrollable page content -->
-                <div class="page-content">
-                    <p>Page content goes here</p>
-                    <!-- Link to another page -->
-                    <a href="{{ path('app_page', {page: 'about'}) }}">About app (/pages)</a>
+                <div class="tabs">
+                    {% for t in tabs %}
+                        <div id="tab-{{ t }}" class="page-content tab {{ loop.first ? 'tab-active' }}">
+                                {{ include('tabs/%s.html.twig'|format(t), {t: t}) }}
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

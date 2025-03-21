@@ -21,6 +21,8 @@ import {stimulus_action, stimulus_controller, stimulus_target,} from "stimulus-a
 import Routing from 'fos-routing';
 import RoutingData from '/js/fos_js_routes.js';
 
+import { DbUtilities } from "../lib/dexieDatabase.js";
+
 Routing.setData(RoutingData);
 
 Twig.extend(function (Twig) {
@@ -152,13 +154,16 @@ export default class extends Controller {
                 // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
                 if (e.detail.hasOwnProperty('id')) {
-                    window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/");
+                    window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/",{
+                        animate : false,
+                    });
                     this.renderPage(e.detail.id, this.storeValue);
                     //console.warn(html);
 
                 } else {
                     let store = this.storeValue;
-                    let table = window.app.db[store];
+                    let db = window.db;
+                    let table = db.table(store);
                     table
                         .toArray()
                         .then((rows) => {
@@ -356,11 +361,11 @@ export default class extends Controller {
             }
             console.assert(this.appOutlet);
             // app_controller checks isPopulated to check for reload
-
             const isPopulated = await this.appOutlet.isPopulated(t);
             if (isPopulated) {
                 continue;
             }
+
             // const count = await new Promise((resolve, reject) => {
             //     t.count(count => resolve(count)).catch(reject);
             // });
@@ -373,10 +378,10 @@ export default class extends Controller {
             console.warn("%s has no data, loading...", t.name, filteredStores.find((f) => f.name === store.name));
             // const filteredUrl = filteredStores ? filteredStores.find((f)=> f.name === store.name).url : store.url;
             const filteredUrl = store.url;
-
             // console.error(filteredUrl, filteredStores);
             // Fetch and bulk put data for each page
-            await loadData(filteredUrl, store.name);
+            //await loadData(filteredUrl, store.name);
+            await DbUtilities.syncTable(db, store.name,store.url);
             // console.warn("Done populating.");
             try {
             } catch (error) {
@@ -409,7 +414,7 @@ export default class extends Controller {
         // console.error(window.db);
         // is db a Dexie instance?  It shouldn't be complaining about void, it thinks it's a console table
         // https://dexie.org/docs/Dexie/Dexie.table()
-        let table = window.db.table('items');
+        let table = window.db.table(this.storeValue);
         // let table = window.db.table(this.storeValue);
         // console.error(table,  this.storeValues)
 
@@ -442,7 +447,6 @@ export default class extends Controller {
 
         // const modifiedStores = this.appOutlet.getProjectFiltered(this.configValue.stores);
         const modifiedStores = [];
-
 
         await this.populateEmptyTables(window.db, this.configValue.stores, modifiedStores);
 

@@ -154,9 +154,13 @@ export default class extends Controller {
                 // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
                 if (e.detail.hasOwnProperty('id')) {
-                    window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/",{
-                        animate : false,
-                    });
+                    if (window.app && window.app.views) {
+                        window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/", {
+                            animate: false,
+                        });
+                    } else {
+                        //console.error("window.app or window.app.views is not defined");
+                    }
                     this.renderPage(e.detail.id, this.storeValue);
                     //console.warn(html);
 
@@ -494,8 +498,9 @@ export default class extends Controller {
         // console.error("page data", this.appOutlet.navigatorTarget.topPage.data);
         // let key = this.appOutlet.navigatorTarget.topPage.data.id;
         // console.error(this.appOutlet.navigatorTarget.topPage.data, key);
-        let table = window.app.db[store];
-
+        let db = new Dexie(this.dbNameValue);
+        await db.open();
+        let table = db["table"](store);
         table = table.get(parseInt(key));
         table
             .then((data) => {

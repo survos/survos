@@ -54,7 +54,6 @@ export default class extends Controller {
 
     initialize() {
         super.initialize();
-        console.error("adding a listener");
         document.addEventListener('ons-tabbar:init', function (event) {
             var tabBar = event.component;
             console.error(tabBar);

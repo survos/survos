@@ -26,6 +26,11 @@ class DbUtilities {
             }
         }
     }
+
+    async isPopulated(table) {
+        let count = await this.db[table].count();
+        return count > 0;
+    }
 }
 
 export { DbUtilities };

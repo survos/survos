@@ -85,9 +85,9 @@ export default class extends Controller {
         // order: Object // e.g. {dateAdded: 'DESC'} (could be an array?)
     };
     static outlets = ["app"]; // can this be passed in?
+    dbUtils = null;
 
     connect() {
-
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
 
         console.error(`starting content ` + this.refreshEventValue  + ' ' +  this.contentTarget.innerHTML);
@@ -300,6 +300,7 @@ export default class extends Controller {
         await db.open();
         this.db = db;
         window.db = db;
+        this.dbUtils = new DbUtilities(db);
         console.info(`connection to ${this.dbNameValue} succeeded`, schema, this.configValue.stores);
 
         // this.appOutlet.test("I am from dexie")
@@ -360,13 +361,10 @@ export default class extends Controller {
                 console.error('missing appOutlet');
                 return;
             }
-            console.assert(this.appOutlet);
-            // app_controller checks isPopulated to check for reload
-            const isPopulated = await this.appOutlet.isPopulated(t);
+            const isPopulated = await this.dbUtils.isPopulated(store.name);
             if (isPopulated) {
                 continue;
             }
-
             // const count = await new Promise((resolve, reject) => {
             //     t.count(count => resolve(count)).catch(reject);
             // });

@@ -50,7 +50,6 @@ Twig.extend(function (Twig) {
             stimulus_action(controllerName, r, n, a)
     );
     Twig._function.extend('path', (route, routeParams = {}) => {
-        // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         return Routing.generate(route, routeParams);
     });
@@ -89,12 +88,8 @@ export default class extends Controller {
 
     connect() {
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
-
-        console.error(`starting content ` + this.refreshEventValue  + ' ' +  this.contentTarget.innerHTML);
         // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
         // by default, the template id is the caller basename
-        // console.error(this.callerValue);
-
         console.assert(this.refreshEventValue, "missing refreshEvent");
         console.assert(this.hasAppOutlet, "missing app outlet");
         console.assert(this.dbNameValue, "missing dbName");
@@ -104,13 +99,11 @@ export default class extends Controller {
 
         console.warn("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
         this.filter = this.filterValue ? JSON.parse(this.filterValue) : false;
-        // console.error(this.callerValue, this.filterValue, this.filter);
         // compile the template
 
         let compiledTwigTemplates = {};
 
         // these are the templates within the <twig:dexie> component
-        console.error(this.twigTemplatesValue);
         for (const [key, value] of Object.entries(this.twigTemplatesValue)) {
             compiledTwigTemplates[key] = Twig.twig({
                 data: value.html.trim(),
@@ -119,23 +112,19 @@ export default class extends Controller {
         this.compiledTwigTemplates = compiledTwigTemplates;
 
         // the actual jstwig template code, passed into the renderer
-        // console.error(this.twigTemplateValue);
         // this should be multiple templates, dispatched as events or populating a target if it exists.
         this.template = Twig.twig({
             data: this.twigTemplateValue,
         });
 
         document.addEventListener('dexie.load-data', (e) => {
-            console.error('heard: dexie.load-data');
             if (!window.called) {
                 window.called = true;
                 this.openDatabase(this.dbNameValue);
             } else {
                 this.openDatabase(this.dbNameValue);
             }
-
             this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
-            // console.error(event);
             // the data comes from the topPage data
             console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
         });
@@ -283,7 +272,7 @@ export default class extends Controller {
 
         // Get the stored hash from localStorage
         const storedHash = localStorage.getItem('databaseHash');
-        console.error(storedHash);
+
 
         // If the hash parameter is provided and it doesn't match the stored hash
         // or if there's no stored hash, delete the database
@@ -298,7 +287,7 @@ export default class extends Controller {
         // this opens the database for every dexie connection!
         console.assert(this.dbNameValue, "Missing dbName in dexie_controller");
         const db = new Dexie(this.dbNameValue);
-        console.error(this.dbNameValue, this.configValue);
+
         let schema = this.convertArrayToObject(this.configValue.stores);
         db.version(this.versionValue).stores(schema);
         await db.open();
@@ -321,11 +310,7 @@ export default class extends Controller {
     appOutletConnected(app, element) {
         // return; // move to regular events
         // console.warn(app, element);
-        console.error(
-            `${this.callerValue}: ${app.identifier}_controller is now connected to ` +
-            this.identifier +
-            "_controller (appOutletConnected)"
-        );
+        
         if (!window.called) {
             window.called = true;
             this.openDatabase(this.dbNameValue);
@@ -362,7 +347,7 @@ export default class extends Controller {
         for (const store of stores) {
             let t = window.db.table(store.name);
             if (!this.hasAppOutlet) {
-                console.error('missing appOutlet');
+                
                 return;
             }
             const isPopulated = await this.dbUtils.isPopulated(store.name);
@@ -381,7 +366,6 @@ export default class extends Controller {
             console.warn("%s has no data, loading...", t.name, filteredStores.find((f) => f.name === store.name));
             // const filteredUrl = filteredStores ? filteredStores.find((f)=> f.name === store.name).url : store.url;
             const filteredUrl = store.url;
-            // console.error(filteredUrl, filteredStores);
             // Fetch and bulk put data for each page
             //await loadData(filteredUrl, store.name);
             await DbUtilities.syncTable(db, store.name,store.url);
@@ -504,7 +488,7 @@ export default class extends Controller {
         table = table.get(parseInt(key));
         table
             .then((data) => {
-                    console.error(data, key, store);
+                    
                     return {
                         content: this.template.render({
                             data: data,
@@ -531,7 +515,7 @@ export default class extends Controller {
                     this.contentTarget.innerHTML = content;
                     console.log(title);
                     if (this.hasAppOutlet) {
-                        console.error(title);
+                        
                         //commented for now (avoid error)
                         ///this.appOutlet.setTitle(title);
                     }
@@ -568,7 +552,6 @@ async function loadData(url, tableName) {
         ;
 
         console.table(rows[1] ?? []);
-        console.error(data);
 
         // Check if there's a next page
         nextPageUrl = data["view"] && data["view"]["next"] ? data["view"]["next"] : null;

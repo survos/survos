@@ -143,7 +143,7 @@ export default class extends Controller {
                 // document.getElementById('test').innerHTML = "hello this is " + e.type;
 
                 if (e.detail.hasOwnProperty('id')) {
-                    if (window.app && window.app.views) {
+                    if (window.app && window.app.views && window.app.views.get(".panel-view")) {
                         window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/", {
                             animate: false,
                         });

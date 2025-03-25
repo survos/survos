@@ -328,8 +328,9 @@ class PixieImportService
 //                    $sourceString = $rowObj[$tKey];
 //                    assert($rowObj == $event->getNormalizedData());
 //                    dd($rowObj, $event->getNormalizedData());
+//                    dd($row, $rowObj);
 
-                    $rowObj = $this->handleTranslations($table, $config, $rowObj, $pixieCode, $tableName);
+                    $rowObj = $this->handleTranslations($table, $config, $rowObj, $row, $pixieCode, $tableName);
                     if ($limit && ($idx >= $limit - 1)) break;
                 }
 
@@ -592,6 +593,7 @@ class PixieImportService
                                         new FetchTranslationObjectEvent($relatedRowData,
                                             $sourceLang,
                                             $sourceLang,
+                                            row: $item,
                                             storageBox: $kv,
                                             pixieCode: $pixieCode,
                                             table: $relatedTableName,
@@ -675,7 +677,6 @@ class PixieImportService
 
         }
         $item->setData($row); // the processed data?
-//        dd($row, $item);
         return $row;
     }
 
@@ -866,7 +867,7 @@ class PixieImportService
      * @param array $rowObj
      * @return array
      */
-    public function handleTranslations(Table $table, ?Config $config, array $rowObj): array
+    public function handleTranslations(Table $table, ?Config $config, array $rowObj, Row $row): array
     {
 
         if (count($table->getTranslatable())) {
@@ -892,15 +893,19 @@ class PixieImportService
                             sourceLanguage: $sourceLocale,
                             targetLanguage: $sourceLocale,
                             table: $table->getName(), // for debugging,
+                            row: $row,
                             key: $rowObj[$table->getPkName()],
                             keys: $table->getTranslatable()
                         ));
+//
+//                    dd($rowObj, $trEvent->translationModels);
 
 //                            dd($event->translationModels, $tKv->getSelectedTable());
                     // this populates the source table of the translation database,
 //                            dump($rowObj);
 //                            dump($rowObj);
                     /** @var Translation $transModel */
+                    // this populate Str for translations.
                     foreach ($trEvent->translationModels as $transModel) {
                         /** @var $tt Str */
                         if (!$tt = $this->translateTextRepository->find($transModel->getHash())) {

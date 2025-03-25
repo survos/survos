@@ -68,14 +68,14 @@ class Str
         return $this;
     }
 
-    public function getT(): ?object
+    public function getT(): array
     {
         return $this->t;
     }
 
-    public function setT(?object $t): static
+    public function setT(null|object|array $t): static
     {
-        $this->t = $t;
+        $this->t = (array)$t;
 
         return $this;
     }
@@ -102,5 +102,10 @@ class Str
         $this->extra = $extra;
 
         return $this;
+    }
+
+    public function getOriginalLength(): int
+    {
+        return strlen($this->original);
     }
 }

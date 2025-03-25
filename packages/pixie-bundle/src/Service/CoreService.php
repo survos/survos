@@ -687,18 +687,18 @@ class CoreService
     /**
      * @param mixed $tableName
      */
-    public function getCore(string $tableName, Owner $owner): Core
+    public function getCore(string $tableName, ?Owner $owner=null): Core
     {
 
-        $ownerCode = $owner->getCode();
-        if (empty($this->cores[$owner->getCode()])) {
+        $ownerCode = $owner?->getCode();
+        if ( empty($owner) || empty($this->cores[$owner->getCode()])) {
             foreach ($this->coreRepository->findAll() as $core) {
 //                assert($core->getOwner(), "Missing owner in core");
 //                if ($core->getOwner() !== $owner) {
 //                    dd($core->getOwner(), $owner);
 //                }
 //                assert($core->getOwner() === $owner);
-                $this->cores[$owner->getCode()][$core->getCoreCode()] = $core;
+                $this->cores[$core->getCode()][$core->getCoreCode()] = $core;
             }
         }
 
@@ -709,6 +709,7 @@ class CoreService
 //            foreach ($this->coreRepository->findAll() as $existingCore) {
 //                dump($existingCore->get   Code(), $existingCore);
 //            }
+            assert($owner, "owner required when creating core");
             $this->pixieEntityManager->persist($core);
             assert($this->pixieEntityManager->contains($core));
             $this->cores[$ownerCode][$tableName] = $core;

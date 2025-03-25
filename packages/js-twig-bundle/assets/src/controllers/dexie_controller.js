@@ -18,6 +18,7 @@ import Twig from "twig";
 import Dexie from "dexie";
 import {stimulus_action, stimulus_controller, stimulus_target,} from "stimulus-attributes";
 
+// @todo: fail gracefully if these files don't exist.
 import Routing from 'fos-routing';
 import RoutingData from '/js/fos_js_routes.js';
 
@@ -97,7 +98,7 @@ export default class extends Controller {
         // this.appOutlet.setTitle('test setTitle from appOutlet');
         // this.populateEmptyTables(db, this.configValue['stores']);
 
-        console.warn("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
+        console.info("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
         this.filter = this.filterValue ? JSON.parse(this.filterValue) : false;
         // compile the template
 
@@ -117,7 +118,12 @@ export default class extends Controller {
             data: this.twigTemplateValue,
         });
 
-        document.addEventListener('dexie.load-data', (e) => {
+        let type = 'dexie:load';
+        console.error(`listening for ${type}`);
+
+        document.addEventListener(type, (e) => {
+            console.error(`listening for ${type}`);
+            console.error(`heard ${type}`, this.store, this.url);
             if (!window.called) {
                 window.called = true;
                 this.openDatabase(this.dbNameValue);
@@ -132,8 +138,8 @@ export default class extends Controller {
         // register dexie events that use the database to update a page or tab
         const eventName = this.refreshEventValue;
         if (eventName) {
-            console.warn(`Listening for ${eventName}`);
-            console.warn("Current content: " + this.contentTarget.innerHTML);
+            // console.warn(`Listening for ${eventName}`);
+            // console.warn("Current content: " + this.contentTarget.innerHTML);
             document.addEventListener(eventName, (e) => {
                 //
                 console.log(window.app);
@@ -310,7 +316,7 @@ export default class extends Controller {
     appOutletConnected(app, element) {
         // return; // move to regular events
         // console.warn(app, element);
-        
+
         if (!window.called) {
             window.called = true;
             this.openDatabase(this.dbNameValue);
@@ -347,7 +353,7 @@ export default class extends Controller {
         for (const store of stores) {
             let t = window.db.table(store.name);
             if (!this.hasAppOutlet) {
-                
+
                 return;
             }
             const isPopulated = await this.dbUtils.isPopulated(store.name);
@@ -488,7 +494,7 @@ export default class extends Controller {
         table = table.get(parseInt(key));
         table
             .then((data) => {
-                    
+
                     return {
                         content: this.template.render({
                             data: data,
@@ -515,7 +521,7 @@ export default class extends Controller {
                     this.contentTarget.innerHTML = content;
                     console.log(title);
                     if (this.hasAppOutlet) {
-                        
+
                         //commented for now (avoid error)
                         ///this.appOutlet.setTitle(title);
                     }

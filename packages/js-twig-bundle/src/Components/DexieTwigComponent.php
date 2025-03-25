@@ -14,16 +14,18 @@ use Twig\Environment;
 final class DexieTwigComponent extends AsTwigComponent
 {
     use TwigBlocksTrait;
-    public string $store; // required
+    public string $store; // required unless $dbConfig is defined.
     public iterable|object|null $globals=null;
     public null|string|int $key=null;
     public ?string $refreshEvent=null;
+//    public array $dbConfig=[]; // this is passed in!
+    public ?string $url = null;
     // public string $caller; // in TwigBlocksTrait
 
     public function __construct(
         private Environment $twig,
         private LoggerInterface $logger,
-        private array $config=[]
+        private array $config=[], // this is the config defined in survos_js_twig.yaml
     ) {
 
         //        ='@survos/grid-bundle/api_grid';
@@ -58,6 +60,7 @@ final class DexieTwigComponent extends AsTwigComponent
 
     public function getSchema(): array
     {
+//        assert(false);
         #    db.version(3).stores({
 #savedTable: "id,name,owned",
 #productTable: "++id,price,brand,category"
@@ -110,7 +113,9 @@ final class DexieTwigComponent extends AsTwigComponent
                 'caller' => null,
                 'refreshEvent' => null,
                 'key' => null,
+                'url' => null,
                 'filter' => [],
+//                'dbConfig' => [],
                 'globals' => (object)[],
                 'store' => null,
             ]);
@@ -122,6 +127,7 @@ final class DexieTwigComponent extends AsTwigComponent
             'caller',
             'refreshEvent',
         ]);
+        // either store or dbConfig. store is empty for loadData, which loads all the stores defined
         $resolver
             ->setAllowedTypes('key', ['null', 'string','int'])
             ->setAllowedTypes('filter', ['array'])

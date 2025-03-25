@@ -8,14 +8,7 @@
 {# this is one approach, but we're not using it now.  Instead, look at the body to load the initial page #}
 
 {% block body %}
-    {% set iconMap = {
-        info: 'tabler:info-circle',
-        map: 'tabler:map',
-        locations: 'tabler:list',
-        artists: 'tabler:list',
-        obras: 'tabler:list',
-        share: 'table:qrcode'
-    } %}
+    {% set iconMap = dictionary('tab_icons') %}
     <div id="app" {{ stimulus_controller('app') }}>
 
         <!-- Your main view, should have "view-main" class -->
@@ -40,7 +33,7 @@
                     <div class="toolbar-inner">
                         {% for t in tabs %}
                         <a href="#tab-{{ t }}" title="#tab-{{ t }}" class="tab-link ">
-                            <twig:ux:icon name="{{iconMap[t]}}" />
+                            <twig:ux:icon name="{{iconMap[t]|default('tabler:bug')}}" />
                             {% if app.request.get('debug', false) %}<code>{{ t }}</code>{% endif %}
                             <span class="tabbar-label">
             {{ 'tab.%s'|format(t)|trans|title }}

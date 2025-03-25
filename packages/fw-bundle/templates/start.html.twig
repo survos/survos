@@ -15,18 +15,18 @@
         <twig:dexie
                 refreshEvent="dexie:load"
                 :globals="globals"
-                :url="store.url"
-                :store="store.store"
+                :store="store|json_encode"
                 :filter="{}"
                 :caller="_self">
-            <twig:block name="title">
-                Loading {{ store.url }}
-            </twig:block>
+{#            <twig:block name="title">#}
+{#                Loading {{ store.url }}#}
+{#            </twig:block>#}
 
             <twig:block name="twig_template" id="hack_to_get_raw_data">
-                {% set url = globals.store.url %}
-                @todo: a loading gauge / progress bar for
-                <a href="{{ url }}">{{ globals.store.url }}</a>
+{#                {% set url = globals.store.url %}#}
+{#                <code>{{ globals.store.schema }}</code>#}
+{#                @todo: a loading gauge / progress bar for#}
+{#                <a href="{{ url }}">{{ globals.store.url }}</a>#}
                 <!-- hack_to_get_raw_data -->
             </twig:block>
 

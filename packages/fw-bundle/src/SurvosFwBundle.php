@@ -159,8 +159,10 @@ class SurvosFwBundle extends AbstractBundle implements CompilerPassInterface
         $pixieRoot->arrayNode('stores')
             ->arrayPrototype()
             ->children()
-            ->scalarNode('store')->defaultNull()->end()
-            ->scalarNode('url')->defaultNull()->end()
+
+            ->scalarNode('name')->info("the store name")->example("friendTable")->end()
+            ->scalarNode('schema')->info("the index definition")->example("++i,age")->end()
+            ->scalarNode('url')->info("the API to use to load if empty.  json-ld iterates through pages")->end()
             ->integerNode('limit')->defaultValue(100)->end()
             ->end();
 

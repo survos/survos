@@ -75,7 +75,10 @@ export default class extends Controller {
         // schema: Object,
         // tableUrls: Object,
         version: Number,
-        store: String,
+        store: {
+            type: String,
+            default: "{}",
+        }, // {status: 'queued'}
         globals: Object,
         key: String, // overrides filter, get a single row.  ID is a reserved word!!
         filter: {
@@ -98,8 +101,9 @@ export default class extends Controller {
         // this.appOutlet.setTitle('test setTitle from appOutlet');
         // this.populateEmptyTables(db, this.configValue['stores']);
 
-        console.info("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
         this.filter = this.filterValue ? JSON.parse(this.filterValue) : false;
+        this.store = this.storeValue ? JSON.parse(this.storeValue) : false;
+        console.info("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
         // compile the template
 
         let compiledTwigTemplates = {};
@@ -120,10 +124,9 @@ export default class extends Controller {
 
         let type = 'dexie:load';
         console.error(`listening for ${type}`);
-
         document.addEventListener(type, (e) => {
             console.error(`listening for ${type}`);
-            console.error(`heard ${type}`, this.store, this.url);
+            console.error(`heard ${type}`, this.store.name, this.store.url, this.store.schema);
             if (!window.called) {
                 window.called = true;
                 this.openDatabase(this.dbNameValue);
@@ -134,6 +137,9 @@ export default class extends Controller {
             // the data comes from the topPage data
             console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
         });
+        // hack to fire this
+        this.dispatch(new CustomEvent(type));
+
 
         // register dexie events that use the database to update a page or tab
         const eventName = this.refreshEventValue;

@@ -14,7 +14,7 @@ use Twig\Environment;
 final class DexieTwigComponent extends AsTwigComponent
 {
     use TwigBlocksTrait;
-    public string $store; // required unless $dbConfig is defined.
+    public iterable|object|string $store;
     public iterable|object|null $globals=null;
     public null|string|int $key=null;
     public ?string $refreshEvent=null;
@@ -37,7 +37,11 @@ final class DexieTwigComponent extends AsTwigComponent
         return $this->filter;
     }
 
-    public function getStore(): string
+    public function getStoreName(): ?string
+    {
+        return $this->storeName;
+    }
+    public function getStore(): array|object|null
     {
         return $this->store;
     }
@@ -107,13 +111,19 @@ final class DexieTwigComponent extends AsTwigComponent
     #[PreMount]
     public function preMount(array $data): array
     {
+        if (json_validate($data['store'])) {
+            $data['store'] = json_decode($data['store'], true);
+        } else {
+            $data['store'] = [
+                'name' => $data['store'],
+            ];
+        }
         // validate data
         $resolver = (new OptionsResolver())
             ->setDefaults([
                 'caller' => null,
                 'refreshEvent' => null,
                 'key' => null,
-                'url' => null,
                 'filter' => [],
 //                'dbConfig' => [],
                 'globals' => (object)[],
@@ -131,6 +141,7 @@ final class DexieTwigComponent extends AsTwigComponent
         $resolver
             ->setAllowedTypes('key', ['null', 'string','int'])
             ->setAllowedTypes('filter', ['array'])
+            ->setAllowedTypes('store', ['array'])
             ->setAllowedTypes('globals', ['object'])
         ;
 

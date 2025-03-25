@@ -8,6 +8,32 @@
 {# this is one approach, but we're not using it now.  Instead, look at the body to load the initial page #}
 
 {% block body %}
+    {% for store in config.stores %}
+        {% set globals = {
+            store: store
+        } %}
+        <twig:dexie
+                refreshEvent="dexie:load"
+                :globals="globals"
+                :url="store.url"
+                :store="store.store"
+                :filter="{}"
+                :caller="_self">
+            <twig:block name="title">
+                Loading {{ store.url }}
+            </twig:block>
+
+            <twig:block name="twig_template" id="hack_to_get_raw_data">
+                {% set url = globals.store.url %}
+                @todo: a loading gauge / progress bar for
+                <a href="{{ url }}">{{ globals.store.url }}</a>
+                <!-- hack_to_get_raw_data -->
+            </twig:block>
+
+        </twig:dexie>
+    {% endfor %}
+
+
     {% set iconMap = dictionary('tab_icons') %}
     <div id="app" {{ stimulus_controller('app') }}>
 
@@ -31,7 +57,7 @@
                 <!-- Bottom Toolbar -->
                 <div class="toolbar tabbar toolbar-bottom">
                     <div class="toolbar-inner">
-                        {% for t in tabs %}
+                        {% for t in config.tabs %}
                         <a href="#tab-{{ t }}" title="#tab-{{ t }}" class="tab-link ">
                             <twig:ux:icon name="{{iconMap[t]|default('tabler:bug')}}" />
                             {% if app.request.get('debug', false) %}<code>{{ t }}</code>{% endif %}
@@ -46,7 +72,7 @@
                 </div>
 
                 <div class="tabs">
-                    {% for t in tabs %}
+                    {% for t in config.tabs %}
                         <div id="tab-{{ t }}" class="page-content tab {{ loop.first ? 'tab-active' }}">
                                 {{ include('tabs/%s.html.twig'|format(t), {t: t}) }}
                         </div>

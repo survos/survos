@@ -156,7 +156,7 @@ class SurvosFwBundle extends AbstractBundle implements CompilerPassInterface
         $pixieRoot->scalarNode('name')->defaultValue('DummyProject')->end();
         $pixieRoot->arrayNode('tabs')->info("Array of tab codes")->scalarPrototype()->end();
         $pixieRoot->scalarNode('database')->info("indexDb database name")->defaultValue('MyDatabase')->end();
-        $pixieRoot->arrayNode('data')
+        $pixieRoot->arrayNode('stores')
             ->arrayPrototype()
             ->children()
             ->scalarNode('store')->defaultNull()->end()

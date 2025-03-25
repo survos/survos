@@ -5,120 +5,10 @@
     {{ parent() }}
 {% endblock %}
 
-
-{% block templates %}
-
-<div class="views tabs safe-areas">
-    <!-- Tabbar for switching views-tabs -->
-    <div class="toolbar toolbar-bottom">
-        <div class="toolbar-inner">
-            {{ component('mobile_menu', {type: MOBILE_TAB_MENU, caller: _self}) }}
-        </div>
-    </div>
-
-    <!--
-      Tabbar for switching views-tabs. Should be a first child in Views.
-      Additional "toolbar-bottom" class to set it on bottom
-    -->
-{#    <div class="toolbar tabbar toolbar-bottom">#}
-{#        <div class="toolbar-inner">#}
-{#        {% for code, template in templates|default([]) %}#}
-{#            <a href="#view-{{ code }}" class="tab-link {{ loop.first ? 'tab-link-active' }}">#}
-{#                <i class="icon icon-home"></i>#}
-{#                @icon#}
-{#                <code>{{ code }}</code>#}
-{#            </a>#}
-{#        {% endfor %}#}
-{#        </div>#}
-        {% for code, template in templates|default([]) %}
-        <!-- Your main view/tab, should have "view-main" class. It also has "tab-active" class -->
-        <div id="view-{{ code }}" class="view tab {{ loop.first ? 'tab-active view-main '  }}">
-            <code>{{ code }}</code>
-            {{ template|raw }}
-        </div>
-        {% endfor %}
-    </div>
-
-{#    {% for code, template in templates|default([]) %}#}
-{#        <div id="view-{{ code }}">#}
-
-{#        <div class="page" data-name="page-{{ code }}">#}
-{#            <div class="navbar">#}
-{#                <div class="navbar-bg"></div>#}
-{#                <div class="navbar-inner sliding">#}
-{#                    <div class="left">#}
-{#                        <a href="#" class="link back">#}
-{#                            <i class="icon icon-back"></i>#}
-{#                            <span class="if-not-md">Back</span>#}
-{#                        </a>#}
-{#                    </div>#}
-{#                    <div class="title">{{ code|upper }}</div>#}
-{#                </div>#}
-{#            </div>#}
-{#            <div class="page-content">#}
-{#                <div class="block-title">@get from meta</div>#}
-{#                <div class="block">#}
-{#                    {{ template|raw }}#}
-
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#        </div>#}
-
-{#    {% endfor %}#}
-{% endblock %}
+{# this is one approach, but we're not using it now.  Instead, look at the body to load the initial page #}
 
 {% block body %}
-      {{ block('initial_layout_template') }}
-{% endblock %}
-
-{% block ons_body %}
-
-{#      {{ block('templates') }}#}
-      {{ block('initial_layout_template') }}
-
-      <ons-splitter>
-          <!-- The side menu -->
-          <ons-splitter-side
-                  label="menu"
-                  icon="users"
-                  id="menu" collapse {{ stimulus_target('app','menu') }}>
-              <ons-page>
-                  <ons-list>
-
-                      {{ component('mobile_menu', {type: MOBILE_PAGE_MENU, caller: _self}) }}
-
-                      <ons-list-item {{ stimulus_action('app', 'clear', 'click') }}>
-                          Clear local storage
-                      </ons-list-item>
-                      <ons-list-item {{ stimulus_action('app', 'close', 'click') }}>
-                          Exit
-                      </ons-list-item>
-
-                  </ons-list>
-              </ons-page>
-          </ons-splitter-side>
-
-          <!-- Everything not in the side menu -->
-          <ons-splitter-content>
-              <!-- https://onsen.io/v2/api/js/ons-navigator.html -->
-              <!-- navigates pages, not tabs.  -->
-              <ons-navigator
-                      id="navigator"
-                      {{ stimulus_target(_app_sc, 'navigator') }}
-                      page="initial-layout"
-              > <!-- the starting page -->
-
-              </ons-navigator>
-          </ons-splitter-content>
-      </ons-splitter>
-
-
-  {% endblock %}
-{% block initial_layout_template %}
-    {% set tabs = [
-        'info', 'locations'
-    ] %}
+    {% set iconMap = dictionary('tab_icons') %}
     <div id="app" {{ stimulus_controller('app') }}>
 
         <!-- Your main view, should have "view-main" class -->
@@ -141,7 +31,17 @@
                 <!-- Bottom Toolbar -->
                 <div class="toolbar tabbar toolbar-bottom">
                     <div class="toolbar-inner">
-                        {{ component('mobile_menu', {type: MOBILE_TAB_MENU, caller: _self}) }}
+                        {% for t in tabs %}
+                        <a href="#tab-{{ t }}" title="#tab-{{ t }}" class="tab-link ">
+                            <twig:ux:icon name="{{iconMap[t]|default('tabler:bug')}}" />
+                            {% if app.request.get('debug', false) %}<code>{{ t }}</code>{% endif %}
+                            <span class="tabbar-label">
+            {{ 'tab.%s'|format(t)|trans|title }}
+        </span>
+                        </a>
+
+                        {% endfor %}
+{#                        {{ component('mobile_menu', {type: MOBILE_TAB_MENU, caller: _self}) }}#}
                     </div>
                 </div>
 
@@ -156,5 +56,25 @@
         </div>
     </div>
 
+
+{% endblock %}
+
+{% block templates_experiment %}
+    <div class="views tabs safe-areas">
+        <!-- Tabbar for switching views-tabs -->
+        <div class="toolbar toolbar-bottom">
+            <div class="toolbar-inner">
+                {{ component('mobile_menu', {type: MOBILE_TAB_MENU, caller: _self}) }}
+            </div>
+        </div>
+
+        {% for code, template in templates|default([]) %}
+            <!-- Your main view/tab, should have "view-main" class. It also has "tab-active" class -->
+            <div id="view-{{ code }}" class="view tab {{ loop.first ? 'tab-active view-main '  }}">
+                <code>{{ code }}</code>
+                {{ template|raw }}
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock %}

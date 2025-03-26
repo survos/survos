@@ -517,9 +517,8 @@ export default class extends Controller {
         // console.error("page data", this.appOutlet.navigatorTarget.topPage.data);
         // let key = this.appOutlet.navigatorTarget.topPage.data.id;
         // console.error(this.appOutlet.navigatorTarget.topPage.data, key);
-        let db = new Dexie(this.dbNameValue);
-        await db.open();
-        let table = db["table"](store);
+        store = JSON.parse(store);
+        let table = window.db["table"](store.name);
         table = table.get(parseInt(key));
         table
             .then((data) => {

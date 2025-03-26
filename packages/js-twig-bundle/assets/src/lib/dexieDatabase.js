@@ -7,7 +7,7 @@ class DbUtilities {
         let version = 1;
         let local = 'es';
         //prepare db from config
-        alert('config.database: ' + JSON.stringify(config.database));
+        //alert('config.database: ' + JSON.stringify(config.database));
         let db = new Dexie(config.database);
         db.version(version).stores(this.convertArrayToObject(config.stores));
         //call db connection

@@ -7,13 +7,14 @@ class DbUtilities {
         let version = 1;
         let local = 'es';
         //prepare db from config
+        alert('config.database: ' + JSON.stringify(config.database));
         let db = new Dexie(config.database);
         db.version(version).stores(this.convertArrayToObject(config.stores));
         //call db connection
+        this.db = db;
+        window.db = db;
         db.open().then(() => {
-            this.db = db;
-            this.initDatabase();
-            window.db = db;
+            //this.initDatabase();
         }).catch(err => {
             console.error('Failed to connect to database');
         });

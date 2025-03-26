@@ -93,10 +93,19 @@ export default class extends Controller {
 
     connect() {
         if(this.initDbValue){
-            console.log("new config",this.globalsValue.config);
             let dbUtils = new DbUtilities(this.globalsValue.config);
-            //dbUtils.initDatabase();
-            this.dbUtils = dbUtils;
+            var that = this;
+            dbUtils.initDatabase().then(() => {
+                that.dbUtils = dbUtils;
+                var artists = window.db.table('artists').toArray().then((artists) => {
+                    console.log("artitst",artists)
+                }).catch((e) => {
+                    alert(e);
+                    console.error(e);
+                });
+                
+            });
+            //this.dbUtils = dbUtils;
             return;
             //dbUtils.initDatabase(this.globalsValue.config);
         }
@@ -177,10 +186,8 @@ export default class extends Controller {
                     //console.warn(html);
 
                 } else {
-                    let store = this.storeValue;
-                    let db = window.db;
-                    alert(controller.dbUtils);
-                    let table = db.table(store);
+                    let store = JSON.parse(this.storeValue);
+                    let table = window.db.table(store.name);
                     table
                         .toArray()
                         .then((rows) => {

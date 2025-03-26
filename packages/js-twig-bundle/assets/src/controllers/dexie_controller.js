@@ -85,12 +85,22 @@ export default class extends Controller {
             type: String,
             default: "{}",
         }, // {status: 'queued'}
+        initDb: Boolean,
         // order: Object // e.g. {dateAdded: 'DESC'} (could be an array?)
     };
     static outlets = ["app"]; // can this be passed in?
     dbUtils = null;
 
     connect() {
+        if(this.initDbValue){
+            console.log("new config",this.globalsValue.config);
+            let dbUtils = new DbUtilities(this.globalsValue.config);
+            //dbUtils.initDatabase();
+            this.dbUtils = dbUtils;
+            return;
+            //dbUtils.initDatabase(this.globalsValue.config);
+        }
+        
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
         // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
         // by default, the template id is the caller basename
@@ -143,6 +153,7 @@ export default class extends Controller {
 
         // register dexie events that use the database to update a page or tab
         const eventName = this.refreshEventValue;
+        var controller = this;
         if (eventName) {
             // console.warn(`Listening for ${eventName}`);
             // console.warn("Current content: " + this.contentTarget.innerHTML);
@@ -168,6 +179,7 @@ export default class extends Controller {
                 } else {
                     let store = this.storeValue;
                     let db = window.db;
+                    alert(controller.dbUtils);
                     let table = db.table(store);
                     table
                         .toArray()
@@ -325,7 +337,9 @@ export default class extends Controller {
 
         if (!window.called) {
             window.called = true;
-            this.openDatabase(this.dbNameValue);
+
+            //disable temproraly
+            //this.openDatabase(this.dbNameValue);
         }
 
         this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
@@ -465,10 +479,12 @@ export default class extends Controller {
                 return okay;
             });
         }
-
+ 
         table.count().then((c) => {
             console.assert(c, "missing rows in table");
         });
+
+        alerty('rendering table');
 
         table
             .toArray()

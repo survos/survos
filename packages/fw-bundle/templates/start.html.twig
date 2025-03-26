@@ -8,14 +8,15 @@
 {# this is one approach, but we're not using it now.  Instead, look at the body to load the initial page #}
 
 {% block body %}
-    {% for store in config.stores %}
+    
         {% set globals = {
-            store: store
+            config: config,
         } %}
         <twig:dexie
+                :initDb="true"
                 refreshEvent="dexie:load"
                 :globals="globals"
-                :store="store|json_encode"
+                :store="{}|json_encode"
                 :filter="{}"
                 :caller="_self">
 {#            <twig:block name="title">#}
@@ -31,7 +32,7 @@
             </twig:block>
 
         </twig:dexie>
-    {% endfor %}
+
 
 
     {% set iconMap = dictionary('tab_icons') %}
@@ -54,6 +55,23 @@
                     </div>
                 </div>
 
+                {# <div class="page-content">
+
+
+                
+                    {# <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <div
+                            class="gauge gauge-init my-gauge"
+                            data-type="circle"
+                            data-value="0.44"
+                            data-value-text="44%"
+                            data-value-text-color="#ff9800"
+                            data-border-color="#ff9800"
+                        >
+                        </div>
+                    </div> #}
+                </div> #}
+
                 <!-- Bottom Toolbar -->
                 <div class="toolbar tabbar toolbar-bottom">
                     <div class="toolbar-inner">
@@ -73,7 +91,7 @@
 
                 <div class="tabs">
                     {% for t in config.tabs %}
-                        <div id="tab-{{ t }}" class="page-content tab {{ loop.first ? 'tab-active' }}">
+                        <div id="tab-{{ t }}" class="page-content tab">
                                 {{ include('tabs/%s.html.twig'|format(t), {t: t}) }}
                         </div>
                     {% endfor %}

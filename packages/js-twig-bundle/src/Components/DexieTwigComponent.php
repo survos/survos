@@ -21,6 +21,7 @@ final class DexieTwigComponent extends AsTwigComponent
 //    public array $dbConfig=[]; // this is passed in!
     public ?string $url = null;
     // public string $caller; // in TwigBlocksTrait
+    public bool $initDb = false;
 
     public function __construct(
         private Environment $twig,
@@ -128,6 +129,7 @@ final class DexieTwigComponent extends AsTwigComponent
 //                'dbConfig' => [],
                 'globals' => (object)[],
                 'store' => null,
+                'initDb' => false,
             ]);
         if (array_key_exists('globals', $data) && is_array($data['globals'])) {
             $data['globals'] = (object)$data['globals'];

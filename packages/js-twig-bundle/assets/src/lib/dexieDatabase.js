@@ -19,6 +19,23 @@ class DbUtilities {
             console.error('Failed to connect to database');
         });
         this.local = local;
+        //if dataProgress element is present bind gauge to it
+        let dataProgress = document.getElementById('dataProgress');
+        var gauge = app.gauge.create({
+            el: dataProgress,
+            value: 0,
+            valueText: '0%',
+            valueTextColor: '#ff9800',
+            borderColor: '#ff9800',
+            type: 'circle',
+            labelText: 'Loading Data ...',
+            on: {
+                beforeDestroy: function () {
+                    console.log('Gauge will be destroyed')
+                }
+            }
+        });
+        this.gauge = gauge;
     }
 
     convertArrayToObject(array, key) {
@@ -36,9 +53,32 @@ class DbUtilities {
     }
 
     async populateEmptyTables(tables) {
+        let index = 1;
         for (let table of tables) {
-            this.syncTable(table.name, table.url);
+            //alert('table: ' + table.name);
+            await this.syncTable(table.name, table.url);
+            //sleep for 1 second
+            
+            //set gauge value
+            let value = Math.round((index / tables.length) * 100) / 100;
+            //value should be 2 decimal places
+            value = value.toFixed(2);
+            //alert('value: ' + value);
+            this.gauge.update({
+                value: value,
+                valueText: (value * 100) + '%'
+            });
+            //alert('value: ' + value);
+            await new Promise(resolve => setTimeout(resolve, 600));
+            index++;
         }
+        //when done , hide .page-content
+        let pageContent = document.querySelector('.page-content');
+        //remove page-content
+        pageContent.remove();
+        //click on first .tab-link
+        let tabLink = document.querySelector('.tab-link');
+        tabLink.click();
     }
 
     async syncTable(table , url) {

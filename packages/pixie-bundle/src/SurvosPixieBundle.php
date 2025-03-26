@@ -247,6 +247,7 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
 
     private function addCoresSection(NodeBuilder $children): void
     {
+        // global, not specific to an individual pixie
         $children
             ->arrayNode('cores')
             ->arrayPrototype()

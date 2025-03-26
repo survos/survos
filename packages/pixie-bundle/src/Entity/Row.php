@@ -35,6 +35,25 @@ class Row implements MarkingInterface, \Stringable
     private ?array $data = null;
 
     /**
+     * keyed by locale, then by translatable field name, e..g en.label, en.description
+     *
+     * @var array|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+    private ?array $translations = null;
+
+    public function getTranslations(): ?array
+    {
+        return $this->translations;
+    }
+
+    public function setTranslations(?array $translations): Row
+    {
+        $this->translations = $translations;
+        return $this;
+    }
+
+    /**
      * @var Collection<int, OriginalImage>
      */
     #[ORM\OneToMany(targetEntity: OriginalImage::class, mappedBy: 'row', orphanRemoval: true)]
@@ -137,6 +156,12 @@ class Row implements MarkingInterface, \Stringable
         }
 
         return $this;
+    }
+
+    public function getOwner(): Owner
+    {
+        return $this->getCore()->getOwner();
+
     }
 
     public function setRaw(?array $raw): static

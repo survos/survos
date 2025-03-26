@@ -53,6 +53,10 @@ trait CoreIdTrait
     public function getUniqueIdentifiers(): array
     {
         return [
+            'pixieCode' => $this->getOwner()->getCode(),
+            'tableName' => $this->getCoreCode(),
+            'key' => $this->getId(),
+
             'coreId' => (new \ReflectionClass($this))->getShortName(),
             'id' => $this->getId(),
         ];

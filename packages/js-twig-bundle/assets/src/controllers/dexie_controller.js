@@ -95,16 +95,15 @@ export default class extends Controller {
         if(this.initDbValue){
             let dbUtils = new DbUtilities(this.globalsValue.config);
             var that = this;
-            dbUtils.initDatabase().then(() => {
-                that.dbUtils = dbUtils;
-                var artists = window.db.table('artists').toArray().then((artists) => {
-                    console.log("artitst",artists)
-                }).catch((e) => {
-                    alert(e);
-                    console.error(e);
-                });
+            // dbUtils.initDatabase().then(() => {
+            //     that.dbUtils = dbUtils;
+            //     var artists = window.db.table('artists').toArray().then((artists) => {
+            //         console.log("artitst",artists)
+            //     }).catch((e) => {
+            //         console.error(e);
+            //     });
                 
-            });
+            // });
             //this.dbUtils = dbUtils;
             return;
             //dbUtils.initDatabase(this.globalsValue.config);

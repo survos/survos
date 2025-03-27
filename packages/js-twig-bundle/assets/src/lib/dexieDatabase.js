@@ -5,9 +5,7 @@ class DbUtilities {
         this.config = config;
         //hard set version to 1 , and local to en
         let version = 1;
-        let local = 'es';
-        //prepare db from config
-        //alert('config.database: ' + JSON.stringify(config.database));
+        let local = 'en';
         let db = new Dexie(config.database);
         db.version(version).stores(this.convertArrayToObject(config.stores));
         //call db connection
@@ -15,27 +13,39 @@ class DbUtilities {
         window.db = db;
         db.open().then(() => {
             //this.initDatabase();
+            console.log("DbUtilities: Database connected");
         }).catch(err => {
             console.error('Failed to connect to database');
         });
         this.local = local;
         //if dataProgress element is present bind gauge to it
         let dataProgress = document.getElementById('dataProgress');
-        var gauge = app.gauge.create({
-            el: dataProgress,
-            value: 0,
-            valueText: '0%',
-            valueTextColor: '#ff9800',
-            borderColor: '#ff9800',
-            type: 'circle',
-            labelText: 'Loading Data ...',
-            on: {
-                beforeDestroy: function () {
-                    console.log('Gauge will be destroyed')
-                }
+        
+        //alert empty tables count
+        this.countEmptyTables().then(emptyTables => {
+            if (emptyTables.length > 0) {
+                console.log('Empty tables : ' + emptyTables.map(table => table.name).join(', '));
+                var gauge = app.gauge.create({
+                    el: dataProgress,
+                    value: 0,
+                    valueText: '0%',
+                    valueTextColor: '#ff9800',
+                    borderColor: '#ff9800',
+                    type: 'circle',
+                    labelText: 'Loading Data ...',
+                    on: {
+                        beforeDestroy: function () {
+                            console.log('Gauge will be destroyed')
+                        }
+                    }
+                });
+                this.gauge = gauge;
+                this.populateEmptyTables(emptyTables);
+            } else {
+                console.log('All tables are populated');
+                this.bootApp();
             }
-        });
-        this.gauge = gauge;
+        }); 
     }
 
     convertArrayToObject(array, key) {
@@ -48,37 +58,43 @@ class DbUtilities {
         }, {});
     }
 
-    async initDatabase() {
-        this.populateEmptyTables(this.config.stores);
+    async countEmptyTables() {
+        let emptyTables = [];
+        for (let table of this.config.stores) {
+            let count = await this.db[table.name].count();
+            if (count === 0) {
+                emptyTables.push(table);
+            }
+        }
+        return emptyTables;
+    }
+
+    async destroyGauge() {
+        this.gauge.destroy();
+    }
+
+    async bootApp() {
+        let pageContent = document.querySelector('.page-content');
+        pageContent.remove();
+        let tabLink = document.querySelector('.tab-link');
+        tabLink.click();
     }
 
     async populateEmptyTables(tables) {
         let index = 1;
         for (let table of tables) {
-            //alert('table: ' + table.name);
             await this.syncTable(table.name, table.url);
-            //sleep for 1 second
-            
-            //set gauge value
             let value = Math.round((index / tables.length) * 100) / 100;
-            //value should be 2 decimal places
             value = value.toFixed(2);
-            //alert('value: ' + value);
             this.gauge.update({
                 value: value,
                 valueText: (value * 100) + '%'
             });
-            //alert('value: ' + value);
             await new Promise(resolve => setTimeout(resolve, 600));
             index++;
         }
-        //when done , hide .page-content
-        let pageContent = document.querySelector('.page-content');
-        //remove page-content
-        pageContent.remove();
-        //click on first .tab-link
-        let tabLink = document.querySelector('.tab-link');
-        tabLink.click();
+        await this.destroyGauge();
+        this.bootApp();
     }
 
     async syncTable(table , url) {

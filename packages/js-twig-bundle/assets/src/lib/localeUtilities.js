@@ -2,7 +2,6 @@
 class LocaleUtilities {
     //add constructor to set default local
     constructor() {
-        alert('LocaleUtilities: constructor');
         //check if local is set in local storage
         if (!localStorage.getItem('local')) {
             //if not set local to default

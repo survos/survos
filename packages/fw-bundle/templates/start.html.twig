@@ -8,7 +8,7 @@
 {# this is one approach, but we're not using it now.  Instead, look at the body to load the initial page #}
 
 {% block body %}
-    
+
         {% set globals = {
             config: config,
             locale: app.request.locale,
@@ -37,7 +37,7 @@
 
 
     {% set iconMap = dictionary('tab_icons') %}
-    <div id="app" {{ stimulus_controller('app') }}>
+    <div id="app" {{ stimulus_controller(_app_sc) }}>
 
         <!-- Your main view, should have "view-main" class -->
         <div class="view view-main view-init safe-areas">
@@ -52,11 +52,18 @@
                     </div>
                     <div class="navbar-inner">
                         <img style="max-height: 100%" src="{{ globals.config.logo }}" alt="">
-                        <div class="title">{{globals.config.name}}</div>
+                        <div class="title" {{ stimulus_target(_app_sc, 'title') }}>
+                            {{globals.config.name}}
+                        </div>
+
                     </div>
                 </div>
 
                 <div class="page-content">
+                    <div {{ stimulus_target(_app_sc, 'pageTitle') }}>
+                        ClASS FOR PAGE TITLE?
+                    </div>
+
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="dataProgress">
                     </div>
                 </div>

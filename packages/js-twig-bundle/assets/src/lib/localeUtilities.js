@@ -11,7 +11,7 @@ class LocaleUtilities {
     //at starting point we need methods to set local , get local
 
     static async alertMessage() {
-        alert('LocaleUtilities: alertMessage');
+        // alert('LocaleUtilities: alertMessage');
     }
 
     static setLanguage(language) {

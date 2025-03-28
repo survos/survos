@@ -37,8 +37,7 @@ class DbUtilities {
         this.locale = locale;
         //if dataProgress element is present bind gauge to it
         let dataProgress = document.getElementById('dataProgress');
-        
-        //alert empty tables count
+
         this.countEmptyTables().then(emptyTables => {
             if (emptyTables.length > 0) {
                 console.log('Empty tables : ' + emptyTables.map(table => table.name).join(', '));
@@ -62,7 +61,7 @@ class DbUtilities {
                 console.log('All tables are populated');
                 this.bootApp();
             }
-        }); 
+        });
     }
 
     convertArrayToObject(array, key) {
@@ -125,12 +124,10 @@ class DbUtilities {
     }
 
     async fetchTable(table, url) {
-        alert('url bfr: ' + url);
         //temp : replace http with https in next url
         url = url.replace('http://', 'https://');
         //replace local in url
         url = url.replace('{locale}', this.locale);
-        alert('url afr: ' + url);
         let res = await fetch(url);
         let data = await res.json();
         if (data.member.length > 0) {

@@ -103,13 +103,15 @@ export default class extends Controller {
             //     }).catch((e) => {
             //         console.error(e);
             //     });
-                
+
             // });
             //this.dbUtils = dbUtils;
             return;
             //dbUtils.initDatabase(this.globalsValue.config);
         }
-        
+
+        // hack until we can figure out how to do this elegantly.
+        this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
         // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
         // by default, the template id is the caller basename
@@ -486,12 +488,10 @@ export default class extends Controller {
                 return okay;
             });
         }
- 
+
         table.count().then((c) => {
             console.assert(c, "missing rows in table");
         });
-
-        alerty('rendering table');
 
         table
             .toArray()

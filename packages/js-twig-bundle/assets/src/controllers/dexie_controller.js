@@ -93,7 +93,8 @@ export default class extends Controller {
 
     connect() {
         if(this.initDbValue){
-            let dbUtils = new DbUtilities(this.globalsValue.config);
+            //let s hack the local binding
+            let dbUtils = new DbUtilities(this.globalsValue.config, this.globalsValue.locale);
             var that = this;
             // dbUtils.initDatabase().then(() => {
             //     that.dbUtils = dbUtils;

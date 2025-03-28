@@ -1,11 +1,11 @@
 import Dexie from 'dexie';
 
 class DbUtilities {
-    constructor(config) {
+    constructor(config,locale = 'en') {
         this.config = config;
+        console.log('Config: ', locale);
         //hard set version to 1 , and local to en
         let version = 1;
-        let local = 'en';
         let db = new Dexie(config.database);
         db.version(version).stores(this.convertArrayToObject(config.stores));
         //call db connection
@@ -17,7 +17,7 @@ class DbUtilities {
         }).catch(err => {
             console.error('Failed to connect to database');
         });
-        this.local = local;
+        this.locale = locale;
         //if dataProgress element is present bind gauge to it
         let dataProgress = document.getElementById('dataProgress');
         
@@ -111,7 +111,7 @@ class DbUtilities {
         //temp : replace http with https in next url
         url = url.replace('http://', 'https://');
         //replace local in url
-        url = url.replace('{local}', this.local);
+        url = url.replace('{locale}', this.locale);
         let res = await fetch(url);
         let data = await res.json();
         if (data.member.length > 0) {

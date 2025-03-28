@@ -11,6 +11,7 @@
     
         {% set globals = {
             config: config,
+            locale: app.request.locale,
         } %}
         <twig:dexie
                 :initDb="true"
@@ -56,9 +57,6 @@
                 </div>
 
                 <div class="page-content">
-
-
-                
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="dataProgress">
                     </div>
                 </div>

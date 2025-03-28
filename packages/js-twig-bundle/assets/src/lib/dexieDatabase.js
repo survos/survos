@@ -11,12 +11,29 @@ class DbUtilities {
         //call db connection
         this.db = db;
         window.db = db;
+
+        //store locale in local storage
+        if(locale) {
+            //check stored locale , if diffrent , destroy db
+            if (localStorage.getItem('locale') !== locale) {
+                console.log('locale changed, destroying db');
+                db.delete().then(() => {
+                    console.log("Database successfully deleted");
+                }).catch((err) => {
+                    console.error("Could not delete database");
+                });
+            }
+            localStorage.setItem('locale', locale);
+        }
+
         db.open().then(() => {
             //this.initDatabase();
             console.log("DbUtilities: Database connected");
         }).catch(err => {
             console.error('Failed to connect to database');
         });
+
+
         this.locale = locale;
         //if dataProgress element is present bind gauge to it
         let dataProgress = document.getElementById('dataProgress');
@@ -108,10 +125,12 @@ class DbUtilities {
     }
 
     async fetchTable(table, url) {
+        alert('url bfr: ' + url);
         //temp : replace http with https in next url
         url = url.replace('http://', 'https://');
         //replace local in url
         url = url.replace('{locale}', this.locale);
+        alert('url afr: ' + url);
         let res = await fetch(url);
         let data = await res.json();
         if (data.member.length > 0) {

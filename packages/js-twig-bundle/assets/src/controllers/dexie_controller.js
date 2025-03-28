@@ -119,7 +119,6 @@ export default class extends Controller {
         console.assert(this.hasAppOutlet, "missing app outlet");
         console.assert(this.dbNameValue, "missing dbName");
 
-        // this.appOutlet.setTitle('test setTitle from appOutlet');
         // this.populateEmptyTables(db, this.configValue['stores']);
 
         this.filter = this.filterValue ? JSON.parse(this.filterValue) : false;
@@ -146,8 +145,7 @@ export default class extends Controller {
         let type = 'dexie:load';
         console.error(`listening for ${type}`);
         document.addEventListener(type, (e) => {
-            console.error(`listening for ${type}`);
-            console.error(`heard ${type}`, this.store.name, this.store.url, this.store.schema);
+            // console.error(`heard ${type}`, this.store.name, this.store.url, this.store.schema);
             if (!window.called) {
                 window.called = true;
                 this.openDatabase(this.dbNameValue);
@@ -269,7 +267,8 @@ export default class extends Controller {
         // console.error('can we get rid of this call?')
         document.addEventListener('appOutlet.connected', (e) => {
             // the data comes from the topPage data
-            console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
+            // console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
+            // this.appOutlet.setTitle('test setTitle from appOutlet');
 
             // console.error(e.detail.id, this.storeValue);
             // @todo: types of events, like detail, list,
@@ -342,8 +341,6 @@ export default class extends Controller {
 
     appOutletConnected(app, element) {
         // return; // move to regular events
-        // console.warn(app, element);
-
         if (!window.called) {
             window.called = true;
 
@@ -523,28 +520,32 @@ export default class extends Controller {
         table
             .then((data) => {
 
-                    let title = data.title || data.label || data.name || data.id;
+                // @todo: render from dexie title template
+                //     let title = data.title || data.label || data.name || data.id;
 
                     //set title
-                    let titleElement = document.querySelector(".page-current .navbar .title");
-                    if (titleElement) {
-                        titleElement.innerHTML = title[this.globalsValue.locale];
-                    }
+                    // let titleElement = document.querySelector(".page-current .navbar .title");
+                    // if (titleElement) {
+                    //     titleElement.innerHTML = title[this.globalsValue.locale];
+                    // }
 
+                    // this is a promise
+                console.error(data);
+                    const title = this.compiledTwigTemplates.hasOwnProperty('title')
+                        ? this.compiledTwigTemplates["title"].render({
+                            data: data,
+                            window: window,
+                            globals: this.globalsValue,
+                        })
+                        : 'no title';
                     return {
                         content: this.template.render({
                             data: data,
                             globals: this.globalsValue,
                         }),
                         // if there's a <twig:block name="title"> use it to render the title
-                        title:
-                            this.compiledTwigTemplates.hasOwnProperty('title')
-                                ? this.compiledTwigTemplates["title"].render({
-                                    data: data,
-                                    window: window,
-                                    globals: this.globalsValue,
-                                })
-                                : 'no title'
+                        title: title
+
                     };
                 }
             )
@@ -554,12 +555,17 @@ export default class extends Controller {
                      title
                  }
                 ) => {
+                    title = title.trim();
+                    console.error(title);
+                    // content target is in dexie component, we need to communicate to the app
                     this.contentTarget.innerHTML = content;
-                    console.log(title);
-                    if (this.hasAppOutlet) {
-
+                    console.assert(title, "missing title content");
+                    console.assert(this.hasAppOutlet, "Missing appOutlet");
                         //commented for now (avoid error)
-                        ///this.appOutlet.setTitle(title);
+                        this.appOutlet.setTitle(title);
+                    if (this.hasAppOutlet) {
+                    } else {
+                        console.error(title, "missing appOutlet");
                     }
                 }
             )

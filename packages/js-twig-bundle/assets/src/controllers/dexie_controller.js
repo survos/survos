@@ -523,6 +523,14 @@ export default class extends Controller {
         table
             .then((data) => {
 
+                    let title = data.title || data.label || data.name || data.id;
+
+                    //set title
+                    let titleElement = document.querySelector(".page-current .navbar .title");
+                    if (titleElement) {
+                        titleElement.innerHTML = title[this.globalsValue.locale];
+                    }
+
                     return {
                         content: this.template.render({
                             data: data,

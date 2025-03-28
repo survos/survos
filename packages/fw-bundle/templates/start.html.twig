@@ -39,6 +39,29 @@
     {% set iconMap = dictionary('tab_icons') %}
     <div id="app" {{ stimulus_controller(_app_sc) }}>
 
+        <div class="panel panel-left">
+            <div class="list menu-list">
+                <ul>
+                    <li>
+                        <a href="#" class="item-content item-link item-selected">
+                            <div class="item-media">
+                                <twig:ux:icon name="tabler:refresh-dot" />
+                            </div>
+                            <div class="item-inner">
+                                <div class="item-title">Refresh</div>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right panel -->
+        <div class="panel panel-right">
+            <div class="view view-init panel-view" data-name="panel-view">
+            </div>
+        </div>
+
         <!-- Your main view, should have "view-main" class -->
         <div class="view view-main view-init safe-areas">
             <!-- Initial Page, "data-name" contains page name -->
@@ -46,16 +69,22 @@
 
                 <!-- Top Navbar -->
                 <div class="navbar">
-
-                    <div class="navbar-bg">
-
-                    </div>
+                    <div class="navbar-bg"></div>
                     <div class="navbar-inner">
+                        <div class="left">
+                            <a href="#" class="link icon-only panel-open" data-panel="left">
+                                <twig:ux:icon name="tabler:menu-2" />
+                            </a>
+                        </div>
                         <img style="max-height: 100%" src="{{ globals.config.logo }}" alt="">
                         <div class="title" {{ stimulus_target(_app_sc, 'title') }}>
-                            {{globals.config.name}}
+                            {# {{ globals.config.name }} #}
                         </div>
-
+                        <div class="right">
+                            <a href="#" class="link icon-only panel-open" data-panel="right">
+                                <twig:ux:icon name="tabler:info-square-rounded" />
+                            </a>
+                        </div>
                     </div>
                 </div>
 

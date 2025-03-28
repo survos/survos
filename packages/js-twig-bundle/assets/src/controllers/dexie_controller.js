@@ -176,7 +176,7 @@ export default class extends Controller {
 
                 if (e.detail.hasOwnProperty('id')) {
                     if (window.app && window.app.views && window.app.views.get(".panel-view")) {
-                        window.app.views.get(".panel-view").router.navigate("/pages/" + this.storeValue + "_list/", {
+                        window.app.views.get(".panel-view").router.navigate("/pages/" + JSON.parse(this.storeValue).name + "_list/", {
                             animate: false,
                         });
                     } else {

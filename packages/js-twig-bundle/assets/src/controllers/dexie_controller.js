@@ -111,7 +111,6 @@ export default class extends Controller {
 
         // hack until we can figure out how to do this elegantly.
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
-        this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
         // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
         // by default, the template id is the caller basename
         console.assert(this.refreshEventValue, "missing refreshEvent");

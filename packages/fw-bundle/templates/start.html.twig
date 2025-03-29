@@ -37,10 +37,43 @@
     <div id="app" {{ stimulus_controller(_app_sc) }}>
 
         <div class="panel panel-left">
+
+            <div class="popover my-popover">
+                <div class="popover-inner">
+                    <div class="list inset list-strong list-dividers-ios">
+                        <ul>
+                            <!-- loop over enabled_locales -->
+                            {% for locale in app.enabled_locales %}
+                                <li>
+                                    <a class="external list-button" href="{{ url('project_start', {configCode: config.code, _locale: locale}) }}">
+                                        {{ locale|upper }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="list inset list-strong">
+                        <ul>
+                            <li><a class="list-button color-red popover-close">Cancel</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="list menu-list">
                 <ul>
                     <li>
-                        <a href="#" id="refreshDatabase"  class="item-content item-link item-selected">
+                        <a href="#" class="item-content item-link popover-open" data-popover=".my-popover">
+                            <div class="item-media">
+                                <twig:ux:icon name="tabler:language-katakana" />
+                            </div>
+                            <div class="item-inner">
+                                <div class="item-title">Change Language</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="refreshDatabase"  class="item-content item-link">
                             <div class="item-media">
                                 <twig:ux:icon name="tabler:refresh-dot" />
                             </div>
@@ -87,7 +120,7 @@
 
                 <div class="page-content">
                     <div {{ stimulus_target(_app_sc, 'pageTitle') }}>
-                        ClASS FOR PAGE TITLE?
+                        
                     </div>
 
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="dataProgress">

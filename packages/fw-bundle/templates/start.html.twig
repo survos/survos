@@ -33,9 +33,6 @@
             </twig:block>
 
         </twig:dexie>
-
-
-
     {% set iconMap = dictionary('tab_icons') %}
     <div id="app" {{ stimulus_controller(_app_sc) }}>
 
@@ -43,7 +40,7 @@
             <div class="list menu-list">
                 <ul>
                     <li>
-                        <a href="#" class="item-content item-link item-selected">
+                        <a href="#" id="refreshDatabase"  class="item-content item-link item-selected">
                             <div class="item-media">
                                 <twig:ux:icon name="tabler:refresh-dot" />
                             </div>

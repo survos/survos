@@ -74,6 +74,19 @@ class DbUtilities {
         }, {});
     }
 
+    async refreshDatabase() {
+        //should destroy db an reload page
+        let db = window.db;
+        db.delete().then(() => {
+            console.log("Database successfully deleted");
+            window.location.reload();
+        }).catch((err) => {
+            console.error("Could not delete database");
+        });
+    }
+
+    
+
     async countEmptyTables() {
         let emptyTables = [];
         for (let table of this.config.stores) {

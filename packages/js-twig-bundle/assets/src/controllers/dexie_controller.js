@@ -93,19 +93,18 @@ export default class extends Controller {
 
     connect() {
         if(this.initDbValue){
-            //let s hack the local binding
+    
             let dbUtils = new DbUtilities(this.globalsValue.config, this.globalsValue.locale);
-            var that = this;
-            // dbUtils.initDatabase().then(() => {
-            //     that.dbUtils = dbUtils;
-            //     var artists = window.db.table('artists').toArray().then((artists) => {
-            //         console.log("artitst",artists)
-            //     }).catch((e) => {
-            //         console.error(e);
-            //     });
+            
+            //bind refresh db to #refreshDatabase
+            let refreshButton = document.getElementById("refreshDatabase");
+            if (refreshButton) {
+                refreshButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    dbUtils.refreshDatabase();
+                });
+            }
 
-            // });
-            //this.dbUtils = dbUtils;
             return;
             //dbUtils.initDatabase(this.globalsValue.config);
         }

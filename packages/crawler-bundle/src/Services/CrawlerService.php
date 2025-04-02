@@ -317,6 +317,18 @@ class CrawlerService
         $crawler->filter(' a')->each(
             function ($node) use ($link, $depth) {
                 $href = (string) $node->attr('href');
+                //ignore node $node if has attribute data-bs-toggle="modal"
+                //ignore data-bs-target="#modal-delete"
+                if ($node->attr('data-bs-toggle') == 'modal' || $node->attr('data-bs-target') == '#modal-delete') {
+                    return null;
+                }
+
+                //if $href has / delete , do dd
+                if (preg_match('/\/delete/', $href)) {
+                    dd($href);
+                }
+
+
                 $cleanHref = str_replace($this->baseUrl, '', $href);
                 $cleanHref = u($cleanHref)->before('#')->toString();
                 if (empty($cleanHref)) {

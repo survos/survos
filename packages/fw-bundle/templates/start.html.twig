@@ -34,14 +34,16 @@
 
         </twig:dexie>
     {% set iconMap = dictionary('tab_icons') %}
-    <div id="app" {{ stimulus_controller(_app_sc) }}>
-
+    <div id="app" {{ stimulus_controller(_app_sc, {
+        config: appConfig
+    }) }}>
         <div class="panel panel-left">
 
             <div class="popover my-popover">
                 <div class="popover-inner">
                     <div class="list inset list-strong list-dividers-ios">
                         <ul>
+                            From AppConfig: {{ appConfig.name }}
                             <!-- loop over enabled_locales -->
                             {% for locale in app.enabled_locales %}
                                 <li>
@@ -120,7 +122,7 @@
 
                 <div class="page-content">
                     <div {{ stimulus_target(_app_sc, 'pageTitle') }}>
-                        
+
                     </div>
 
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="dataProgress">

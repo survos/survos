@@ -334,6 +334,7 @@ class CrawlerService
                 if (empty($cleanHref)) {
                     return null;
                 }
+                if (str_contains($cleanHref, '/delete/')) { return null; }
 //                var_dump($cleanHref);
                 if (preg_match('/^\/(_profiler|_wdt|css|images|js)\//i', $cleanHref)) {
 //                    echo "====================================";

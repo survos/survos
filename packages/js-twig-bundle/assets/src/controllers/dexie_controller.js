@@ -92,6 +92,23 @@ export default class extends Controller {
     dbUtils = null;
 
     connect() {
+        // is this correct?
+        if(this.initDbValue){
+
+            let dbUtils = new DbUtilities(this.globalsValue.config, this.globalsValue.locale);
+
+            //bind refresh db to #refreshDatabase
+            let refreshButton = document.getElementById("refreshDatabase");
+            if (refreshButton) {
+                refreshButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    dbUtils.refreshDatabase();
+                });
+            }
+
+            return;
+            //dbUtils.initDatabase(this.globalsValue.config);
+        }
         // hack until we can figure out how to do this elegantly.
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
         // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;
@@ -397,7 +414,8 @@ export default class extends Controller {
 
     // because this can be loaded by Turbo or Onsen
     async contentConnected() {
-            console.warn("Content is connected! Populate tables if empty")
+
+        console.warn("Content is connected! Populate tables if empty")
         // console.error(this.outlets);
         // this.outlets.forEach( (outlet) => console.warn(outlet));
         // if this is fired before the database is open, return, it'll be called later

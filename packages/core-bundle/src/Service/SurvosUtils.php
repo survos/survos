@@ -42,6 +42,9 @@ class SurvosUtils
         return $filename;
     }
 
+    // see https://www.php.net/manual/en/class.recursiveiteratoriterator.php
+    // and https://stackoverflow.com/questions/12077177/how-does-recursiveiteratoriterator-work-in-php
+    // and https://github.com/tacman/PhpMetrics/commit/7bebaba683dad4710b720f4f63ed52c971cc06cb afor an example
     public function flatten(array &$messages, array|null $subnode = null, string|null $path = null)
     {
         if (null === $subnode) {

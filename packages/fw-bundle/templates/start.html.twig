@@ -9,10 +9,13 @@
 
 {% block body %}
 
+
         {% set globals = {
             config: config,
+            configCode: configCode,
             locale: app.request.locale,
         } %}
+
         <twig:dexie
                 :initDb="true"
                 refreshEvent="dexie:load"

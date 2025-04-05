@@ -26,10 +26,14 @@ class BunnyService
         private ?string $storageZone = null,
         private array $zones = []
     ) {
+        $timeout = 60*60*15; // 15 hours?
 // Create a BunnyClient using any HTTP client implementing "Psr\Http\Client\ClientInterface".
         $this->bunnyClient = new BunnyClient(
-            client: new \Symfony\Component\HttpClient\Psr18Client(
-                client: $this->client
+            client: (new \Symfony\Component\HttpClient\Psr18Client(
+                client: $this->client,
+            ))->withOptions([
+                'timeout' => $timeout
+                ]
             ),
         );
         if (!$this->storageZone) {

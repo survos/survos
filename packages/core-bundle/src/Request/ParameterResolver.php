@@ -63,6 +63,8 @@ class ParameterResolver implements ValueResolverInterface
             if ($entity = $repository->findOneBy($lookupParams)) {
 //                $history[$param] = $entity;
                 return [$entity];
+            } else {
+                dd(missingEntity: $lookupParams);
             }
         }
         return [];

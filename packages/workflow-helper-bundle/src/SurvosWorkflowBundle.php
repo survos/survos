@@ -76,7 +76,7 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
             ->setArgument('$workflows', tagged_iterator('workflow'));
 
         foreach (tagged_iterator('workflow', 'name') as $x) {
-            dd($x);
+//            dd(__METHOD__, __CLASS__, $x);
         }
 //        dd(tagged_iterator('workflow'));
 

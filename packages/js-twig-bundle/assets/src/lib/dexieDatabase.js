@@ -59,7 +59,8 @@ class DbUtilities {
                 this.populateEmptyTables(emptyTables);
             } else {
                 console.log('All tables are populated');
-                this.bootApp();
+                //emit dbready event
+                this.dispatchReadyEvent({});
             }
         });
     }
@@ -72,6 +73,12 @@ class DbUtilities {
             acc[curr.name] = curr.schema;
             return acc;
         }, {});
+    }
+
+    async dispatchReadyEvent(data) {
+        let event = new CustomEvent('dbready', { detail: data });
+        document.dispatchEvent(event);
+        console.log('dbready event dispatched');
     }
 
     async refreshDatabase() {
@@ -102,13 +109,6 @@ class DbUtilities {
         this.gauge.destroy();
     }
 
-    async bootApp() {
-        let pageContent = document.querySelector('.page-content');
-        pageContent.remove();
-        let tabLink = document.querySelector('.tab-link');
-        tabLink.click();
-    }
-
     async populateEmptyTables(tables) {
         let index = 1;
         for (let table of tables) {
@@ -123,7 +123,8 @@ class DbUtilities {
             index++;
         }
         await this.destroyGauge();
-        this.bootApp();
+        //emit dbready event
+        this.dispatchReadyEvent({});
     }
 
     async syncTable(table , url) {

@@ -35,7 +35,9 @@
         </twig:dexie>
     {% set iconMap = dictionary('tab_icons') %}
     <div id="app" {{ stimulus_controller(_app_sc, {
-        config: appConfig
+        config: appConfig,
+        configCode : configCode,
+        locale: app.request.locale,
     }) }}>
         <div class="panel panel-left">
 

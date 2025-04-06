@@ -498,7 +498,7 @@ export default class extends Controller {
         // console.error(this.appOutlet.navigatorTarget.topPage.data, key);
         store = JSON.parse(store);
         let table = window.db["table"](store.name);
-        table = table.get(parseInt(key));
+        table = table.get(key);
         table
             .then((data) => {
 

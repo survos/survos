@@ -92,23 +92,6 @@ export default class extends Controller {
     dbUtils = null;
 
     connect() {
-        // is this correct?
-        if(this.initDbValue){
-
-            let dbUtils = new DbUtilities(this.globalsValue.config, this.globalsValue.locale);
-
-            //bind refresh db to #refreshDatabase
-            let refreshButton = document.getElementById("refreshDatabase");
-            if (refreshButton) {
-                refreshButton.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    dbUtils.refreshDatabase();
-                });
-            }
-
-            return;
-            //dbUtils.initDatabase(this.globalsValue.config);
-        }
         // hack until we can figure out how to do this elegantly.
         this.element.setAttribute("data-survos--js-twig-bundle--dexie-target", "content");
         // this.contentTarget.innerHTML = 'from connect ' + this.storeValue;

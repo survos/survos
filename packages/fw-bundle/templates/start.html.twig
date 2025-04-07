@@ -53,7 +53,7 @@
                             {% for locale in app.enabled_locales %}
                                 <li>
                                     <a class="external list-button" href="{{ url('project_start', {configCode: config.code, _locale: locale}) }}">
-                                        {{ locale|upper }}
+                                        {{ locale|language_name(locale) }}
                                     </a>
                                 </li>
                             {% endfor %}
@@ -75,7 +75,7 @@
                                 <twig:ux:icon name="tabler:language-katakana" />
                             </div>
                             <div class="item-inner">
-                                <div class="item-title">Change Language</div>
+                                <div class="item-title">{{ ('language'|trans)|title }}</div>
                             </div>
                         </a>
                     </li>

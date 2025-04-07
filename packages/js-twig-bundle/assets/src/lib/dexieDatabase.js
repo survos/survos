@@ -63,6 +63,16 @@ class DbUtilities {
                 this.dispatchReadyEvent({});
             }
         });
+
+        //refresh btn temporary
+        //bind refresh db to #refreshDatabase
+        let refreshButton = document.getElementById("refreshDatabase");
+        if (refreshButton) {
+            refreshButton.addEventListener("click", (e) => {
+                e.preventDefault();
+                this.refreshDatabase();
+            });
+        }
     }
 
     convertArrayToObject(array, key) {

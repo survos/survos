@@ -123,24 +123,6 @@ export default class extends Controller {
             data: this.twigTemplateValue,
         });
 
-        let type = 'dexie:load';
-        console.error(`listening for ${type}`);
-        document.addEventListener(type, (e) => {
-            // console.error(`heard ${type}`, this.store.name, this.store.url, this.store.schema);
-            if (!window.called) {
-                window.called = true;
-                this.openDatabase(this.dbNameValue);
-            } else {
-                this.openDatabase(this.dbNameValue);
-            }
-            this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
-            // the data comes from the topPage data
-            console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
-        });
-        // hack to fire this
-        this.dispatch(new CustomEvent(type));
-
-
         // register dexie events that use the database to update a page or tab
         const eventName = this.refreshEventValue;
         var controller = this;
@@ -237,6 +219,8 @@ export default class extends Controller {
                 } else {
                     this.contentConnected();
                 }
+            },{
+                once: true,
             });
             return;
 
@@ -246,21 +230,22 @@ export default class extends Controller {
         // app should be in the dom, not sure why this.appOutlet not immediately available when dexie connects.
         // we shouldn't need to call this every time, since appOutlet.getDb caches the db.
         // console.error('can we get rid of this call?')
-        document.addEventListener('appOutlet.connected', (e) => {
-            // the data comes from the topPage data
-            // console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
-            // this.appOutlet.setTitle('test setTitle from appOutlet');
 
-            // console.error(e.detail.id, this.storeValue);
-            // @todo: types of events, like detail, list,
-            if (e.detail.hasOwnProperty('id')) {
-                let html = this.renderPage(e.detail.id, this.storeValue);
-                console.warn(html);
-            } else {
+        // document.addEventListener('appOutlet.connected', (e) => {
+        //     // the data comes from the topPage data
+        //     // console.warn(this.identifier + " heard %s event! %o", e.type, e.detail);
+        //     // this.appOutlet.setTitle('test setTitle from appOutlet');
 
-                this.contentConnected();
-            }
-        });
+        //     // console.error(e.detail.id, this.storeValue);
+        //     // @todo: types of events, like detail, list,
+        //     if (e.detail.hasOwnProperty('id')) {
+        //         let html = this.renderPage(e.detail.id, this.storeValue);
+        //         console.warn(html);
+        //     } else {
+
+        //         this.contentConnected();
+        //     }
+        // });
     }
 
 
@@ -272,127 +257,16 @@ export default class extends Controller {
         }, {});
     }
 
-    // initialize() {
-    //     super.initialize();
-    //     console.info("initializing %s", this.dbNameValue);
-    // }
-
-    // opens the database and sets the global this.db.  Also pushes that db to appOutlet
-    async openDatabase(dbName) {
-        // Get the hash parameter from the URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const hashParam = urlParams.get('hash');
-
-        // Get the stored hash from localStorage
-        const storedHash = localStorage.getItem('databaseHash');
-
-
-        // If the hash parameter is provided and it doesn't match the stored hash
-        // or if there's no stored hash, delete the database
-        if (hashParam && hashParam !== storedHash) {
-            // Delete the database
-            await Dexie.delete(dbName);
-            console.info("Deleted existing database.");
-
-            // Store the new hash in localStorage
-            localStorage.setItem('databaseHash', hashParam);
-        }
-        // this opens the database for every dexie connection!
-        console.assert(this.dbNameValue, "Missing dbName in dexie_controller");
-        const db = new Dexie(this.dbNameValue);
-
-        let schema = this.convertArrayToObject(this.configValue.stores);
-        db.version(this.versionValue).stores(schema);
-        await db.open();
-        this.db = db;
-        window.db = db;
-        this.dbUtils = new DbUtilities(db);
-        console.info(`connection to ${this.dbNameValue} succeeded`, schema, this.configValue.stores);
-
-        // this.appOutlet.test("I am from dexie")
-        // there should only be one app, but sometimes it appears to be zero.
-        // this.appOutlet.setDb(this.db);
-        await this.contentConnected();
-
-        console.info(
-            "at this point, the tables should be populated and db should be open"
-        );
-        // return this.db;
-    }
-
     appOutletConnected(app, element) {
         // return; // move to regular events
         if (!window.called) {
             window.called = true;
-
             //disable temproraly
             //this.openDatabase(this.dbNameValue);
         }
 
         this.dispatch(new CustomEvent('appOutlet.connected', {detail: app.identifier}));
 
-
-        return;
-
-        this.appOutlet.setDb(window.db); // ??
-
-        console.assert(this.hasAppOutlet, "no appOutlet!");
-        this.db = this.appOutlet.getDb();
-        if (!this.db) {
-            this.db = this.openDatabase();
-            this.db = this.appOutlet.setDb(this.db);
-        }
-
-        this.filter = this.appOutlet.getFilter(); // the global filter, like projectId
-
-        // console.warn(this.hasAppOutlet, this.appOutlet.getCurrentProjectId());
-        if (this.db) {
-            this.appOutlet.setDb(this.db);
-        } else {
-            this.db = this.appOutlet.getDb();
-        }
-        // console.log(app.identifier + '_controller', body);
-        // console.error('page data', this.appOutlet.getProjectId);
-    }
-
-    async populateEmptyTables(db, stores, filteredStores) {
-        let shouldReload = false;
-        for (const store of stores) {
-            let t = window.db.table(store.name);
-            if (!this.hasAppOutlet) {
-
-                return;
-            }
-            const isPopulated = await this.dbUtils.isPopulated(store.name);
-            if (isPopulated) {
-                continue;
-            }
-            // const count = await new Promise((resolve, reject) => {
-            //     t.count(count => resolve(count)).catch(reject);
-            // });
-            // if (count > 0) {
-            //     // console.warn("%s already has %d", t.name, count);
-            //     continue; // Move to the next store
-            // }
-            shouldReload = true;
-            console.warn(store.name, store.url);
-            console.warn("%s has no data, loading...", t.name, filteredStores.find((f) => f.name === store.name));
-            // const filteredUrl = filteredStores ? filteredStores.find((f)=> f.name === store.name).url : store.url;
-            const filteredUrl = store.url;
-            // Fetch and bulk put data for each page
-            //await loadData(filteredUrl, store.name);
-            await DbUtilities.syncTable(db, store.name,store.url);
-            // console.warn("Done populating.");
-            try {
-            } catch (error) {
-                console.error("Error populating table", t.name, error);
-            }
-        }
-        // what listens to this??
-        document.dispatchEvent(new CustomEvent('window.db.available', {'detail': {dbName: db.name}}));
-        if (shouldReload) {
-            window.location.reload(); // Reload after populating all tables
-        }
     }
 
     // because this can be loaded by Turbo or Onsen
@@ -553,37 +427,5 @@ export default class extends Controller {
             )
             .catch((e) => console.error(e))
             .finally((e) => console.log("finally rendered page"));
-
-    }
-
-}
-
-/*
-load all the rows in a json-ld (e.g. api-platform) endpoint
-
-The dexie database must be connected and initialized this is called.
- */
-
-async function loadData(url, tableName) {
-    let nextPageUrl = url;
-    while (nextPageUrl) {
-        console.log("fetching " + nextPageUrl);
-        const response = await fetch(nextPageUrl);
-        const data = await response.json();
-        console.log(data);
-
-        // Bulk put data for this page
-        const t = window.db.table(tableName);
-        const rows = data["member"];
-        console.log(rows);
-        await t.bulkPut(rows)
-            .then((x) => console.log("bulk add", x))
-        // .catch((e) => console.error(e))
-        ;
-
-        console.table(rows[1] ?? []);
-
-        // Check if there's a next page
-        nextPageUrl = data["view"] && data["view"]["next"] ? data["view"]["next"] : null;
     }
 }

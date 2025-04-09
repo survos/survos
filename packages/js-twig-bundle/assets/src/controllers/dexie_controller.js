@@ -86,6 +86,7 @@ export default class extends Controller {
             default: "{}",
         }, // {status: 'queued'}
         initDb: Boolean,
+        queries : Object
         // order: Object // e.g. {dateAdded: 'DESC'} (could be an array?)
     };
     static outlets = ["app"]; // can this be passed in?
@@ -145,6 +146,7 @@ export default class extends Controller {
                     } else {
                         //console.error("window.app or window.app.views is not defined");
                     }
+                    console.log(this.queriesValue);
                     this.renderPage(e.detail.id, this.storeValue);
                     //console.warn(html);
 

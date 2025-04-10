@@ -117,6 +117,7 @@ export default class extends Controller {
             });
         }
         this.compiledTwigTemplates = compiledTwigTemplates;
+        console.log("twig templates : ",this.compiledTwigTemplates);
 
         // the actual jstwig template code, passed into the renderer
         // this should be multiple templates, dispatched as events or populating a target if it exists.
@@ -163,6 +164,7 @@ export default class extends Controller {
                                 storeName: this.storeValue,
                                 globals: this.globalsValue});
                             console.log("About to insert rendered template into contentTarget");
+                            console.log("contentTarget", this.contentTarget);
                             if (this.contentTarget) {
                                 this.contentTarget.innerHTML = x;
                             }
@@ -362,8 +364,28 @@ export default class extends Controller {
             .finally((e) => console.log("populated the template with the data"));
     }
 
+    // Function to render all string values in an object recursively
+    
+    
+    async renderPage(entityId, store) {
 
-    async renderPage(key, store) {
+        function renderTwigInObject(obj, context) {
+            if (typeof obj === 'string') {
+                return Twig.twig({ data: obj }).render(context);
+            }
+        
+            if (Array.isArray(obj)) {
+                return obj.map(item => renderTwigInObject(item, context));
+            }
+        
+            if (typeof obj === 'object' && obj !== null) {
+                return Object.fromEntries(
+                    Object.entries(obj).map(([key, val]) => [key, renderTwigInObject(val, context)])
+                );
+            }
+        
+            return obj;
+        }
         // console.log(this.appOutlet.tabbarTarget.getActiveIndex());
         //
         // console.warn(this.appOutlet.tabbarTarget.getActiveIndex());
@@ -372,6 +394,72 @@ export default class extends Controller {
         // console.error("page data", this.appOutlet.navigatorTarget.topPage.data);
         // let key = this.appOutlet.navigatorTarget.topPage.data.id;
         // console.error(this.appOutlet.navigatorTarget.topPage.data, key);
+        
+        //artist temp area
+        //alert(this.compiledTwigTemplates["title"]);
+        //alert(JSON.stringify(this.queriesValue));
+        //loop through the queries
+
+        //set an object to store all the grabbed entities
+        let entities = {};
+
+        for (const [key, value] of Object.entries(this.queriesValue)) {
+            //console.log('store : ', value.store);
+            //make sure value.templateName exists
+            if (!value.templateName) {
+                console.error("missing templateName for %s", key);
+                continue;
+            }
+            if (this.compiledTwigTemplates.hasOwnProperty(value.templateName)) {
+                let entity = window.db[value.store];
+                console.error("entity", entity);
+                //check if value has filters
+                if (value.hasOwnProperty('filters')) {
+                    const renderedFilters = renderTwigInObject(value.filters, entities);
+                    entity = await entity[value.filterType](renderedFilters).toArray();
+                } else {
+                    //just get by id for now
+                    entity = await entity.get(entityId);
+                }
+
+                entities[key] = entity;
+
+                console.log('entities update : ',entities);
+
+                const renderedEntity = this.compiledTwigTemplates[value.templateName].render({
+                    data: entity,
+                    window: window,
+                    globals: this.globalsValue,
+                });
+
+                this.contentTarget.innerHTML += renderedEntity;
+
+                //prevent old rendering
+                continue;
+
+                entity
+                    .then((data) => {
+                        entities[key] = data;
+                        console.log('entities update : ',entities);
+                        const renderedEntity = this.compiledTwigTemplates[value.templateName].render({
+                            data: data,
+                            window: window,
+                            globals: this.globalsValue,
+                        });
+                        return renderedEntity;
+                    })
+                    .then((html) => {
+                        //console.warn(html);
+                        this.contentTarget.innerHTML += html;
+                    })
+                    .catch((e) => console.error(e))
+                    .finally((e) => console.log("finally rendered page"));
+            }
+        }
+
+        //return to prevent old render
+        return;
+        //
         store = JSON.parse(store);
         let table = window.db["table"](store.name);
         table = table.get(key);

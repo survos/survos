@@ -1,14 +1,32 @@
 {% extends "@SurvosFw/base.html.twig" %}
 
 {% block stylesheets %}
-{#    <link rel="stylesheet" type="text/css" href="{{ asset('bundles/survosFw/style.css') }}" />#}
+   {# <link rel="stylesheet" type="text/css" href="{{ asset('bundles/survosFw/style.css') }}" /> #}
     {{ parent() }}
 {% endblock %}
 
 {# this is one approach, but we're not using it now.  Instead, look at the body to load the initial page #}
 
 {% block body %}
+{# custom css start #}
+<style>
+.ios {
+    --f7-navbar-height: 62px; 
+    --f7-toolbar-height: 60px;
+}
 
+.ios .navbar a.icon-only {
+    height: 38px;
+    width: 38px;
+    background-color: var(--f7-page-bg-color);
+    border-radius: 0.25rem;
+}
+
+.tabbar .tab-link {
+    gap: 4px;
+}
+</style>
+{# custom css end #}
 
         {% set globals = {
             config: config,
@@ -121,17 +139,19 @@
                     <div class="navbar-bg"></div>
                     <div class="navbar-inner">
                         <div class="left">
-                            <a href="#" class="link icon-only panel-open" data-panel="left">
-                                <twig:ux:icon name="tabler:menu-2" />
-                            </a>
+                            <div>
+                                <a href="#" class="link icon-only panel-open" data-panel="left">
+                                    <twig:ux:icon width="25px" name="tabler:menu-2" />
+                                </a>
+                            </div>
                         </div>
-                        <img style="max-height: 100%" src="{{ globals.config.logo }}" alt="">
+                        <img style="max-height: 100%;height: 44px;" src="{{ globals.config.logo }}" alt="">
                         <div class="title" {{ stimulus_target(_app_sc, 'title') }}>
                             {# {{ globals.config.name }} #}
                         </div>
                         <div class="right">
                             <a href="#" class="link icon-only panel-open" data-panel="right">
-                                <twig:ux:icon name="tabler:info-square-rounded" />
+                                <twig:ux:icon width="25px" name="tabler:info-square-rounded" />
                             </a>
                         </div>
                     </div>
@@ -150,10 +170,10 @@
                 <div class="toolbar tabbar toolbar-bottom">
                     <div class="toolbar-inner">
                         {% for t in config.tabs %}
-                        <a href="#tab-{{ t }}" title="#tab-{{ t }}" class="tab-link ">
-                            <twig:ux:icon name="{{iconMap[t]|default('tabler:bug')}}" />
+                        <a href="#tab-{{ t }}" title="#tab-{{ t }}" class="tab-link">
+                            <twig:ux:icon name="{{iconMap[t]|default('tabler:bug')}}" width="25px" />
                             {% if app.request.get('debug', false) %}<code>{{ t }}</code>{% endif %}
-                            <span class="tabbar-label">
+                            <span class="tabbar-label mt-2">
             {{ 'tab.%s'|format(t)|trans|title }}
         </span>
                         </a>

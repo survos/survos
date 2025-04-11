@@ -402,6 +402,7 @@ export default class extends Controller {
 
         //set an object to store all the grabbed entities
         let entities = {};
+        let title = "Untitled";
 
         for (const [key, value] of Object.entries(this.queriesValue)) {
             //console.log('store : ', value.store);
@@ -420,6 +421,13 @@ export default class extends Controller {
                 } else {
                     //just get by id for now
                     entity = await entity.get(entityId);
+
+                    title = this.compiledTwigTemplates.hasOwnProperty('title')
+                    ? this.compiledTwigTemplates["title"].render({
+                        data: entity
+                    })
+                    : 'Untitled';
+
                 }
 
                 entities[key] = entity;
@@ -456,7 +464,7 @@ export default class extends Controller {
                     .finally((e) => console.log("finally rendered page"));
             }
         }
-
+        this.appOutlet.setTitle(title);
         //return to prevent old render
         return;
         //

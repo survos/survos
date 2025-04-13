@@ -9,8 +9,12 @@ class Place
 {
     public function __construct(
         public bool $initial=false,
-        public array $metadata=[]
-    ) {
+        public ?string $info=null,
+        public array $metadata=[],
+  ) {
+        if ($this->info) {
+            $this->metadata['description'] = $this->info;
+        }
 
     }
 

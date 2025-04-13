@@ -9,6 +9,7 @@ use Survos\WorkflowBundle\Command\IterateCommand;
 use Survos\WorkflowBundle\Command\MakeWorkflowCommand;
 use Survos\WorkflowBundle\Command\SurvosWorkflowConfigureCommand;
 use Survos\WorkflowBundle\Command\SurvosWorkflowDumpCommand;
+use Survos\WorkflowBundle\Command\VizCommand;
 use Survos\WorkflowBundle\Controller\WorkflowController;
 use Survos\WorkflowBundle\Doctrine\TransitionListener;
 use Survos\WorkflowBundle\Service\ConfigureFromAttributesService;
@@ -74,6 +75,8 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
 
         $container->findDefinition(SurvosWorkflowDumpCommand::class)
             ->setArgument('$workflows', tagged_iterator('workflow'));
+        $container->findDefinition(VizCommand::class)
+            ->setArgument('$workflows', tagged_iterator('workflow'));
 
         foreach (tagged_iterator('workflow', 'name') as $x) {
 //            dd(__METHOD__, __CLASS__, $x);
@@ -95,12 +98,24 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
         // hopefully not needed!
 //        $builder->setParameter('survos_workflow.entities', $config['entities']);
 
+        // this probably isn't needed anymore
         $container->services()
             ->set('console.command.survos_workflow_dump', WorkflowDumpCommand::class)
             ->args([
                 tagged_locator('workflow', 'name'),
             ]);
 
+        $container->services()
+            ->set('console.command.survos_workflow_viz', VizCommand::class)
+            ->args([
+                tagged_locator('workflow', 'name'),
+            ]);
+
+        $builder->autowire(VizCommand::class)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->addTag('console.command')
+        ;
 
         //        $builder->register('workflow.registry', Registry::class); // isn't this already done by Symfony/Workflow
 

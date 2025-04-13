@@ -96,7 +96,7 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
 //        $builder->setParameter('survos_workflow.entities', $config['entities']);
 
         $container->services()
-            ->set('console.command.workflow_dump', WorkflowDumpCommand::class)
+            ->set('console.command.survos_workflow_dump', WorkflowDumpCommand::class)
             ->args([
                 tagged_locator('workflow', 'name'),
             ]);

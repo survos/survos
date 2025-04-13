@@ -70,11 +70,14 @@ class ConfigureFromAttributesService
                         ->metadata($instance->metadata);
                         break;
                     case Transition::class:
-                        $workflow->transition()
+                        $transition = $workflow->transition()
                             ->name($constantValue)
                             ->from($instance->from)
                             ->to($instance->to)
                             ->metadata($instance->metadata);
+                        if ($instance->guard) {
+                            $transition->guard($instance->guard);
+                        }
                         break;
                 }
             }

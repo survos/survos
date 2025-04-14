@@ -1,6 +1,8 @@
 <?php
 namespace Survos\WorkflowBundle\Service;
 
+// worth reading: https://sketchviz.com/flowcharts-in-graphviz
+
 use Symfony\Component\Workflow\Definition;
 use Symfony\Component\Workflow\Dumper\GraphvizDumper;
 use Symfony\Component\Workflow\Marking;

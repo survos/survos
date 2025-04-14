@@ -162,7 +162,9 @@ class SurvosGraphVizDumper extends GraphvizDumper
                 $escapedLabel = '"'.$this->escape($place['name']).'"';
             }
 
-            $code .= \sprintf("  transition_%s [label=%s,%s];\n", $this->dotize($i), $escapedLabel, $this->addAttributes($place['attributes']));
+            $code .= \sprintf("  transition_%s [label=%s,%s];\n",
+                $this->dotize($i),
+                $escapedLabel, $this->addAttributes($place['attributes']));
         }
 
         return $code;
@@ -185,7 +187,7 @@ class SurvosGraphVizDumper extends GraphvizDumper
                     'from' => $from,
                     'to' => $transitionName,
                     'direction' => 'from',
-                    'transition_number' => $i,
+                    'transition_number' => $i, // $from . $i,
                 ];
             }
             foreach ($transition->getTos() as $to) {
@@ -210,9 +212,10 @@ class SurvosGraphVizDumper extends GraphvizDumper
 
         foreach ($edges as $edge) {
             if ('from' === $edge['direction']) {
-                $code .= \sprintf("  place_%s -> transition_%s [style=\"solid\"];\n",
+                $code .= \sprintf('  place_%s -> transition_%s [style="solid", comment="%s"];' . "\n",
                     $this->dotize($edge['from']),
-                    $this->dotize($edge['transition_number'])
+                    $this->dotize($edge['transition_number']),
+                    $edge['from']
                 );
             } else {
                 $code .= \sprintf("  transition_%s -> place_%s [style=\"solid\"];\n",
@@ -251,6 +254,8 @@ class SurvosGraphVizDumper extends GraphvizDumper
      */
     protected function dotize(string $id): string
     {
+        // inject slugger?
+        return $id;
         return hash('sha1', $id);
     }
 

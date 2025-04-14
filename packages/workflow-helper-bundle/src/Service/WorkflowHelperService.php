@@ -30,7 +30,7 @@ use Symfony\Component\Workflow\WorkflowInterface;
 class WorkflowHelperService
 {
     private $dumper;
-    private string $direction = 'LR';
+    private string $direction = 'TB'; // TB, BT
 
     public function __construct(
         /** @var WorkflowInterface[] */
@@ -136,8 +136,8 @@ class WorkflowHelperService
 //        dd($places);
 //        $entityPlaces = array_keys($workflow->getMarkingStore()->getMarking($subject)->getPlaces());
         if ($subject) {
+            $marking = $workflow->getMarkingStore()->getMarking($subject);
             try {
-                $marking = $workflow->getMarkingStore()->getMarking($subject);
                 array_map(function ($place) use ($marking) {
                     if ($marking->has($place)) {
                         $marking->unmark($place);
@@ -154,17 +154,14 @@ class WorkflowHelperService
 
             } catch (\Exception $exception) {
                 $initial = $workflow->getDefinition()->getInitialPlaces()[0];
-                $marking = (new Marking())
-                    ->mark($subject->marking ?? $initial);
-
+                (new Marking())->mark($subject->marking ?? $initial);
             }
         } else {
+            $marking = new Marking();
             // if there's no subject, just use the initial marking, unless something is passed in
 //            $marking = $definition->getInitialPlaces()[0];
             $initial = $workflow->getDefinition()->getInitialPlaces()[0];
-            $marking = (new Marking())
-                ->mark($subject->marking ?? $initial);
-
+            $marking->mark($subject->marking ?? $initial);
         }
 
         // unset anything previously set
@@ -173,7 +170,7 @@ class WorkflowHelperService
             'graph' => [
                 'ratio' => 'compress',
                 'width' => 0.5,
-                'rankdir' => null, // $this->direction,
+                'rankdir' => $this->direction,
                 'ranksep' => 0.2,
             ],
             'node' => [

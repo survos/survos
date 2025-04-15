@@ -22,6 +22,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Workflow\Dumper\GraphvizDumper;
 use Symfony\Component\Workflow\Dumper\MermaidDumper;
@@ -30,6 +32,7 @@ use Symfony\Component\Workflow\Dumper\StateMachineGraphvizDumper;
 use Symfony\Component\Workflow\Marking;
 use Symfony\Component\Workflow\StateMachine;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Twig\Environment;
 
 /**
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
@@ -47,11 +50,17 @@ class VizCommand extends Command
 
     public function __construct(
         /** @var WorkflowInterface[] */
-        private iterable $workflows,
+        private iterable                                                         $workflows,
+        #[Autowire('%kernel.project_dir%')] private string                       $projectDir,
+        private Environment $twig,
 //        private ServiceLocator $workflows,
-    ) {
+//        #[AutowireIterator('%kernel.event_listener%')] private readonly iterable $messageHandlers
+
+    )
+    {
         parent::__construct();
     }
+
 
     protected function configure(): void
     {
@@ -61,7 +70,7 @@ class VizCommand extends Command
                 new InputArgument('marking', InputArgument::IS_ARRAY, 'A marking (a list of places)'),
                 new InputOption('label', 'l', InputOption::VALUE_REQUIRED, 'Label a graph'),
                 new InputOption('with-metadata', null, InputOption::VALUE_NONE, 'Include the workflow\'s metadata in the dumped graph', null),
-                new InputOption('dump-format', null, InputOption::VALUE_REQUIRED, 'The dump format ['.implode('|', self::DUMP_FORMAT_OPTIONS).']', 'dot'),
+                new InputOption('dump-format', null, InputOption::VALUE_REQUIRED, 'The dump format [' . implode('|', self::DUMP_FORMAT_OPTIONS) . ']', 'dot'),
             ])
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command dumps the graphical representation of a
@@ -71,12 +80,46 @@ workflow in different formats
 <info>PUML</info>: %command.full_name% <workflow name> --dump-format=puml | java -jar plantuml.jar -p > workflow.png
 <info>MERMAID</info>: %command.full_name% <workflow name> --dump-format=mermaid | mmdc -o workflow.svg
 EOF
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $eventFilename = 'var/cache/workflow-events.json';
+        assert(file_exists($eventFilename), "$eventFilename does not exist, run bin/console debug:event --format=json workflow > var/cache/workflow-events.json");
+        $events = json_decode(file_get_contents($eventFilename), false, 512, JSON_THROW_ON_ERROR);
+        $ee = [];
+        foreach ($events as $code => $event) {
+            foreach ($event as $e) {
+                $reflectionMethod = new \ReflectionMethod($e->class, $e->name);
+                $reflectionClass = new \ReflectionClass($e->class);
+                $fn = str_replace($this->projectDir, 'blob/main', $reflectionClass->getFileName());
+                $md = $this->twig->render('@SurvosWorkflow/md/workflows.html.twig', [
+                    'events' => $ee
+                ]);
+                dd($md, $ee);
+
+                dd($fn, $this->projectDir, $reflectionMethod->getFileName(), $reflectionMethod->getStartLine(), $reflectionMethod->getEndLine());
+                $ee[$code][] = [
+                    'file' => $reflectionMethod->extra['file'],
+                    'lines' => $e->extra['line'],
+                    'link' => sprintf('%s#L%d-%d', $fn, $reflectionMethod->getStartLine(), $reflectionMethod->getEndLine()),
+                ];
+
+
+//                dd($e, $code, $reflectionMethod);
+//                https://github.com/survos-sites/sais/blob/main/src/Workflow/ThumbWorkflow.php#L57-L70
+
+            }
+        }
+        dd($ee);
+
+        dd($events);
+
+//        foreach ($this->messageHandlers as $messageHandler) {
+//            dd($messageHandler);
+//        }
+
         $workflowName = $input->getArgument('name');
         foreach ($this->workflows as $w) {
             if ($w->getName() === $workflowName) {

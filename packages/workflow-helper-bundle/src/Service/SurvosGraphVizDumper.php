@@ -3,12 +3,17 @@ namespace Survos\WorkflowBundle\Service;
 
 // worth reading: https://sketchviz.com/flowcharts-in-graphviz
 
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Workflow\Definition;
 use Symfony\Component\Workflow\Dumper\GraphvizDumper;
 use Symfony\Component\Workflow\Marking;
 
 class SurvosGraphVizDumper extends GraphvizDumper
 {
+
+    private string $placeShape = 'oval';
+    private string $transitionShape = 'box';
+
     protected static array $defaultOptions = [
         'graph' => ['ratio' => 'compress', 'rankdir' => 'LR'],
         'node' => ['fontsize' => '8', 'fontname' => 'Arial', 'color' => '#333333',
@@ -95,7 +100,7 @@ class SurvosGraphVizDumper extends GraphvizDumper
         $transitions = [];
 
         foreach ($definition->getTransitions() as $transition) {
-            $attributes = ['shape' => 'cds', 'regular' => true];
+            $attributes = ['shape' => $this->transitionShape, 'regular' => true];
 
             $backgroundColor = $workflowMetadata->getMetadata('bg_color', $transition);
             if (null !== $backgroundColor) {
@@ -144,7 +149,9 @@ class SurvosGraphVizDumper extends GraphvizDumper
                 $escapedLabel = \sprintf('"%s"', $this->escape($placeName));
             }
 
-            $code .= \sprintf("  place_%s [label=%s, shape=oval%s];\n", $this->dotize($id), $escapedLabel, $this->addAttributes($place['attributes']));
+            $code .= \sprintf("  place_%s [label=%s, shape=%s%s];\n", $this->dotize($id), $escapedLabel,
+                $this->placeShape,
+                $this->addAttributes($place['attributes']));
         }
 
         return $code;
@@ -159,7 +166,7 @@ class SurvosGraphVizDumper extends GraphvizDumper
 
         foreach ($transitions as $i => $place) {
             if ($withMetadata) {
-                $escapedLabel = \sprintf('<<B>%s</B>%s>', $this->escape($place['name']), $this->addMetadata($place['metadata']));
+                $escapedLabel = \sprintf('<<B>%s</B><SUP>1</SUP>%s>', $this->escape($place['name']), $this->addMetadata($place['metadata']));
             } else {
                 $escapedLabel = '"'.$this->escape($place['name']).'"';
             }

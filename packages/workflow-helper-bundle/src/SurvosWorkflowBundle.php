@@ -13,6 +13,7 @@ use Survos\WorkflowBundle\Command\VizCommand;
 use Survos\WorkflowBundle\Controller\WorkflowController;
 use Survos\WorkflowBundle\Doctrine\TransitionListener;
 use Survos\WorkflowBundle\Service\ConfigureFromAttributesService;
+use Survos\WorkflowBundle\Service\SurvosGraphVizDumper;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Survos\WorkflowBundle\Twig\WorkflowExtension;
 use Survos\WorkflowHelperBundle\Attribute\Workflow;
@@ -114,6 +115,8 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
         $builder->autowire(VizCommand::class)
             ->setAutoconfigured(true)
             ->setPublic(true)
+            ->setAutowired(true)
+//            ->setArgument('$messageHandlers', tagged_locator('kernel.event', 'name')
             ->addTag('console.command')
         ;
 

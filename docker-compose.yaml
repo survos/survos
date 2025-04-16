@@ -65,7 +65,7 @@ services:
 #    systemctl start meilisearch
 
     meilisearch:
-        image: getmeili/meilisearch:v1.13.3
+        image: getmeili/meilisearch:v1.14
         container_name: 'meilisearch'
         ports:
             - 7700:7700

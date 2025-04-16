@@ -15,11 +15,15 @@ Enjoy your theme!
 <!doctype html{% block html_start %}{% endblock %}>
 <html lang="{{ app.request.locale }}"{% if tabler_bundle.isRightToLeft|default(false) %} dir="rtl"{% endif %}>
 <head>
+
     {% block head %}
         {# @rk: is this right? #}
         <meta charset="utf-8">
         <meta content="width=device-width, initial-scale=1" name="viewport">
         <meta name="robots" content="noindex,nofollow">
+        {% guard function meta_tags %}
+            {{ meta_tags() }}
+        {% endguard %}
     {% endblock %}
     <title>{% block title %}{{ block('page_title') }}{% endblock %}</title>
     {% block stylesheets %}

@@ -64,6 +64,7 @@ class ParameterResolver implements ValueResolverInterface
 //                $history[$param] = $entity;
                 return [$entity];
             } else {
+                assert(false);
                 dd(missingEntity: $lookupParams);
             }
         }

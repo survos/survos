@@ -46,6 +46,12 @@ trait CoreIdTrait
 
     }
 
+    public function getIdWithinCore(): ?string
+    {
+        return $this->idWithinCore;
+
+    }
+
     public static function RowIdentifier(Core $core, string $id): string
     {
         return $core->getCoreCode() . '-' . $id;

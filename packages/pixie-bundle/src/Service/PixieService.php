@@ -47,24 +47,25 @@ class PixieService
     public function __construct(
 //        #[Autowire('%kernel.debug%')] private readonly bool                                        $isDebug,
 
-        private EntityManagerInterface    $pixieEntityManager,
-        private SqliteService             $sqliteService,
-        private readonly CoreRepository $coreRepository,
-        private readonly bool             $isDebug = false,
-        private array                     $data = [],
-        private readonly string           $extension = "pixie.db",
-        private readonly string           $dbDir = 'pixie',
-        private readonly string           $dataRoot = 'data', //
-        private readonly string           $configDir = 'config/packages/pixie',
-        private array                     $bundleConfig = [],
+        private EntityManagerInterface                           $pixieEntityManager,
+        private SqliteService                                    $sqliteService,
+        private readonly CoreRepository                          $coreRepository,
+        private readonly bool                                    $isDebug = false,
+        private array                                            $data = [],
+        private readonly string                                  $extension = "pixie.db",
+        private readonly string                                  $dbDir = 'pixie',
+        private readonly string                                  $dataRoot = 'data', //
+        private readonly string                                  $configDir = 'config/packages/pixie',
+        private array                                            $bundleConfig = [],
         #[Autowire('%env(DATABASE_PIXIE_URL)%')] private ?string $pixieTemplateUrl = null,
         #[Autowire('%kernel.project_dir%')]
-        private readonly ?string          $projectDir = null,
-        private readonly ?LoggerInterface $logger = null,
-        private readonly ?Stopwatch                 $stopwatch = null,
-        private readonly ?PropertyAccessorInterface $accessor = null,
-        private readonly ?SerializerInterface       $serializer = null,
-        private readonly ?WorkflowHelperService     $workflowHelperService = null,
+        private readonly ?string                                 $projectDir = null,
+        private readonly ?LoggerInterface                        $logger = null,
+        private readonly ?Stopwatch                              $stopwatch = null,
+        private readonly ?PropertyAccessorInterface              $accessor = null,
+        private readonly ?SerializerInterface                    $serializer = null,
+        private readonly ?WorkflowHelperService                  $workflowHelperService = null,
+        private ?Config                                          $config = null,
 //        private ?DenormalizerInterface                      $denormalizer = null,
     )
     {
@@ -84,6 +85,12 @@ class PixieService
     public function getLimit(?int $limit = null): ?int
     {
         return is_null($limit) ? $this->bundleConfig['limit'] : $limit;
+
+    }
+
+    public function getPixieEntityManager(): EntityManagerInterface
+    {
+        return $this->pixieEntityManager;
 
     }
 
@@ -229,6 +236,12 @@ class PixieService
         return $this->data;
     }
 
+    public function getConfig(string $pixieCode): Config
+    {
+        return $this->getConfigFiles()[$pixieCode];
+
+    }
+
     /**
      * @return array<Config>
      */
@@ -315,8 +328,8 @@ class PixieService
     {
         $coreCode = $config->getCode();
         if (!$this->coreRepository)
-        // map config to core fields, then only use Core/Fields and not Table/Columns
-        dd($config);
+            // map config to core fields, then only use Core/Fields and not Table/Columns
+            dd($config);
 
 
     }
@@ -327,13 +340,27 @@ class PixieService
     {
         static $configCache = null;
 
+        $conn = $this->pixieEntityManager->getConnection();
+        $currentName = pathinfo($this->dbName($pixieCode), PATHINFO_FILENAME);
+        if ($currentName === $pixieCode) {
+//            $switchDatabase = false;
+        } else {
+//            $conn->selectDatabase($this->dbName($pixieCode));
+        }
+
         if ($switchDatabase) {
-            $this->pixieEntityManager->flush();
-            $this->pixieEntityManager->clear();
+//            dd($currentName, $pixieCode);
+            try {
+                $this->pixieEntityManager->flush();
+                $this->pixieEntityManager->clear();
+            } catch (\Exception $e) {
+                // warn?
+            }
             $conn = $this->pixieEntityManager->getConnection();
             $toDbName = $this->dbName($pixieCode);
             $conn->selectDatabase($toDbName);
         }
+
         if (null === $configCache) {
             $configCache = $this->getConfigFiles();
         }
@@ -654,7 +681,7 @@ class PixieService
         //dd($this->pixieTemplateUrl);
         $params = $this->pixieEntityManager->getConnection()->getParams();
         //$dbName = str_replace('pixie_template', $code, $params['path']);
-        $dbName = str_replace(pathinfo($params['path'],PATHINFO_FILENAME), $code, $params['path']);
+        $dbName = str_replace(pathinfo($params['path'], PATHINFO_FILENAME), $code, $params['path']);
         if ($throwErrorIfMissing) {
             assert(file_exists($dbName), $dbName);
         }

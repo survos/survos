@@ -108,4 +108,10 @@ class Str
     {
         return strlen($this->original);
     }
+
+    public function getTranslatedLocales(): array
+    {
+        return array_keys($this->getT());
+
+    }
 }

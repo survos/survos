@@ -11,8 +11,11 @@
 
 namespace Survos\WorkflowBundle\Command;
 
+use Roave\BetterReflection\BetterReflection;
+use Roave\BetterReflection\Reflection\ReflectionMethod;
 use Survos\WorkflowBundle\Service\SurvosGraphVizDumper;
 use Survos\WorkflowBundle\Service\SurvosStateMachineGraphVizDumper;
+use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Completion\CompletionInput;
@@ -33,6 +36,7 @@ use Symfony\Component\Workflow\Marking;
 use Symfony\Component\Workflow\StateMachine;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Twig\Environment;
+use function Symfony\Component\String\s;
 
 /**
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
@@ -51,8 +55,9 @@ class VizCommand extends Command
     public function __construct(
         /** @var WorkflowInterface[] */
         private iterable                                                         $workflows,
-        #[Autowire('%kernel.project_dir%')] private string                       $projectDir,
+        #[Autowire('%kernel.project_dir%')] private ?string                       $projectDir,
         private Environment $twig,
+private WorkflowHelperService $workflowHelper,
 //        private ServiceLocator $workflows,
 //        #[AutowireIterator('%kernel.event_listener%')] private readonly iterable $messageHandlers
 
@@ -66,7 +71,7 @@ class VizCommand extends Command
     {
         $this
             ->setDefinition([
-                new InputArgument('name', InputArgument::REQUIRED, 'A workflow name'),
+                new InputArgument('name', InputArgument::OPTIONAL, 'A workflow name'),
                 new InputArgument('marking', InputArgument::IS_ARRAY, 'A marking (a list of places)'),
                 new InputOption('label', 'l', InputOption::VALUE_REQUIRED, 'Label a graph'),
                 new InputOption('with-metadata', null, InputOption::VALUE_NONE, 'Include the workflow\'s metadata in the dumped graph', null),
@@ -89,30 +94,53 @@ EOF
         assert(file_exists($eventFilename), "$eventFilename does not exist, run bin/console debug:event --format=json workflow > var/cache/workflow-events.json");
         $events = json_decode(file_get_contents($eventFilename), false, 512, JSON_THROW_ON_ERROR);
         $ee = [];
+        foreach ($this->workflows as $workflow) {
+//            $this->workflowHelper->workflowDiagram();
+        }
         foreach ($events as $code => $event) {
+            $parts = explode('.', str_replace('workflow.', '', $code));
+            $workflowName = array_shift($parts);
+            $action = array_shift($parts);
+            $transition = array_shift($parts);
+//            dd(wf: $workflowName, action: $action, transition: $transition);//, $parts, $code);
+
+
             foreach ($event as $e) {
                 $reflectionMethod = new \ReflectionMethod($e->class, $e->name);
+
+                $classInfo = (new BetterReflection())
+                    ->reflector()
+                    ->reflectClass($e->class);
+                $method = $classInfo->getMethod($e->name);
+//                $source = $method->getLocatedSource()->getSource();
+                $source = explode("\n", $classInfo->getLocatedSource()->getSource());
+                $methodSource = array_slice($source, $method->getStartLine(), $method->getEndLine() - $method->getStartLine());
+
+//                dd($e->class, $source, $classInfo, $method, $reflectionMethod);
+//                $m = ReflectionMethod::createFromName(MediaWorkflow::class, $e->name);
+//                $m = ReflectionMethod::createFromName($e->class, $e->name);
                 $reflectionClass = new \ReflectionClass($e->class);
                 $fn = str_replace($this->projectDir, 'blob/main', $reflectionClass->getFileName());
-                $md = $this->twig->render('@SurvosWorkflow/md/workflows.html.twig', [
-                    'events' => $ee
-                ]);
-                dd($md, $ee);
-
-                dd($fn, $this->projectDir, $reflectionMethod->getFileName(), $reflectionMethod->getStartLine(), $reflectionMethod->getEndLine());
-                $ee[$code][] = [
-                    'file' => $reflectionMethod->extra['file'],
-                    'lines' => $e->extra['line'],
+                $ee[$workflowName][$action][$transition][] = [
+                    'file' => $classInfo->getFileName(),
+//                    'lines' => $e->extra['line'],
                     'link' => sprintf('%s#L%d-%d', $fn, $reflectionMethod->getStartLine(), $reflectionMethod->getEndLine()),
+                    'source' => join("\n", array_slice($methodSource, 0, 8))
                 ];
-
-
-//                dd($e, $code, $reflectionMethod);
-//                https://github.com/survos-sites/sais/blob/main/src/Workflow/ThumbWorkflow.php#L57-L70
 
             }
         }
-        dd($ee);
+
+        foreach ($ee as $wf=>$events) {
+            $md = $this->twig->render('@SurvosWorkflow/md/workflows.html.twig', [
+                'events' => $events,
+                'workflowName' => $wf,
+            ]);
+            file_put_contents(sprintf('doc/%s.md', $wf), $md);
+            dump($md);
+        }
+
+        return self::SUCCESS;
 
         dd($events);
 
@@ -121,47 +149,45 @@ EOF
 //        }
 
         $workflowName = $input->getArgument('name');
-        foreach ($this->workflows as $w) {
-            if ($w->getName() === $workflowName) {
-                $workflow = $w;
-                break;
+        foreach ($this->workflows as $workflow) {
+            if ($workflowName && ($w->getName() !== $workflowName)) {
+                continue;
             }
+            $type = $workflow instanceof StateMachine ? 'state_machine' : 'workflow';
+            $definition = $workflow->getDefinition();
+
+            switch ($input->getOption('dump-format')) {
+                case 'puml':
+                    $transitionType = 'workflow' === $type ? PlantUmlDumper::WORKFLOW_TRANSITION : PlantUmlDumper::STATEMACHINE_TRANSITION;
+                    $dumper = new PlantUmlDumper($transitionType);
+                    break;
+
+                case 'mermaid':
+                    $transitionType = 'workflow' === $type ? MermaidDumper::TRANSITION_TYPE_WORKFLOW : MermaidDumper::TRANSITION_TYPE_STATEMACHINE;
+                    $dumper = new MermaidDumper($transitionType);
+                    break;
+
+                case 'dot':
+                default:
+                    $dumper = new SurvosGraphVizDumper();
+            }
+
+            $marking = new Marking();
+
+            foreach ($input->getArgument('marking') as $place) {
+                $marking->mark($place);
+            }
+
+            $options = [
+                'name' => $workflowName,
+                'with-metadata' => $input->getOption('with-metadata'),
+                'nofooter' => true,
+                'label' => $input->getOption('label'),
+            ];
+            $output->writeln($dumper->dump($definition, $marking, $options));
+
+            // now run dot and create the svg
         }
-        if (empty($workflow)) {
-            throw new InvalidArgumentException(\sprintf('The workflow named "%s" cannot be found.', $workflowName));
-        }
-        $type = $workflow instanceof StateMachine ? 'state_machine' : 'workflow';
-        $definition = $workflow->getDefinition();
-
-        switch ($input->getOption('dump-format')) {
-            case 'puml':
-                $transitionType = 'workflow' === $type ? PlantUmlDumper::WORKFLOW_TRANSITION : PlantUmlDumper::STATEMACHINE_TRANSITION;
-                $dumper = new PlantUmlDumper($transitionType);
-                break;
-
-            case 'mermaid':
-                $transitionType = 'workflow' === $type ? MermaidDumper::TRANSITION_TYPE_WORKFLOW : MermaidDumper::TRANSITION_TYPE_STATEMACHINE;
-                $dumper = new MermaidDumper($transitionType);
-                break;
-
-            case 'dot':
-            default:
-                $dumper = new SurvosGraphVizDumper();
-        }
-
-        $marking = new Marking();
-
-        foreach ($input->getArgument('marking') as $place) {
-            $marking->mark($place);
-        }
-
-        $options = [
-            'name' => $workflowName,
-            'with-metadata' => $input->getOption('with-metadata'),
-            'nofooter' => true,
-            'label' => $input->getOption('label'),
-        ];
-        $output->writeln($dumper->dump($definition, $marking, $options));
 
         return 0;
     }

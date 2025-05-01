@@ -45,7 +45,7 @@ cat <<'EOF' > templates/app/index.html.twig
 Hello, visitor from {{ ipGeolocation(ip).country_name}} )
 <pre>{{ ipGeolocation(ip)|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
 
-Powered by Geoapify.io <a href="https://www.geoapify.io">IP geolocation</a> web service.
+Powered by Geoapify.com <a href="https://www.geoapify.com">IP geolocation</a> web service.
 
 {% endblock %}
 EOF

@@ -23,13 +23,5 @@ class ClientTest extends TestCase
         return;
 
         $client->getTeamsForVereniging('ckl9m4l');
-        $client->getTeam('ckl9m4l-hs-1');
-        $client->getSporthallenForVereniging('ckl9m4l');
-        $client->getVereniging('ckl9m4l');
-        $client->getPouleIndelingen('regio-west-h1f-7');
-        $client->getWedstrijdenForPoule('regio-west-h1f-7');
-        $client->getWedstrijdenForVereniging('ckl9m4l');
-        $client->getWedstrijdResultaatForVereniging('ckl9m4l');
-        $client->getWedstrijdProgrammaForVereniging('ckl9m4l');
     }
 }

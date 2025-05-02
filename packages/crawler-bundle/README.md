@@ -6,6 +6,8 @@ Then repeat the process, but logged in as different users (e.g. as an administra
 
 That's what this bundle does.  Combine with code coverage, it's a fast and easy way to test.  This can also be run in --dev
 
+@todo: check out https://github.com/mvdbos/php-spider
+
 ```bash
 composer req survos/crawler-bundle
 # configure the users in packages/survos_crawler.yaml

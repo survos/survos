@@ -486,6 +486,7 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
     {
         $link = preg_replace('/#.*/', '', $link); // strip off URL fragment
         if (empty($this->domainLinks[$link])) {
+            dd($link, $currentUrl);
             // check for routes that should only be indexed once
             // do this before we add the link to the domainLinks array since we check that array for duplicates...
             if (! $this->isDuplicateIgnoredRoute($link)) {

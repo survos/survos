@@ -45,11 +45,11 @@ final class GenerateTestsCommand extends Command
             mkdir($testDir, 0777, true);
         }
         if (!class_exists(PhpNamespace::class)) {
-            $output->writeln("Missing dependency:\n\ncomposer req nette/php-generator");
+            $output->writeln("Missing dependency:\n\ncomposer req nette/php-generator --dev");
             return self::FAILURE;
         }
         $fn = $testDir . '/../crawldata.json';
-        assert(file_exists($fn), $fn);
+        assert(file_exists($fn), "$fn is missing, run bin/console survos:crawl first");
         $routes = json_decode(file_get_contents($fn), true);
         foreach ($routes as $key => $links) {
             [$user, $userClass, $startUrl] = explode('|', $key);

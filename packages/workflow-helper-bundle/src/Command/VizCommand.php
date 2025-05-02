@@ -92,38 +92,33 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $eventFilename = 'doc/workflow-events.json';
-        assert(file_exists($eventFilename), "$eventFilename does not exist, run bin/console debug:event --format=json workflow > doc/workflow-events.json");
-        $events = json_decode(file_get_contents($eventFilename), false, 512, JSON_THROW_ON_ERROR);
+        assert(file_exists($eventFilename), "$eventFilename does not exist, run bin/console debug:event --format=json workflow > " . $eventFilename);
+        $allEvents = json_decode(file_get_contents($eventFilename), false, 512, JSON_THROW_ON_ERROR);
         $ee = [];
         foreach ($this->workflows as $workflow) {
             $this->dumpSvg($workflow);
 //            $this->workflowHelper->workflowDiagram();
         }
-        foreach ($events as $code => $event) {
+
+        foreach ($allEvents as $code => $events) {
             if (!str_starts_with($code, 'workflow.')) {
                 continue;
             }
+
             $parts = explode('.', str_replace('workflow.', '', $code));
             $workflowName = array_shift($parts);
             $action = array_shift($parts);
             $transition = array_shift($parts);
 //            dd(wf: $workflowName, action: $action, transition: $transition);//, $parts, $code);
 
-
-            foreach ($event as $e) {
-//                continue;
-                if (is_string($e)) {
-                    continue;
-                }
-                if (!$e->class ?? null) {
-                    continue;
-                }
+            foreach ($events as $e) {
+                dump($e);
                 $reflectionMethod = new \ReflectionMethod($e->class, $e->name);
                 // hack to only get App Events, not the Symfony Events (in vendor)
                 if (!str_starts_with($e->class, 'App')) {
                     continue;
                 }
-
+//                assert(!is_string($e), $e);
                 $classInfo = (new BetterReflection())
                     ->reflector()
                     ->reflectClass($e->class);

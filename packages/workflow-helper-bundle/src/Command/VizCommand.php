@@ -11,6 +11,8 @@
 
 namespace Survos\WorkflowBundle\Command;
 
+use Nette\PhpGenerator\Method;
+use Nette\PhpGenerator\Printer;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflection\ReflectionMethod;
 use Survos\WorkflowBundle\Service\SurvosGraphVizDumper;
@@ -91,6 +93,9 @@ EOF
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+
+        $orderedEvents = ['guard','leave','transition','enter','entered','completed','announce'];
+
         $eventFilename = 'doc/workflow-events.json';
         assert(file_exists($eventFilename), "$eventFilename does not exist, run bin/console debug:event --format=json workflow > " . $eventFilename);
         $allEvents = json_decode(file_get_contents($eventFilename), false, 512, JSON_THROW_ON_ERROR);
@@ -100,44 +105,57 @@ EOF
 //            $this->workflowHelper->workflowDiagram();
         }
 
-        foreach ($allEvents as $code => $events) {
-            if (!str_starts_with($code, 'workflow.')) {
-                continue;
-            }
+        // order the events
+        foreach ($orderedEvents as $eventName) {
 
-            $parts = explode('.', str_replace('workflow.', '', $code));
-            $workflowName = array_shift($parts);
-            $action = array_shift($parts);
-            $transition = array_shift($parts);
-//            dd(wf: $workflowName, action: $action, transition: $transition);//, $parts, $code);
-
-            foreach ($events as $e) {
-                dump($e);
-                $reflectionMethod = new \ReflectionMethod($e->class, $e->name);
-                // hack to only get App Events, not the Symfony Events (in vendor)
-                if (!str_starts_with($e->class, 'App')) {
+            foreach ($allEvents as $code => $events) {
+                if (!str_starts_with($code, 'workflow.')) {
                     continue;
                 }
+
+                $parts = explode('.', str_replace('workflow.', '', $code));
+                $workflowName = array_shift($parts);
+                $action = array_shift($parts);
+                $transition = array_shift($parts);
+                if ($action <> $eventName) {
+                    continue;
+                }
+//                dd($code, $eventName, $action, $workflowName, $transition);
+//            dd(wf: $workflowName, action: $action, transition: $transition);//, $parts, $code);
+
+                foreach ($events as $e) {
+                    dump($e);
+                    $reflectionMethod = new \ReflectionMethod($e->class, $e->name);
+                    // hack to only get App Events, not the Symfony Events (in vendor)
+                    if (!str_starts_with($e->class, 'App')) {
+                        continue;
+                    }
 //                assert(!is_string($e), $e);
-                $classInfo = (new BetterReflection())
-                    ->reflector()
-                    ->reflectClass($e->class);
-                $method = $classInfo->getMethod($e->name);
+                    $classInfo = (new BetterReflection())
+                        ->reflector()
+                        ->reflectClass($e->class);
+                    $method = $classInfo->getMethod($e->name);
 //                $source = $method->getLocatedSource()->getSource();
-                $source = explode("\n", $classInfo->getLocatedSource()->getSource());
-                $methodSource = array_slice($source, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine()+1);
+                    $rawSource = $classInfo->getLocatedSource()->getSource();
+                    $rawSource = str_replace("\t", "    ", $rawSource);
+                    $source = explode("\n", $rawSource);
+
+
+                    $lines = array_slice($source, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
+                    $justifiedCode = $this->leftJustifyPhpCode($lines);
 
 //                dd($e->class, $source, $classInfo, $method, $reflectionMethod);
 //                $m = ReflectionMethod::createFromName(MediaWorkflow::class, $e->name);
 //                $m = ReflectionMethod::createFromName($e->class, $e->name);
-                $reflectionClass = new \ReflectionClass($e->class);
-                $fn = str_replace($this->projectDir, 'blob/main', $reflectionClass->getFileName());
-                $ee[$workflowName][$action][$transition][] = [
-                    'file' => $classInfo->getFileName(),
+                    $reflectionClass = new \ReflectionClass($e->class);
+                    $fn = str_replace($this->projectDir, 'blob/main', $reflectionClass->getFileName());
+                    $ee[$workflowName][$action][$transition][] = [
+                        'file' => $classInfo->getFileName(),
 //                    'lines' => $e->extra['line'],
-                    'link' => sprintf('%s#L%d-%d', $fn, $reflectionMethod->getStartLine(), $reflectionMethod->getEndLine()),
-                    'source' => join("\n", array_slice($methodSource, 0, 12))
-                ];
+                        'link' => sprintf('%s#L%d-%d', $fn, $reflectionMethod->getStartLine(), $reflectionMethod->getEndLine()),
+                        'source' => $justifiedCode
+                    ];
+                }
             }
         }
 
@@ -243,4 +261,29 @@ EOF
             $suggestions->suggestValues(self::DUMP_FORMAT_OPTIONS);
         }
     }
+
+
+    function leftJustifyPhpCode(array $lines): string
+    {
+        $minIndent = null;
+
+        // Step 1: Find minimum indentation (spaces or tabs) among non-empty lines
+        foreach ($lines as $line) {
+            if (trim($line) === '') continue;
+            if (preg_match('/^[ \t]*/', $line, $matches)) {
+                $indentLength = strlen($matches[0]);
+                if ($minIndent === null || $indentLength < $minIndent) {
+                    $minIndent = $indentLength;
+                }
+            }
+        }
+
+        // Step 2: Remove the minimum common indentation from all lines
+        $justified = array_map(function ($line) use ($minIndent) {
+            return preg_replace('/^[ \t]{0,' . $minIndent . '}/', '', $line);
+        }, $lines);
+
+        return implode("\n", $justified);
+    }
+
 }

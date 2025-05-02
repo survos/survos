@@ -198,7 +198,10 @@ final class IterateCommand extends InvokableServiceCommand
             // since we have the workflow and transition, we can do a "can" here.
             if ($workflow && $transition) {
                 if (!$workflow->can($item, $transition)) {
-                    $io->warning("$item cannot transition from {$item->getMarking()} to $transition");
+                    $io->warning(" cannot transition from {$item->getMarking()} to $transition");
+                    foreach ($workflow->buildTransitionBlockerList($item, $transition) as $blocker) {
+                        $io->warning($blocker->getMessage());
+                    }
                     continue;
                 } else {
                     // if there's a workflow and a transition, dispatch a transition message, otherwise a simple row event

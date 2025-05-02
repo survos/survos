@@ -24,8 +24,9 @@ use Symfony\Component\Workflow\Attribute\AsGuardListener;
 use Symfony\Component\Workflow\Attribute\AsTransitionListener;
 use Symfony\Component\Workflow\Event\GuardEvent;
 use Symfony\Component\Workflow\Event\TransitionEvent;
+use function Symfony\Component\String\u;
 
-#[AsCommand('survos:workflow:generate', 'Generate src/Workflow/(class)Workflow and Interface')]
+#[AsCommand('survos:workflow:generate', 'Generate src/Workflow/(class)Workflow and Interface using nette/php-generator')]
 #[WhenNot('prod')]
 final class MakeWorkflowCommand extends InvokableServiceCommand
 {
@@ -34,19 +35,21 @@ final class MakeWorkflowCommand extends InvokableServiceCommand
 
     public function __construct(
         #[Autowire('%kernel.project_dir%/src/Workflow')] private string $dir,
-        private Environment $twig
-    ) {
+        private Environment                                             $twig
+    )
+    {
         parent::__construct();
     }
 
 
     public function __invoke(
-        IO $io,
-        #[Argument(name: 'class-name', description: 'entity class name')] string $entityClassName,
+        IO                                                                                             $io,
+        #[Argument(name: 'class-name', description: 'entity class name')] string                       $entityClassName,
         #[Argument(name: 'place-names', description: 'place names, e.g. new,loaded,processed')] string $placeNames = 'new,loaded',
-        #[Argument(name: 'transition-names', description: 'transitions, e.g. load,process')] string $transitionNames = 'load',
-        #[Option(description: 'namespace')] string $ns = "App\\Workflow"
-    ) {
+        #[Argument(name: 'transition-names', description: 'transitions, e.g. load,process')] string    $transitionNames = 'load',
+        #[Option(description: 'namespace')] string                                                     $ns = "App\\Workflow"
+    )
+    {
         // @todo: check that class must implement MarkingInterface
         try {
             $shortName = (new ReflectionClass($entityClassName))->getShortName();
@@ -103,17 +106,17 @@ final class MakeWorkflowCommand extends InvokableServiceCommand
         $namespace = new PhpNamespace($ns);
         foreach (
             [
-                     $fullInterfaceClass,
-                     $entityClassName,
+                $fullInterfaceClass,
+                $entityClassName,
 //            $ns . "\\" . $interfaceClass, //  because they're in the same namespace, this isn't required
-                     Workflow::class,
-                     AsGuardListener::class,
-                     AsTransitionListener::class,
-                     GuardEvent::class,
-                     TransitionEvent::class,
-                 ] as $use
+                Workflow::class,
+                AsGuardListener::class,
+                AsTransitionListener::class,
+                GuardEvent::class,
+                TransitionEvent::class,
+            ] as $use
         ) {
-            $x = $namespace->addUse($use);
+            $namespace->addUse($use);
         }
 //        dd($namespace->getUses(), $fullInterfaceClass);
 
@@ -161,15 +164,24 @@ PHP, $shortName));
 
         $method->setBody($body);
 
-        // now the transitons
-        $method = $class->addMethod('onTransition')
-            ->setReturnType('void')
-            ->addAttribute(AsTransitionListener::class, [new Literal('self::WORKFLOW_NAME')]);
-        $method
-            ->addParameter('event')
-            ->setType(TransitionEvent::class);
-        $body = $this->twig->render('@SurvosWorkflow/_guard_switch.php.twig', $params);
-        $method->setBody($body);
+        foreach ($transitionConstants as $transitionConstant) {
+
+//            dd($transitionConstants);
+            // now the transitions
+            $name = 'on' . u($transitionConstant)->after('TRANSITION_')->lower()->camel()->title()->toString();
+            $method = $class->addMethod($name)
+                ->setReturnType('void')
+                ->addAttribute(AsTransitionListener::class, [
+                    new Literal('self::WORKFLOW_NAME'),
+                    new Literal($transitionConstant)
+                ]);
+            $method
+                ->addParameter('event')
+                ->setType(TransitionEvent::class);
+            $body = $this->twig->render('@SurvosWorkflow/_transition_body.php.twig', $params);
+            $method->setBody($body);
+//            dd((string)$method);
+        }
 
         $this->writeFile($namespace, $workflowClass);
 

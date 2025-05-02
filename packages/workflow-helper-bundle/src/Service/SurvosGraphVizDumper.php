@@ -276,7 +276,9 @@ class SurvosGraphVizDumper extends GraphvizDumper
         if (is_bool($value)) {
             return '';
         }
+
         if (is_string($value)) {
+            $value = htmlspecialchars($value);
             $value = wordwrap($value, 20, "<BR/>", true);
         }
         $value =  \is_bool($value) ? ($value ? '1' : '0') : addslashes($value);

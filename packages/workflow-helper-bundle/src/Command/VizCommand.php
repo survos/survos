@@ -28,6 +28,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Workflow\Dumper\GraphvizDumper;
 use Symfony\Component\Workflow\Dumper\MermaidDumper;
 use Symfony\Component\Workflow\Dumper\PlantUmlDumper;
@@ -54,10 +55,10 @@ class VizCommand extends Command
 
     public function __construct(
         /** @var WorkflowInterface[] */
-        private iterable                                                         $workflows,
-        #[Autowire('%kernel.project_dir%')] private ?string                       $projectDir,
-        private Environment $twig,
-private WorkflowHelperService $workflowHelper,
+        private iterable                                    $workflows,
+        #[Autowire('%kernel.project_dir%')] private ?string $projectDir,
+        private Environment                                 $twig,
+        private WorkflowHelperService                       $workflowHelper,
 //        private ServiceLocator $workflows,
 //        #[AutowireIterator('%kernel.event_listener%')] private readonly iterable $messageHandlers
 
@@ -90,14 +91,18 @@ EOF
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $eventFilename = 'var/cache/workflow-events.json';
-        assert(file_exists($eventFilename), "$eventFilename does not exist, run bin/console debug:event --format=json workflow > var/cache/workflow-events.json");
+        $eventFilename = 'doc/workflow-events.json';
+        assert(file_exists($eventFilename), "$eventFilename does not exist, run bin/console debug:event --format=json workflow > doc/workflow-events.json");
         $events = json_decode(file_get_contents($eventFilename), false, 512, JSON_THROW_ON_ERROR);
         $ee = [];
         foreach ($this->workflows as $workflow) {
+            $this->dumpSvg($workflow);
 //            $this->workflowHelper->workflowDiagram();
         }
         foreach ($events as $code => $event) {
+            if (!str_starts_with($code, 'workflow.')) {
+                continue;
+            }
             $parts = explode('.', str_replace('workflow.', '', $code));
             $workflowName = array_shift($parts);
             $action = array_shift($parts);
@@ -106,7 +111,18 @@ EOF
 
 
             foreach ($event as $e) {
+//                continue;
+                if (is_string($e)) {
+                    continue;
+                }
+                if (!$e->class ?? null) {
+                    continue;
+                }
                 $reflectionMethod = new \ReflectionMethod($e->class, $e->name);
+                // hack to only get App Events, not the Symfony Events (in vendor)
+                if (!str_starts_with($e->class, 'App')) {
+                    continue;
+                }
 
                 $classInfo = (new BetterReflection())
                     ->reflector()
@@ -114,7 +130,7 @@ EOF
                 $method = $classInfo->getMethod($e->name);
 //                $source = $method->getLocatedSource()->getSource();
                 $source = explode("\n", $classInfo->getLocatedSource()->getSource());
-                $methodSource = array_slice($source, $method->getStartLine(), $method->getEndLine() - $method->getStartLine());
+                $methodSource = array_slice($source, $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine()+1);
 
 //                dd($e->class, $source, $classInfo, $method, $reflectionMethod);
 //                $m = ReflectionMethod::createFromName(MediaWorkflow::class, $e->name);
@@ -125,13 +141,12 @@ EOF
                     'file' => $classInfo->getFileName(),
 //                    'lines' => $e->extra['line'],
                     'link' => sprintf('%s#L%d-%d', $fn, $reflectionMethod->getStartLine(), $reflectionMethod->getEndLine()),
-                    'source' => join("\n", array_slice($methodSource, 0, 8))
+                    'source' => join("\n", array_slice($methodSource, 0, 12))
                 ];
-
             }
         }
 
-        foreach ($ee as $wf=>$events) {
+        foreach ($ee as $wf => $events) {
             $md = $this->twig->render('@SurvosWorkflow/md/workflows.html.twig', [
                 'events' => $events,
                 'workflowName' => $wf,
@@ -190,6 +205,37 @@ EOF
         }
 
         return 0;
+    }
+
+    private function dumpSvg(WorkflowInterface $workflow)
+    {
+        $dumper = new SurvosGraphVizDumper();
+        $marking = new Marking();
+        $type = $workflow instanceof StateMachine ? 'state_machine' : 'workflow';
+        $definition = $workflow->getDefinition();
+
+        $options = [
+            'name' => $workflow->getName(),
+            'with-metadata' => true, // $input->getOption('with-metadata'),
+            'nofooter' => true,
+            'label' => $workflow->getName()
+        ];
+        $dot = $dumper->dump($definition, $marking, $options);
+        //
+
+        file_put_contents($fn = sprintf('doc/%s.dot', $workflow->getName()), $dot);
+        try {
+            $process = new Process(['dot', '-Tsvg']);
+            $process->setInput($dot);
+            $process->mustRun();
+
+            $svg = $process->getOutput();
+            file_put_contents($fn = sprintf('doc/%s.svg', $workflow->getName()), $svg);
+        } catch (\Exception $e) {
+            dd($e->getMessage(), $dot);
+        }
+//        dd($svg, $dot, $fn);
+
     }
 
     public function complete(CompletionInput $input, CompletionSuggestions $suggestions): void

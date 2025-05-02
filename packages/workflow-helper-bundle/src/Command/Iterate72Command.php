@@ -9,62 +9,75 @@ use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Survos\WorkflowBundle\Event\RowEvent;
 use Survos\WorkflowBundle\Message\AsyncTransitionMessage;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Workflow\Transition;
 use Symfony\Component\Yaml\Yaml;
 use Zenstruck\Alias;
+use Zenstruck\Console\Attribute\Argument;
+use Zenstruck\Console\Attribute\Option;
+use Zenstruck\Console\InvokableServiceCommand;
+use Zenstruck\Console\IO;
+use Zenstruck\Console\RunsCommands;
+use Zenstruck\Console\RunsProcesses;
 use Zenstruck\Metadata;
-
+use Zenstruck\Metadata\Bridge\Doctrine\AliasManagerRegistry;
 use function Symfony\Component\String\u;
 
-#[AsCommand('workflow:iterate', 'Iterative over an doctrine table, sending events, Symfony 7.3"')]
-final class IterateCommand extends Command // extends is for 7.2/7.3 compatibility
+#[AsCommand('workflow:iterate72', 'Iterative over an doctrine table, sending events (Symfony 7.2)"')]
+final class Iterate72Command extends InvokableServiceCommand
 {
+    use RunsCommands;
+    use RunsProcesses;
+
     private bool $initialized = false; // so the event listener can be called from outside the command
     private ProgressBar $progressBar;
 
     public function __construct(
-        private LoggerInterface $logger,
-        private ParameterBagInterface $bag,
-        private ?WorkflowHelperService $workflowHelperService = null,
+        private LoggerInterface           $logger,
+        private ParameterBagInterface     $bag,
+        private ?WorkflowHelperService    $workflowHelperService = null,
         private ?EventDispatcherInterface $eventDispatcher = null,
-        private ?MessageBusInterface $bus = null,
-        private ?EntityManagerInterface $entityManager = null,
-        #[Autowire('%env(DEFAULT_TRANSPORT)%')] private ?string $defaultTransport = null,
-    ) {
+        private ?MessageBusInterface      $bus = null,
+        private ?EntityManagerInterface   $entityManager = null,
+        private ?ManagerRegistry          $doctrine = null,
+    )
+    {
+
         parent::__construct();
     }
 
     public function __invoke(
-                SymfonyStyle                                                                                $io,
-                #[Argument(description: 'class name')] ?string                  $className = null,
+        IO                                                                                $io,
+        #[Argument(name: 'className', description: 'class name')] ?string                  $className = null,
+        #[Autowire('%env(DEFAULT_TRANSPORT)%')] ?string                                    $defaultTransport = null,
         # to override the default
-        #[Option(description: 'message transport')] ?string $transport = null,
-        #[Option(description: 'workflow transition')] ?string $transition = null,
+        #[Option(description: 'message transport')] ?string                                $transport = null,
+        #[Option(description: 'workflow transition')] ?string                              $transition = null,
         #[Option(name: 'worflow', description: 'workflow (if multiple on class)')] ?string $workflowName = null,
         // marking CAN be null, which is why we should set it when inserting
-        #[Option(description: 'workflow marking')] ?string $marking = null,
-        #[Option(description: 'tags (for listeners)')] ?string $tags = null,
-        #[Option(name: 'index', description: 'grid:index after flush?')] ?bool $indexAfterFlush = false,
-        #[Option(description: 'show stats only')] ?bool $stats = false,
-        #[Option] int $limit = 0,
-        #[Option(description: "use this count for progressBar")] int $count = 0,
-        #[Option] string $dump = '',
-    ): int {
-        $transport ??= $this->defaultTransport;
+        #[Option(description: 'workflow marking')] ?string                                 $marking = null,
+        #[Option(description: 'tags (for listeners)')] ?string                             $tags = null,
+        #[Option(name: 'index', description: 'grid:index after flush?')] ?bool             $indexAfterFlush = false,
+        #[Option(description: 'show stats only')] ?bool                                    $stats = false,
+        #[Option] int                                                                      $limit = 0,
+        #[Option(description: "use this count for progressBar")] int                       $count = 0,
+        #[Option] string                                                                   $dump = '',
+
+    ): int
+    {
+        $transport ??= $defaultTransport;
+        $io = $this->io();
 
         // inject entities that implement marking interface
 
@@ -77,18 +90,23 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
             return Command::FAILURE;
         }
 
-        if (!$className) {
-            $className = $io->choice(
-                'Which Doctrine entity are you going to iterate?',
-                $doctrineEntitiesFqcn
-            );
-        }
+        $entityFqcn = $io->choice(
+            'Which Doctrine entity are you going to iterate?',
+            $doctrineEntitiesFqcn
+        );
+        dd($entityFqcn);
+        $entityClassName = u($entityFqcn)->afterLast('\\')->toString();
+        $controllerFileNamePattern = sprintf('%s{number}CrudController.php', $entityClassName);
 
         $helper = $this->getHelper('question');
         if (!class_exists($className)) {
             $metaData = Metadata::for($className); // ['track' => true, 'identifier' => 'getId'] (alternatively, fetch metadata by a class' alias)
             $className = Alias::classFor($className);
         }
+        if (!$marking) {
+
+        }
+
         /** @var QueryBuilderHelperInterface $repo */
         $repo = $this->entityManager->getRepository($className);
         if ($stats) {
@@ -117,15 +135,13 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
                     'From which marking?',
                     // choices can also be PHP objects that implement __toString() method
                     $places,
-                    null
+                    0
                 );
 
                 $marking = $io->askQuestion($question);
-            }
-            $transitions = array_filter(array_unique(array_map(fn(Transition $transition) =>
-                in_array($marking, $transition->getFroms()) ? $transition->getName() : null,
-                $workflow->getDefinition()->getTransitions())));
 
+            }
+            $transitions = array_unique(array_map(fn(Transition $transition) => $transition->getName(), $workflow->getDefinition()->getTransitions()));
             if ($transition) {
                 assert(in_array($transition, $transitions), "invalid transition:\n\n$transition: use\n\n" . join("\n", $transitions));
             } else {
@@ -137,6 +153,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
                 );
 
                 $transition = $io->askQuestion($question);
+
             }
         }
 
@@ -186,8 +203,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
                 $className,
                 type: RowEvent::PRE_ITERATE,
                 action: self::class,
-            )
-        );
+            ));
 
         foreach ($iterator as $idx => $item) {
             $method = 'get' . ucfirst($identifier);
@@ -201,10 +217,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
             // since we have the workflow and transition, we can do a "can" here.
             if ($workflow && $transition) {
                 if (!$workflow->can($item, $transition)) {
-                    $io->warning(" cannot transition from {$item->getMarking()} to $transition");
-                    foreach ($workflow->buildTransitionBlockerList($item, $transition) as $blocker) {
-                        $io->warning($blocker->getMessage());
-                    }
+                    $io->warning("$item cannot transition from {$item->getMarking()} to $transition");
                     continue;
                 } else {
                     // if there's a workflow and a transition, dispatch a transition message, otherwise a simple row event
@@ -227,12 +240,11 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
                         type: RowEvent::LOAD,
                         action: self::class,
                         context: [
-                        //                                'storageBox' => $kv,
+//                                'storageBox' => $kv,
                             'tags' => $tags ? explode(",", $tags) : [],
                             'transition' => $transition,
                             'transport' => $transport
-                        ]
-                    )
+                        ])
                 );
             }
 
@@ -254,11 +266,10 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
                 type: RowEvent::POST_LOAD,
                 action: self::class,
                 context: [
-                'tags' => $tags ? explode(",", $tags) : [],
-                'transition' => $transition,
-                'transport' => $transport
-                ]
-            )
+                    'tags' => $tags ? explode(",", $tags) : [],
+                    'transition' => $transition,
+                    'transport' => $transport
+                ])
         );
 
         if ($indexAfterFlush) { // || $transport==='sync') { @todo: check for tags, e.g. create-owners
@@ -285,4 +296,6 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
 
         return $entitiesFqcn;
     }
+
+
 }

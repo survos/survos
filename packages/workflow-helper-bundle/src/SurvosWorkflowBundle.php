@@ -5,6 +5,7 @@ namespace Survos\WorkflowBundle;
 use JetBrains\PhpStorm\NoReturn;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\WorkflowBundle\Command\ConvertFromYamlCommand;
+use Survos\WorkflowBundle\Command\Iterate72Command;
 use Survos\WorkflowBundle\Command\IterateCommand;
 use Survos\WorkflowBundle\Command\MakeWorkflowCommand;
 use Survos\WorkflowBundle\Command\SurvosWorkflowConfigureCommand;
@@ -145,7 +146,7 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
         ;
 
 
-        foreach ([IterateCommand::class, MakeWorkflowCommand::class] as $commandClass) {
+        foreach ([IterateCommand::class, Iterate72Command::class, MakeWorkflowCommand::class] as $commandClass) {
             $builder->autowire($commandClass)
                 ->setAutoconfigured(true)
                 ->addTag('console.command')

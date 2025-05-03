@@ -11,7 +11,7 @@
 {# custom css start #}
 <style>
 .ios {
-    --f7-navbar-height: 62px; 
+    --f7-navbar-height: 62px;
     --f7-toolbar-height: 60px;
 }
 
@@ -54,7 +54,11 @@
             </twig:block>
 
         </twig:dexie>
+    {% guard function dictionary %}
     {% set iconMap = dictionary('tab_icons') %}
+    {% else  %}
+    {% set iconMap = [] %}
+    {% endif %}
     <div id="app" {{ stimulus_controller(_app_sc, {
         config: appConfig,
         configCode : configCode,

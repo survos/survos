@@ -25,7 +25,7 @@ use Symfony\Component\Workflow\Attribute\AsTransitionListener;
 use Symfony\Component\Workflow\Event\GuardEvent;
 use Symfony\Component\Workflow\Event\TransitionEvent;
 
-#[AsCommand('survos:generate:entitry', 'Generate a translatable entity')]
+#[AsCommand('survos:generate:entity', 'Generate a translatable entity')]
 #[WhenNot('prod')]
 final class EntityCommand extends InvokableServiceCommand
 {

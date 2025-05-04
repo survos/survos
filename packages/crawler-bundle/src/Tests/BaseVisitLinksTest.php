@@ -6,6 +6,7 @@ use App\Entity\User;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestDox;
 use Psr\Log\LoggerInterface;
+use Survos\CrawlerBundle\Services\CrawlerService;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
@@ -29,12 +30,17 @@ class BaseVisitLinksTest extends WebTestCase
     private array $visibleLinks = [];
     private KernelBrowser $client;
     private ?string $username=null;
+    private ?string $userClassName = null;
 
-//    public function setUp(): void
-//    {
-//        parent::setUp();
-//        self::bootKernel();
-//    }
+    public function setUp(): void
+    {
+        parent::setUp();
+        self::bootKernel();
+        /** @var CrawlerService $crawlerService */
+//        $crawlerService = $this->getContainer()->get('survos.crawler_service');
+        $crawlerService = $this->getContainer()->get(CrawlerService::class);
+        $this->userClassName = $crawlerService->getUserClass();
+    }
 
     protected function createAuthenticatedClient(?string $username=null): KernelBrowser
     {
@@ -68,7 +74,9 @@ class BaseVisitLinksTest extends WebTestCase
         if ($username && $username != "") {
             if (!array_key_exists($username, $users)) {
                 $container = static::getContainer();
-                $users[$username] = $container->get('doctrine')->getRepository($userClassName)->findOneBy(['email' => $username]);
+                $users[$username] = $container->get('doctrine')->getRepository(
+                    $this->userClassName
+                )->findOneBy(['email' => $username]);
             }
 
             $user = $users[$username];

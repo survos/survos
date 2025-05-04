@@ -183,7 +183,7 @@ class CrawlCommand extends Command
                 }
             }
 
-            $key = $username."|".$crawlerService->getUserClass()."|".$crawlerService->getBaseUrl();
+            $key = $username."|".$crawlerService->getBaseUrl();
             $linksToCrawl[$key] = array_filter($crawlerService->getLinkList($username), fn (Link $link) => $link->testable());
             //            $userLinks = array_merge($userLinks, array_values($linksToCrawl));
             $table->addRow([$username, count($linksToCrawl[$key]), count($crawlerService->getLinkList($username))]);

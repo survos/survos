@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\RouterInterface;
 use function Symfony\Component\String\u;
 
-#[AsCommand('survos:crawl:make-tests', 'Generate crawler tests for a visitor and authenticated users')]
+#[AsCommand('survos:make:crawl-tests', 'Generate crawler tests for a visitor and authenticated users')]
 final class GenerateTestsCommand extends Command
 {
 
@@ -52,7 +52,7 @@ final class GenerateTestsCommand extends Command
         assert(file_exists($fn), "$fn is missing, run bin/console survos:crawl first");
         $routes = json_decode(file_get_contents($fn), true);
         foreach ($routes as $key => $links) {
-            [$user, $userClass, $startUrl] = explode('|', $key);
+            [$user, $startUrl] = explode('|', $key);
             $namespace = new PhpNamespace('App\\Tests\\' . $ns);
             foreach ([
                          WebTestCase::class,
@@ -83,7 +83,6 @@ final class GenerateTestsCommand extends Command
                     [
                         [
                             $user,
-                            $userClass,
                             $link['path'],
 //                            $link['route'],
                             $link['statusCode']??200
@@ -92,12 +91,12 @@ final class GenerateTestsCommand extends Command
             }
 
             array_map(fn($param) => $method->addParameter($param)->setType('string'), [
-                'username', 'userClassName', 'url'
+                'username', 'url'
             ]);
             $method->addParameter('expected')->setType('string|int|null');
 //        public function testRoute(string $method, string $url, string $route): void
             $method->setBody(<<<'END'
-        parent::testWithLogin($username, $userClassName, $url, (int)$expected);
+        parent::testWithLogin($username, $url, (int)$expected);
 
 END
             );

@@ -21,6 +21,13 @@ These are the steps
 * Run the phpunit test (very fast)
 * Check coverage with the test.
 
+```bash
+c d:sc:update --env=test --force
+
+
+bin/console survos:crawl --env=test
+```
+
 
 # Working example (without API Platform)
 

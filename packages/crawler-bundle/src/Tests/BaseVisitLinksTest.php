@@ -64,13 +64,15 @@ class BaseVisitLinksTest extends WebTestCase
 
     #[DataProvider('linksToVisit')]
     #[TestDox('$username $url should return $expected')]
-    public function testWithLogin(?string $username, ?string $userClassName, string $url, int|string|null $expected): void
+    public function testWithLogin(?string $username, string $url, int|string|null $expected): void
     {
         static $users = [];
+        assert(is_int($expected), $expected);
 
         $browser = $this->browser();
 //        $client = static::createClient();
 
+//        dump(username: $username);
         if ($username && $username != "") {
             if (!array_key_exists($username, $users)) {
                 $container = static::getContainer();
@@ -129,9 +131,9 @@ class BaseVisitLinksTest extends WebTestCase
         $crawldata = json_decode(file_get_contents($crawldataFilename));
 
         foreach ($crawldata as $username => $linksToCrawl) {
-            $array = explode("|",$username);
+            [$username, $startingLink] = explode("|",$username);
             foreach ($linksToCrawl as $path=>$info) {
-                yield $x[$username . '@' . $info->path] = [$array[0],$array[1], $info->path, 200];
+                yield $x[$username . '@' . $info->path] = [$username, $info->path, 200];
             }
         }
 //        return $x;

@@ -7,6 +7,7 @@ use App\Kernel;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Survos\CrawlerBundle\Model\Link;
+use Survos\CrawlerBundle\RoutesExtractor;
 use Survos\CrawlerBundle\Services\CrawlerService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -144,7 +145,19 @@ class CrawlCommand extends Command
             $this->crawlerService->checkIfCrawlerClient();
             $io->info(sprintf("Crawling %s as %s", $crawlerService->getInitialPath(), $username ?: 'Visitor'));
 
+            $routes = RoutesExtractor::extractRoutesFromRouter($this->router);
+            dd($routes);
+
+            $staticLinks = ['/login'];
+            foreach ($staticLinks as $link) {
+                $link = $crawlerService->addLink($username, $link);
+                dd($link);
+            }
+
+
             $link = $crawlerService->addLink($username, $crawlerService->getInitialPath());
+
+
             $link->username = $username;
             assert(count($crawlerService->getLinkList($username)), "No links for $username");
             assert($crawlerService->getUnvisitedLink($username));
@@ -233,7 +246,7 @@ class CrawlCommand extends Command
         $client = $this->httpClient;
         $crawler = $client->request('GET', $this->startingLink);
 
-        dump($this->startingLink);
+        dump(startingLink: $this->startingLink);
 
         // Get the latest post in this category and display the titles
         $crawler->filter('h2 > a')->each(function ($node) {

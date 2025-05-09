@@ -146,12 +146,10 @@ class CrawlCommand extends Command
             $io->info(sprintf("Crawling %s as %s", $crawlerService->getInitialPath(), $username ?: 'Visitor'));
 
             $routes = RoutesExtractor::extractRoutesFromRouter($this->router);
-            dd($routes);
 
-            $staticLinks = ['/login'];
+            $staticLinks = [];
             foreach ($staticLinks as $link) {
                 $link = $crawlerService->addLink($username, $link);
-                dd($link);
             }
 
 

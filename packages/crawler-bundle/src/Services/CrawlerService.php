@@ -282,7 +282,7 @@ class CrawlerService
             // @todo: what should we do here?
 //            dump($response->getContent());
             $this->logger->error("$url " . $status . " found on \n" . $this->baseUrl . $link->getFoundOn());
-            dd($response->getStatusCode(), $this->baseUrl . $link->getPath(), $link->getFoundOn());
+            //dd($response->getStatusCode(), $this->baseUrl . $link->getPath(), $link->getFoundOn());
             $html = ''; // false;
         } else {
             $html = $response->getContent();

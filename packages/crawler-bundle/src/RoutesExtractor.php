@@ -62,7 +62,7 @@ final class RoutesExtractor
 
             if ($hasNonDynamicHost || $hasNonDynamicScheme) {
                 // Generate full URI if route is configured with a host.
-                $routerReferenceType = UrlGeneratorInterface::ABSOLUTE_URL;
+                //$routerReferenceType = UrlGeneratorInterface::ABSOLUTE_URL;
             }
 
             foreach ($methods as $method) {

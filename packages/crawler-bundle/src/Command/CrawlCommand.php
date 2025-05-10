@@ -147,6 +147,10 @@ class CrawlCommand extends Command
 
             $routes = RoutesExtractor::extractRoutesFromRouter($this->router);
 
+            foreach ($routes as $route) {
+                $link = $crawlerService->addLink($username, $route["routePath"]);
+            }
+
             $staticLinks = [];
             foreach ($staticLinks as $link) {
                 $link = $crawlerService->addLink($username, $link);

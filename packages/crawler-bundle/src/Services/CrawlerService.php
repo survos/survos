@@ -129,7 +129,7 @@ class CrawlerService
         return sprintf('%s@%s', $username, $path);
     }
 
-    public function addLink(?string $username, string $path, ?string $foundOn = null): Link
+    public function addLink(?string $username, string $path, ?string $foundOn = null,?string $route = null): Link
     {
         //        $key = $this->linkListKey($username, $path);
 
@@ -141,7 +141,7 @@ class CrawlerService
             if(isset($this->linkList[$username][$foundOn])) {
                 $depth = $this->linkList[$username][$foundOn]->getDepth() + 1;
             }
-            $this->linkList[$username][$path] = new Link(username: $username, path: $path, foundOn: $foundOn, depth: $depth);
+            $this->linkList[$username][$path] = new Link(username: $username, path: $path,route: $route, foundOn: $foundOn, depth: $depth);
         }
         $link = $this->linkList[$username][$path];
         return $link;
@@ -225,6 +225,12 @@ class CrawlerService
         }
 
         $this->setRoute($link);
+
+        assert($link->getRoute(), "missing route");
+
+        // var_dump($this->maxVisits);
+        // var_dump($link->getVisits());
+        
         if  ($link->getVisits() >= $this->maxVisits) {
             return $link;
         }
@@ -375,7 +381,7 @@ class CrawlerService
         return $cleanHref;
     }
 
-    private function setRoute(Link $link): void
+    public function setRoute(Link $link): void
     {
         $path = $link->getPath();
         if (!$path) {

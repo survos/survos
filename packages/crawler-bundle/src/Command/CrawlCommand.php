@@ -120,6 +120,7 @@ class CrawlCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        
         $this->locale = $input->getOption('locale');
 
         $io = new SymfonyStyle($input, $output);
@@ -176,6 +177,8 @@ class CrawlCommand extends Command
                     continue;
                 }
 
+                $crawlerService->setRoute($link);
+
                 $io->info(sprintf("%s/%d %s%s as %s (from %s)",
                     $link->getRoute(),
                     $link->getVisits(),
@@ -215,7 +218,7 @@ class CrawlCommand extends Command
 
         file_put_contents($outputFilename, json_encode($linksToCrawl, JSON_UNESCAPED_LINE_TERMINATORS + JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
         $io->success(sprintf("File $outputFilename written with %d usernames", count($linksToCrawl)));
-
+        
         $table = new Table($output);
         $table->setHeaders(['route','visits']);
         foreach ($crawlerService->getRouteVisits() as $routeName=>$visits) {

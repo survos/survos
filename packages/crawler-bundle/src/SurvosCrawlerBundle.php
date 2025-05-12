@@ -64,6 +64,7 @@ class SurvosCrawlerBundle extends AbstractBundle
             ->setArgument('$linkList', [])
             ->setArgument('$username', "")
             ->setArgument('$maxDepth', $config['max_depth'])
+            ->setArgument('$maxVisits', $config['max_per_route'])
 //            ->setArgument('$tokenStorage', new Reference('security.untracked_token_storage'))
             ->setArgument('$routesToIgnore', $config['routes_to_ignore'])
             ->setArgument('$pathsToIgnore', $config['paths_to_ignore'])

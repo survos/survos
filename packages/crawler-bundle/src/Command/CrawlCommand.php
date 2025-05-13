@@ -136,6 +136,8 @@ class CrawlCommand extends Command
 
         $crawlerService->resetLinkList();
 
+        $routesToIgnore = $this->crawlerService->getRoutesToIgnore();
+       
         // start with null, so that it is logged out.  Otherwise, it gets the last user!  BUG
         foreach ([null, ...$usernames] as $username) {
             //        foreach ($usernames as $user) {
@@ -149,6 +151,9 @@ class CrawlCommand extends Command
             $routes = RoutesExtractor::extractRoutesFromRouter($this->router);
 
             foreach ($routes as $route) {
+                if (in_array($route["routeName"], $routesToIgnore)) {
+                    continue;
+                }
                 $link = $crawlerService->addLink($username, $route["routePath"]);
             }
 

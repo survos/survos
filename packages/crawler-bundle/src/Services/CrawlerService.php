@@ -76,6 +76,11 @@ class CrawlerService
         return $this->routeVisits;
     }
 
+    public function getRoutesToIgnore(): array
+    {
+        return $this->routesToIgnore;
+    }
+
     public function getConfig(): array
     {
         return $this->config;
@@ -205,7 +210,7 @@ class CrawlerService
 
     public function scrape(Link $link, int $depth = 0): ?Link
     {
-
+        
         //        $this->logger->info("Scraping " . $link->getPath());
         $link->setSeen(true);
 
@@ -228,8 +233,6 @@ class CrawlerService
 
         assert($link->getRoute(), "missing route");
 
-        // var_dump($this->maxVisits);
-        // var_dump($link->getVisits());
         
         if  ($link->getVisits() >= $this->maxVisits) {
             return $link;

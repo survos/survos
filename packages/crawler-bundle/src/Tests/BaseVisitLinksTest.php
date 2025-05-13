@@ -62,12 +62,12 @@ class BaseVisitLinksTest extends WebTestCase
         return $client;
     }
 
-//    #[DataProvider('linksToVisit')]
+    #[DataProvider('linksToVisit')]
     #[TestDox('$username $url should return $expected')]
     public function testWithLogin(?string $username, string $url, int|string|null $expected): void
     {
         static $users = [];
-        assert(is_int($expected), $expected);
+//        assert(is_int($expected), $expected);
 
         $browser = $this->browser();
 //        $client = static::createClient();

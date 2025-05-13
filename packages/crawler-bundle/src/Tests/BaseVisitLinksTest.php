@@ -62,9 +62,9 @@ class BaseVisitLinksTest extends WebTestCase
         return $client;
     }
 
-    #[DataProvider('linksToVisit')]
-    #[TestDox('$username $url should return $expected')]
-    public function testWithLogin(?string $username, string $url, int|string|null $expected): void
+//    #[DataProvider('linksToVisit')]
+//    #[TestDox('$username $url should return $expected')]
+    public function loginAsUserAndVisit(?string $username, string $url, int|string|null $expected): void
     {
         static $users = [];
 //        assert(is_int($expected), $expected);

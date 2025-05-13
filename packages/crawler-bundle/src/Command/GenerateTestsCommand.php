@@ -96,7 +96,7 @@ final class GenerateTestsCommand extends Command
             $method->addParameter('expected')->setType('string|int|null');
 //        public function testRoute(string $method, string $url, string $route): void
             $method->setBody(<<<'END'
-        parent::testWithLogin($username, $url, (int)$expected);
+        parent::loginAsUserAndVisit($username, $url, (int)$expected);
 
 END
             );

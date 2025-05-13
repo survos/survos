@@ -33,16 +33,16 @@ class SurvosMeiliAdminBundle extends AbstractBundle
         ;
         $container->services()->alias(MeiliService::class,$id);
 
-        // we don't need both controllers!
-//        $builder->autowire(MeiliAdminController::class)
-//            ->addTag('container.service_subscriber')
-//            ->addTag('controller.service_arguments')
-//            ->setArgument('$coreName', $config['core_name'])
-//            ->setArgument('$meili', new Reference('meili_service')) // @todo: move from api to meiliadmin
-//            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-//            ->setAutoconfigured(true)
-//            ->setPublic(true)
-//        ;
+        // we don't need both controllers!  But we do anyway, a mess
+        $builder->autowire(MeiliAdminController::class)
+            ->addTag('container.service_subscriber')
+            ->addTag('controller.service_arguments')
+            ->setArgument('$coreName', $config['core_name'])
+            ->setArgument('$meili', new Reference('meili_service')) // @todo: move from api to meiliadmin
+            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+        ;
 
         $builder->autowire(MeiliController::class)
             ->addTag('container.service_subscriber')

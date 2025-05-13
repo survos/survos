@@ -43,26 +43,30 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         private ?EventDispatcherInterface $eventDispatcher = null,
         private ?MessageBusInterface $bus = null,
         private ?EntityManagerInterface $entityManager = null,
+        private ?ManagerRegistry $doctrine=null,
         #[Autowire('%env(DEFAULT_TRANSPORT)%')] private ?string $defaultTransport = null,
     ) {
         parent::__construct();
     }
 
     public function __invoke(
-                SymfonyStyle                                                                                $io,
-                #[Argument(description: 'class name')] ?string                  $className = null,
+        SymfonyStyle                                                                                $io,
+        #[Argument(description: 'class name')] ?string                  $className = null,
         # to override the default
-        #[Option(description: 'message transport')] ?string $transport = null,
-        #[Option(description: 'workflow transition')] ?string $transition = null,
-        #[Option(name: 'worflow', description: 'workflow (if multiple on class)')] ?string $workflowName = null,
+
+        // these used to be nullable!!
+        #[Option(description: 'message transport')] string $transport = '',
+        #[Option(description: 'workflow transition')] string $transition = '',
+        #[Option(description: 'workflow marking')] string $marking = '',
+        #[Option(name: 'worflow', description: 'workflow (if multiple on class)')] string $workflowName = '',
         // marking CAN be null, which is why we should set it when inserting
-        #[Option(description: 'workflow marking')] ?string $marking = null,
-        #[Option(description: 'tags (for listeners)')] ?string $tags = null,
-        #[Option(name: 'index', description: 'grid:index after flush?')] ?bool $indexAfterFlush = false,
-        #[Option(description: 'show stats only')] ?bool $stats = false,
+        #[Option(description: 'tags (for listeners)')] string $tags = '',
+        #[Option] string $dump = '',
+
+        #[Option(name: 'index', description: 'grid:index after flush?')] bool $indexAfterFlush = false,
+        #[Option(description: 'show stats only')] bool $stats = false,
         #[Option] int $limit = 0,
         #[Option(description: "use this count for progressBar")] int $count = 0,
-        #[Option] string $dump = '',
     ): int {
         $transport ??= $this->defaultTransport;
 
@@ -89,23 +93,38 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
             $metaData = Metadata::for($className); // ['track' => true, 'identifier' => 'getId'] (alternatively, fetch metadata by a class' alias)
             $className = Alias::classFor($className);
         }
+
+
         /** @var QueryBuilderHelperInterface $repo */
         $repo = $this->entityManager->getRepository($className);
-        if ($stats) {
-            $counts = $repo->getCounts('marking');
-            $table = new Table($io->output());
-            $table->setHeaderTitle($className);
-            $table->setHeaders(['marking', 'count', 'Available Transitions']);
-            foreach ($counts as $name => $count) {
-                $table->addRow([$name, $count, '@todo']);
-            }
-            $table->render();
-            return self::SUCCESS;
-        }
-
+//        dd($this->workflowHelperService->getWorkflowsGroupedByClass());
         if ($workflowName = $this->workflowHelperService->getWorkflowsGroupedByClass()[$className][0]) {
             $workflow = $this->workflowHelperService->getWorkflowByCode($workflowName);
             $places = $workflow->getDefinition()->getPlaces();
+
+            $availableTransitions=[];
+            foreach ($workflow->getDefinition()->getTransitions() as $t) {
+                foreach ($t->getFroms() as $from) {
+                    $availableTransitions[$from][] = $t->getName();
+                }
+            }
+//        $transitions = array_filter(array_unique(array_map(fn(Transition $transition) =>
+//        in_array($marking, $transition->getFroms()) ? $transition->getName() : null,
+//            )));
+            if ($stats) {
+                $counts = $repo->getCounts('marking');
+                $table = new Table($io);
+                $table->setHeaderTitle($className);
+                $table->setHeaders(['marking', 'count', 'Available Transitions']);
+                foreach ($counts as $name => $count) {
+                    $table->addRow([$name, $count, join(', ', $availableTransitions[$name]??[])]);
+                }
+                $table->render();
+                return self::SUCCESS;
+            }
+
+
+
             if ($marking) {
                 $places = array_values($workflow->getDefinition()->getPlaces());
                 foreach (explode(',', $marking) as $m) {
@@ -148,7 +167,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         if (!$count) {
             $count = $repo->count(criteria: $where);
             if (!$count) {
-                $this->io()->warning("No items found for " . json_encode($where));
+                $io->warning("No items found for " . json_encode($where));
                 return self::SUCCESS;
             }
         }

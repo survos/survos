@@ -65,8 +65,6 @@ class GeneratorService
 
     ): PhpNamespace
     {
-
-
         if (empty($namespace)) {
             $namespace = 'App\\Controller';
         }
@@ -91,6 +89,7 @@ class GeneratorService
         if ($classRoute) {
             $class->addAttribute(Route::class, [$classRoute]);
         }
+        // this is for entities only
 //            ->addImplement(RouteParametersInterface::class) // will be simplified to A
 //            ->addTrait(RouteParametersTrait::class); // will be simplified to AliasedClass
 

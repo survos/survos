@@ -166,7 +166,8 @@ class SurvosGraphVizDumper extends GraphvizDumper
 
         foreach ($transitions as $i => $place) {
             if ($withMetadata) {
-                $escapedLabel = \sprintf('<<B>%s</B><SUP>1</SUP>%s>', $this->escape($place['name']), $this->addMetadata($place['metadata']));
+//                $escapedLabel = \sprintf('<<B>%s</B><SUP>1</SUP>%s>', $this->escape($place['name']), $this->addMetadata($place['metadata']));
+                $escapedLabel = \sprintf('<<B>%s</B>%s>', $this->escape($place['name']), $this->addMetadata($place['metadata']));
             } else {
                 $escapedLabel = '"'.$this->escape($place['name']).'"';
             }
@@ -354,6 +355,10 @@ class SurvosGraphVizDumper extends GraphvizDumper
             } else {
                 switch ($key) {
                     case 'guard':
+
+                        $value = preg_replace('/\.(is|has)/', '.', $value);
+                        $value = str_replace('()', '', $value);
+                        $value = str_replace('subject.', '', $value);
                         if (preg_match('|is_granted\(" ?(.*?)" ?\)|', $value, $matches)) {
                             $value = str_replace($matches[0], $matches[1], $value);
 //                            $value =

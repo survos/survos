@@ -898,7 +898,7 @@ class PixieImportService
                             keys: $table->getTranslatable()
                         ));
 //
-//                    dd($rowObj, $trEvent->translationModels);
+                    dd($rowObj, $trEvent->translationModels);
 
 //                            dd($event->translationModels, $tKv->getSelectedTable());
                     // this populates the source table of the translation database,

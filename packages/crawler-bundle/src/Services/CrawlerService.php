@@ -210,7 +210,7 @@ class CrawlerService
 
     public function scrape(Link $link, int $depth = 0): ?Link
     {
-        
+
         //        $this->logger->info("Scraping " . $link->getPath());
         $link->setSeen(true);
 
@@ -231,9 +231,9 @@ class CrawlerService
 
         $this->setRoute($link);
 
-        assert($link->getRoute(), "missing route");
+        assert($link->getRoute(), "missing route " . json_encode($link));
 
-        
+
         if  ($link->getVisits() >= $this->maxVisits) {
             return $link;
         }

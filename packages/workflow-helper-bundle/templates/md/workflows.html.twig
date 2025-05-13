@@ -6,7 +6,9 @@ Markdown for {{ workflowName }}
 
 {% for code, x in e %}
 
-## {{ type }}.{{ code }}
+## {{ code }} -- {{ type }}
+
+{#{{ e|json_encode }}#}
 
 {% for a in x %}
 ```php
@@ -15,9 +17,5 @@ Markdown for {{ workflowName }}
 {{ a.link }}
         {% endfor %}
 
-    {% endfor %}
-{#        {% for x, event in e %}#}
-{#{{ e.link }}#}
-{#{% endfor %}#}
-
+{% endfor %}
 {%- endfor -%}

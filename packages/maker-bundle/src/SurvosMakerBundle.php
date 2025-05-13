@@ -76,10 +76,12 @@ class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        foreach ([MakeMenu::class, MakeService::class,
+        foreach (
+            [MakeMenu::class, MakeService::class,
                      MakeMethod::class,
                      MakeInvokableCommand::class,
-                     MakeModel::class] as $makerClass) {
+                     MakeModel::class] as $makerClass
+        ) {
             $definition = $builder->autowire($makerClass)
                 ->addTag('maker.command')
 //                ->addTag(MakeCommandRegistrationPass::MAKER_TAG) // 'maker.command'
@@ -185,7 +187,6 @@ class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
             ->setArgument('$propertyAccessor', new Reference('property_accessor'))
             ->setArgument('$twig', new Reference('twig'))
         ;
-
     }
 
     public function configure(DefinitionConfigurator $definition): void

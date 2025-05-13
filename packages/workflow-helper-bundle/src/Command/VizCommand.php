@@ -124,7 +124,6 @@ EOF
 //            dd(wf: $workflowName, action: $action, transition: $transition);//, $parts, $code);
 
                 foreach ($events as $e) {
-                    dump($e);
                     $reflectionMethod = new \ReflectionMethod($e->class, $e->name);
                     // hack to only get App Events, not the Symfony Events (in vendor)
                     if (!str_starts_with($e->class, 'App')) {
@@ -164,8 +163,8 @@ EOF
                 'events' => $events,
                 'workflowName' => $wf,
             ]);
-            file_put_contents(sprintf('doc/%s.md', $wf), $md);
-            dump($md);
+            file_put_contents($fn = sprintf('doc/%s.md', $wf), $md);
+            $output->writeln(sprintf('<info>%s</info>', $fn));
         }
 
         return self::SUCCESS;

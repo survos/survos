@@ -2,6 +2,7 @@
 
 namespace Survos\CodeBundle\Command;
 
+use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\Type;
@@ -29,6 +30,9 @@ use function Symfony\Component\String\u;
 //
 final class MakeConstructor
 {
+    private PhpNamespace $phpNamespace;
+    private ClassType $phpClass;
+    private Method $constructorMethod;
     public function __construct(
         private GeneratorService $generatorService,
         #[Autowire('%kernel.project_dir%')] private string $projectDir,
@@ -58,8 +62,11 @@ final class MakeConstructor
                 default => throw new \Exception("namespace must be explicitly passed.")
             };
         }
+        $this->phpNamespace = new PhpNamespace($namespace);
 
         $class = $namespace.'\\'.$shortClassName;
+//        $this->phpClass = $this->phpNamespace->addClass($class);
+//        $this->constructorMethod = $this->phpClass->addMethod('__construct');
 
         // fetch the existing dependencies
         $method  = (new \ReflectionClass($class))->getMethod('__construct');
@@ -107,12 +114,15 @@ final class MakeConstructor
 
     private function updateConstructor(SymfonyStyle $io, string $var, string $type): mixed
     {
+        $this->phpNamespace->addUse($type);
+        // we have the namespace already, we just want to update the constructor and add the type to $use
         //
         $method = new Method('__construct');
 
         $parameter = $method->addPromotedParameter($var, null);
         $parameter->setVisibility('private');
         $parameter->setType($type);
+//        $this->phpClass->addMethod($method);
         // for workflow only.
 //        $parameter->addAttribute(Target::class, []);
         $io->writeln((string)$method);

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Survos\CodeBundle\Service;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\Type;
+use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,9 +26,26 @@ class GeneratorService
     //    private PropertyAccessor $propertyAccessor;
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $projectDir,
+        private ?ManagerRegistry $doctrine=null,
+        #[AutowireIterator('workflow.state_machine')] private iterable $workflows,
+        #[AutowireIterator('doctrine.repository_service')] private iterable $repositories,
     )
     {
     }
+
+    public function getWorkflows(): iterable
+    {
+        foreach ($this->workflows as $workflow) {
+            yield $workflow->getName();
+        }
+    }
+    public function getRepositories(): iterable
+    {
+        foreach ($this->repositories as $repository) {
+            yield $repository::class;
+        }
+    }
+
 
     public static function namespaceToPath(string $namespace, string $projectDir): ?string
     {
@@ -91,6 +111,22 @@ class GeneratorService
         return $namespace;
 
     }
+
+    public function getAllDoctrineEntitiesFqcn(): array
+    {
+        $entitiesFqcn = [];
+        foreach ($this->doctrine->getManagers() as $entityManager) {
+            $classesMetadata = $entityManager->getMetadataFactory()->getAllMetadata();
+            foreach ($classesMetadata as $classMetadata) {
+                $entitiesFqcn[] = $classMetadata->getName();
+            }
+        }
+
+        sort($entitiesFqcn);
+
+        return $entitiesFqcn;
+    }
+
 
 
     public function addMethod(ClassType $class,

@@ -4,6 +4,7 @@ namespace Survos\CodeBundle\Command;
 
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\Type;
+use Survos\CodeBundle\Service\GeneratorService;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -25,6 +26,7 @@ final class MakeCommand
 {
 
     public function __construct(
+        private GeneratorService $generatorService,
 //        #[Autowire('%kernel.project_dir%/src/Command')]
         private string $projectDir,
     )

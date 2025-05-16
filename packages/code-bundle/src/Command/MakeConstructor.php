@@ -2,10 +2,12 @@
 
 namespace Survos\CodeBundle\Command;
 
+use Nette\PhpGenerator\ClassManipulator;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\Type;
+use Psr\Log\LoggerInterface;
 use Survos\Bundle\MakerBundle\Service\MakerService;
 use Survos\CodeBundle\Service\GeneratorService;
 use Symfony\Bridge\Twig\Attribute\Template;
@@ -101,12 +103,25 @@ final class MakeConstructor
         assert(file_exists($filename), "File $filename does not exist");
         //dd($filename);
 
-        // $class = Nette\PhpGenerator\ClassType::from(LoadCommand::class, withBodies: true);
-        // $class->addMethod('foo')
-        //     ->setReturnType('string')
-        //     ->setBody('return "bar";');
-        
-        // dump((string)$class);
+
+        $phpClass = ClassType::from($class, withBodies: true);
+        $constructor = $phpClass->getMethod('__construct');
+        $constructor->addParameter('logger', LoggerInterface::class);
+        foreach ($constructor->getParameters() as $name => $param) {
+            dump($name, $param);
+        }
+        dd((string)$constructor);
+        // create a new namespace and add the uses from the old
+        // one.
+        $phpClass->addMethod('foo')
+             ->setReturnType('string')
+             ->setBody('return "bar";');
+
+
+        $manipulator = new ClassManipulator($phpClass);
+
+
+        dd((string)$phpClass);
 
 
        

@@ -46,6 +46,8 @@ use PhpParser\Node\Stmt\Expression;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\UseUse;
 
+use Kdyby\ParseUseStatements\ParseUseStatements;
+
 // removed until nullable string options are allowed again
 #[AsCommand('survos:make:constructor', 'inject dependencies into a constructor')]
 // class must exist before the method.
@@ -110,7 +112,7 @@ final class MakeConstructor
         foreach ($constructor->getParameters() as $name => $param) {
             dump($name, $param);
         }
-        dd((string)$constructor);
+        //dd((string)$constructor);
         // create a new namespace and add the uses from the old
         // one.
         $phpClass->addMethod('foo')
@@ -120,8 +122,14 @@ final class MakeConstructor
 
         $manipulator = new ClassManipulator($phpClass);
 
+        //get the namespace use statements
+        $php_code = file_get_contents($filename);
+        $parser = new ParseUseStatements($php_code);
+        $useStatements = $parser->getUseStatements();
+        dd($useStatements);
 
-        dd((string)$phpClass);
+
+        //dd((string)$phpClass);
 
 
        

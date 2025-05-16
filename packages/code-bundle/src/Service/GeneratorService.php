@@ -46,6 +46,23 @@ class GeneratorService
         }
     }
 
+    public function classToPath(string $className, string $projectDir): ?string
+    {
+        $x = include $projectDir . "/vendor/composer/autoload_psr4.php";
+        $result = null;
+        $parts = explode('\\', $className);
+        $paths = [];
+        do {
+            $className = join('\\', $parts);
+            if (array_key_exists($className . '\\', $x)) {
+                array_unshift($paths, $x[$className . '\\'][0]);
+                return join('/', $paths);
+            } else {
+                array_unshift($paths, array_pop($parts));
+            }
+        } while (!$result && count($parts));
+        return null;
+    }
 
     public static function namespaceToPath(string $namespace, string $projectDir): ?string
     {

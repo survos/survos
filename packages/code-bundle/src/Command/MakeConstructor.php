@@ -101,6 +101,14 @@ final class MakeConstructor
         assert(file_exists($filename), "File $filename does not exist");
         //dd($filename);
 
+        // $class = Nette\PhpGenerator\ClassType::from(LoadCommand::class, withBodies: true);
+        // $class->addMethod('foo')
+        //     ->setReturnType('string')
+        //     ->setBody('return "bar";');
+        
+        // dump((string)$class);
+
+
        
     
 //        $this->phpClass = $this->phpNamespace->addClass($class);

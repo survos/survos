@@ -26,6 +26,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use function Symfony\Component\String\u;
 
+use Nette\PhpGenerator\PsrPrinter;
+
+
 use PhpParser\ParserFactory;
 use PhpParser\BuilderFactory;
 use PhpParser\PrettyPrinter\Standard;
@@ -47,6 +50,7 @@ use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\UseUse;
 
 use Kdyby\ParseUseStatements\ParseUseStatements;
+use Nette\PhpGenerator\PhpFile;
 
 // removed until nullable string options are allowed again
 #[AsCommand('survos:make:constructor', 'inject dependencies into a constructor')]
@@ -56,6 +60,8 @@ final class MakeConstructor
 {
     private PhpNamespace $phpNamespace;
     private ClassType $phpClass;
+    private string $className;
+    private string $FqClassName;
     private Method $constructorMethod;
     //filename
     private string $filename;
@@ -92,9 +98,11 @@ final class MakeConstructor
 
         $class = $namespace.'\\'.$shortClassName;
 
+        $this->FqClassName = $class;
+
         $path = $this->generatorService->namespaceToPath($namespace, $this->projectDir);
          
-        
+        $this->className = $shortClassName;
         $filename = $path . '/' . $shortClassName . '.php';
         $this->filename = $filename;
         // foreach (explode(':', $filename) as $part) {
@@ -107,31 +115,31 @@ final class MakeConstructor
 
 
         $phpClass = ClassType::from($class, withBodies: true);
+        //$this->phpClass = $phpClass;
         $constructor = $phpClass->getMethod('__construct');
-        $constructor->addParameter('logger', LoggerInterface::class);
+        //make sure method __construct exists
+        if (!$constructor) {
+            $constructor = $phpClass->addMethod('__construct');
+        }
+        //$constructor->addParameter('logger', LoggerInterface::class);
+        $constructor->addPromotedParameter('logger')
+            ->setType(LoggerInterface::class)
+            ->setPrivate()
+            ->setReadonly();
         foreach ($constructor->getParameters() as $name => $param) {
-            dump($name, $param);
+            //dump($name, $param);
         }
         //dd((string)$constructor);
         // create a new namespace and add the uses from the old
         // one.
-        $phpClass->addMethod('foo')
-             ->setReturnType('string')
-             ->setBody('return "bar";');
+        // $phpClass->addMethod('foo')
+        //      ->setReturnType('string')
+        //      ->setBody('return "bar";');
 
 
-        $manipulator = new ClassManipulator($phpClass);
+        //$manipulator = new ClassManipulator($phpClass);
 
-        //get the namespace use statements
-        $php_code = file_get_contents($filename);
-        $parser = new ParseUseStatements($php_code);
-        $useStatements = $parser->getUseStatements();
-        dd($useStatements);
-
-
-        //dd((string)$phpClass);
-
-
+    
        
     
 //        $this->phpClass = $this->phpNamespace->addClass($class);
@@ -169,7 +177,7 @@ final class MakeConstructor
             iterator_to_array($this->generatorService->getRepositories())));
         // of course, it shouldn't be $repo, but rather based on the class name,
 
-        $this->updateConstructorFile($io, 'repo', $entityClass); //
+        $this->updateConstructorHybrid($io, 'repo', $entityClass); //
         // $io->warning("@todo: add the entity to the Uses and the repo to the constructor for " . $entityClass);
         return [];
     }
@@ -299,6 +307,131 @@ final class MakeConstructor
         return $newCode;
     }
 
+    private function updateConstructorHybrid(SymfonyStyle $io, string $var, string $type): mixed
+    {
+        //we ll recreate the php class and all the file content with minimized effort
+        
+        //init the file using the generator service
+        //init file / class namespace
+        $namespace = new PhpNamespace($this->phpNamespace->getName());
+
+        //print : showing use statements
+        //$io->writeln("use statements:");
+        //extract use statements from existing file
+
+        $code = file_get_contents($this->filename);
+        $parser = (new ParserFactory)->createForNewestSupportedVersion();
+        $ast = $parser->parse($code);
+
+        //$injectedVar = 'logger';
+        $injectedVar = $var;
+        //$injectedType = 'Psr\Log\LoggerInterface';
+        $injectedType = $type;
+        //$shortType = 'LoggerInterface'; // used in type hint, use() will handle import
+        $shortType = (new \ReflectionClass($type))->getShortName();
+
+        $traverser = new NodeTraverser();
+        
+        $useStatements = [];
+        $collector = new UseCollector();
+        // Collect use statements into $useStatements array
+        $traverser->addVisitor(new class($collector) extends NodeVisitorAbstract {
+
+            public function __construct(private UseCollector $collector)
+            {
+                
+            }
+
+            public function enterNode(Node $node)
+            {
+                if ($node instanceof Use_) {
+                    foreach ($node->uses as $use) {
+                        $this->collector->useStatements[] = $use->name->toString();
+                    }
+                }
+                //return $this->useStatements;
+            }
+        });
+
+        $modifiedAst = $traverser->traverse($ast);
+
+        //dd($collector->useStatements);
+        //add the use statements to the namespace
+        foreach ($collector->useStatements as $use) {
+            $namespace->addUse($use);
+            //$io->writeln($use);
+        }
+
+        //prepare the class
+        //$class = $namespace->addClass($this->className);
+        $class = ClassType::from($this->FqClassName, withBodies: true);
+        //extract class arttributes (#[AsCommand('app:load', 'Load the chijal data')])
+        $attributesCollector = new AttributesCollector();
+        $traverser = new NodeTraverser;
+
+        $traverser->addVisitor(new class($attributesCollector) extends NodeVisitorAbstract {
+            public function __construct(private AttributesCollector $attributesCollector)
+            {
+                
+            }
+            public function enterNode(Node $node) {
+                if ($node instanceof Node\Stmt\Class_) {
+                    foreach ($node->attrGroups as $attrGroup) {
+                        foreach ($attrGroup->attrs as $attr) {
+                            $attributeName = $attr->name->toString();
+                            $args = [];
+                            foreach ($attr->args as $arg) {
+                                // Try to get the value, fallback to the raw node if not scalar
+                                $args[] = property_exists($arg->value, 'value') ? $arg->value->value : $arg->value;
+                            }
+                            $this->attributesCollector->attributes[] = [
+                                'name' => $attributeName,
+                                'args' => $args,
+                            ];
+                        }
+                    }
+                }
+            }
+        });
+        $traverser->traverse($ast);
+
+        //add the attributes to the class
+        foreach ($attributesCollector->attributes as $attribute) {
+            $class->addAttribute($attribute['name'], $attribute['args']);
+            //$io->writeln($attribute['name']);
+        }
+        //add the constructor if it does not exist
+        $constructor = $class->getMethod('__construct');
+        if (!$constructor) {
+            $constructor = $class->addMethod('__construct');
+        }
+        //add the new parameter to the constructor
+        // $parameter = $constructor->addPromotedParameter($injectedVar, null);
+        // $parameter->setVisibility('private');
+        // $parameter->setType($injectedType);
+        // //add the attribute to the constructor
+        // $parameter->addAttribute(Target::class, []);
+        // //add the use statement to the namespace
+        // $namespace->addUse($injectedType);
+
+        //generate the new code
+        $file = new PhpFile();
+        $file->addNamespace($namespace);
+        //and namespace statement
+
+        $file->setStrictTypes();
+        $file->addClass($class);
+        //$printer = new Standard();
+        //$newCode = $printer->
+        echo (new PsrPrinter)->printFile($file);
+        //show the new code
+        //$io->writeln($newCode);
+        //write the new code to the file
+        //file_put_contents($this->filename, $newCode);
+
+        return null;
+    }
+
     private function workflows(SymfonyStyle $io): mixed
     {
         $entityClass = $io->askQuestion(new ChoiceQuestion("select a workflow class",
@@ -335,4 +468,13 @@ final class MakeConstructor
 
 
 
+}
+
+
+class UseCollector {
+    public array $useStatements = [];
+}
+
+class AttributesCollector {
+    public array $attributes = [];
 }

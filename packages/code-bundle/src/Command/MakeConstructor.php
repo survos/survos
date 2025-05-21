@@ -27,6 +27,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use function Symfony\Component\String\u;
 
 use Nette\PhpGenerator\PsrPrinter;
+use PhpParser\PrettyPrinter;
+
 
 
 use PhpParser\ParserFactory;
@@ -177,7 +179,8 @@ final class MakeConstructor
             iterator_to_array($this->generatorService->getRepositories())));
         // of course, it shouldn't be $repo, but rather based on the class name,
 
-        $this->updateConstructorHybrid($io, 'repo', $entityClass); //
+        //$this->updateConstructorHybrid($io, 'repo', $entityClass); //
+        $this->updateConstructorFile($io, 'repo', $entityClass); // this is the one that works
         // $io->warning("@todo: add the entity to the Uses and the repo to the constructor for " . $entityClass);
         return [];
     }
@@ -299,10 +302,15 @@ final class MakeConstructor
         });
 
         $modifiedAst = $traverser->traverse($ast);
-        $printer = new Standard();
-        $newCode = $printer->prettyPrintFile($modifiedAst);
+        //$printer = new Standard();
+        //$prettyPrinter = new PrettyPrinter\Standard;
+        //$newCode = $prettyPrinter->prettyPrintFile($modifiedAst);
 
-        file_put_contents($this->filename,$newCode);
+        $printer = new CustomPrettyPrinter();
+        $newCode = $printer->prettyPrintFile($modifiedAst);
+        file_put_contents($this->filename, $newCode);
+
+        //file_put_contents($this->filename,$newCode);
 
         return $newCode;
     }
@@ -470,11 +478,46 @@ final class MakeConstructor
 
 }
 
-
 class UseCollector {
     public array $useStatements = [];
 }
 
 class AttributesCollector {
     public array $attributes = [];
+}
+
+class CustomPrettyPrinter extends Standard
+{
+    public function pStmt_ClassMethod(Node\Stmt\ClassMethod $node): string
+    {
+        if ($node->name->toString() === '__construct' && !empty($node->params)) {
+            $params = array_map(fn($param) => $this->p($param), $node->params);
+
+            $paramString = "\n        " . implode(",\n        ", $params) . "\n    ";
+
+            $header = sprintf(
+                '    %s function %s(%s)%s',
+                $this->pModifiers($node->flags),
+                $node->name,
+                $paramString,
+                $node->returnType !== null ? ': ' . $this->p($node->returnType) : ''
+            );
+
+            // Handle body
+            if (is_array($node->stmts)) {
+                if (count($node->stmts) === 0) {
+                    return $header . " {\n    }";
+                } else {
+                    $body = $this->pStmts($node->stmts, true);
+                    // Indent each line of the body
+                    $indentedBody = preg_replace('/^/m', '    ', $body);
+                    return $header . $indentedBody;
+                }
+            } else {
+                return $header . ';';
+            }
+        }
+
+        return parent::pStmt_ClassMethod($node);
+    }
 }

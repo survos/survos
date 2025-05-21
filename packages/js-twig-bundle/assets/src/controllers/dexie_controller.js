@@ -132,6 +132,8 @@ export default class extends Controller {
             // console.warn(`Listening for ${eventName}`);
             // console.warn("Current content: " + this.contentTarget.innerHTML);
             document.addEventListener(eventName, (e) => {
+                console.warn("event %s fired", eventName);
+                console.log(e.detail);
                 //
                 console.log(window.app);
                 // the data comes from the topPage data
@@ -148,6 +150,7 @@ export default class extends Controller {
                         //console.error("window.app or window.app.views is not defined");
                     }
                     console.log(this.queriesValue);
+                    
                     this.renderPage(e.detail.id, this.storeValue);
                     //console.warn(html);
 
@@ -412,15 +415,22 @@ export default class extends Controller {
                 continue;
             }
             if (this.compiledTwigTemplates.hasOwnProperty(value.templateName)) {
-                let entity = window.db[value.store];
+                let entityTable = window.db[value.store];
+                let entity = null;
                 console.error("entity", entity);
                 //check if value has filters
                 if (value.hasOwnProperty('filters')) {
                     const renderedFilters = renderTwigInObject(value.filters, entities);
-                    entity = await entity[value.filterType](renderedFilters).toArray();
+                    entity = await entityTable[value.filterType](renderedFilters).toArray();
                 } else {
                     //just get by id for now
-                    entity = await entity.get(entityId);
+                    entity = await entityTable.get(entityId);
+                    if (!entity) {
+                        const entityIdAsInt = parseInt(entityId, 10);
+                        if (!isNaN(entityIdAsInt)) {
+                            entity = await entityTable.get(entityIdAsInt);
+                        }
+                    }
 
                     title = this.compiledTwigTemplates.hasOwnProperty('title')
                     ? this.compiledTwigTemplates["title"].render({
@@ -464,12 +474,15 @@ export default class extends Controller {
                     .finally((e) => console.log("finally rendered page"));
             }
         }
+        //alert(JSON.stringify(title));
         this.appOutlet.setTitle(title);
         //return to prevent old render
         return;
         //
         store = JSON.parse(store);
         let table = window.db["table"](store.name);
+
+
         table = table.get(key);
         table
             .then((data) => {

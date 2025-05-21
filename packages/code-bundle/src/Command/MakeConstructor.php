@@ -118,41 +118,25 @@ final class MakeConstructor
 
         $phpClass = ClassType::from($class, withBodies: true);
         //$this->phpClass = $phpClass;
-        $constructor = $phpClass->getMethod('__construct');
+        //$constructor = $phpClass->getMethod('__construct');
         //make sure method __construct exists
-        if (!$constructor) {
-            $constructor = $phpClass->addMethod('__construct');
-        }
+        //if (!$constructor) {
+        //    $constructor = $phpClass->addMethod('__construct');
+        //}
         //$constructor->addParameter('logger', LoggerInterface::class);
-        $constructor->addPromotedParameter('logger')
-            ->setType(LoggerInterface::class)
-            ->setPrivate()
-            ->setReadonly();
-        foreach ($constructor->getParameters() as $name => $param) {
-            //dump($name, $param);
-        }
-        //dd((string)$constructor);
-        // create a new namespace and add the uses from the old
-        // one.
-        // $phpClass->addMethod('foo')
-        //      ->setReturnType('string')
-        //      ->setBody('return "bar";');
+        
 
-
-        //$manipulator = new ClassManipulator($phpClass);
-
-    
        
     
 //        $this->phpClass = $this->phpNamespace->addClass($class);
 //        $this->constructorMethod = $this->phpClass->addMethod('__construct');
 
         // fetch the existing dependencies
-        $method  = (new \ReflectionClass($class))->getMethod('__construct');
+        //$method  = (new \ReflectionClass($class))->getMethod('__construct');
         // really only the ones marked as 'private' are injected in the modern way
-        foreach ($method->getParameters() as $name => $param) {
-            $io->writeln(sprintf("%s $%s", $param->getType(), $param->getName()));
-        }
+        // foreach ($method->getParameters() as $name => $param) {
+        //     $io->writeln(sprintf("%s $%s", $param->getType(), $param->getName()));
+        // }
         
         //dd($method);
 
@@ -220,6 +204,21 @@ final class MakeConstructor
                     return null;
                 }
 
+                // If no constructor exists, create one
+                $constructor = new Node\Stmt\ClassMethod('__construct', [
+                    'flags' => Class_::MODIFIER_PUBLIC,
+                    'params' => [
+                        new Param(
+                            var: new Variable($this->var),
+                            type: new Name($this->type),
+                            flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
+                        ),
+                    ],
+                    'stmts' => [],
+                ]);
+
+                $node->stmts[] = $constructor;
+
                 foreach ($node->getMethods() as $method) {
                     if ($method->name->toString() === '__construct') {
                         foreach ($method->params as $param) {
@@ -238,21 +237,6 @@ final class MakeConstructor
                         return null;
                     }
                 }
-
-                // If no constructor exists, create one
-                $constructor = new Node\Stmt\ClassMethod('__construct', [
-                    'flags' => Class_::MODIFIER_PUBLIC,
-                    'params' => [
-                        new Param(
-                            var: new Variable($this->var),
-                            type: new Name($this->type),
-                            flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
-                        ),
-                    ],
-                    'stmts' => [],
-                ]);
-
-                $node->stmts[] = $constructor;
 
                 return null;
             }

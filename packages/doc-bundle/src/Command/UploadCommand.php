@@ -39,7 +39,10 @@ class UploadCommand
 
         $response = $this->httpClient->request('POST', $apiEndpoint, [
             'proxy' => '127.0.0.1:7080',
-            'body' => ['asciicast' => $fileHandle]]);
+            'body' => ['asciicast' => $fileHandle],
+            'verify_peer' => false,
+            'verify_host' => false,
+        ]);
 
         dump($response->getContent());
         $io->success(self::class . " success.");

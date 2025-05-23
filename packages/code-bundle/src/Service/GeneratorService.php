@@ -26,9 +26,9 @@ class GeneratorService
     //    private PropertyAccessor $propertyAccessor;
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $projectDir,
-        private ?ManagerRegistry $doctrine=null,
         #[AutowireIterator('workflow.state_machine')] private iterable $workflows,
         #[AutowireIterator('doctrine.repository_service')] private iterable $repositories,
+        private ?ManagerRegistry $doctrine=null,
     )
     {
     }

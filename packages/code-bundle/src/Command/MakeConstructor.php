@@ -187,58 +187,83 @@ final class MakeConstructor
 
         $traverser = new NodeTraverser();
 
-        // 1. Add the constructor parameter if it doesn't exist
-        $traverser->addVisitor(new class($injectedVar, $shortType) extends NodeVisitorAbstract {
-            private string $var;
-            private string $type;
+        // 1. Add the constructor parameter using the short type for the variable name, ensuring uniqueness
+        $traverser->addVisitor(new class($shortType) extends NodeVisitorAbstract {
+            private string $shortType;
 
-            public function __construct(string $var, string $type)
-            {
-                $this->var = $var;
-                $this->type = $type;
+            public function __construct(string $shortType) {
+            $this->shortType = $shortType;
             }
 
-            public function enterNode(Node $node)
-            {
-                if (!$node instanceof Class_) {
-                    return null;
-                }
-
-                // If no constructor exists, create one
-                $constructor = new Node\Stmt\ClassMethod('__construct', [
-                    'flags' => Class_::MODIFIER_PUBLIC,
-                    'params' => [
-                        new Param(
-                            var: new Variable($this->var),
-                            type: new Name($this->type),
-                            flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
-                        ),
-                    ],
-                    'stmts' => [],
-                ]);
-
-                $node->stmts[] = $constructor;
-
-                foreach ($node->getMethods() as $method) {
-                    if ($method->name->toString() === '__construct') {
-                        foreach ($method->params as $param) {
-                            if ($param->var->name === $this->var) {
-                                return null; // already injected
-                            }
-                        }
-
-                        // Inject parameter
-                        $method->params[] = new Param(
-                            var: new Variable($this->var),
-                            type: new Name($this->type),
-                            flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
-                        );
-
-                        return null;
-                    }
-                }
-
+            public function enterNode(Node $node) {
+            if (!$node instanceof Class_) {
                 return null;
+            }
+
+            // Find existing __construct method
+            $constructor = null;
+            foreach ($node->getMethods() as $method) {
+                if ($method->name->toString() === '__construct') {
+                $constructor = $method;
+                break;
+                }
+            }
+
+            // Collect all parameter variable names to avoid collision
+            $existingVars = [];
+            if ($constructor) {
+                foreach ($constructor->params as $param) {
+                $existingVars[] = $param->var->name;
+                }
+            }
+
+            // Use short type for variable name, lowercased first letter
+            $baseVar = lcfirst($this->shortType);
+            $var = $baseVar;
+            $i = 2;
+            while (in_array($var, $existingVars, true)) {
+                $var = $baseVar . $i;
+                $i++;
+            }
+
+            // If no constructor, create one with the injected param
+            if (!$constructor) {
+                $constructor = new Node\Stmt\ClassMethod('__construct', [
+                'flags' => Class_::MODIFIER_PUBLIC,
+                'params' => [
+                    new Param(
+                    var: new Variable($var),
+                    type: new Name($this->shortType),
+                    flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
+                    ),
+                ],
+                'stmts' => [],
+                ]);
+                // Insert constructor at the top of the class statements
+                array_unshift($node->stmts, $constructor);
+                return null;
+            }
+
+            // Check if parameter already exists with correct type and visibility
+            foreach ($constructor->params as $param) {
+                $isSameVar = $param->var->name === $var;
+                $isSameType = $param->type instanceof Name && $param->type->toString() === $this->shortType;
+                $isPromoted = ($param->flags & (Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY)) === (Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY);
+
+                if ($isSameVar && $isSameType && $isPromoted) {
+                // Already injected correctly
+                return null;
+                }
+            }
+
+            // Otherwise, inject parameter with unique name
+            $constructor->params[] = new Param(
+                var: new Variable($var),
+                type: new Name($this->shortType),
+                flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
+            );
+
+            return null;
             }
         });
 
@@ -480,7 +505,7 @@ class CustomPrettyPrinter extends Standard
             $paramString = "\n        " . implode(",\n        ", $params) . "\n    ";
 
             $header = sprintf(
-                '    %s function %s(%s)%s',
+                '%s function %s(%s)%s',
                 $this->pModifiers($node->flags),
                 $node->name,
                 $paramString,

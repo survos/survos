@@ -62,6 +62,7 @@ class ParameterResolver implements ValueResolverInterface
 //            if (count($lookupParams) > 1) dd($lookupParams);
             if ($entity = $repository->findOneBy($lookupParams)) {
 //                $history[$param] = $entity;
+                dd($entity);
                 return [$entity];
             } else {
                 assert(false);

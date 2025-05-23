@@ -145,11 +145,11 @@ class SurvosMakerBundle extends AbstractBundle implements CompilerPassInterface
 
 
 
-        $builder->autowire(GenerateControllerCommand::class)
-            ->addArgument(new Reference(GeneratorService::class))
-            ->addTag('console.command')
-            ->addTag('container.service_subscriber')
-        ;
+//        $builder->autowire(GenerateControllerCommand::class)
+//            ->addArgument(new Reference(GeneratorService::class))
+//            ->addTag('console.command')
+//            ->addTag('container.service_subscriber')
+//        ;
 
 
         $builder->autowire(MakeCrud::class)

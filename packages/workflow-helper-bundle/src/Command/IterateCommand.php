@@ -68,7 +68,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         #[Option] int $limit = 0,
         #[Option(description: "use this count for progressBar")] int $count = 0,
     ): int {
-        $transport ??= $this->defaultTransport;
+        $transport = $transport ?: $this->defaultTransport;
 
         // inject entities that implement marking interface
 

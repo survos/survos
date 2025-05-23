@@ -24,7 +24,7 @@ class UploadCommand
     public function __invoke(
         SymfonyStyle                                                      $io,
         #[Argument('path to file or directory')] string                   $path,
-        #[Option(name: 'server-url', description: 'api endpoint')] string $apiEndpoint = 'https://showcase.wip/api/asciicasts',
+        #[Option(name: 'server-url', description: 'api endpoint')] string $apiEndpoint = 'https://show.survos.com/api/asciicasts',
     ): int
     {
 
@@ -36,15 +36,17 @@ class UploadCommand
             return Command::FAILURE;
         }
         $fileHandle = fopen($path, 'r');
-
-        $response = $this->httpClient->request('POST', $apiEndpoint, [
-            'proxy' => '127.0.0.1:7080',
-            'body' => ['asciicast' => $fileHandle],
+        $params = [
             'verify_peer' => false,
             'verify_host' => false,
-        ]);
+            'body' => ['asciicast' => $fileHandle]
+        ];
+        if (str_contains($apiEndpoint, '.wip')) {
+            $params['proxy'] = '127.0.0.1:7080';
+        }
 
-        dump($response->getContent());
+        $response = $this->httpClient->request('POST', $apiEndpoint, $params);
+
         $io->success(self::class . " success.");
         return Command::SUCCESS;
     }

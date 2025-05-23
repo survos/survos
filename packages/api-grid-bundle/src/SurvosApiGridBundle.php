@@ -98,17 +98,6 @@ class SurvosApiGridBundle extends AbstractBundle
 //            ->setArgument('$normalizer', new Reference('normalizer'))
             ->addTag('console.command')
         ;
-//        $definition->addMethodCall('setInvokeContainer', [new Reference('container')]);
-
-        $definition = $builder->autowire(ApiIndexCommand::class)
-            ->setAutoconfigured(true)
-            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
-            ->setArgument('$bag', new Reference('parameter_bag'))
-            ->setArgument('$serializer', new Reference('serializer'))
-//            ->setArgument('$normalizer', new Reference('normalizer'))
-            ->addTag('console.command')
-        ;
-
 
         if (class_exists(Environment::class)) {
             $builder

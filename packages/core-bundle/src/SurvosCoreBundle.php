@@ -26,14 +26,14 @@ class SurvosCoreBundle extends AbstractBundle
             ->setAutoconfigured(true)
             ->setAutowired(true);
 
-//        $builder
-//            ->autowire(ParameterResolver::class)
-//            ->setAutoconfigured(true)
-//            ->setAutowired(true)
-//            ->addTag('controller.argument_value_resolver', [
-//                'name' => 'ParameterResolver',
-//                'priority' => 200,
-//            ]);
+        $builder
+            ->autowire(ParameterResolver::class)
+            ->setAutoconfigured(true)
+            ->setAutowired(true)
+            ->addTag('controller.argument_value_resolver', [
+                'name' => 'ParameterResolver',
+                'priority' => 200,
+            ]);
     }
 
     public function configure(DefinitionConfigurator $definition): void

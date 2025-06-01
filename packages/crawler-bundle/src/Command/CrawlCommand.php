@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -141,9 +142,19 @@ class CrawlCommand extends Command
         // start with null, so that it is logged out.  Otherwise, it gets the last user!  BUG
         foreach ([null, ...$usernames] as $username) {
             //        foreach ($usernames as $user) {
-            if ($user = $this->crawlerService->getUser($username)) {
-                $username = $user->getUserIdentifier(); //assert that they're the same?
-                $crawlerService->authenticateClient($user);
+            try {
+                if ($user = $this->crawlerService->getUser($username)) {
+                    $username = $user->getUserIdentifier(); //assert that they're the same?
+                    $crawlerService->authenticateClient($user);
+                }
+            } catch (UserNotFoundException $e) {
+                $io->error(sprintf("User %s not found", $username));
+            } catch (\Exception $e) {
+                dd($e->getMessage(), $e->getTraceAsString(), $e->getPrevious());
+            }
+            if ($username && !$user) {
+                $io->error(sprintf("User %s not found", $username));
+                return Command::FAILURE;
             }
             $this->crawlerService->checkIfCrawlerClient();
             $io->info(sprintf("Crawling %s as %s", $crawlerService->getInitialPath(), $username ?: 'Visitor'));
@@ -395,7 +406,7 @@ At most, <comment>%s</comment> pages will be crawled.', $this->domain, $this->st
      *
      * @author  Joe Sexton <joe@webtipblog.com
      */
-    protected function authenticate($kernel, $client)
+    protected function XXauthenticate($kernel, $client)
     {
         //
         $crawler = $client->request('GET', 'https://github.com/');

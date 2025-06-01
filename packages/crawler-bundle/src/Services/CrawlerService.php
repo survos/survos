@@ -123,7 +123,8 @@ class CrawlerService
             'email' => $username,
         ]);
         if ($username && !$user) {
-            dd("user $username is not in the database");
+            $this->logger->error("user $username is not in the database");
+//            dd("user $username is not in the database");
             throw new UserNotFoundException();
         }
         return $user;

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale|split('_')[0] }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <!-- applied to all survos-mobile -->
+
+    <title>{% block title 'SurvosFw'%}</title>
+
+    {#        <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">#}
+    {% block stylesheets %}
+{#        <link rel="stylesheet" type="text/css" href="{{ asset('bundles/survosFw/style.css') }}" ></link>#}
+    {% endblock %}
+
+    {% block javascripts %}
+        {# perhaps the entry point should be configurable, since it might be mobile_app.  Also, configure if pwa is called #}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
+
+    {% block pwa %}
+    {% endblock %}
+
+</head>
+
+{#    {% set _appController = 'app' %}#}
+{# app_controller handles navigation #}
+<body>
+{#<div id="app" {{ stimulus_controller(_app_sc) }} >#}
+{% block body %}{% endblock %}
+{#</div>#}
+
+{# these are defined by the child page (start.html.twig) #}
+{# {{ block('templates') }} #}
+
+</body>
+</html>

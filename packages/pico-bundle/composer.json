@@ -1,0 +1,28 @@
+{
+  "name": "survos/pico-bundle",
+  "descripion": "light-weight wrapper around picocss library https://picocss.com/",
+  "type": "symfony-bundle",
+  "description": "pico-bundle Bundle",
+  "keywords": ["symfony-ux", "symfony"],
+
+  "license": "MIT",
+  "require": {
+    "php": "^8.3",
+    "symfony/config": "^6.4 || ^7.1",
+    "symfony/dependency-injection": "^6.4 || ^7.1",
+    "symfony/http-kernel": "^6.4 || ^7.1",
+    "twig/twig": "^3.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Survos\\PicoBundle\\": "src/"
+    }
+  },
+  "require-dev": {
+    "symfony/browser-kit": "^6.4 || ^7.1",
+    "symfony/framework-bundle": "^6.4 || ^7.1",
+    "symfony/phpunit-bridge": "^6.4 || ^7.1",
+    "symfony/twig-bundle": "^6.4 || ^7.1",
+    "symfony/var-dumper": "^6.4 || ^7.1"
+  }
+}

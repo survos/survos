@@ -108,18 +108,18 @@ class SheetService
         return $this->googleSheetsApiService->getGoogleSpreadSheets($id);
     }
 
-    public function downloadSheetToLocal(string $sheetId, string $localFilename): array
+    public function downloadSheetToLocal(string $sheetId, string $localFilename, ?string $dataDir): array
     {
 //        dd(get_defined_vars(), $this->aliases);
         $files = [];
-        $dir = $this->dataDir . '/' . $project->getCode();
-        if (!file_exists($dir)) {
-            try {
-                mkdir($dir, 0777, true);
-            } catch (\Exception $exception) {
-                throw new \Exception('Could not create directory ' . $dir . ' ' . $exception->getMessage()) ;
-            }
-        }
+//        $dir = $this->dataDir . '/' . $project->getCode();
+//        if (!file_exists($dir)) {
+//            try {
+//                mkdir($dir, 0777, true);
+//            } catch (\Exception $exception) {
+//                throw new \Exception('Could not create directory ' . $dir . ' ' . $exception->getMessage()) ;
+//            }
+//        }
 
 
         $this->getData($sheetId,

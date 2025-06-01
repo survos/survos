@@ -29,13 +29,13 @@
     "symfony/var-dumper": "^7.2",
     "symfony/console": "^7.3",
     "symfony/routing": "^7.2",
-    "symfony/security-bundle": "^7.3@beta",
+    "symfony/security-bundle": "^7.3",
     "doctrine/orm": "^3.3",
     "halaxa/json-machine": "^1.2",
     "league/csv": "^9.23",
     "survos/workflow-helper-bundle": "^1.5"
   },
-  "minimum-stability": "beta",
+  "minimum-stability": "RC",
   "version": "2.0.0",
   "config": {
     "allow-plugins": {

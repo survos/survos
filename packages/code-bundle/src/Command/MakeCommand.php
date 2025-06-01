@@ -44,15 +44,15 @@ final class MakeCommand
 
     public function __invoke(
         SymfonyStyle                                                           $io,
-        #[Argument(description: 'command name, e.g. app:do-something')] string $name = '',
-        #[Argument(description: 'description')] ?string                        $description = null, // prompt if null
-        #[Option(description: 'overwrite the existing file')] bool             $force = true,
+        #[Argument('command name, e.g. app:do-something')] string $name = '',
+        #[Argument('command description')] ?string                        $description = null, // prompt if null
+        #[Option('overwrite the existing command class')] bool             $force = true,
         #[Option(description: 'add the project dir to the constructor')] bool  $projectDir = false,
         #[Option(description: 'namespace')] string                             $ns = "App\\Command"
     ): int
     {
         if (!class_exists(PhpNamespace::class)) {
-            $io->error("Missing dependency:\n\ncomposer req nette/php-generator");
+            $io->error("Missing dependency:\n\ncomposer require nette/php-generator");
             return Command::FAILURE;
         }
 

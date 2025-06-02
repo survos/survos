@@ -85,6 +85,20 @@ class GeneratorService
 
 
 
+    public function generateService(
+        string $className,
+        string $namespaceName = 'App\\Controller',
+    ) {
+        $namespace = new PhpNamespace($namespaceName);
+        $class = $namespace->addClass($className);
+        $class
+//            ->setExtends(AbstractController::class)
+        ;
+
+        return $namespace;
+
+
+    }
     public function generateController(
         string $controllerName,
         string $namespaceName = 'App\\Controller',

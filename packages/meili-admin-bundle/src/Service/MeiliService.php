@@ -132,11 +132,14 @@ class MeiliService
     }
 
 
-    public function getMeiliClient(): Client
+    public function getMeiliClient(?string $host=null, ?string $apiKey=null): Client
     {
         static $client;
-        if (!$client) {
-            $client = new Client($this->meiliHost, $this->meiliKey, httpClient: $this->httpClient);
+//        if (!$client)
+        {
+            $client = new Client(
+                $host??$this->meiliHost, $apiKey??$this->meiliKey,
+                httpClient: $this->httpClient);
         }
         return $client;
     }

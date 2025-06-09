@@ -28,7 +28,10 @@
 {% block nav %}
 {% endblock %}
 {#<div id="app" {{ stimulus_controller(_app_sc) }} >#}
-{% block body %}{% endblock %}
+<main class="container">
+    {% block body %}
+    {% endblock %}
+</main>
 {#</div>#}
 
 {# these are defined by the child page (start.html.twig) #}

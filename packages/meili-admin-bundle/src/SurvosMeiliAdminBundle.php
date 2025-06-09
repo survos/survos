@@ -2,6 +2,7 @@
 
 namespace Survos\MeiliAdminBundle;
 
+use Survos\MeiliAdminBundle\Command\ListCommand;
 use Survos\MeiliAdminBundle\Controller\MeiliAdminController;
 use Survos\MeiliAdminBundle\Controller\MeiliController;
 use Survos\MeiliAdminBundle\Service\MeiliService;
@@ -43,6 +44,13 @@ class SurvosMeiliAdminBundle extends AbstractBundle
             ->setAutoconfigured(true)
             ->setPublic(true)
         ;
+
+        foreach ([ListCommand::class] as $class) {
+            $builder->autowire($class)
+                ->setPublic(true)
+                ->setAutoconfigured(true)
+                ->addTag('console.command');
+        }
 
         $builder->autowire(MeiliController::class)
             ->addTag('container.service_subscriber')

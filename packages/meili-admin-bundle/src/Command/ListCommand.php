@@ -60,6 +60,17 @@ class ListCommand extends Command
     )
     {
         $client = $this->meiliService->getMeiliClient($host, $apiKey);
+
+        if ($uId === null) {
+            // @todo: make this an "ask", but list size?
+            $io->title('List indexes');
+            /** @var Indexes $index */
+            foreach ($client->getIndexes() as $index) {
+                $io->writeln(sprintf('<info>%s</info>', $index->getUid()));
+            }
+            return;
+        }
+
         dump($host, $apiKey);
         $index = $client->index($uId);
 //        dd($index->getUid());

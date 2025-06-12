@@ -157,6 +157,12 @@ class MeiliService
         }
         return $index;
     }
+    
+    public function getIndexEndpoint(string $indexName): Indexes
+    {
+        return $this->getMeiliClient()->index($indexName);
+        
+    }
 
     public function loadExistingIndexes()
     {

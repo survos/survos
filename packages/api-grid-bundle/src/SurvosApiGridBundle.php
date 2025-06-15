@@ -4,7 +4,6 @@ namespace Survos\ApiGrid;
 
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
-use Survos\ApiGrid\Command\ApiIndexCommand;
 use Survos\ApiGrid\Command\IndexCommand;
 use Survos\ApiGrid\Components\GridComponent;
 use Survos\ApiGrid\Components\ItemGridComponent;
@@ -146,11 +145,11 @@ class SurvosApiGridBundle extends AbstractBundle
         ;
 
         $builder->register(MeiliSearchStateProvider::class)
-            ->setArgument('$meiliSearchFilters',tagged_iterator('meili_search_filter'))
+            ->setArgument('$meiliSearchFilters', tagged_iterator('meili_search_filter'))
             ->setArgument('$meili', new Reference('api_meili_service'))
             ->setArgument('$httpClient',new Reference('httplug.http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setArgument('$meiliHost',$config['meiliHost'])
-            ->setArgument('$meiliKey',$config['meiliKey'])
+//            ->setArgument('$meiliHost',$config['meiliHost'])
+//            ->setArgument('$meiliKey',$config['meiliKey'])
             ->setArgument('$denormalizer', new Reference('serializer'))
             ->addTag('api_platform.state_provider')
             ->setAutowired(true)

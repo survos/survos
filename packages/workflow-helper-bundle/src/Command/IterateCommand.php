@@ -89,7 +89,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         }
 
         $helper = $this->getHelper('question');
-        if (!class_exists($className)) {
+        if (!class_exists($className) && class_exists(Metadata::class)) {
             $metaData = Metadata::for($className); // ['track' => true, 'identifier' => 'getId'] (alternatively, fetch metadata by a class' alias)
             $className = Alias::classFor($className);
         }

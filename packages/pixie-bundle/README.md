@@ -10,7 +10,7 @@ Inspired by https://gist.github.com/sbrl/c3bfbbbb3d1419332e9ece1bac8bb71c and ht
 
 A parallel file with a -translation suffix stores the source strings and translation strings.  The source table is populated during the import process, or with 
 
-The --translate dispatches the requests for translations.  The --index currently MUST happen in pixie translate (not the normal pixie:index) in order for the translations from the translations table populate the regular pixie file (in the _transations block)
+The --translate dispatches the requests for translations.  The --index currently MUST happen in pixie translate (not the normal pixie:index) in order for the translations from the translations table populate the regular pixie file (in the _translations block)
 
 ![img.png](img.png)
 

@@ -369,6 +369,9 @@ class PixieService
             if ($config = $configCache[$pixieCode] ?? null) {
                 $config = StorageBox::fix($config, $this->getTemplates());
             }
+            if (!$config) {
+                return null;
+            }
             // not sure this should be here -- selectConfig is called during migrate, and owner doesn't yet exist
             $owner = $this->pixieEntityManager->getRepository(Owner::class)->find($pixieCode);
             $config->setOwner($owner);

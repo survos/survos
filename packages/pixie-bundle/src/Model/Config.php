@@ -19,12 +19,9 @@ class Config
         public ?Source $source=null,
         private array $files=[],
         /**
-         * @var array<Table>
+         * @var array<string,Table>
          */
         public array $tables=[],
-        /**
-         * @var array<Table>
-         */
         public array $templates=[],
         private ?string $configFilename=null,
         private readonly string $type=self::TYPE_MUSEUM,

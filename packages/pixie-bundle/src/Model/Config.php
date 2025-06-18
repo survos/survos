@@ -20,6 +20,7 @@ class Config
         private array $files=[],
         /**
          * @var array<string,Table>
+//         * @ var Table[]
          */
         public array $tables=[],
         public array $templates=[],

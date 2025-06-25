@@ -31,7 +31,8 @@
         "symfony/http-client": "^6.4 || ^7.1",
         "symfony/asset": "^7.1",
         "illuminate/collections": "^11.33",
-        "alexandre-fernandez/json-translation-bundle": "^1.0"
+        "alexandre-fernandez/json-translation-bundle": "^1.0",
+        "symfony/object-mapper": "^7.3"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.0",

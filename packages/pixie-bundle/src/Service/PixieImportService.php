@@ -40,6 +40,8 @@ use Survos\PixieBundle\Model\Translation;
 use Survos\PixieBundle\StorageBox;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\ObjectMapper\ObjectMapper;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function Symfony\Component\String\u;
@@ -739,7 +741,36 @@ class PixieImportService
             assert($r->getId() === $rowId, "$rowId is not " . $r->getId());
             $this->entityManager->persist($r);
         }
-        $r->setLabel($row[Instance::DB_LABEL_FIELD]);
+
+        // hard-coded hack for testing mapper
+
+        $mapper = new ObjectMapper();
+        $target = 'App\Dto\Cleveland\Obj';
+        // hack to populate missing fields
+        $resolved = new OptionsResolver()
+            ->setDefined(array_keys($row))
+            ->setDefaults(
+            [
+            'meas' => null
+        ], )
+            ->setIgnoreUndefined(true)
+            ->resolve($row);
+        try {
+            $entity = $mapper->map((object)$resolved, $target);
+        } catch (\Exception $e) {
+            dump($e->getMessage());
+            dd($target, $row, $resolved);
+        }
+        dd($entity, $resolved);
+
+        $label = $row[Instance::DB_LABEL_FIELD]??null;
+        if (!$label) {
+            // y
+            $label = 'row ' . $rowId;
+            dump($row, Instance::DB_LABEL_FIELD);
+        }
+        $r->setLabel($label);
+
 
 //        $row = json_encode($row, JSON_FORCE_OBJECT);
         $r->setRaw($row);
@@ -898,7 +929,7 @@ class PixieImportService
                             keys: $table->getTranslatable()
                         ));
 //
-                    dd($rowObj, $trEvent->translationModels);
+//                    dd($rowObj, $trEvent->translationModels);
 
 //                            dd($event->translationModels, $tKv->getSelectedTable());
                     // this populates the source table of the translation database,

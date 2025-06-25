@@ -77,17 +77,19 @@ services:
             - ./.docker/chroma:/data
 
     meilisearch:
-        image: getmeili/meilisearch:v1.15.0-rc.3
+        image: getmeili/meilisearch:v1.15.2
         container_name: 'meilisearch'
         ports:
             - 7700:7700
         volumes:
-            - ./.docker/meili-1.13.3/:/meili_data/
+            - ./.docker/meili-1.15/:/meili_data/
         environment:
 #            - MEILI_MASTER_KEY=MeiliKey
             - MEILI_NO_ANALYTICS=true
             - MEILI_EXPERIMENTAL_DUMPLESS_UPGRADE=true
             - MEILI_TASK_WEBHOOK_URL=http://localhost:8002/meili
+            - MEILI_CONFIG_FILE_PATH=./config.toml
+            - MEILI_HTTP_ALLOWED_ORIGINS='["*"]'
         # ./meilisearch --experimental-contains-filter
 
     redis:

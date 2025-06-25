@@ -284,6 +284,9 @@ final class PixieIndexCommand extends InvokableServiceCommand
             ]), "updateSettings", $settings);
         // wait until the index is set up.
 //        $stats = $this->meiliService->waitUntilFinished($index);
+
+        // add the embedder
+
         return $indexApi;
     }
 

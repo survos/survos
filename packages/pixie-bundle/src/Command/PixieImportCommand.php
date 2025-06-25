@@ -2,7 +2,6 @@
 
 namespace Survos\PixieBundle\Command;
 
-use App\Repository\OwnerRepository;
 use Survos\PixieBundle\Entity\OriginalImage;
 use Survos\PixieBundle\Entity\Str;
 use App\Metadata\ITableAndKeys;
@@ -24,25 +23,23 @@ use Survos\PixieBundle\Event\StorageBoxEvent;
 use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\StorageBox;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Zenstruck\Console\Attribute\Argument;
-use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\InvokableServiceCommand;
-use Zenstruck\Console\IO;
-use Zenstruck\Console\RunsCommands;
-use Zenstruck\Console\RunsProcesses;
 
 #[AsCommand('pixie:import', 'Import csv to Row Entities, a file or directory of files"', aliases: ['import', 'p:imp'])]
-final class PixieImportCommand extends InvokableServiceCommand
+final class PixieImportCommand
 {
-    use RunsCommands;
-    use RunsProcesses;
+    private SymfonyStyle $io;
 
     private bool $initialized = false; // so the event listener can be called from outside the command
     private ?ProgressBar $progressBar=null;
@@ -57,13 +54,16 @@ final class PixieImportCommand extends InvokableServiceCommand
         private EventDispatcherInterface                   $eventDispatcher,
         #[Autowire('%env(SITE_BASE_URL)%')] private string $baseUrl,
         private CoreRepository                             $coreRepository,
+        private PixieImportService $pixieImportService,
         private ImportHandler                              $importHandler,
         private readonly SqliteService                     $sqliteService,
-        private readonly OwnerRepository                   $ownerRepository, private readonly CoreService $coreService, private readonly TableRepository $tableRepository,
+        private readonly CoreService $coreService,
+        private readonly TableRepository $tableRepository,
     )
     {
 
-        parent::__construct();
+        if (0)
+
         $this->setHelp(sprintf(<<<EOL
 import /json files into Row entities with _raw data and label.  
 dispatches PixieImportEvent with _raw
@@ -82,27 +82,27 @@ EOL
     }
 
     public function __invoke(
-        IO                                                                                            $io,
-        PixieService                                                                                  $pixieService,
-        PixieImportService                                                                            $pixieImportService,
-        #[Argument(description: 'config code')] ?string                                               $configCode,
+        SymfonyStyle                                                                                            $io,
+        #[Argument(description: 'config code')] ?string                                               $configCode=null,
         #[Argument(description: 'sub code, e.g. musdig inst id')] ?string                             $subCode = null,
         #[Option(description: 'conf directory, default to directory name of first argument')] ?string $dir = null,
         #[Option(description: "max number of records per table to import")] ?int                      $limit = null,
         #[Option(description: "overwrite records if they already exist")] bool                        $overwrite = false,
-        #[Option(description: "queue 'source' strings in translation db")] ?bool                      $populate = false,
-        #[Option(description: "dispatch translation requests")] ?bool                                 $translate = false,
-        #[Option(description: "persist images to -images.pixie.db (pixie:media?)")] ?bool             $persist = false,
+        #[Option(description: "queue 'source' strings in translation db")] ?bool                      $populate = null,
+        #[Option(description: "dispatch translation requests")] ?bool                                 $translate = null,
+        #[Option(description: "persist images to -images.pixie.db (pixie:media?)")] ?bool             $persist = null,
         #[Option(description: "index after import (default: true)")] ?bool                            $index = null,
-        #[Option(description: "purge db file first")] bool                                            $reset = false,
+        #[Option(description: "purge db file first")] ?bool                                            $reset = null,
         #[Option(description: "Batch size for commit")] int                                           $batch = 500,
         #[Option(description: "total if known (slow to calc)")] int                                   $total = 0,
-        #[Option('start', description: "starting at (offset)")] int                                   $startingAt = 0,
-        #[Option(description: "table search pattern")] string                                         $pattern = '',
+        #[Option("starting at (offset)", name: 'start')] int                                   $startingAt = 0,
+        #[Option(description: "table search pattern")] ?string                                         $pattern = null,
         #[Option(description: 'tags (for listeners)')] ?string                                        $tags = null,
 
     ): int
     {
+        $this->io = $io;
+
         $this->initialized = true;
         // in bash:  export PIXIE_CODE=aust
         $configCode ??= getenv('PIXIE_CODE');
@@ -111,8 +111,15 @@ EOL
         $translate ??= false;
         $index = is_null($index) ? false : $index;
 
+        if (!$configCode) {
+            $configCode = $io->askQuestion(new ChoiceQuestion("Config?",
+                array_keys($this->pixieService->getConfigFiles())));
+        }
+
+        $pixieService = $this->pixieService;
         $config = $pixieService->selectConfig($configCode);
         // make sure the local owner is set.
+
         assert($config, "Missing $configCode");
         $sourceDir = $pixieService->getSourceFilesDir($configCode, subCode: $subCode);
         assert(is_dir($sourceDir), "Invalid source dir: $sourceDir");
@@ -170,7 +177,7 @@ EOL
 
 //        dd($limit, $envLimit);
         // ack, what is the different between createKv and getStorageBox()?
-        $pixieImportService->import($configCode, $subCode, null,
+        $this->pixieImportService->import($configCode, $subCode, null,
             limit: $limit,
             startingAt: $startingAt,
             context: [
@@ -277,7 +284,7 @@ EOL
             $this->pixieEntityManager->getRepository(OriginalImage::class)->count());
         $this->io()->writeln("Translations: " .
             $this->pixieEntityManager->getRepository(Str::class)->count());
-        return self::SUCCESS;
+        return Command::SUCCESS;
     }
 
 
@@ -287,7 +294,7 @@ EOL
         if (!$this->initialized) {
             return;
         }
-        $this->io()->title(sprintf("%s -> %s", $event->filename, $event->pixieDbName));
+        $this->io->title(sprintf("%s -> %s", $event->filename, $event->pixieDbName));
 //        dd($count, $this->total);
         if (!$this->total) {
 

@@ -42,6 +42,8 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\ObjectMapper\ObjectMapper;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use function Symfony\Component\String\u;
@@ -56,6 +58,7 @@ class PixieImportService
         #[Target('pixieEntityManager')]
         private EntityManagerInterface            $entityManager,
         private CoreService                       $coreService,
+        private PropertyAccessorInterface $propertyAccessor,
 //        private ImportHandler                     $importHandler,
         private CoreRepository                    $coreRepository,
         private OriginalImageRepository $originalImageRepository,
@@ -711,6 +714,13 @@ class PixieImportService
         return $row;
     }
 
+    public function mergeObjects(object $a, object $b): object {
+        foreach (get_object_vars($b) as $key => $value) {
+            $a->$key = $value;
+        }
+        return $a;
+    }
+
     /** the one and only place it's add to the database, to core, etc. */
     public function addRow(array|object $row, Table $table, Owner $owner): Row
     {
@@ -744,24 +754,21 @@ class PixieImportService
 
         // hard-coded hack for testing mapper
 
-        $mapper = new ObjectMapper();
-        $target = 'App\Dto\Cleveland\Obj';
-        // hack to populate missing fields
-        $resolved = new OptionsResolver()
-            ->setDefined(array_keys($row))
-            ->setDefaults(
-            [
-            'meas' => null
-        ], )
-            ->setIgnoreUndefined(true)
-            ->resolve($row);
-        try {
-            $entity = $mapper->map((object)$resolved, $target);
-        } catch (\Exception $e) {
-            dump($e->getMessage());
-            dd($target, $row, $resolved);
+        $targetClass = 'App\\Dto\\' . ucfirst($owner->getCode())
+            . '\\' . ucfirst($table->getName());
+        // or use the base class?
+        if (class_exists($targetClass)) {
+            $mapper = new ObjectMapper(propertyAccessor:
+                PropertyAccess::createPropertyAccessorBuilder()->disableExceptionOnInvalidPropertyPath()->getPropertyAccessor());
+            try {
+                $entity = $mapper->map((object)$row, $targetClass);
+            } catch (\Exception $e) {
+                dd($e);
+            }
+            $merged = $this->mergeObjects($entity, (object)$row);
         }
-        dd($entity, $resolved);
+
+//        $entity->json = $row;
 
         $label = $row[Instance::DB_LABEL_FIELD]??null;
         if (!$label) {

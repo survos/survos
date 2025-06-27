@@ -37,7 +37,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 #[AsCommand('pixie:import', 'Import csv to Row Entities, a file or directory of files"', aliases: ['import', 'p:imp'])]
-final class PixieImportCommand
+final class PixieImportCommand extends Command
 {
     private SymfonyStyle $io;
 
@@ -61,8 +61,7 @@ final class PixieImportCommand
         private readonly TableRepository $tableRepository,
     )
     {
-
-        if (0)
+        parent::__construct();
 
         $this->setHelp(sprintf(<<<EOL
 import /json files into Row entities with _raw data and label.  
@@ -156,7 +155,7 @@ EOL
 
         if ($reset) {
             // hmm, how do do this now?  Maybe in migrate?
-            $this->io()->error("Reset is no longer supported.");
+            $this->io->error("Reset is no longer supported.");
             return self::FAILURE;
             $this->pixieService->destroy($pixieDbName);
         }
@@ -173,7 +172,7 @@ EOL
             $limit = $envLimit;
         }
         $this->progressBar = SurvosUtils::createProgressBar($io, $limit ?: $this->total);
-//        $progressBar = SurvosUtils::createProgressBar($this->io(), null);
+//        $progressBar = SurvosUtils::createProgressBar($this->io, null);
 
 //        dd($limit, $envLimit);
         // ack, what is the different between createKv and getStorageBox()?
@@ -258,12 +257,12 @@ EOL
         // this only queues source translations, so unrelated to indexing
         if ($populate) {
             $cli = "pixie:translate --queue $configCode";
-            $this->io()->warning('bin/console ' . $cli);
-            $this->runCommand($cli);
+            $this->io->warning('bin/console ' . $cli);
+//            $this->runCommand($cli);
         }
         if ($translate) {
             $cli = "pixie:translate $configCode";
-            $this->io()->warning('bin/console ' . $cli);
+            $this->io->warning('bin/console ' . $cli);
             $this->runCommand($cli);
         }
 
@@ -271,18 +270,18 @@ EOL
         $locale = $config->getSource()->locale;
         $url = str_replace('https://', 'https://' . $locale . '.', $this->baseUrl);
         $url .= "/$configCode";
-        $this->io()->writeln(sprintf("<href=%s>%s</>", $url, $url));
+        $this->io->writeln(sprintf("<href=%s>%s</>", $url, $url));
 //        $kv->close();
 
         $this->pixieEntityManager->flush();
 
 //        $iKv = $this->eventDispatcher->dispatch(new StorageBoxEvent($configCode, mode: ITableAndKeys::PIXIE_IMAGE))->getStorageBox();
 //        $iKv->select(ITableAndKeys::IMAGE_TABLE);
-//        $this->io()->writeln("Images in iKv: " . $iKv->count(ITableAndKeys::IMAGE_TABLE));
+//        $this->io->writeln("Images in iKv: " . $iKv->count(ITableAndKeys::IMAGE_TABLE));
 
-        $this->io()->writeln("Images in image db: " .
+        $this->io->writeln("Images in image db: " .
             $this->pixieEntityManager->getRepository(OriginalImage::class)->count());
-        $this->io()->writeln("Translations: " .
+        $this->io->writeln("Translations: " .
             $this->pixieEntityManager->getRepository(Str::class)->count());
         return Command::SUCCESS;
     }
@@ -326,8 +325,8 @@ EOL
         }
 
         $count= $count??$this->total??0;
-//        $this->io()->writeln("Init progressBar with " . $count);
-//        $this->progressBar = new ProgressBar($this->io()->output(), $count);
+//        $this->io->writeln("Init progressBar with " . $count);
+//        $this->progressBar = new ProgressBar($this->io->output(), $count);
 //        $this->progressBar->setProgress(0);
 //        $this->progressBar->setFormat(OutputInterface::VERBOSITY_VERBOSE);
 //        $this->progressBar->start();
@@ -353,7 +352,7 @@ EOL
             case $event::PRE_LOAD:
                 if (!empty($this->progressBar)) {
                     $this->progressBar->setMaxSteps($event->context['count']);
-//                    $this->progressBar = new ProgressBar($this->io()->output());
+//                    $this->progressBar = new ProgressBar($this->io->output());
                 }
                 break;
             case $event::LOAD:
@@ -365,7 +364,7 @@ EOL
                 if (($event->index % 1000) == 0) {
 
 //                    dump($this->progressBar->getProgress(), $this->progressBar->getMaxSteps());
-//                    $this->io()->writeln(sprintf("pause %d %d",
+//                    $this->io->writeln(sprintf("pause %d %d",
 //                        $this->progressBar?->getProgress(),
 //                        $this->progressBar?->getMaxSteps()
 //                    ));
@@ -384,7 +383,7 @@ EOL
     public function runIndex(string $pixieCode, ?string $subCode = null): void
     {
         $cli = "pixie:index $pixieCode $subCode";
-        $this->io()->warning('bin/console ' . $cli);
+        $this->io->warning('bin/console ' . $cli);
         $this->runCommand($cli);
     }
 

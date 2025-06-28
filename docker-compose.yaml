@@ -68,13 +68,13 @@ services:
 #    systemctl start meilisearch
 
 #    docker run -v ./chroma-data:/data -p 8000:8000 chromadb/chroma
-    chromadb:
-        image: chromadb/chroma:0.5.0
-        container_name: 'chromadb'
-        ports:
-            - 8000:8000
-        volumes:
-            - ./.docker/chroma:/data
+#    chromadb:
+#        image: chromadb/chroma:0.5.0
+#        container_name: 'chromadb'
+#        ports:
+#            - 8000:8000
+#        volumes:
+#            - ./.docker/chroma:/data
 
     meilisearch:
         image: getmeili/meilisearch:v1.15.2

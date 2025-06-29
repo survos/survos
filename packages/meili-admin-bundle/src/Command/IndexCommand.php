@@ -13,7 +13,9 @@ use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\MeiliAdminBundle\Service\MeiliService;
 use Survos\MeiliAdminBundle\Service\SettingsService;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
@@ -60,30 +62,27 @@ class IndexCommand extends Command
         return $this->settingsService->getFieldsWithAttribute($settings, 'browsable');
     }
 
-    protected function configure(): void
-    {
-        $this
-            ->addArgument('class', InputArgument::OPTIONAL, 'Class to index', null)
-            ->addOption('reset', null, InputOption::VALUE_NONE, 'Reset the indexes')
-            ->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Batch size to meili', 100)
-            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit', 0)
-            ->addOption('filter', null, InputOption::VALUE_REQUIRED, 'filter in yaml format')
-            ->addOption('dump', null, InputOption::VALUE_REQUIRED, 'dump the nth item', 0)
-        ;
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(
+        SymfonyStyle $io,
+        #[Argument("Class name")] ?string $class = null,
+        #[Option("limit")] ?int $limit = null,
+        #[Argument("filter class name")] string $filter='',
+        #[Option("pk")] ?string $pk = null,
+        #[Option("dump")] ?int $dump = null,
+        #[Option("reset the meili index")] ?bool $reset = null,
+        #[Option("batch-size for sending documents to meili", name: 'batch')] int $batchSize = 100,
+    ): int
     {
 
-        $filter = $input->getOption('filter');
         $filterArray = $filter ? Yaml::parse($filter) : null;
-        $class = $input->getArgument('class');
-        if (!$class && !class_exists($class)) {
-            if (class_exists(Alias::class)) {
-                $class = Alias::classFor('user');
-            }
+        if ($class && !class_exists($class)) {
+            $class = "App\\Entity\\$class";
+            //
+//            if (class_exists(Alias::class)) {
+//                $class = Alias::classFor('user');
+//            }
         }
-            $classes = [];
+        $classes = [];
 
 
             // https://abendstille.at/blog/?p=163
@@ -97,7 +96,7 @@ class IndexCommand extends Command
                 // skip if no groups defined
                 if (!$groups = $this->settingsService->getNormalizationGroups($meta->getName())) {
 //                    if ($input->ver) {
-                        $output->writeln("Skipping {$class}: no normalization groups for " . $meta->getName());
+                        $io->writeln("Skipping {$class}: no normalization groups for " . $meta->getName());
 //                    }
                     continue;
                 }
@@ -105,12 +104,12 @@ class IndexCommand extends Command
                 $classes[$meta->getName()] = $groups;
             }
 
-        $this->io = new SymfonyStyle($input, $output);
+        $this->io = $io;
 
         foreach ($classes as $class=>$groups) {
             $indexName = $this->meiliService->getPrefixedIndexName((new \ReflectionClass($class))->getShortName());
             $this->io->title($indexName);
-            if ($reset=$input->getOption('reset')) {
+            if ($reset) {
                 $this->meiliService->reset($indexName);
             }
 
@@ -119,13 +118,14 @@ class IndexCommand extends Command
 
             // pk of meili  index might be different than doctine pk, e.g. $imdbId
             $index = $this->configureIndex($class, $indexName);
-            $batchSize = $input->getOption('batch-size');
 
-            $stats = $this->indexClass($class, $index, batchSize: $batchSize, indexName: $indexName, groups: $groups,
-                limit: $input->getOption('limit'),
-                filter: $input->getOption('filter') ? $filterArray: null,
+            $stats = $this->indexClass($class, $index,
+                batchSize: $batchSize, indexName: $indexName, groups: $groups,
+                limit: $limit??0,
+                filter: $filter ? $filterArray: null,
                 primaryKey: $index->getPrimaryKey(),
-                dump: $input->getOption('dump'),
+                dump: $dump,
+                pk: $pk,
             );
 
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
@@ -194,9 +194,10 @@ class IndexCommand extends Command
                                 array $groups=[],
                                 int $limit=0,
                                 ?array $filter=[],
-                                int $dump=0,
+                                ?int $dump=null,
                                 ?string $primaryKey=null,
                                 ?string $subdomain=null,
+    ?string $pk = null
     ): array
     {
         $startingAt = 0;
@@ -244,6 +245,8 @@ class IndexCommand extends Command
         if ($subdomain) {
             assert($count == 1, "$count should be one for " . $subdomain);
         }
+
+        // where should we get the id from?  ApiProperty(identifier: true)?  #[ORM\Id()]?  $rp?
         foreach ($results as $idx => $r) {
             $count++;
             // @todo: pass in groups?  Or configure within the class itself?
@@ -254,14 +257,21 @@ class IndexCommand extends Command
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
             $data = SurvosUtils::removeNullsAndEmptyArrays($data);
-            assert(array_key_exists('rp', $data), "missing rp in $class\n\n" . join("\n", array_keys($data)));
-            if (!array_key_exists($primaryKey, $data)) {
-                $this->logger->error($msg = "No primary key $primaryKey for " . $class);
-                SurvosUtils::assertKeyExists($primaryKey, $data);
-                assert(false, $msg . "\n" . join("\n", array_keys($data)));
-                return ['numberOfDocuments'=>0];
-                break;
+            if ($pk) {
+                $primaryKey = $pk;
+                $data['id'] = $data[$pk];
             }
+            if (!array_key_exists('rp', $data)) {
+
+            }
+//            assert(array_key_exists('rp', $data), "missing rp in $class\n\n" . join("\n", array_keys($data)));
+//            if (!array_key_exists($primaryKey, $data)) {
+//                $this->logger->error($msg = "No primary key $primaryKey for " . $class);
+//                SurvosUtils::assertKeyExists($primaryKey, $data);
+//                assert(false, $msg . "\n" . join("\n", array_keys($data)));
+//                return ['numberOfDocuments'=>0];
+//                break;
+//            }
             $data['id'] = $data[$primaryKey]; // ??
             if (array_key_exists('keyedTranslations', $data)) {
                 $data['_translations'] = $data['keyedTranslations'];
@@ -278,7 +288,8 @@ class IndexCommand extends Command
 //                $data['language'] = $language;
 //            }
 
-            if ($dump === ($idx+1)) {
+            // @todo: use pk for dump
+            if ($dump && ($dump === ($idx+1))) {
                 dd($data);
             }
 //

@@ -94,6 +94,7 @@ EOL
         #[Option(description: "purge db file first")] ?bool                                            $reset = null,
         #[Option(description: "Batch size for commit")] int                                           $batch = 500,
         #[Option(description: "total if known (slow to calc)")] int                                   $total = 0,
+        #[Option(description: "dump the n-th record and stop")] ?int                                   $dump = null,
         #[Option("starting at (offset)", name: 'start')] int                                   $startingAt = 0,
         #[Option(description: "table search pattern")] ?string                                         $pattern = null,
         #[Option(description: 'tags (for listeners)')] ?string                                        $tags = null,
@@ -183,8 +184,11 @@ EOL
                 'tags' => $tags ? explode(",", $tags) : [],
             ],
             overwrite: $overwrite, pattern: $pattern,
-            callback: function ($row, \Survos\PixieBundle\Model\Table $table, $idx, StorageBox $kv) use ($batch, $limit) {
+            callback: function ($row, \Survos\PixieBundle\Model\Table $table, $idx, StorageBox $kv) use ($batch, $limit, $dump) {
                 $this->progressBar->advance();
+                if ($dump && $idx===$dump) {
+                    dump($row);
+                }
 //                dd($row);
 //                dd($this->progressBar->getProgress(), $this->progressBar->getMaxSteps());
                 // testing only

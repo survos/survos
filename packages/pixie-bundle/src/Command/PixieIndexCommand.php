@@ -410,7 +410,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
             "<fg=white;bg=cyan> %status:-45s%</>\n%current%/%max% [%bar%] %percent:3s%%\n🏁  %estimated:-21s% %memory:21s%"
         );
 
-        $rows = $query->toIterable();
+            $rows = $query->toIterable();
         /** @var Row $row */
         foreach ($progressBar->iterate($rows) as $row) {
 

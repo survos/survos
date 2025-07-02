@@ -715,10 +715,11 @@ class PixieImportService
     }
 
     public function mergeObjects(object $a, object $b): object {
+        $c = (clone $a);
         foreach (get_object_vars($b) as $key => $value) {
-            $a->$key = $value;
+            $c->$key = $value;
         }
-        return $a;
+        return $c;
     }
 
     /** the one and only place it's add to the database, to core, etc. */
@@ -762,10 +763,24 @@ class PixieImportService
                 PropertyAccess::createPropertyAccessorBuilder()->disableExceptionOnInvalidPropertyPath()->getPropertyAccessor());
             try {
                 $entity = $mapper->map((object)$row, $targetClass);
+                dump($entity, $row['object_url'], $targetClass);
             } catch (\Exception $e) {
                 dd($e);
             }
-            $merged = $this->mergeObjects($entity, (object)$row);
+            $merged = (array)$this->mergeObjects($entity, (object)$row);
+            $row = (array)$this->mergeObjects($entity, (object)$row);
+
+            $rawEntity = $this->serializer->normalize(
+                $entity,
+                /* format */ null,
+                /* context */ [
+                    // if you use #[Groups] in your DTO, you can do:
+                    // 'groups' => ['product:read'],
+                ]
+            );
+
+            dd($entity);
+            $r->setRaw($rawEntity);
         }
 
 //        $entity->json = $row;
@@ -778,9 +793,7 @@ class PixieImportService
         }
         $r->setLabel($label);
 
-
 //        $row = json_encode($row, JSON_FORCE_OBJECT);
-        $r->setRaw($row);
 
         // this should be in the RowWorkflow!  here for testing only
 //        assert($owner->getPixieCode(), "missing pixieCode in ".$owner->getCode());

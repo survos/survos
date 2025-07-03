@@ -158,6 +158,7 @@ class IndexCommand extends Command
 //        $classAttributes = $reflection->getAttributes();
 //        $filterAttributes = [];
 //        $sortableAttributes = [];
+
         $settings = $this->settingsService->getSettingsFromAttributes($class);
         $idFields = $this->settingsService->getFieldsWithAttribute($settings, 'is_primary');
         $primaryKey = count($idFields) ? $idFields[0] : 'id';
@@ -184,6 +185,7 @@ class IndexCommand extends Command
                 ],
             ]);
             $stats = $this->meiliService->waitUntilFinished($index);
+            dump($stats, $debug, $filterable, $index->getUid());
         return $index;
     }
 

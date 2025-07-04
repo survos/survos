@@ -1,7 +1,5 @@
 <?php 
 
-// setup a User, need approxCount to determine path structure.
-
 namespace Survos\SaisBundle\Model;
 
 use OpenApi\Attributes as OA;

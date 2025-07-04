@@ -35,3 +35,24 @@ $result = $client->execute('tools/call', [
 ]);
 
 ```
+
+# Adding Models : 
+
+Each model needs OpenApi validation attributes and Symfony validation attributes.
+```php
+use OpenApi\Attributes as OA;
+use Symfony\Component\Validator\Constraints as Assert;
+#[OA\Schema(required: ['root', 'approx'])]
+class AccountSetup
+{
+....
+
+```
+
+Fields validation can be done with Symfony validation attributes:
+
+```php
+#[Assert\NotBlank]
+#[Assert\Length(min: 3, max: 50)]
+#[OA\Property(description: 'The root code that prefixes the file storage', type: 'string', maxLength: 50, minLength: 3, nullable: false)]
+public string $root,

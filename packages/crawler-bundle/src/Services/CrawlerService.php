@@ -256,7 +256,7 @@ class CrawlerService
             $this->routeVisits[$routeName] = 0;
         }
 
-        if  ($this->routeVisits[$routeName] >= $this->maxVisits) {
+        if  ($this->routeVisits[$routeName] > $this->maxVisits) {
             $link->setLinkStatus($link::STATUS_ALREADY_VISITED);
             return $link;
         }

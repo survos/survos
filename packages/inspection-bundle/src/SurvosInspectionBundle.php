@@ -4,6 +4,7 @@ namespace Survos\InspectionBundle;
 
 use Survos\InspectionBundle\Controller\InspectionController;
 use Survos\InspectionBundle\Services\InspectionService;
+use Survos\InspectionBundle\Services\ResourceInspector;
 use Survos\InspectionBundle\Twig\TwigExtension;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -26,6 +27,13 @@ class SurvosInspectionBundle extends AbstractBundle
         $builder->autowire( InspectionService::class)
             ->setArgument('$resourceMetadataCollectionFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory.cached'))
             ->setArgument('$router', new Reference('router'))
+            ->setAutoconfigured(true)
+        ;
+
+        $builder->autowire( ResourceInspector::class)
+            ->setAutoconfigured(true)
+//            ->setArgument('$resourceMetadataCollectionFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory.cached'))
+//            ->setArgument('$router', new Reference('router'))
             ->setAutoconfigured(true)
         ;
 

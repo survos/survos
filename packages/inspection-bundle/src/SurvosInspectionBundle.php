@@ -25,7 +25,8 @@ class SurvosInspectionBundle extends AbstractBundle
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $builder->autowire( InspectionService::class)
-            ->setArgument('$resourceMetadataCollectionFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory.cached'))
+            ->setArgument('$resourceMetadataCollectionFactory',
+                new Reference('api_platform.metadata.resource.metadata_collection_factory.cached', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$router', new Reference('router'))
             ->setAutoconfigured(true)
         ;

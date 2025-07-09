@@ -11,12 +11,15 @@ use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
     class ResourceInspector
 {
     public function __construct(
-        private ResourceNameCollectionFactoryInterface      $resourceNames,
-        private ResourceMetadataCollectionFactoryInterface $metadataFactory
+        private ?ResourceNameCollectionFactoryInterface      $resourceNames=null,
+        private ?ResourceMetadataCollectionFactoryInterface $metadataFactory=null
     ) {}
 
     public function inspect(string $class): void
     {
+        if (!$this->metadataFactory) {
+            throw new \RuntimeException("MetadataFactory not set, run\ncomposer install api-platform/core");
+        }
         // 1. Get all resource classes known to API Platform
         $allResources = $this->resourceNames->create();
 

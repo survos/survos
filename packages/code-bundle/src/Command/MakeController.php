@@ -37,9 +37,9 @@ final class MakeController
         #[Argument(description: 'Controller class name, e.g. App')]
         string $name,
         #[Option(description: 'controller route name (e.g. admin_do_something)', shortcut: 'r')]
-        ?string $routeName = '',
+        ?string $routeName = null,
         #[Option('method name, default to routeName', shortcut: 'm')]
-        ?string $method = '',
+        ?string $method = null,
 
         #[Option(description: 'make an invokable controller', shortcut: 'inv')] // save i for interactive
         bool   $invokable = true,

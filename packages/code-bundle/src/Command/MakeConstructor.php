@@ -2,6 +2,7 @@
 
 namespace Survos\CodeBundle\Command;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Nette\PhpGenerator\ClassManipulator;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
@@ -16,6 +17,7 @@ use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -28,7 +30,6 @@ use function Symfony\Component\String\u;
 
 use Nette\PhpGenerator\PsrPrinter;
 use PhpParser\PrettyPrinter;
-
 
 
 use PhpParser\ParserFactory;
@@ -55,10 +56,10 @@ use Kdyby\ParseUseStatements\ParseUseStatements;
 use Nette\PhpGenerator\PhpFile;
 
 // removed until nullable string options are allowed again
-#[AsCommand('survos:make:constructor', 'inject dependencies into a constructor')]
+#[AsCommand('survos:make:constructor', 'inject dependencies into a constructor', aliases: ['_construct'])]
 // class must exist before the method.
 //
-final class MakeConstructor
+final class MakeConstructor extends BaseMaker
 {
     private PhpNamespace $phpNamespace;
     private ClassType $phpClass;
@@ -67,30 +68,31 @@ final class MakeConstructor
     private Method $constructorMethod;
     //filename
     private string $filename;
-    public function __construct(
-        private GeneratorService $generatorService,
-        #[Autowire('%kernel.project_dir%')] private string $projectDir,
-    )
-    {
-    }
+//    public function __construct(
+//        protected GeneratorService $generatorService,
+//        #[Autowire('%kernel.project_dir%')] protected string $projectDir,
+//    )
+//    {
+//    }
 
     public function __invoke(
-        SymfonyStyle     $io,
+        SymfonyStyle $io,
         #[Argument(description: "filename of the EXISTING class, e.g. TestCommand")]
-        string $shortClassName,
+        string       $shortClassName,
 
         #[Argument(description: "initial category, e.g. em")]
-        ?string $category=null,
+        ?string      $category = null,
 
         #[Option(description: 'namespace to use (detect based on name, e.g. TextCommand = App\\Command)', shortcut: 'ns')]
-        ?string $namespace = null,
+        ?string      $namespace = null,
 
         #[Option(description: "Overwrite the file if it exists")]
-        ?bool   $force = null
+        ?bool        $force = null
     ): int
     {
         if (!$namespace) {
             $namespace = match (true) {
+                str_ends_with($shortClassName, 'Service') => 'App\\Service',
                 str_ends_with($shortClassName, 'Command') => 'App\\Command',
                 str_ends_with($shortClassName, 'Controller') => 'App\\Controller',
                 default => throw new \Exception("namespace must be explicitly passed.")
@@ -98,7 +100,7 @@ final class MakeConstructor
         }
         $this->phpNamespace = new PhpNamespace($namespace);
 
-        $class = $namespace.'\\'.$shortClassName;
+        $class = $namespace . '\\' . $shortClassName;
 
         $this->FqClassName = $class;
 
@@ -124,50 +126,11 @@ final class MakeConstructor
                 $class = $existingClass;
                 break;
             }
-//            dd($className, $existingClass);
         }
-//        dd($file, $namespaces[$namespace]);
 
-//        $class = $this->phpNamespace->getClass($this->className);
-//        dd($class, $file);
         $constructor = $class->hasMethod('__construct')
             ? $class->getMethod('__construct')
             : $class->addMethod('__construct');
-        $constructor
-            ->addPromotedParameter('em')
-            ->setPrivate()
-            ->setType('Doctrine\ORM\EntityManagerInterface');
-        dd((string)$existingNs);
-
-//        $phpClass = ClassType::from($class, withBodies: true);
-//
-//        $constructor = $class->hasMethod('__construct')
-//            ? $class->getMethod('__construct')
-//            : $class->addMethod('__construct');
-
-
-        //$this->phpClass = $phpClass;
-        //$constructor = $phpClass->getMethod('__construct');
-        //make sure method __construct exists
-        //if (!$constructor) {
-        //    $constructor = $phpClass->addMethod('__construct');
-        //}
-        //$constructor->addParameter('logger', LoggerInterface::class);
-
-
-
-
-//        $this->phpClass = $this->phpNamespace->addClass($class);
-//        $this->constructorMethod = $this->phpClass->addMethod('__construct');
-
-        // fetch the existing dependencies
-        //$method  = (new \ReflectionClass($class))->getMethod('__construct');
-        // really only the ones marked as 'private' are injected in the modern way
-        // foreach ($method->getParameters() as $name => $param) {
-        //     $io->writeln(sprintf("%s $%s", $param->getType(), $param->getName()));
-        // }
-
-        //dd($method);
 
         $categories = new ChoiceQuestion('What type of dependencies do you want to inject?', [
             'em' => 'em/repos',
@@ -177,25 +140,67 @@ final class MakeConstructor
             '' => "exit"
         ]);
 
+
         while ($category || ($category = $io->askQuestion($categories))) {
-            $this->$category($io);
-            $io->success($category . ' now.');
+            $this->$category($io, $constructor, $existingNs);
+//            $io->writeln((string) $existingNs);
+//            $printer = new CustomPrettyPrinter();
+//            $newCode = $printer->prettyPrintFile($modifiedAst);
+            file_put_contents($this->filename, "<?php\n\n" . $existingNs);
+            // reload the file
+            [$existingClass, $existingNs, $filename] =
+                $this->getClass($existingNs->getName(), $shortClassName, $this->filename);
+            // at this point, it should always exist
+            $constructor = $existingClass->getMethod('__construct');
+//            $io->writeln((string)$constructor);
+            if ($io->isVerbose()) {
+                $io->writeln($existingNs);
+            }
+//            $io->success($category . ' now.');
             $category = null;
         }
 
 
         return Command::SUCCESS;
     }
-    private function em(SymfonyStyle $io): mixed
-    {
-        $entityClass = $io->askQuestion(new ChoiceQuestion("please select",
-            iterator_to_array($this->generatorService->getRepositories())));
-        // of course, it shouldn't be $repo, but rather based on the class name,
 
-        //$this->updateConstructorHybrid($io, 'repo', $entityClass); //
-        $this->updateConstructorFile($io, 'repo', $entityClass); // this is the one that works
-        // $io->warning("@todo: add the entity to the Uses and the repo to the constructor for " . $entityClass);
+    private function em(SymfonyStyle $io, Method $constructor, PhpNamespace $ns): mixed
+    {
+        $options = iterator_to_array($this->generatorService->getRepositories());
+        $options[] = EntityManagerInterface::class;
+//        $options = [...$options, iterator_to_array($this->generatorService->getWorkflows())];
+        foreach ($options as $option) {
+            $shortName = new \ReflectionClass($option)->getShortName();
+            $keyedOptions[lcfirst($shortName)] = $option;
+        }
+        $entityClasses = $io->askQuestion(new ChoiceQuestion("please select",
+            $keyedOptions)
+            ->setMultiselect(true)
+        );
+        foreach ($entityClasses as $entityClass) {
+            $entityClass = $keyedOptions[$entityClass];
+
+            $this->dumpParameters($io, $constructor);
+            $constructor
+                ->addPromotedParameter(lcfirst(new \ReflectionClass($entityClass)->getShortName()))
+                ->setPrivate()
+                ->setReadOnly()
+                ->setType($entityClass);
+
+            $ns->addUse($entityClass);
+        }
         return [];
+    }
+
+    private function dumpParameters($io, $method)
+    {
+        $table = new Table($io);
+        $table->setHeaderTitle($method);
+        foreach ($method->getParameters() as $param) {
+            $table->addRow([$param->getName(), $param->getType()]);
+        }
+        $table->render();
+
     }
 
     private function updateConstructorFile(SymfonyStyle $io, string $var, string $type): mixed
@@ -220,79 +225,81 @@ final class MakeConstructor
         $traverser->addVisitor(new class($shortType) extends NodeVisitorAbstract {
             private string $shortType;
 
-            public function __construct(string $shortType) {
-            $this->shortType = $shortType;
+            public function __construct(string $shortType)
+            {
+                $this->shortType = $shortType;
             }
 
-            public function enterNode(Node $node) {
-            if (!$node instanceof Class_) {
-                return null;
-            }
-
-            // Find existing __construct method
-            $constructor = null;
-            foreach ($node->getMethods() as $method) {
-                if ($method->name->toString() === '__construct') {
-                $constructor = $method;
-                break;
+            public function enterNode(Node $node)
+            {
+                if (!$node instanceof Class_) {
+                    return null;
                 }
-            }
 
-            // Collect all parameter variable names to avoid collision
-            $existingVars = [];
-            if ($constructor) {
+                // Find existing __construct method
+                $constructor = null;
+                foreach ($node->getMethods() as $method) {
+                    if ($method->name->toString() === '__construct') {
+                        $constructor = $method;
+                        break;
+                    }
+                }
+
+                // Collect all parameter variable names to avoid collision
+                $existingVars = [];
+                if ($constructor) {
+                    foreach ($constructor->params as $param) {
+                        $existingVars[] = $param->var->name;
+                    }
+                }
+
+                // Use short type for variable name, lowercased first letter
+                $baseVar = lcfirst($this->shortType);
+                $var = $baseVar;
+                $i = 2;
+                while (in_array($var, $existingVars, true)) {
+                    $var = $baseVar . $i;
+                    $i++;
+                }
+
+                // If no constructor, create one with the injected param
+                if (!$constructor) {
+                    $constructor = new Node\Stmt\ClassMethod('__construct', [
+                        'flags' => Class_::MODIFIER_PUBLIC,
+                        'params' => [
+                            new Param(
+                                var: new Variable($var),
+                                type: new Name($this->shortType),
+                                flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
+                            ),
+                        ],
+                        'stmts' => [],
+                    ]);
+                    // Insert constructor at the top of the class statements
+                    array_unshift($node->stmts, $constructor);
+                    return null;
+                }
+
+                // Check if parameter already exists with correct type and visibility
                 foreach ($constructor->params as $param) {
-                $existingVars[] = $param->var->name;
+                    $isSameVar = $param->var->name === $var;
+                    $isSameType = $param->type instanceof Name && $param->type->toString() === $this->shortType;
+                    $isPromoted = ($param->flags & (Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY)) === (Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY);
+
+                    if ($isSameVar && $isSameType && $isPromoted) {
+                        // Already injected correctly
+                        return null;
+                    }
                 }
-            }
 
-            // Use short type for variable name, lowercased first letter
-            $baseVar = lcfirst($this->shortType);
-            $var = $baseVar;
-            $i = 2;
-            while (in_array($var, $existingVars, true)) {
-                $var = $baseVar . $i;
-                $i++;
-            }
-
-            // If no constructor, create one with the injected param
-            if (!$constructor) {
-                $constructor = new Node\Stmt\ClassMethod('__construct', [
-                'flags' => Class_::MODIFIER_PUBLIC,
-                'params' => [
-                    new Param(
+                // Otherwise, inject parameter with unique name
+                $constructor->params[] = new Param(
                     var: new Variable($var),
                     type: new Name($this->shortType),
                     flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
-                    ),
-                ],
-                'stmts' => [],
-                ]);
-                // Insert constructor at the top of the class statements
-                array_unshift($node->stmts, $constructor);
+                );
+
                 return null;
-            }
-
-            // Check if parameter already exists with correct type and visibility
-            foreach ($constructor->params as $param) {
-                $isSameVar = $param->var->name === $var;
-                $isSameType = $param->type instanceof Name && $param->type->toString() === $this->shortType;
-                $isPromoted = ($param->flags & (Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY)) === (Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY);
-
-                if ($isSameVar && $isSameType && $isPromoted) {
-                // Already injected correctly
-                return null;
-                }
-            }
-
-            // Otherwise, inject parameter with unique name
-            $constructor->params[] = new Param(
-                var: new Variable($var),
-                type: new Name($this->shortType),
-                flags: Class_::MODIFIER_PRIVATE | Class_::MODIFIER_READONLY
-            );
-
-            return null;
             }
         });
 
@@ -420,7 +427,9 @@ final class MakeConstructor
             {
 
             }
-            public function enterNode(Node $node) {
+
+            public function enterNode(Node $node)
+            {
                 if ($node instanceof Node\Stmt\Class_) {
                     foreach ($node->attrGroups as $attrGroup) {
                         foreach ($attrGroup->attrs as $attr) {
@@ -513,14 +522,15 @@ final class MakeConstructor
     }
 
 
-
 }
 
-class UseCollector {
+class UseCollector
+{
     public array $useStatements = [];
 }
 
-class AttributesCollector {
+class AttributesCollector
+{
     public array $attributes = [];
 }
 

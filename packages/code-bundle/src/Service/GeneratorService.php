@@ -35,9 +35,14 @@ class GeneratorService
 
     public function getWorkflows(): iterable
     {
-        foreach ($this->workflows as $workflow) {
+        foreach ($this->workflows as $workflowName => $workflow) {
+//            dd($workflowName, $workflow, $workflow->getName());
             yield $workflow->getName();
         }
+//        foreach ($this->workflows as $workflowName => $workflow) {
+//            yield [$workflowName => $workflow::class];
+//        }
+
     }
     public function getRepositories(): iterable
     {
@@ -100,6 +105,8 @@ class GeneratorService
 
     }
     public function generateController(
+        ClassType $class,
+        PhpNamespace $namespace,
         string $controllerName,
         string $namespaceName = 'App\\Controller',
         ?string $routeName = null,
@@ -111,11 +118,12 @@ class GeneratorService
 
     ): PhpNamespace
     {
-        if (empty($namespace)) {
-            $namespace = 'App\\Controller';
-        }
 
-        $namespace = new PhpNamespace($namespaceName);
+//        if (empty($namespace)) {
+//            $namespace = 'App\\Controller';
+//        }
+//
+//        $namespace = new PhpNamespace($namespaceName);
         $useClasses = [
             AbstractController::class,
             Response::class,
@@ -129,11 +137,15 @@ class GeneratorService
         }
         array_map(fn($useClass) => $namespace->addUse($useClass), $useClasses);
 
-        $class = $namespace->addClass($controllerName);
-        $class
-            ->setExtends(AbstractController::class);
-        if ($classRoute) {
-            $class->addAttribute(Route::class, [$classRoute]);
+        try {
+            $class = $namespace->addClass($controllerName);
+            $class
+                ->setExtends(AbstractController::class);
+            if ($classRoute) {
+                $class->addAttribute(Route::class, [$classRoute]);
+            }
+        } catch (\Nette\InvalidStateException $e) {
+            // already exists
         }
         // this is for entities only
 //            ->addImplement(RouteParametersInterface::class) // will be simplified to A
@@ -194,7 +206,15 @@ class GeneratorService
             file_put_contents(getcwd() . '/' . $templatePath, 'template content');
         }
 
-        $method = $class->addMethod('__construct');
+        if ($class->hasMethod($methodName)) {
+            return;
+        }
+
+        $method = $class->hasMethod($methodName)
+            ? $class->getMethod($methodName)
+            : $class->addMethod($methodName);
+
+//        $method = $class->addMethod('__construct');
         // @todo: add DI, e.g. doctrine, entity repos, etc.
 //        $method->addPromotedParameter('name', null)
 //            ->addAttribute(Autowire::class)
@@ -203,7 +223,8 @@ class GeneratorService
 //        $method->addPromotedParameter('args', [])
 //            ->setPrivate();
 
-        $method = $class->addMethod($methodName);
+//        $method = $class->addMethod($methodName);
+        // unless it already has it?
         if ($templateName) {
             $method
                 ->addAttribute(Template::class, [$templateName]);

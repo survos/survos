@@ -70,6 +70,9 @@ final class MakeService
         }
 
         $io->success(sprintf('service %s generated.', $filename));
+        if ($io->isVerbose()) {
+            $io->writeln($ns);
+        }
         return Command::SUCCESS;
     }
 

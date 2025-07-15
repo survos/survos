@@ -47,6 +47,7 @@ final class MakeCommand
         #[Argument('command name, e.g. app:do-something')] string $name = '',
         #[Argument('command description')] ?string                        $description = null, // prompt if null
         #[Option('overwrite the existing command class')] bool             $force = true,
+        // @todo: move to make:constructor
         #[Option(description: 'add the project dir to the constructor')] bool  $projectDir = false,
         #[Option(description: 'namespace')] string                             $ns = "App\\Command"
     ): int
@@ -157,6 +158,12 @@ final class MakeCommand
             $parameter->setType($fieldType);
         }
         if ($default = $io->ask('Enter default value (blank for none)')) {
+            if ($fieldType === 'int') {
+                $default = (int)$default;
+            }
+            if ($fieldType === 'bool') {
+                $default = (bool)$default;
+            }
             $parameter->setDefaultValue($default);
         }
         // these MUST be in the same order as the attribute, e.g. description first

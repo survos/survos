@@ -309,11 +309,16 @@ class WorkflowHelperService
         }
         if ($workflow->can($object, $transition)) {
             $marking = $workflow->apply($object, $transition, $message->getContext());
+            // is this the best place to flush?  or only if workflow applied
             $this->entityManager->flush(); // save the marking and any updates
         } else {
             $this->logger?->info("cannot transition from {$object->getMarking()} to $transition");
         }
-        // is this the best place to flush?  or only if workflow applied
+
+        // so we have it for the monitor.
+        return [
+            'message' => $message,
+        ];
 
 
         // dispatch the FIRST valid next transition

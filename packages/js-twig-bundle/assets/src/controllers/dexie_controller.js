@@ -105,7 +105,7 @@ export default class extends Controller {
 
         this.filter = this.filterValue ? JSON.parse(this.filterValue) : false;
         this.store = this.storeValue ? JSON.parse(this.storeValue) : false;
-        console.info("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
+        // console.info("hi from " + this.identifier + ' using dbName: ' + this.dbNameValue + '/' + this.storeValue);
         // compile the template
 
         let compiledTwigTemplates = {};
@@ -117,7 +117,7 @@ export default class extends Controller {
             });
         }
         this.compiledTwigTemplates = compiledTwigTemplates;
-        console.log("twig templates : ",this.compiledTwigTemplates);
+        // console.log("twig templates : ",this.compiledTwigTemplates);
 
         // the actual jstwig template code, passed into the renderer
         // this should be multiple templates, dispatched as events or populating a target if it exists.
@@ -150,7 +150,7 @@ export default class extends Controller {
                         //console.error("window.app or window.app.views is not defined");
                     }
                     console.log(this.queriesValue);
-                    
+
                     this.renderPage(e.detail.id, this.storeValue);
                     //console.warn(html);
 
@@ -166,8 +166,8 @@ export default class extends Controller {
                                 window: window,
                                 storeName: this.storeValue,
                                 globals: this.globalsValue});
-                            console.log("About to insert rendered template into contentTarget");
-                            console.log("contentTarget", this.contentTarget);
+                            // console.log("About to insert rendered template into contentTarget");
+                            // console.log("contentTarget", this.contentTarget);
                             if (this.contentTarget) {
                                 this.contentTarget.innerHTML = x;
                             }
@@ -368,25 +368,25 @@ export default class extends Controller {
     }
 
     // Function to render all string values in an object recursively
-    
-    
+
+
     async renderPage(entityId, store) {
 
         function renderTwigInObject(obj, context) {
             if (typeof obj === 'string') {
                 return Twig.twig({ data: obj }).render(context);
             }
-        
+
             if (Array.isArray(obj)) {
                 return obj.map(item => renderTwigInObject(item, context));
             }
-        
+
             if (typeof obj === 'object' && obj !== null) {
                 return Object.fromEntries(
                     Object.entries(obj).map(([key, val]) => [key, renderTwigInObject(val, context)])
                 );
             }
-        
+
             return obj;
         }
         // console.log(this.appOutlet.tabbarTarget.getActiveIndex());
@@ -397,7 +397,7 @@ export default class extends Controller {
         // console.error("page data", this.appOutlet.navigatorTarget.topPage.data);
         // let key = this.appOutlet.navigatorTarget.topPage.data.id;
         // console.error(this.appOutlet.navigatorTarget.topPage.data, key);
-        
+
         //artist temp area
         //alert(this.compiledTwigTemplates["title"]);
         //alert(JSON.stringify(this.queriesValue));

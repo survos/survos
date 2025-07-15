@@ -24,6 +24,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Workflow\Transition;
+use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\Component\Yaml\Yaml;
 use Zenstruck\Alias;
 use Zenstruck\Metadata;
@@ -58,7 +59,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         #[Option('message transport', shortcut: 'tr')] string $transport = '',
         #[Option('workflow transition', shortcut: 't')] ?string $transition = null,
         #[Option('workflow marking', shortcut: 'm')] ?string $marking = null,
-        #[Option(name: 'worflow', description: 'workflow (if multiple on class)')] string $workflowName = '',
+        #[Option(name: 'workflow', description: 'workflow (if multiple on class)')] string $workflowName = '',
         // marking CAN be null, which is why we should set it when inserting
         #[Option('tags (for listeners)')] string $tags = '',
         #[Option] string $dump = '',
@@ -82,10 +83,13 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         }
 
         if (!$className) {
-            $className = $io->choice(
-                'Which Doctrine entity are you going to iterate?',
-                $doctrineEntitiesFqcn
-            );
+            if (!$className = $doctrineEntitiesFqcn[$className] ?? null) {
+                $className = $io->choice(
+                    'Which Doctrine entity are you going to iterate?',
+                    $doctrineEntitiesFqcn
+                );
+                $className = $doctrineEntitiesFqcn[$className] ?? $className;
+            }
         }
 
         $helper = $this->getHelper('question');
@@ -101,6 +105,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         /** @var QueryBuilderHelperInterface $repo */
         $repo = $this->entityManager->getRepository($className);
 //        dd($this->workflowHelperService->getWorkflowsGroupedByClass());
+
         if ($workflowName = $this->workflowHelperService->getWorkflowsGroupedByClass()[$className][0]) {
             $workflow = $this->workflowHelperService->getWorkflowByCode($workflowName);
             $places = $workflow->getDefinition()->getPlaces();
@@ -108,14 +113,14 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
             $availableTransitions=[];
             foreach ($workflow->getDefinition()->getTransitions() as $t) {
                 foreach ($t->getFroms() as $from) {
-                    $availableTransitions[$from][] = $t->getName();
+                    $availableTransitions[$from][] = $t;
                 }
             }
 //        $transitions = array_filter(array_unique(array_map(fn(Transition $transition) =>
 //        in_array($marking, $transition->getFroms()) ? $transition->getName() : null,
 //            )));
             if ($stats) {
-                $this->showStats($repo, $io, $className, $availableTransitions);
+                $this->showStats($repo, $io, $className, $availableTransitions, $workflow);
                 return Command::SUCCESS;
             }
 
@@ -297,7 +302,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
             $this->runCommand($cli);
         }
 
-        $this->showStats($repo, $io, $className, $availableTransitions);
+        $this->showStats($repo, $io, $className, $availableTransitions, $workflow);
 
         $io->success($this->getName() . ' success ' . $className);
         return self::SUCCESS;
@@ -309,11 +314,11 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         foreach ($this->doctrine->getManagers() as $entityManager) {
             $classesMetadata = $entityManager->getMetadataFactory()->getAllMetadata();
             foreach ($classesMetadata as $classMetadata) {
-                $entitiesFqcn[] = $classMetadata->getName();
+                $entitiesFqcn[lcfirst($classMetadata->getReflectionClass()->getShortName())] = $classMetadata->getName();
             }
         }
 
-        sort($entitiesFqcn);
+//        sort($entitiesFqcn);
 
         return $entitiesFqcn;
     }
@@ -326,14 +331,27 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
      * @param array $availableTransitions
      * @return int
      */
-    public function showStats(QueryBuilderHelperInterface $repo, SymfonyStyle $io, mixed $className, array $availableTransitions): void
+    public function showStats(QueryBuilderHelperInterface $repo,
+                              SymfonyStyle $io, mixed $className,
+                              array $availableTransitions,
+    WorkflowInterface $workflow
+    ): void
     {
+
         $counts = $repo->getCounts('marking');
         $table = new Table($io);
         $table->setHeaderTitle($className);
-        $table->setHeaders(['marking', 'count', 'Available Transitions']);
+        $table->setHeaders(['marking', 'description', 'count', 'Available Transitions']);
+        $meta = $workflow->getMetadataStore();
         foreach ($counts as $name => $count) {
-            $table->addRow([$name, $count, join(', ', $availableTransitions[$name] ?? [])]);
+            $markingHelp = $meta->getMetadata('description', $name)??null;
+            $x = [];
+            foreach ($availableTransitions[$name] as $t) {
+                $description = $meta->getMetadata('description', $t);
+                dd($t, $description, $name);
+                $x[] = sprintf("(%s) %s", $t->getName(), $description);
+            }
+            $table->addRow([$name, $markingHelp, $count, join("\n", $x ?? [])]);
         }
         $table->render();
     }

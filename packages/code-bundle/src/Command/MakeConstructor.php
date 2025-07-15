@@ -80,13 +80,13 @@ final class MakeConstructor
         string $shortClassName,
 
         #[Argument(description: "initial category, e.g. em")]
-        string $category='',
+        ?string $category=null,
 
         #[Option(description: 'namespace to use (detect based on name, e.g. TextCommand = App\\Command)', shortcut: 'ns')]
-        string $namespace = '',
+        ?string $namespace = null,
 
         #[Option(description: "Overwrite the file if it exists")]
-        bool   $force = false
+        ?bool   $force = null
     ): int
     {
         if (!$namespace) {
@@ -103,7 +103,7 @@ final class MakeConstructor
         $this->FqClassName = $class;
 
         $path = $this->generatorService->namespaceToPath($namespace, $this->projectDir);
-         
+
         $this->className = $shortClassName;
         $filename = $path . '/' . $shortClassName . '.php';
         $this->filename = $filename;
@@ -115,8 +115,37 @@ final class MakeConstructor
         assert(file_exists($filename), "File $filename does not exist");
         //dd($filename);
 
+        $file = PhpFile::fromCode(file_get_contents($filename));
+        $namespaces = $file->getNamespaces();
+        // hack to get the class from the _existing_ php file
+        $existingNs = $namespaces[$namespace];
+        foreach ($existingNs->getClasses() as $className => $existingClass) {
+            if ($className === $shortClassName) {
+                $class = $existingClass;
+                break;
+            }
+//            dd($className, $existingClass);
+        }
+//        dd($file, $namespaces[$namespace]);
 
-        $phpClass = ClassType::from($class, withBodies: true);
+//        $class = $this->phpNamespace->getClass($this->className);
+//        dd($class, $file);
+        $constructor = $class->hasMethod('__construct')
+            ? $class->getMethod('__construct')
+            : $class->addMethod('__construct');
+        $constructor
+            ->addPromotedParameter('em')
+            ->setPrivate()
+            ->setType('Doctrine\ORM\EntityManagerInterface');
+        dd((string)$existingNs);
+
+//        $phpClass = ClassType::from($class, withBodies: true);
+//
+//        $constructor = $class->hasMethod('__construct')
+//            ? $class->getMethod('__construct')
+//            : $class->addMethod('__construct');
+
+
         //$this->phpClass = $phpClass;
         //$constructor = $phpClass->getMethod('__construct');
         //make sure method __construct exists
@@ -124,10 +153,10 @@ final class MakeConstructor
         //    $constructor = $phpClass->addMethod('__construct');
         //}
         //$constructor->addParameter('logger', LoggerInterface::class);
-        
 
-       
-    
+
+
+
 //        $this->phpClass = $this->phpNamespace->addClass($class);
 //        $this->constructorMethod = $this->phpClass->addMethod('__construct');
 
@@ -137,7 +166,7 @@ final class MakeConstructor
         // foreach ($method->getParameters() as $name => $param) {
         //     $io->writeln(sprintf("%s $%s", $param->getType(), $param->getName()));
         // }
-        
+
         //dd($method);
 
         $categories = new ChoiceQuestion('What type of dependencies do you want to inject?', [
@@ -177,7 +206,7 @@ final class MakeConstructor
         $factory = new BuilderFactory();
 
         $printer = new Standard();
-        
+
         //$injectedVar = 'logger';
         $injectedVar = $var;
         //$injectedType = 'Psr\Log\LoggerInterface';
@@ -327,7 +356,7 @@ final class MakeConstructor
     private function updateConstructorHybrid(SymfonyStyle $io, string $var, string $type): mixed
     {
         //we ll recreate the php class and all the file content with minimized effort
-        
+
         //init the file using the generator service
         //init file / class namespace
         $namespace = new PhpNamespace($this->phpNamespace->getName());
@@ -348,7 +377,7 @@ final class MakeConstructor
         $shortType = (new \ReflectionClass($type))->getShortName();
 
         $traverser = new NodeTraverser();
-        
+
         $useStatements = [];
         $collector = new UseCollector();
         // Collect use statements into $useStatements array
@@ -356,7 +385,7 @@ final class MakeConstructor
 
             public function __construct(private UseCollector $collector)
             {
-                
+
             }
 
             public function enterNode(Node $node)
@@ -389,7 +418,7 @@ final class MakeConstructor
         $traverser->addVisitor(new class($attributesCollector) extends NodeVisitorAbstract {
             public function __construct(private AttributesCollector $attributesCollector)
             {
-                
+
             }
             public function enterNode(Node $node) {
                 if ($node instanceof Node\Stmt\Class_) {

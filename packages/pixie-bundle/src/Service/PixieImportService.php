@@ -275,6 +275,7 @@ class PixieImportService
                             context: $context);
                         $event = $this->eventDispatcher->dispatch($rowEvent);
                         $rowObj = $event->row;
+                        
                         if ($event->type !== RowEvent::DISCARD) {
                             $row = $this->addRow($rowObj, $table, $owner); // insert row from file iterator
                         } else {
@@ -763,7 +764,7 @@ class PixieImportService
                 PropertyAccess::createPropertyAccessorBuilder()->disableExceptionOnInvalidPropertyPath()->getPropertyAccessor());
             try {
                 $entity = $mapper->map((object)$row, $targetClass);
-                dump($entity, $row['object_url'], $targetClass);
+//                dump($entity, $row['object_url']??null, $targetClass);
             } catch (\Exception $e) {
                 dd($e);
             }
@@ -779,7 +780,6 @@ class PixieImportService
                 ]
             );
 
-            dd($entity);
             $r->setRaw($rawEntity);
         }
 

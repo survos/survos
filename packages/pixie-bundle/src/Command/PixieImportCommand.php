@@ -29,6 +29,7 @@ use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -256,7 +257,7 @@ EOL
 
         // this is queuing the source strings to 'source', not the translations
         if ($index) {
-            $this->runIndex($configCode, $subCode);
+            $this->runIndex($configCode, $subCode, $io);
         }
         // this only queues source translations, so unrelated to indexing
         if ($populate) {
@@ -384,8 +385,22 @@ EOL
 //        $this->initialized && $event->isRowLoad() && $this->progressBar->advance();
     }
 
-    public function runIndex(string $pixieCode, ?string $subCode = null): void
+    public function runIndex(string $pixieCode, ?string $subCode = null, $output): void
     {
+
+        $greetInput = new ArrayInput([
+            // the command name is passed as first argument
+            'command' => 'pixie:index',
+            'configCode'    => $pixieCode,
+//            '--yell'  => true,
+        ]);
+
+        // disable interactive behavior for the greet command
+        $greetInput->setInteractive(false);
+        $returnCode = $this->getApplication()->doRun($greetInput, $output);
+        dd($returnCode);
+
+
         $cli = "pixie:index $pixieCode $subCode";
         $this->io->warning('bin/console ' . $cli);
         $this->runCommand($cli);

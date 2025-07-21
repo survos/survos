@@ -26,6 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function Symfony\Component\String\u;
 
 use Nette\PhpGenerator\PsrPrinter;
@@ -70,6 +71,7 @@ final class MakeConstructor extends BaseMaker
         if (!$namespace) {
             $namespace = match (true) {
                 str_ends_with($shortClassName, 'Service') => 'App\\Service',
+                str_ends_with($shortClassName, 'Workflow') => 'App\\Workflow',
                 str_ends_with($shortClassName, 'Command') => 'App\\Command',
                 str_ends_with($shortClassName, 'Controller') => 'App\\Controller',
                 default => throw new \Exception("namespace must be explicitly passed.")
@@ -144,6 +146,8 @@ final class MakeConstructor extends BaseMaker
     private function em(SymfonyStyle $io, Method $constructor, PhpNamespace $ns): mixed
     {
         $options = iterator_to_array($this->generatorService->getRepositories());
+        $options[] = HttpClientInterface::class;
+        $options[] = LoggerInterface::class;
         $options[] = EntityManagerInterface::class;
 //        $options = [...$options, iterator_to_array($this->generatorService->getWorkflows())];
         foreach ($options as $option) {
@@ -158,8 +162,10 @@ final class MakeConstructor extends BaseMaker
             $entityClass = $keyedOptions[$entityClass];
 
             $this->dumpParameters($io, $constructor);
+            $parameterName = lcfirst(new \ReflectionClass($entityClass)->getShortName());
+            $parameterName = str_replace('Interface', '', $parameterName);
             $constructor
-                ->addPromotedParameter(lcfirst(new \ReflectionClass($entityClass)->getShortName()))
+                ->addPromotedParameter($parameterName)
                 ->setPrivate()
                 ->setReadOnly()
                 ->setType($entityClass);

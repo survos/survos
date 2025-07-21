@@ -38,7 +38,8 @@
     "league/csv": "^9.23",
     "survos/workflow-helper-bundle": "^1.5",
     "phpunit/phpunit": "^12.2.7",
-    "doctrine/doctrine-bundle": "^2.15"
+    "doctrine/doctrine-bundle": "^2.15",
+    "symfony/http-client-contracts": "^3.6"
   },
   "version": "1.5.602",
   "config": {

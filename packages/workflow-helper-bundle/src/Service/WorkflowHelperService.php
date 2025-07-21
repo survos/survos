@@ -322,8 +322,13 @@ class WorkflowHelperService
 //        }
 
         // so we have it for the monitor.
+        // return [
+        //     'message' => json_encode((array)$message),
+        // ];
         return [
-            'message' => json_encode((array)$message),
+            'message' => sprintf("Transitioned %s to %s", $object->getMarking(), $transition),
+            'marking' => $marking,
+            'object' => $object,
         ];
 
 

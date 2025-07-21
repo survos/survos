@@ -99,7 +99,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         $reset ??= true;
 
         if (!$this->meiliService) {
-            $io->error("Run composer require survos/api-grid-bundle");
+            $io->error("Run composer require survos/meili-bundle");
             return self::FAILURE;
         }
 

@@ -351,7 +351,7 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
         foreach ($counts as $name => $count) {
             $markingHelp = $meta->getMetadata('description', $name)??null;
             $x = [];
-            foreach ($availableTransitions[$name] as $t) {
+            foreach ($availableTransitions[$name]??[] as $t) {
                 $description = $meta->getMetadata('description', $t);
                 $x[] = sprintf("(%s) %s", $t->getName(), $description);
             }

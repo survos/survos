@@ -111,6 +111,8 @@ final class IterateCommand extends Command // extends is for 7.2/7.3 compatibili
             $workflow = $this->workflowHelperService->getWorkflowByCode($workflowName);
             $places = $workflow->getDefinition()->getPlaces();
 
+//            dd($places);
+
             $availableTransitions=[];
             foreach ($workflow->getDefinition()->getTransitions() as $t) {
                 foreach ($t->getFroms() as $from) {

@@ -41,7 +41,7 @@ services:
 #            - ./.docker/mercure_config:/config
 
     rabbitmq:
-        image: rabbitmq:latest
+        image: rabbitmq:4.1.2-management-alpine
         container_name: 'rabbitmq'
         ports:
             - 5672:5672

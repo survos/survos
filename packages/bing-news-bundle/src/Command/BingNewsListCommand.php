@@ -6,19 +6,14 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Survos\BingNewsBundle\Event\RowEvent;
 use Survos\BingNewsBundle\Service\BingNewsService;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Zenstruck\Console\Attribute\Argument;
-use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\InvokableServiceCommand;
-use Zenstruck\Console\IO;
-use Zenstruck\Console\RunsCommands;
-use Zenstruck\Console\RunsProcesses;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand('bing-news:list', 'list bing-news sources and articles (various endpoints)')]
-final class BingNewsListCommand extends InvokableServiceCommand
+final class BingNewsListCommand extends Command
 {
-    use RunsCommands;
-    use RunsProcesses;
 
     public function __construct(
         private readonly BingNewsService $bingNewsService,
@@ -29,7 +24,7 @@ final class BingNewsListCommand extends InvokableServiceCommand
     }
 
     public function __invoke(
-        IO                                                                                          $io,
+        SymfonyStyle $io,
         #[Option(description: 'filter by top')] bool $top = false,
         #[Option(description: 'search string')] ?string $q=null,
         #[Option(description: 'category')] ?string $category=null,

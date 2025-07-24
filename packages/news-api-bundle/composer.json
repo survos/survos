@@ -13,7 +13,6 @@
         "symfony/dependency-injection": "^6.4 || ^7.1",
         "symfony/http-kernel": "^6.4 || ^7.1",
         "twig/twig": "^3.4",
-        "zenstruck/console-extra": "^1.4",
         "zenstruck/bytes": "^1.0",
         "jcobhams/newsapi": "*@dev"
     },

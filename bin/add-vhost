@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Check if vhost name is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <vhost_name>"
+    echo "Example: $0 my_vhost"
+    exit 1
+fi
+
+VHOSTNAME="$1"
+
+echo "Creating vhost: $VHOSTNAME"
+docker exec rabbitmq rabbitmqctl add_vhost "$VHOSTNAME"
+
+if [ $? -eq 0 ]; then
+    echo "Vhost '$VHOSTNAME' created successfully"
+    echo "Setting permissions for guest user on vhost: $VHOSTNAME"
+    docker exec rabbitmq rabbitmqctl set_permissions -p "$VHOSTNAME" guest "." "." ".*"
+    
+    if [ $? -eq 0 ]; then
+        echo "Permissions set successfully for guest user on vhost '$VHOSTNAME'"
+    else
+        echo "Error: Failed to set permissions for guest user on vhost '$VHOSTNAME'"
+        exit 1
+    fi
+else
+    echo "Error: Failed to create vhost '$VHOSTNAME'"
+    exit 1
+fi

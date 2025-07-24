@@ -26,7 +26,8 @@
         "symfony/phpunit-bridge": "^6.4 || ^7.1",
         "symfony/twig-bundle": "^6.4 || ^7.1",
         "symfony/var-dumper": "^6.4 || ^7.1",
-        "symfony/security-bundle": "^6.4 || ^7.1"
+        "symfony/security-bundle": "^6.4 || ^7.1",
+        "survos/auth-bundle": "^1.6"
     },
     "autoload": {
         "psr-4": {
@@ -35,5 +36,10 @@
     },
     "suggest": {
         "intl-extra": "For better performance, install the intl-extra package to use the IntlDateFormatter class."
+    },
+    "config": {
+        "allow-plugins": {
+            "survos/installer": true
+        }
     }
 }

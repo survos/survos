@@ -82,3 +82,8 @@ on both client and server.
 Thanks for considering contributing to this project. You are very welcome to propose a PR!
 You should first check locally that `bin/all-tests` runs properly and ensure that any changes
 leave the codebase as clean and secure as possible
+
+
+## TODO
+
+- Add code integrity validation tools such as [PHPStan](https://phpstan.org/) for static analysis.

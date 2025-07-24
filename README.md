@@ -10,19 +10,6 @@ Although the bundles often work together, they can be used independently.  Survo
 
 * simple-datatables-bundle: 
 
-### Dokku
-
-dokku config:set DATABASE_URL=postgresql://postgres:y5q5n6mX2EBebVb@5.161.107.103:5432/kpa?serverVersion=16
-dokku config:set MEILI_API_KEY=Y0urVery-S3cureAp1K3y
-dokku config:set MEILI_SERVER=http://dokku.survos.com:7700/
-dokku config:set SENTRY_DSN=https://23af3e73d7d52cc68c42ea54dfa1811d@o13782.ingest.sentry.io/4506240906166272
-
-DOKKU_APP_RESTORE:  1
-DOKKU_APP_TYPE:     herokuish
-DOKKU_PROXY_PORT:   80
-GIT_REV:            8f61e59939797be88d658097bbd06ece48d3037b
-SENTRY_DSN:         https://23af3e73d7d52cc68c42ea54dfa1811d@o13782.ingest.sentry.io/4506240906166272
-
 Demos
 -----
 
@@ -37,10 +24,9 @@ See the bundles in actions, and/or build them locally, with these demos (using b
 Getting Started
 ---------------
 
-* Install Symfony 6.1+
-* Install webpack-encore, so that stimulus components work, and run yarn install
+* Install Symfony ^7.3
 
-A collection of bundles to faciliate rapid development of Symfony applications.
+A collection of bundles to facilitate rapid development of Symfony applications.
 
 You'll find all packages in [`/packages`](/packages) directory. Here is a brief overview (tip: click on the package name to see its `README` with more detailed features):
 
@@ -120,6 +106,7 @@ php composer-unused.phar
 
 ## Ignore dump in production
 
+```
 symfony new ignore-dump-in-production --webapp && cd ignore-dump-in-production
 bin/console make:controller AppController
 sed -i "s|/app|/|" src/Controller/AppController.php
@@ -145,7 +132,7 @@ symfony open:local
 sed -i "s|APP_ENV=prod|APP_ENV=dev|" .env
 symfony open:local
 composer require --dev pierstoval/smoke-testing
-
+```
 
 
 

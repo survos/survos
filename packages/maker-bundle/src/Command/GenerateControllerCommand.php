@@ -7,24 +7,22 @@ use Survos\Bundle\MakerBundle\Service\GeneratorService;
 use Survos\Bundle\MakerBundle\Service\MakerService;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Zenstruck\Console\Attribute\Argument;
-use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\InvokableServiceCommand;
-use Zenstruck\Console\IO;
-use Zenstruck\Console\RunsCommands;
-use Zenstruck\Console\RunsProcesses;
 use function Symfony\Component\String\u;
 
 #[AsCommand('survos:make:controller-class', 'Generate a controller class OR a method')]
 // class must exist before the method.
 //
-final class GenerateControllerCommand extends InvokableServiceCommand
+final class GenerateControllerCommand extends Command
 {
     public function __construct(
         private GeneratorService $generatorService,
@@ -34,11 +32,9 @@ final class GenerateControllerCommand extends InvokableServiceCommand
         parent::__construct();
 
     }
-    use RunsCommands;
-    use RunsProcesses;
 
     public function __invoke(
-        IO     $io,
+        SymfonyStyle $io,
         #[Argument(description: 'Controller class name, e.g. App')]
         string $name,
         #[Option('routeName', description: 'controller route name (e.g. admin_do_something')]

@@ -10,19 +10,6 @@ Although the bundles often work together, they can be used independently.  Survo
 
 * simple-datatables-bundle: 
 
-### Dokku
-
-dokku config:set DATABASE_URL=postgresql://postgres:y5q5n6mX2EBebVb@5.161.107.103:5432/kpa?serverVersion=16
-dokku config:set MEILI_API_KEY=Y0urVery-S3cureAp1K3y
-dokku config:set MEILI_SERVER=http://dokku.survos.com:7700/
-dokku config:set SENTRY_DSN=https://23af3e73d7d52cc68c42ea54dfa1811d@o13782.ingest.sentry.io/4506240906166272
-
-DOKKU_APP_RESTORE:  1
-DOKKU_APP_TYPE:     herokuish
-DOKKU_PROXY_PORT:   80
-GIT_REV:            8f61e59939797be88d658097bbd06ece48d3037b
-SENTRY_DSN:         https://23af3e73d7d52cc68c42ea54dfa1811d@o13782.ingest.sentry.io/4506240906166272
-
 Demos
 -----
 

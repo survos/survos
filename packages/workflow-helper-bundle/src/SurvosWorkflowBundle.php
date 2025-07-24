@@ -5,14 +5,18 @@ namespace Survos\WorkflowBundle;
 use JetBrains\PhpStorm\NoReturn;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\WorkflowBundle\Command\ConvertFromYamlCommand;
+use Survos\WorkflowBundle\Command\Iterate72Command;
 use Survos\WorkflowBundle\Command\IterateCommand;
 use Survos\WorkflowBundle\Command\MakeWorkflowCommand;
 use Survos\WorkflowBundle\Command\SurvosWorkflowConfigureCommand;
 use Survos\WorkflowBundle\Command\SurvosWorkflowDumpCommand;
+use Survos\WorkflowBundle\Command\VizCommand;
 use Survos\WorkflowBundle\Controller\WorkflowController;
 use Survos\WorkflowBundle\Doctrine\TransitionListener;
 use Survos\WorkflowBundle\Service\ConfigureFromAttributesService;
+use Survos\WorkflowBundle\Service\SurvosGraphVizDumper;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
+use Survos\WorkflowBundle\Service\WorkflowListener;
 use Survos\WorkflowBundle\Twig\WorkflowExtension;
 use Survos\WorkflowHelperBundle\Attribute\Workflow;
 use Symfony\Bundle\FrameworkBundle\Command\WorkflowDumpCommand;
@@ -28,6 +32,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Workflow\Registry;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
@@ -47,7 +52,8 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
     public function process(ContainerBuilder $container): void
     {
 
-        // for now, look for workflows defined in config/packages/workflow.php
+        $workflows = $container->findTaggedServiceIds('workflows');
+        // for now, lookd for workflows defined in config/packages/workflow.php
         // @todo: scan for classes that implement SurvosWorkflowInterface or something
 
 
@@ -73,9 +79,11 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
 
         $container->findDefinition(SurvosWorkflowDumpCommand::class)
             ->setArgument('$workflows', tagged_iterator('workflow'));
+        $container->findDefinition(VizCommand::class)
+            ->setArgument('$workflows', tagged_iterator('workflow'));
 
         foreach (tagged_iterator('workflow', 'name') as $x) {
-            dd($x);
+//            dd(__METHOD__, __CLASS__, $x);
         }
 //        dd(tagged_iterator('workflow'));
 
@@ -94,12 +102,26 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
         // hopefully not needed!
 //        $builder->setParameter('survos_workflow.entities', $config['entities']);
 
+        // this probably isn't needed anymore
         $container->services()
-            ->set('console.command.workflow_dump', WorkflowDumpCommand::class)
+            ->set('console.command.survos_workflow_dump', WorkflowDumpCommand::class)
             ->args([
                 tagged_locator('workflow', 'name'),
             ]);
 
+        $container->services()
+            ->set('console.command.survos_workflow_viz', VizCommand::class)
+            ->args([
+                tagged_locator('workflow', 'name'),
+            ]);
+
+        $builder->autowire(VizCommand::class)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->setAutowired(true)
+//            ->setArgument('$messageHandlers', tagged_locator('kernel.event', 'name')
+            ->addTag('console.command')
+        ;
 
         //        $builder->register('workflow.registry', Registry::class); // isn't this already done by Symfony/Workflow
 
@@ -125,6 +147,11 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
             ->addTag('console.command')
         ;
 
+
+        $builder->autowire(WorkflowListener::class)
+            ->setArgument('$workflowHelperService', new Reference(WorkflowHelperService::class))
+            ->setArgument('$messageBus', new Reference(MessageBusInterface::class))
+            ->addTag('kernel.event_listener', ['event' => 'workflow.completed', 'method' => 'onCompleted']);
 
         foreach ([IterateCommand::class, MakeWorkflowCommand::class] as $commandClass) {
             $builder->autowire($commandClass)

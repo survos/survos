@@ -2,7 +2,9 @@
 
 services:
     database:
-        image: postgres:17.0-alpine
+        image: pgvector/pgvector:pg17 # PostgreSQL with pgvector support
+        container_name: pgvector-db
+#        image: postgres:17.0-alpine
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: docker
@@ -15,6 +17,7 @@ services:
             - 5434:5432
 #            - 5435:5432
 #            - 32785:32785
+        # https://medium.com/@adarsh.ajay/setting-up-postgresql-with-pgvector-in-docker-a-step-by-step-guide-d4203f6456bd
         volumes:
 #            - ~/.docker-conf/postgres15:/var/lib/postgresql/data
             - ./.docker/postgres17:/var/lib/postgresql/data
@@ -38,7 +41,7 @@ services:
 #            - ./.docker/mercure_config:/config
 
     rabbitmq:
-        image: rabbitmq:3-management-alpine
+        image: rabbitmq:4.1.2-management-alpine
         container_name: 'rabbitmq'
         ports:
             - 5672:5672
@@ -64,17 +67,29 @@ services:
 #  # start meilisearch
 #    systemctl start meilisearch
 
+#    docker run -v ./chroma-data:/data -p 8000:8000 chromadb/chroma
+#    chromadb:
+#        image: chromadb/chroma:0.5.0
+#        container_name: 'chromadb'
+#        ports:
+#            - 8000:8000
+#        volumes:
+#            - ./.docker/chroma:/data
+
     meilisearch:
-        image: getmeili/meilisearch:v1.13.0
+        image: getmeili/meilisearch:v1.15.2
         container_name: 'meilisearch'
         ports:
             - 7700:7700
         volumes:
-            - ./.docker/meili-1.13.0/:/meili_data/
+            - ./.docker/meili-1.15/:/meili_data/
         environment:
 #            - MEILI_MASTER_KEY=MeiliKey
             - MEILI_NO_ANALYTICS=true
+            - MEILI_EXPERIMENTAL_DUMPLESS_UPGRADE=true
             - MEILI_TASK_WEBHOOK_URL=http://localhost:8002/meili
+            - MEILI_CONFIG_FILE_PATH=./config.toml
+            - MEILI_HTTP_ALLOWED_ORIGINS='["*"]'
         # ./meilisearch --experimental-contains-filter
 
     redis:

@@ -76,6 +76,11 @@ class CrawlerService
         return $this->routeVisits;
     }
 
+    public function getRoutesToIgnore(): array
+    {
+        return $this->routesToIgnore;
+    }
+
     public function getConfig(): array
     {
         return $this->config;
@@ -118,7 +123,8 @@ class CrawlerService
             'email' => $username,
         ]);
         if ($username && !$user) {
-            dd($username);
+            $this->logger->error("user $username is not in the database");
+//            dd("user $username is not in the database");
             throw new UserNotFoundException();
         }
         return $user;
@@ -129,7 +135,7 @@ class CrawlerService
         return sprintf('%s@%s', $username, $path);
     }
 
-    public function addLink(?string $username, string $path, ?string $foundOn = null): Link
+    public function addLink(?string $username, string $path, ?string $foundOn = null,?string $route = null): Link
     {
         //        $key = $this->linkListKey($username, $path);
 
@@ -141,7 +147,7 @@ class CrawlerService
             if(isset($this->linkList[$username][$foundOn])) {
                 $depth = $this->linkList[$username][$foundOn]->getDepth() + 1;
             }
-            $this->linkList[$username][$path] = new Link(username: $username, path: $path, foundOn: $foundOn, depth: $depth);
+            $this->linkList[$username][$path] = new Link(username: $username, path: $path,route: $route, foundOn: $foundOn, depth: $depth);
         }
         $link = $this->linkList[$username][$path];
         return $link;
@@ -167,7 +173,7 @@ class CrawlerService
         return array_filter($this->getLinkList($username), fn (Link $link) => $link->isPending());
     }
 
-    public function getUnvisitedLink(?string $username): ?Link
+    public function         getUnvisitedLink(?string $username): ?Link
     {
         return current($this->getPendingLinks($username)) ?: null;
     }
@@ -224,18 +230,37 @@ class CrawlerService
             }
         }
 
-        $this->setRoute($link);
         if  ($link->getVisits() >= $this->maxVisits) {
+            $link->setLinkStatus($link::STATUS_ALREADY_VISITED);
             return $link;
         }
+
+        // e.g. sais.wip/test-webhook
+        if (str_starts_with($link->getPath(), 'http')) {
+            $link->setLinkStatus($link::STATUS_IGNORED);
+            return $link;
+        }
+
+        $this->setRoute($link);
+
+        if (!$link->getRoute()) {
+            $link->setLinkStatus($link::STATUS_IGNORED);
+            return $link;
+            $link->setHtml('missing');
+            dd($link);
+        }
+        assert($link->getRoute(), "missing route  in path " . $link->getPath());
+
         $routeName = $link->getRoute();
         if (!array_key_exists($routeName, $this->routeVisits)) {
             $this->routeVisits[$routeName] = 0;
         }
-        $this->routeVisits[$routeName]++;
-        if  ($this->routeVisits[$routeName] >= $this->maxVisits) {
+
+        if  ($this->routeVisits[$routeName] > $this->maxVisits) {
+            $link->setLinkStatus($link::STATUS_ALREADY_VISITED);
             return $link;
         }
+        $this->routeVisits[$routeName]++;
 
         if ($this->isIgnoredPath($link->getPath())) {
             $link->setLinkStatus($link::STATUS_IGNORED);
@@ -282,7 +307,7 @@ class CrawlerService
             // @todo: what should we do here?
 //            dump($response->getContent());
             $this->logger->error("$url " . $status . " found on \n" . $this->baseUrl . $link->getFoundOn());
-            dd($response->getStatusCode(), $this->baseUrl . $link->getPath(), $link->getFoundOn());
+            //dd($response->getStatusCode(), $this->baseUrl . $link->getPath(), $link->getFoundOn());
             $html = ''; // false;
         } else {
             $html = $response->getContent();
@@ -317,11 +342,24 @@ class CrawlerService
         $crawler->filter(' a')->each(
             function ($node) use ($link, $depth) {
                 $href = (string) $node->attr('href');
+                //ignore node $node if has attribute data-bs-toggle="modal"
+                //ignore data-bs-target="#modal-delete"
+                if ($node->attr('data-bs-toggle') == 'modal' || $node->attr('data-bs-target') == '#modal-delete') {
+                    return null;
+                }
+
+                //if $href has / delete , do dd
+                if (preg_match('/\/delete/', $href)) {
+                    dd($href);
+                }
+
+
                 $cleanHref = str_replace($this->baseUrl, '', $href);
                 $cleanHref = u($cleanHref)->before('#')->toString();
                 if (empty($cleanHref)) {
                     return null;
                 }
+                if (str_contains($cleanHref, '/delete/')) { return null; }
 //                var_dump($cleanHref);
                 if (preg_match('/^\/(_profiler|_wdt|css|images|js)\//i', $cleanHref)) {
 //                    echo "====================================";
@@ -362,7 +400,7 @@ class CrawlerService
         return $cleanHref;
     }
 
-    private function setRoute(Link $link): void
+    public function setRoute(Link $link): void
     {
         $path = $link->getPath();
         if (!$path) {

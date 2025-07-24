@@ -14,16 +14,21 @@ use Twig\Environment;
 final class DexieTwigComponent extends AsTwigComponent
 {
     use TwigBlocksTrait;
-    public string $store; // required
+    public iterable|object|string $store;
     public iterable|object|null $globals=null;
     public null|string|int $key=null;
     public ?string $refreshEvent=null;
+//    public array $dbConfig=[]; // this is passed in!
+    public ?string $url = null;
     // public string $caller; // in TwigBlocksTrait
+    public bool $initDb = false;
+    //add queries object
+    public iterable|object|null $queries=null;
 
     public function __construct(
         private Environment $twig,
         private LoggerInterface $logger,
-        private array $config=[]
+        private array $config=[], // this is the config defined in survos_js_twig.yaml
     ) {
 
         //        ='@survos/grid-bundle/api_grid';
@@ -35,7 +40,11 @@ final class DexieTwigComponent extends AsTwigComponent
         return $this->filter;
     }
 
-    public function getStore(): string
+    public function getStoreName(): ?string
+    {
+        return $this->storeName;
+    }
+    public function getStore(): array|object|null
     {
         return $this->store;
     }
@@ -58,6 +67,7 @@ final class DexieTwigComponent extends AsTwigComponent
 
     public function getSchema(): array
     {
+//        assert(false);
         #    db.version(3).stores({
 #savedTable: "id,name,owned",
 #productTable: "++id,price,brand,category"
@@ -104,6 +114,13 @@ final class DexieTwigComponent extends AsTwigComponent
     #[PreMount]
     public function preMount(array $data): array
     {
+        if (json_validate($data['store'])) {
+            $data['store'] = json_decode($data['store'], true);
+        } else {
+            $data['store'] = [
+                'name' => $data['store'],
+            ];
+        }
         // validate data
         $resolver = (new OptionsResolver())
             ->setDefaults([
@@ -111,21 +128,32 @@ final class DexieTwigComponent extends AsTwigComponent
                 'refreshEvent' => null,
                 'key' => null,
                 'filter' => [],
+//                'dbConfig' => [],
                 'globals' => (object)[],
+                'queries' => (object)[],
                 'store' => null,
+                'initDb' => false,
             ]);
         if (array_key_exists('globals', $data) && is_array($data['globals'])) {
             $data['globals'] = (object)$data['globals'];
         }
+
+        if (array_key_exists('queries', $data) && is_array($data['queries'])) {
+            $data['queries'] = (object)$data['queries'];
+        }
+
         $resolver->setRequired([
             'store',
             'caller',
             'refreshEvent',
         ]);
+        // either store or dbConfig. store is empty for loadData, which loads all the stores defined
         $resolver
             ->setAllowedTypes('key', ['null', 'string','int'])
             ->setAllowedTypes('filter', ['array'])
+            ->setAllowedTypes('store', ['array'])
             ->setAllowedTypes('globals', ['object'])
+            ->setAllowedTypes('queries', ['object'])
         ;
 
         $data = $resolver->resolve($data);

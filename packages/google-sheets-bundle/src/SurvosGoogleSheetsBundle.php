@@ -6,7 +6,9 @@ use Google\Service\Sheets;
 use Google\Service\Sheets\Sheet;
 use Survos\GoogleSheetsBundle\Command\GoogleSheetsApiCommand;
 use Survos\GoogleSheetsBundle\Service\GoogleApiClientService;
+use Survos\GoogleSheetsBundle\Service\GoogleDriveService;
 use Survos\GoogleSheetsBundle\Service\GoogleSheetsApiService;
+use Survos\GoogleSheetsBundle\Service\SheetService;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -44,6 +46,11 @@ class SurvosGoogleSheetsBundle extends AbstractBundle
         $container->services()->alias(GoogleApiClientService::class, $apiClientServiceId);
         $container->services()->alias(Sheets::class, 'google_sheets.sheets');
 
+        $builder->register(GoogleDriveService::class)
+            ->setPublic(true)
+            ->setAutowired(true)
+            ->setAutoconfigured(true);
+
         $builder->register($apiServiceId = 'google_sheets.sheets_api_service', GoogleSheetsApiService::class)
             ->setArgument('$clientService', new Reference($apiClientServiceId))
             ->setPublic(true)
@@ -54,10 +61,33 @@ class SurvosGoogleSheetsBundle extends AbstractBundle
             ->setPublic(true)
             ->setAutowired(true);
 
+        // for download
+        $builder->autowire(SheetService::class)
+            ->setAutowired(true)
+            ->setPublic(true)
+            ->setAutoconfigured(true)
+            ->setArgument('$aliases', $config['aliases'])
+        ;
+
+
+        /* removed until this could be fixed
+        /g/sites/pgsc$ c googlesheets:execute
+
+In GoogleSheetsApiService.php line 49:
+
+  Survos\GoogleSheetsBundle\Service\GoogleSheetsApiService::setSheetServices(): Argument #1 ($id) must be of type string, null given, called in /home/tac/g/sites/survos/packages/google-sheets-bundle/src/Command/GoogleShe
+  etsApiCommand.php on line 49
+
+        */
+
         // GoogleSheetsApiCommand
+        if (0)
         $builder->autowire(GoogleSheetsApiCommand::class)
+            ->setAutowired(true)
+            ->setPublic(true)
+            ->setAutoconfigured(true)
             ->setArgument('$clientService', new Reference($apiClientServiceId))
-            ->setArgument('$googleSheetsApiService', new Reference($apiClientServiceId))
+            ->setArgument('$googleSheetsApiService', new Reference($apiServiceId))
             ->addTag('console.command')
         ;
 
@@ -80,6 +110,14 @@ class SurvosGoogleSheetsBundle extends AbstractBundle
             ->scalarNode('client_secret')
                 ->isRequired()
                 ->cannotBeEmpty()
+            ->end()
+            ->arrayNode('aliases')
+                ->arrayPrototype()
+                    ->children()
+                    ->scalarNode('code')->end()
+                    ->scalarNode('url')->end()
+                    ->end()
+                ->end()
             ->end()
         ->end()
         ;

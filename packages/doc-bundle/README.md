@@ -1,5 +1,23 @@
 # DocBundle
 
+## Integration with Asciinema (ciine)
+
+Workflow for ciine after installing the bundle.
+
+set up the filename template.  This is global
+
+set up .bashrc so that rec or ciine runs
+
+```bash
+export CIINE_PATH=~/g/sites/showcase/casts
+export CIINE_PATH=~/g/sites/showcase/casts/${PWD##*/}/$(date '+%s').cast
+ciine rec $CIINE_PATH
+```
+
+
+
+
+
 Symfony Bundle that provides some utilities for creating Spinx documentation for a Symfony project.
 
 First, setup Sphinx
@@ -7,8 +25,8 @@ First, setup Sphinx
 ```bash
 
 sudo apt-get install python3-sphinx
-pip install sphinx_rtd_theme
-pip install sphinx_fontawesome
+pipx install sphinx_rtd_theme
+pipx install sphinx_fontawesome
 ```
 
 ```bash

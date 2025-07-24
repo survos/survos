@@ -38,32 +38,40 @@ class ParameterResolver implements ValueResolverInterface
             return [];
         }
 
-        if (defined($const=$argumentType.'::UNIQUE_PARAMETERS')) {
-            foreach (constant($const) as $param => $getter) {
-                if (class_exists($getter)) {
-                    // hack!!
-                    $entityParam = u($param)->before('Id')->toString();
-                    $lookupParams[$entityParam] = $history[$param];
-                } else {
-                    if ($value = $request->attributes->get($param)) {
-                        $lookupParams[$getter] = $value;
+        $lookupParams = [];
+        if (method_exists($argument, 'getUniqueIdentifiers')) {
+            // @todo: use the method...
+            $lookupParams = $argument->getUniqueIdentifiers();
+//                assert(false, $argumentType . " should declare a UNIQUE_PARAMETERS constant");
+        } else {
+            if (defined($const=$argumentType.'::UNIQUE_PARAMETERS')) {
+                foreach (constant($const) as $param => $getter) {
+                    if (class_exists($getter)) {
+                        // hack!!
+                        $entityParam = u($param)->before('Id')->toString();
+                        $lookupParams[$entityParam] = $history[$param];
+                    } else {
+                        if ($value = $request->attributes->get($param)) {
+                            $lookupParams[$getter] = $value;
+                        }
                     }
                 }
             }
-        } else {
-            if (method_exists($argument, 'getUniqueIdentifiers')) {
-                // @todo: use the method...
-                $lookupParams = $argument->getUniqueIdentifiers();
-//                assert(false, $argumentType . " should declare a UNIQUE_PARAMETERS constant");
-            }
         }
 
+
         if (!empty($lookupParams)) {
+            $em = $this->entityManager;
+            $conn = $em->getConnection();
             $repository = $this->entityManager->getRepository($argumentType);
-//            if (count($lookupParams) > 1) dd($lookupParams);
+//            dump($lookupParams, $this->entityManager, $conn, $argument, $argumentType, $repository, $repository::class);
+            if (count($lookupParams) > 1) dd($lookupParams);
             if ($entity = $repository->findOneBy($lookupParams)) {
-//                $history[$param] = $entity;
+                $history[$param] = $entity;
                 return [$entity];
+            } else {
+                assert(false, "Missing $argumentType parameter");
+//                dd(missingEntity: $lookupParams);
             }
         }
         return [];

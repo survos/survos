@@ -4,23 +4,19 @@ namespace Survos\StorageBundle\Command;
 
 use Exception;
 use Survos\StorageBundle\Service\StorageService;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Zenstruck\Console\Attribute\Argument;
-use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\InvokableServiceCommand;
-use Zenstruck\Console\IO;
-use Zenstruck\Console\RunsCommands;
-use Zenstruck\Console\RunsProcesses;
 use ZipArchive;
 
 #[AsCommand('storage:download', 'download remote storage files')]
-final class StorageDownloadCommand extends InvokableServiceCommand
+final class StorageDownloadCommand extends Command
 {
-    use RunsCommands;
-    use RunsProcesses;
 
     public function __construct(
         private readonly StorageService $storageService,
@@ -40,12 +36,12 @@ END
      * @throws Exception
      */
     public function __invoke(
-        IO $io,
-        #[Argument(description: 'path within zone')] string $remoteFilename = '',
-        #[Argument(description: 'local directory')] ?string $localDirOrFilename = '',
-        #[Option(name: 'zone', description: 'zone name')] ?string $zoneName = null,
-        #[Option(description: 'unzip')] ?bool $unzip = null,
-        #[Option(description: 'download even if file exists')] bool $force = false,
+        SymfonyStyle $io,
+        #[Argument('path within zone')] string $remoteFilename = '',
+        #[Argument('local directory')] ?string $localDirOrFilename = '',
+        #[Option('zone name', name: 'zone')] ?string $zoneName = null,
+        #[Option('unzip')] ?bool $unzip = null,
+        #[Option('download even if file exists')] bool $force = false,
     ): int {
         if ($unzip) {
             if (pathinfo($remoteFilename, PATHINFO_EXTENSION) !== 'zip') {
@@ -103,7 +99,7 @@ END
             $io->info("Unzipped $downloadPath to $localDirOrFilename");
             $dir = $downloadDir . DIRECTORY_SEPARATOR . pathinfo($downloadPath, PATHINFO_FILENAME);
             $io->info("Unzipping $downloadPath to $dir");
-            $this->unzip($downloadPath, $dir);
+            $this->unzip($downloadPath, $dir, $io);
 
             $table = new Table($io);
             $table->setStyle('compact');
@@ -156,7 +152,7 @@ END
      * @param string $destination
      * @throws Exception
      */
-    private function unzip(string $zipPath, string $destination): void
+    private function unzip(string $zipPath, string $destination, SymfonyStyle $io): void
     {
         $zip = new ZipArchive();
         try {
@@ -165,7 +161,7 @@ END
                 $zip->close();
             }
         } catch (Exception $e) {
-            $this->io()->error($e->getMessage());
+            $io->error($e->getMessage());
             throw new Exception("Could not unzip $zipPath to $destination");
         }
     }

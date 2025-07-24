@@ -10,12 +10,24 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GeoapifyService
 {
+    public const BASE_URL = 'https://api.geoapify.com/v1/geocode/';
     public function __construct(
         private ?string $apiKey=null,
         private ?CacheInterface $cache=null,
         private ?HttpClientInterface $httpClient=null
     )
     {
+    }
+
+//https://api.geoapify.com/v1/geocode/search?text=11%20Rue%20Grenette%2C%2069002%20Lyon%2C%20France&apiKey=YOUR_API_KEY
+
+//https://api.geoapify.com/v1/geocode/search?housenumber=11&street=Rue%20Grenette&postcode=69002&city=Lyon&country=France&apiKey=YOUR_API_KEY
+
+    public function lookup(string $text): ?array
+    {
+        return $this->cache->get(md5($text), fn (CacheItem $item) => $this->makeCall('search', [
+            'text' => $text,
+        ]));
     }
 
     public function reverseGeocode(float|string $lat, float|string $lng): ?array
@@ -27,26 +39,37 @@ class GeoapifyService
 
     }
 
-    public function reverseApiCall(float|string $lat, float|string $lng): ?array
+    private function makeCall(string $action, array $params = []): ?array
     {
-        $response = null;
-        // https://myprojects.geoapify.com/api/SaXR1ujolOktGdYjGwMW/keys
-        $url = sprintf('https://api.geoapify.com/v1/geocode/reverse?lat=%s&lon=%s&apiKey=%s', $lat, $lng, $this->apiKey);
         if ($this->httpClient) {
-            $request = $this->httpClient->request('GET', $url);
+            $params = array_merge($params, ['apiKey' => $this->apiKey]);
+            $request = $this->httpClient->request('GET', self::BASE_URL . $action, [
+                'query' => $params,
+            ]);
             $statusCode = $request->getStatusCode();
             if ($statusCode === 200) {
                 $response =  $request->toArray();
             } else {
-
-                dd($url, $request->getStatusCode());
+                dd($action, $params, $statusCode);
             }
         } else {
+            assert(false,"inject http client");
             // or use curl?
-            dd($url);
-            $response = json_decode(file_get_contents($url), true);
         }
         return $response;
+
+    }
+
+    public function reverseApiCall(float|string $lat, float|string $lng): ?array
+    {
+        $response = null;
+        // https://myprojects.geoapify.com/api/SaXR1ujolOktGdYjGwMW/keys
+
+//        $url = sprintf('https://api.geoapify.com/v1/geocode/reverse?lat=%s&lon=%s&apiKey=%s', $lat, $lng, $this->apiKey);
+        return $this->makeCall('reverse', [
+            'lat' => $lat,
+            'lon' => $lng,
+        ]);
 //        $data = $json['data']; // json_decode($json, true);
 //        return $data['features'][0]['properties'];
     }

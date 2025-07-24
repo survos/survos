@@ -2,7 +2,10 @@
 
 namespace Survos\DocBundle;
 
+use Survos\DocBundle\Command\ScreenshotCommand;
 use Survos\DocBundle\Command\SurvosBuildDocsCommand;
+use Survos\DocBundle\Command\UploadCommand;
+use Survos\DocBundle\Controller\ScreenshotController;
 use Survos\DocBundle\EventSubscriber\LoggerSubscriber;
 use Survos\DocBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -21,6 +24,13 @@ class SurvosDocBundle extends AbstractBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        $builder->autowire(ScreenshotController::class)
+            ->setPublic(true)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->addTag('controller.service_arguments')
+            ->addTag('controller.service_subscriber');
+
         $definition = $builder
             ->autowire('survos.doc_twig', TwigExtension::class)
             ->addTag('twig.extension')
@@ -36,16 +46,16 @@ class SurvosDocBundle extends AbstractBundle
             ->addTag('console.command')
         ;
 
-        $env = $builder->getParameter("kernel.environment");
-        if (in_array($env, ['test', 'dev'])) {
-            $definition = $builder->autowire(LoggerSubscriber::class)
-                ->setArgument('$config', $config)
-                ->setArgument('$options', [])
-                ->setArgument('$twig', new Reference('twig'))
-            ;
-            $definition
-                ->addMethodCall('setTwig', [new Reference('twig')]);
-        }
+        $builder->autowire(ScreenshotCommand::class)
+            ->addTag('console.command');
+
+        $builder->autowire(UploadCommand::class)
+            ->setArgument('$httpClient', new Reference('http_client'))
+            ->setArgument('$projectDir', '%kernel.project_dir%')
+            ->setArgument('$config', $config)
+//            ->setArgument('$config', $config)
+            ->addTag('console.command')
+        ;
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -53,6 +63,8 @@ class SurvosDocBundle extends AbstractBundle
         // since the configuration is short, we can add it here
         $definition->rootNode()
             ->children()
+//            ->scalarNode('screenshow_endpoint')->defaultValue(null)->end()
+            ->scalarNode('screenshow_endpoint')->defaultValue('%env(default::SCREENSHOW_ENDPOINT)%')->end()
             ->scalarNode('user_provider')->defaultValue(null)->end()
             ->scalarNode('user_class')->defaultValue("App\\Entity\\User")->end()
             ->end();

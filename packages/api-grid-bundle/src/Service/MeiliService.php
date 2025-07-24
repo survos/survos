@@ -1,5 +1,7 @@
 <?php
 
+// really this should extend, use or decorate MeiliService in MeiliAdminBundle
+
 namespace Survos\ApiGrid\Service;
 
 use ApiPlatform\Metadata\ApiResource;
@@ -97,6 +99,8 @@ class MeiliService
     {
         $client = $this->getMeiliClient();
         try {
+            // hmm, this should be clearer!
+//            $index = $client->index($indexName);
             $index = $client->getIndex($indexName);
             $response = $client->deleteIndex($indexName);
             $task = $this->waitForTask($response['taskUid'], $index);
@@ -137,7 +141,7 @@ class MeiliService
             };
             if ($status == 'failed') {
                 if ($stopOnError) {
-                    $this->logger->warning(json_encode($dataToDump ?? [], JSON_PRETTY_PRINT+JSON_UNESCAPED_SLASHES));
+                    $this->logger?->warning(json_encode($dataToDump ?? [], JSON_PRETTY_PRINT+JSON_UNESCAPED_SLASHES));
                     throw new \Exception("Task has failed " . $task['error']['message']);
                 }
             }
@@ -231,13 +235,13 @@ class MeiliService
             if ($exception->httpStatus === 404) {
                 if ($autoCreate) {
                     $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]));
-//            $this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]);
+            $this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]);
                     $index = $client->getIndex($indexName);
                 } else {
                     $index = null;
                 }
             } else {
-                dd($exception, $exception::class);
+                dd($exception, $indexName, $client, $exception::class);
             }
         }
         return $index;

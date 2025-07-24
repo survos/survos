@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Check if vhost name is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <vhost_name>"
+    echo "Example: $0 my_vhost"
+    exit 1
+fi
+
+VHOST="$1"
+
+echo "Purging all queues in vhost: $VHOST"
+docker exec rabbitmq bash -c "for q in \$(rabbitmqctl list_queues -p $VHOST -q name); do rabbitmqctl purge_queue -p $VHOST \"\$q\"; done"
+
+if [ $? -eq 0 ]; then
+    echo "Successfully purged all queues in vhost '$VHOST'"
+else
+    echo "Error: Failed to purge queues in vhost '$VHOST'"
+    exit 1
+fi

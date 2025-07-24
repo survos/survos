@@ -2,12 +2,11 @@
 
 namespace Survos\WorkflowBundle\Service;
 
-use App\Entity\Task;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Survos\CoreBundle\Service\SurvosUtils;
-use Survos\WorkflowBundle\Message\AsyncTransitionMessage;
+use Survos\WorkflowBundle\Message\TransitionMessage;
 use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
 use Symfony\Component\DependencyInjection\Attribute\TaggedLocator;
 use Symfony\Component\DependencyInjection\ServiceLocator;
@@ -30,7 +29,7 @@ use Symfony\Component\Workflow\WorkflowInterface;
 class WorkflowHelperService
 {
     private $dumper;
-    private string $direction = 'LR';
+    private string $direction = 'TB'; // TB, BT
 
     public function __construct(
         /** @var WorkflowInterface[] */
@@ -81,6 +80,22 @@ class WorkflowHelperService
                 'count' => $counts[$marking] ?? null,
             ], $workflow->getMetadataStore()->getPlaceMetadata($marking)), $workflow->getDefinition()->getPlaces());
     }
+
+    public function getTransitionMetadata(string $transitionName, WorkflowInterface $workflow): array
+    {
+        // Get all transitions
+        $transitions = $workflow->getDefinition()->getTransitions();
+
+        foreach ($transitions as $transition) {
+            if ($transition->getName() === $transitionName) {
+                // Fetch metadata for this specific transition
+                return $workflow->getMetadataStore()->getTransitionMetadata($transition);
+            }
+        }
+
+        throw new \InvalidArgumentException(sprintf('Transition "%s" not found in the workflow.', $transitionName));
+    }
+
 
     public function getWorkflow($subject, string $workflowName): WorkflowInterface
     {
@@ -136,8 +151,8 @@ class WorkflowHelperService
 //        dd($places);
 //        $entityPlaces = array_keys($workflow->getMarkingStore()->getMarking($subject)->getPlaces());
         if ($subject) {
+            $marking = $workflow->getMarkingStore()->getMarking($subject);
             try {
-                $marking = $workflow->getMarkingStore()->getMarking($subject);
                 array_map(function ($place) use ($marking) {
                     if ($marking->has($place)) {
                         $marking->unmark($place);
@@ -154,17 +169,14 @@ class WorkflowHelperService
 
             } catch (\Exception $exception) {
                 $initial = $workflow->getDefinition()->getInitialPlaces()[0];
-                $marking = (new Marking())
-                    ->mark($subject->marking ?? $initial);
-
+                (new Marking())->mark($subject->marking ?? $initial);
             }
         } else {
+            $marking = new Marking();
             // if there's no subject, just use the initial marking, unless something is passed in
 //            $marking = $definition->getInitialPlaces()[0];
             $initial = $workflow->getDefinition()->getInitialPlaces()[0];
-            $marking = (new Marking())
-                ->mark($subject->marking ?? $initial);
-
+            $marking->mark($subject->marking ?? $initial);
         }
 
         // unset anything previously set
@@ -173,7 +185,7 @@ class WorkflowHelperService
             'graph' => [
                 'ratio' => 'compress',
                 'width' => 0.5,
-                'rankdir' => null, // $this->direction,
+                'rankdir' => $this->direction,
                 'ranksep' => 0.2,
             ],
             'node' => [
@@ -290,55 +302,49 @@ class WorkflowHelperService
     }
 
     #[AsMessageHandler]
-    public function handleTransition(AsyncTransitionMessage $message)
+    // @todo: make sure this is property configured in SurvosWorkflowBundle
+    public function handleTransition(TransitionMessage $message)
     {
         $object = $this->entityManager->find($message->getClassName(), $message->getId());
-        assert($object, sprintf( "missing entity %s for %s", $message->getClassName(), $message->getId()));
+        $initialMarking = $object->getMarking(); // @todo: use Marking Service to handle more cases, e.g. ->marking
+        $debugMessage = sprintf( "missing entity %s for %s", $message->getClassName(), $message->getId());
+//        assert($object, $message);
         // removed, throw error (above) during testing only.
         if (!$object) {
-            return;
+            return ['message' => $debugMessage];
         }
         if (!$flowName = $message->getWorkflow()) {
             // ..
-
         }
+
+        $shortName = new \ReflectionClass($message->getClassName())->getShortName();
+        $id = $message->getId();
+
         $transition = $message->getTransitionName();
         $workflow = $this->getWorkflow($object, $flowName);
-        if (!$workflow->can($object, $transition)) {
+        if ($workflow->can($object, $transition)) {
+            $marking = $workflow->apply($object, $transition, $message->getContext());
+            // is this the best place to flush?  or only if workflow applied
+            $this->entityManager->flush(); // save the marking and any updates
+        } else {
             foreach ($workflow->buildTransitionBlockerList($object, $transition) as $blocker) {
                 $this->logger->info($blocker->getMessage());
             }
-            return;
+            return [
+                'info' => "cannot $transition $shortName::$id ",
+                'message' => $blocker->getMessage(),
+                'initialMarking' => $initialMarking,
+                'class' => $message->getClassName(),
+            ];
         }
-        if ($workflow->can($object, $transition)) {
-            $marking = $workflow->apply($object, $transition, $message->getContext());
-            $this->entityManager->flush(); // save the marking and any updates
-        } else {
-            $this->logger?->info("cannot transition from {$object->getMarking()} to $transition");
-        }
-        // is this the best place to flush?  or only if workflow applied
 
-
-        // dispatch the FIRST valid next transition
-//        foreach ($context['nextTransitions']??[] as $transition) {
-//            assert(!$transition, "@todo: handle next transition $transition");
-//            if ($workflow->can($object, $transition)) {
-                // apply it? Or dispatch it?  or recursively call this?
-                // since it's been saved (above), we will refetch it when this is recursively called
-//                $this->handleTransition(new AsyncTransitionMessage(
-////                    $message->pixieCode,
-////                    $message->key,
-////                    $message->table,
-//                    $transition,
-//                    $message->workflow
-//                ));
-//                    $marking = $workflow->apply($row, $transition, [
-//                        'kv' => $kv
-//                    ]);
-//                    dd($marking, $row, $message, $transition);
-//            }
-//        }
-
+        return [
+            'message' => "applied $transition to $shortName::$id ($initialMarking)",
+            //     'details' => json_encode((array)$message),
+            'initialMarking' => $initialMarking,
+            'marking' => $object->getMarking(),
+            'class' => $object,
+        ];
 
     }
 

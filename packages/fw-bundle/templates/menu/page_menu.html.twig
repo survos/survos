@@ -1,0 +1,63 @@
+{% extends '@KnpMenu/menu.html.twig' %}
+{% set debug = options['debug']|default(false) %}
+{% block root %}
+    <!-- {{ _self }} -->
+    {% set listAttributes = item.childrenAttributes %}
+
+    <div class="list menu-list">
+        <ul>
+            {{ block('list') -}}
+        </ul>
+    </div>
+
+{% endblock %}
+
+{% block heading %}
+    !!!
+    {{ item.label }}
+{% endblock %}
+
+{% block item %}
+    {% set icon = item.attributes.icon|default('fa-question-mark') %}
+    {% set badge = item.extras.badge|default(false) %}
+    {% set route = item.name %} {#  really the pageId that's loaded #}
+
+    {% if item.attributes.style|default('') == 'header' %}
+        {{ block('heading') }}
+    {% else %}
+        {% if item.linkAttributes.target|default('') == '_blank' %}
+                <a target="_blank" href="{{ item.uri }}">
+                    {{ block('label') }}
+                </a>
+        {% else %}
+            <li>
+                <a href="{{ item.uri }}" class="item-content item-link panel-close">
+                    {% if icon %}
+                    <div class="item-media">
+                        <twig:ux:icon name="{{icon}}" />
+                    </div>
+                    {% endif %}
+                    <div class="item-inner">
+                        <div class="item-title">
+                        {# {{ route }} #}
+                        {{ item.label|trans }}
+                        </div>
+                    </div>
+                </a>
+
+            </li>
+
+        {% endif %}
+    
+    {% endif %}
+        
+
+{% endblock %}
+
+{% block list %}
+    {# we could add the ons-page or ons-tab wrapper here #}
+    {% if item.hasChildren and options.depth is not same as(0) and item.displayChildren %}
+        {% import _self as knp_menu %}
+        {{ block('children') }}
+    {% endif %}
+{% endblock %}

@@ -24,10 +24,9 @@ See the bundles in actions, and/or build them locally, with these demos (using b
 Getting Started
 ---------------
 
-* Install Symfony 6.1+
-* Install webpack-encore, so that stimulus components work, and run yarn install
+* Install Symfony ^7.3
 
-A collection of bundles to faciliate rapid development of Symfony applications.
+A collection of bundles to facilitate rapid development of Symfony applications.
 
 You'll find all packages in [`/packages`](/packages) directory. Here is a brief overview (tip: click on the package name to see its `README` with more detailed features):
 
@@ -107,6 +106,7 @@ php composer-unused.phar
 
 ## Ignore dump in production
 
+```
 symfony new ignore-dump-in-production --webapp && cd ignore-dump-in-production
 bin/console make:controller AppController
 sed -i "s|/app|/|" src/Controller/AppController.php
@@ -132,7 +132,7 @@ symfony open:local
 sed -i "s|APP_ENV=prod|APP_ENV=dev|" .env
 symfony open:local
 composer require --dev pierstoval/smoke-testing
-
+```
 
 
 

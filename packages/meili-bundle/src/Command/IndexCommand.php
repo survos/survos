@@ -124,6 +124,7 @@ class IndexCommand extends Command
                     return Command::FAILURE;
                 }
                 $this->meiliService->reset($indexName);
+                $updateSettings = true;
             }
 
             if ($updateSettings) {
@@ -231,7 +232,6 @@ class IndexCommand extends Command
         $primaryKey ??= $index->getPrimaryKey();
         $count = 0;
         $qb = $this->entityManager->getRepository($class)->createQueryBuilder('e');
-
         if ($filter) {
             foreach ($filter as $var => $val) {
                 $qb->andWhere('e.' . $var . "= :$var")
@@ -281,7 +281,10 @@ class IndexCommand extends Command
             // we should probably index from the actual api calls.
             // for now, just match the groups in the normalization groups of the entity
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
-            $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
+//            $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
+            $data = $this->normalizer->normalize(clone $r, null, ['groups' => $groups]);
+            unset($r);
+
             $data = SurvosUtils::removeNullsAndEmptyArrays($data);
             if ($pk) {
                 $primaryKey = $pk;
@@ -305,17 +308,7 @@ class IndexCommand extends Command
                 $data['targetLocales'] = array_keys($data['_translations']);
 //                unset($data['keyedTranslations']);
             }
-//            assert(array_key_exists('_translations', $data), "Missing translations for " .$r::class);
-            // if live, only add if indexed and meiliCount
-            // total hack, this doesn't belong in the indexer, but in the deserializer before sending the results back,
-            // so somewhere in meili?
-//            assert($data['locale'], "Missing locale for $class " . $code);
-//            if ($projectLocale = $data['projectLocale']??$data['locale']??false) {
-//                $language = Languages::getName($projectLocale);
-//                $data['language'] = $language;
-//            }
-
-            // @todo: use pk for dump
+            // @todo: use pk for dump index of index
             if ($dump && ($dump === ($idx+1))) {
                 dd(data:    $data, raw: $r);
             }
@@ -329,8 +322,12 @@ class IndexCommand extends Command
                 if (!$progress) {
                     $this->meiliService->waitForTask($task);
                 }
-//                $this->io->writeln("Flushing " . count($records));
+                $this->io->writeln("Flushing " . count($records));
                 $records = [];
+                $this->entityManager->clear();
+                unset($records);
+                $records = [];
+                gc_collect_cycles();
             }
             $progressBar->advance();
             assert($count == $progressBar->getProgress(), "$count  <> " . $progressBar->getProgress());

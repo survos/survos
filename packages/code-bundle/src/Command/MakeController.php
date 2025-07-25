@@ -146,7 +146,7 @@ final class MakeController extends BaseMaker
     private function createTemplate(string $controllerName,
                                     string $routeName,
                                     ?string $templateName=null,
-                                    ?string $content,
+                                    ?string $content = null,
                                     bool $force = false): ?string
     {
         $path = null;
@@ -154,6 +154,12 @@ final class MakeController extends BaseMaker
             $templatePrefix = u($controllerName)->replace('Controller', '')->lower();
             $templateName = "$templatePrefix/$routeName";
         }
+
+        //$content must not be empty, otherwise we create an empty file
+        if (empty($content)) {
+            $content = "{# template for $controllerName::$routeName #}\n";
+        }
+
         if (!u($templateName)->endsWith('.html.twig')) {
             $templateName .= ".html.twig";
         }

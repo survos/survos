@@ -1,24 +1,59 @@
+# Include all bundle-specific PHPStan configurations
+includes:
+    - packages/api-grid-bundle/phpstan.neon
+    - packages/auth-bundle/phpstan.neon
+    - packages/bad-bot-bundle/phpstan.neon
+    - packages/barcode-bundle/phpstan.neon
+    - packages/bing-news-bundle/phpstan.neon
+    - packages/bootstrap-bundle/phpstan.neon
+    - packages/bunny-bundle/phpstan.neon
+    - packages/command-bundle/phpstan.neon
+    - packages/core-bundle/phpstan.neon
+    - packages/crawler-bundle/phpstan.neon
+    - packages/deployment-bundle/phpstan.neon
+    - packages/doc-bundle/phpstan.neon
+    - packages/faker-bundle/phpstan.neon
+    - packages/flickr-bundle/phpstan.neon
+    - packages/fw-bundle/phpstan.neon
+    - packages/geoapify-bundle/phpstan.neon
+    - packages/global-giving-bundle/phpstan.neon
+    - packages/google-sheets-bundle/phpstan.neon
+    - packages/grid-bundle/phpstan.neon
+    - packages/inspection-bundle/phpstan.neon
+    - packages/ip2location-bundle/phpstan.neon
+    - packages/js-twig-bundle/phpstan.neon
+    - packages/key-value-bundle/phpstan.neon
+    - packages/libre-translate-bundle/phpstan.neon
+    - packages/liform-bundle/phpstan.neon
+    - packages/location-bundle/phpstan.neon
+    - packages/maker-bundle/phpstan.neon
+    - packages/meili-bundle/phpstan.neon
+    - packages/mobile-bundle/phpstan.neon
+    - packages/news-api-bundle/phpstan.neon
+    - packages/phenx-bundle/phpstan.neon
+    - packages/pixie-bundle/phpstan.neon
+    - packages/providence-bundle/phpstan.neon
+    - packages/pwa-extra-bundle/phpstan.neon
+    - packages/reveal-bundle/phpstan.neon
+    - packages/sais-bundle/phpstan.neon
+    - packages/scraper-bundle/phpstan.neon
+    - packages/seo-bundle/phpstan.neon
+    - packages/simple-datatables-bundle/phpstan.neon
+    - packages/storage-bundle/phpstan.neon
+    - packages/the-guardian-bundle/phpstan.neon
+    - packages/thumb-hash-bundle/phpstan.neon
+    - packages/tree-bundle/phpstan.neon
+    - packages/wiki-bundle/phpstan.neon
+    - packages/workflow-helper-bundle/phpstan.neon
+
 parameters:
-    level: 0
-    inferPrivatePropertyTypeFromConstructor: true
-    paths:
-#        - ./src
-#        - ./packages/seo-bundle
-#        - ./packages/workflow-helper-bundle
-        - ./packages/pixie-bundle
-
-    excludePaths:
-            analyse:
-#                - ./packages
-                - ./packages/providence-bundle
-                - ./packages/phenx-bundle
-                - ./packages/pixie-bundle/src/Service/TranslationService*
-                - ./packages/pixie-bundle/src/Service/Libre*
-                - ./packages/pixie-bundle/src/EventListener/TranslationRowEventListener*
-                - ./packages/pixie-bundle/src/Command/PixieTranslateCommand.php
-                - ./packages/pixie-bundle/src/Controller/SearchController.php
-#                - packages/*/vendor/*
-                - ./packages/*/vendor/*
-                - */cache/*
-
+    
+    # Global settings
+    reportUnmatchedIgnoredErrors: false
+    treatPhpDocTypesAsCertain: false
+    
+    # Additional global ignore patterns
     ignoreErrors:
+        # Global patterns that apply across all bundles
+        - '#Path in include\(\) .+ is not a file or it does not exist#'
+        - '#Path in require.* .+ is not a file or it does not exist#'

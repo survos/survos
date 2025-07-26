@@ -3,11 +3,10 @@ parameters:
     inferPrivatePropertyTypeFromConstructor: true
     paths:
         - ./src/
-
+        - ./tests
     excludePaths:
        analyse:
-          - ./vendor
-
+          - ./vendor (?)
     ignoreErrors:
         -
             message: '#.*NodeDefinition::children.*#'

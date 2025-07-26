@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 //use Survos\ApiGrid\Service\DatatableService;
 use Survos\CoreBundle\Service\SurvosUtils;
+use Survos\MeiliBundle\Metadata\MeiliIndex;
 use Survos\MeiliBundle\Service\MeiliService;
 use Survos\MeiliBundle\Service\SettingsService;
 use Symfony\Component\Console\Attribute\Argument;
@@ -97,6 +98,10 @@ class IndexCommand extends Command
             $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
             foreach ($metas as $meta) {
                 // check argument
+                if (!$meta->getReflectionClass()->getAttributes(MeiliIndex::class)) {
+                    continue;
+                }
+
                 if ($class && ($meta->getName() <> $class)) {
                     continue;
                 }
@@ -104,7 +109,8 @@ class IndexCommand extends Command
                 // skip if no groups defined
                 if (!$groups = $this->settingsService->getNormalizationGroups($meta->getName())) {
 //                    if ($input->ver) {
-                        $io->writeln("Skipping {$class}: no normalization groups for " . $meta->getName());
+                        $io->error("ERROR {$class}: no normalization groups for " . $meta->getName());
+                        return Command::FAILURE;
 //                    }
                     continue;
                 }
@@ -282,6 +288,7 @@ class IndexCommand extends Command
             // for now, just match the groups in the normalization groups of the entity
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
 //            $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
+            // maybe use less memory this way?
             $data = $this->normalizer->normalize(clone $r, null, ['groups' => $groups]);
             unset($r);
 

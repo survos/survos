@@ -63,7 +63,7 @@ jobs:
           - {local_path: 'bad-bot-bundle', split_repository: 'bad-bot-bundle'}
           - {local_path: 'maker-bundle', split_repository: 'SurvosMakerBundle'}
           - {local_path: 'mobile-bundle', split_repository: 'SurvosMobileBundle'}
-          - {local_path: 'meili-admin-bundle', split_repository: 'SurvosMeiliAdminBundle'}
+          - {local_path: 'meili-bundle', split_repository: 'meili-bundle'}
 #          - {local_path: 'providence-bundle', split_repository: 'SurvosProvidenceBundle'}
           - {local_path: 'reveal-bundle', split_repository: 'SurvosRevealBundle'}
           - {local_path: 'seo-bundle', split_repository: 'SurvosSeoBundle'}

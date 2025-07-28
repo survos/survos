@@ -139,6 +139,9 @@ class MeiliService
 
     public function getPrefixedIndexName(string $indexName)
     {
+        if (class_exists($indexName)) {
+            $indexName = new \ReflectionClass($indexName)->getShortName();
+        }
         if ($prefix = $this->getConfig()['meiliPrefix']) {
             if (!str_starts_with($indexName, $prefix)) {
                 $indexName = $prefix . $indexName;

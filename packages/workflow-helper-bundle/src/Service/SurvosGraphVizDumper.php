@@ -355,7 +355,7 @@ class SurvosGraphVizDumper extends GraphvizDumper
             } else {
                 switch ($key) {
                     case 'next':
-                        $code[] = "Next: ";
+                        $code[] = " Next: ";
                         foreach ($value??[] as $nextValue) {
                             $code[] = $nextValue;
 //                            $code[] = \sprintf('-><U>%s</U>', $this->escape($nextValue));

@@ -1,19 +1,9 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Survos\WorkflowBundle\Command;
 
 use Roave\BetterReflection\BetterReflection;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
-use Survos\WorkflowBundle\Service\SurvosGraphVizDumper;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -21,9 +11,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Workflow\Marking;
-use Symfony\Component\Workflow\StateMachine;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Component\Workflow\Transition;
 use Twig\Environment;
 
 #[AsCommand(name: 'survos:workflow:viz', description: 'Visualize a workflow')]
@@ -99,18 +88,19 @@ EOF
         foreach ($this->workflows as $workflow) {
             $wfName = $workflow->getName();
 
-            // If a specific name was given, skip others
             if ($input->getArgument('name') && $input->getArgument('name') !== $wfName) {
                 continue;
             }
 
             $definition = $workflow->getDefinition();
+            $mdStore = $definition->getMetadataStore();
 
-            // Transitions in the order they were declared
             foreach ($definition->getTransitions() as $transition) {
+                $transMeta = $mdStore->getTransitionMetadata($transition);
+                /** @var Transition $transition */
                 $tn = $transition->getName();
 
-                // Actions in your specified sequence
+
                 foreach ($this->orderedEvents as $action) {
                     $eventKey = sprintf('workflow.%s.%s.%s', $wfName, $action, $tn);
                     if (empty($allEvents->{$eventKey})) {
@@ -118,12 +108,10 @@ EOF
                     }
 
                     foreach ($allEvents->{$eventKey} as $e) {
-                        // Only include App\ listeners
                         if (!str_starts_with($e->class, 'App\\')) {
                             continue;
                         }
 
-                        // Build unique key to dedupe
                         $handlerKey = sprintf(
                             '%s::%s::%s::%s::%s',
                             $wfName,
@@ -137,11 +125,8 @@ EOF
                         }
                         $seen[$handlerKey] = true;
 
-                        // Reflect to get source and link
                         $refMethod = new \ReflectionMethod($e->class, $e->name);
-                        $br        = (new BetterReflection())
-                            ->reflector()
-                            ->reflectClass($e->class);
+                        $br        = (new BetterReflection())->reflector()->reflectClass($e->class);
                         $method    = $br->getMethod($e->name);
 
                         $srcLines = explode(
@@ -168,13 +153,13 @@ EOF
                             'link'   => $lineLink,
                             'source' => $justified,
                             'method' => $e->name,
+                            'metadata' => $transMeta, // redundant
                         ];
                     }
                 }
             }
         }
 
-        // Render Markdown for each workflow
         foreach ($collected as $wf => $transitions) {
             $md = $this->twig->render('@SurvosWorkflow/md/workflows.html.twig', [
                 'workflowName'       => $wf,

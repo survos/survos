@@ -6,13 +6,22 @@ Markdown for {{ workflowName }}
 
 {% for transition, actions in eventsByTransition %}
 
+{% if actions.metadata is defined %}
+**Metadata:**
+{% for key, value in actions.metadata %}
+        - **{{ key|capitalize }}**: {{ value }}
+{% endfor %}
+{% endif %}
+
 ---
 ## Transition: {{ transition }}
 
 {% for action, handlers in actions %}
-### {{ transition }}.{{ action|capitalize }} {{ handlers[0].method }}
+### {{ transition }}.{{ action|capitalize }}
 
 {% for handler in handlers %}
+        {{ handler.method }}()
+        // {{ handler.metadata.description??'' }}
 ```php
 {{ handler.source|raw }}
 ```

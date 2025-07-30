@@ -312,20 +312,14 @@ class MeiliService
 
         $groups = $this->settingsService->getNormalizationGroups($message->entityClass);
         $meiliIndex = $this->getMeiliIndex($message->entityClass);
-        $payloadThreshold = 1_000_000; // 30_000_000;
+        $payloadThreshold = 1_000_000; // 1MB
+        $chunkSize = $message->chunkSize ?? 1000;
 
         $documents = [];
         $payloadSize = 0;
         $processed = 0;
+        $buffer = [];
 
-        $this->logger?->info(sprintf(
-            "Streaming %d entities of class %s to MeiliSearch (payload threshold: %d bytes)",
-            count($message->entitiesData),
-            $message->entityClass,
-            $payloadThreshold
-        ));
-
-        // Build query
         $qb = $this->entityManager->createQueryBuilder()
             ->select('e')
             ->from($message->entityClass, 'e')
@@ -335,28 +329,16 @@ class MeiliService
         $iterableResult = $qb->getQuery()->toIterable([], \Doctrine\ORM\Query::HYDRATE_OBJECT);
 
         foreach ($iterableResult as $idx => $entity) {
-            $normalized = $this->normalizer->normalize($entity, 'array', ['groups' => $groups]);
-            $normalized = SurvosUtils::removeNullsAndEmptyArrays($normalized);
+            $buffer[] = $entity;
 
-//            $json = json_encode($normalized, JSON_UNESCAPED_UNICODE);
-            $size = strlen(serialize($normalized));
-            $id = $this->propertyAccessor->getValue($entity, $identifierField);
-            $this->logger->info((string)$entity . ': ' . $size . ' ' . $id);
-
-            $documents[] = $normalized;
-            $payloadSize += $size;
-            $processed++;
-
-            if ($payloadSize >= $payloadThreshold) {
-                $this->logger->warning(sprintf('%d/ (%d/%d) items, size: %s',
-                    count($documents), $idx, count($message->entitiesData), Bytes::parse($payloadSize)));
-//                $this->flushToMeili($meiliIndex, $documents);
-                $documents = [];
-                $payloadSize = 0;
-
-                $this->entityManager->clear(); // free memory
-                gc_collect_cycles();
+            if (count($buffer) >= $chunkSize) {
+                $this->processChunk($buffer, $identifierField, $groups, $documents, $payloadSize, $processed, $payloadThreshold, $meiliIndex, $message, $idx);
+                $buffer = [];
             }
+        }
+
+        if (!empty($buffer)) {
+            $this->processChunk($buffer, $identifierField, $groups, $documents, $payloadSize, $processed, $payloadThreshold, $meiliIndex, $message, count($message->entitiesData));
         }
 
         // Final flush
@@ -372,6 +354,47 @@ class MeiliService
             $processed,
             $message->entityClass
         ));
+    }
+
+    private function processChunk(
+        array $entities,
+        string $identifierField,
+        array $groups,
+        array &$documents,
+        int &$payloadSize,
+        int &$processed,
+        int $payloadThreshold,
+        $meiliIndex,
+        BatchIndexEntitiesMessage $message,
+        int $idx
+    ): void {
+        $this->logger->warning(sprintf("chunk size " . count($entities) .
+            " of %s entities of class %s", $identifierField, $message->entityClass));
+        $normalizedList = $this->normalizer->normalize($entities, 'array', ['groups' => $groups]);
+
+        foreach ($normalizedList as $i => $normalized) {
+            $normalized = SurvosUtils::removeNullsAndEmptyArrays($normalized);
+
+            $size = strlen(serialize($normalized)); // fast estimation
+            $documents[] = $normalized;
+            $payloadSize += $size;
+            $processed++;
+
+            $id = $this->propertyAccessor->getValue($entities[$i], $identifierField);
+            $this->logger->info((string)$entities[$i] . ': ' . $size . ' ' . $id);
+
+            if ($payloadSize >= $payloadThreshold) {
+                $this->logger->warning(sprintf('%d/ (%d/%d) items, size: %s',
+                    count($documents), $idx, count($message->entitiesData), Bytes::parse($payloadSize)));
+
+                $this->flushToMeili($meiliIndex, $documents);
+                $documents = [];
+                $payloadSize = 0;
+
+                $this->entityManager->clear(); // free memory
+                gc_collect_cycles();
+            }
+        }
     }
 
     private function flushToMeili($meiliIndex, array $documents): void

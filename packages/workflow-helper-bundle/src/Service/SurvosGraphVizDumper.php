@@ -1,282 +1,428 @@
 <?php
+
 namespace Survos\WorkflowBundle\Service;
 
+// worth reading: https://sketchviz.com/flowcharts-in-graphviz
+
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Workflow\Definition;
 use Symfony\Component\Workflow\Dumper\GraphvizDumper;
 use Symfony\Component\Workflow\Marking;
 
 class SurvosGraphVizDumper extends GraphvizDumper
 {
-    private array $dumpOptions = [];
+
+    private string $placeShape = 'oval';
+    private string $transitionShape = 'box';
 
     protected static array $defaultOptions = [
         'graph' => ['ratio' => 'compress', 'rankdir' => 'TB'],
         'node'  => [
-            'fontsize'  => '10',
-            'fontname'  => 'Helvetica',
-            'color'     => '#333333',
-            'style'     => 'rounded,filled',
+            'fontsize'  => '8',
+            'fontname'  => 'Arial',
+            'color'     => 'lightBlue',
+            'style'     => 'filled',
             'fixedsize' => 'false',
-            'width'     => '1',
+            'width'     => '2',    // increased for wider nodes
+            'height'    => '1',    // optional: set min height
         ],
         'edge'  => [
-            'fontsize'  => '8',
-            'fontname'  => 'Helvetica',
+            'fontsize'  => '7',
+            'fontname'  => 'Arial',
             'color'     => '#333333',
             'arrowhead' => 'normal',
             'arrowsize' => '0.5',
         ],
-        'place'       => ['shape' => 'oval', 'fillcolor' => 'lightblue'],
-        'transition'  => ['shape' => 'box', 'fillcolor' => 'lightyellow'],
+        // High-contrast place style
+        'place'      => ['shape' => 'oval', 'fillcolor' => '#FFD966'],
+        'transition' => ['shape' => 'box',  'fillcolor' => 'lightyellow'],
+    ];
+
+    protected static array $OLDdefaultOptions = [
+        'graph' => ['ratio' => 'compress', 'rankdir' => 'TB'],
+        'node' => ['fontsize' => '8', 'fontname' => 'Arial', 'color' => '#333333',
+            'fillcolor' => 'lightgreen',
+            'fixedsize' => 'false', 'width' => '1'],
+        'edge' => ['fontsize' => '7', 'fontname' => 'Arial',
+            'color' => '#333333', 'arrowhead' => 'normal', 'arrowsize' => '0.5'],
     ];
 
     public function dump(Definition $definition, ?Marking $marking = null, array $options = []): string
     {
-        $options = array_replace_recursive(self::$defaultOptions, $options);
-        $this->dumpOptions = $options;
         $withMetadata = $options['with-metadata'] ?? true;
+        $withMetadata = true;
 
-        $places      = $this->findPlaces($definition, $withMetadata, $marking);
+        $places = $this->findPlaces($definition, $withMetadata, $marking);
         $transitions = $this->findTransitions($definition, $withMetadata);
-        $edges       = $this->findEdges($definition);
-        $label       = $this->formatLabel($definition, $withMetadata, $options);
+        $edges = $this->findEdges($definition);
 
-        $dot  = $this->startDot($options, $label)
-            // Places cluster
-            . "  subgraph cluster_places {\n"
-            . "    rank=source;\n"
-            . "    node [" . $this->addOptions(array_merge($options['node'], $options['place'])) . "];\n"
+        $options = array_replace_recursive(self::$defaultOptions, $options);
+
+        $label = $this->formatLabel($definition, $withMetadata, $options);
+
+        return $this->startDot($options, $label)
             . $this->addPlaces($places, $withMetadata)
-            . "  }\n"
-            // Transitions cluster
-            . "  subgraph cluster_transitions {\n"
-            . "    rank=same;\n"
-            . "    node [" . $this->addOptions(array_merge($options['node'], $options['transition'])) . "];\n"
             . $this->addTransitions($transitions, $withMetadata)
-            . "  }\n"
             . $this->addEdges($edges)
             . $this->endDot();
-
-        return $dot;
     }
 
+
+    /**
+     * @internal
+     */
     protected function findPlaces(Definition $definition, bool $withMetadata, ?Marking $marking = null): array
     {
-        $options = $this->dumpOptions;
-        $store   = $definition->getMetadataStore();
-        $places  = [];
+        $workflowMetadata = $definition->getMetadataStore();
+
+        $places = [];
 
         foreach ($definition->getPlaces() as $place) {
-            $attrs = [
-                'shape'     => $options['place']['shape'],
-                'style'     => 'filled',
-                'fillcolor' => $store->getMetadata('bg_color', $place) ?? $options['place']['fillcolor'],
-            ];
-            if (in_array($place, $definition->getInitialPlaces(), true)) {
-                $attrs['penwidth'] = '2';
+            $attributes = [];
+            $attributes['fillcolor'] = 'lightgreen';
+            if (\in_array($place, $definition->getInitialPlaces(), true)) {
+                $attributes['style'] = 'filled';
             }
             if ($marking?->has($place)) {
-                $attrs['color']    = '#d9534f';
-                $attrs['penwidth'] = '2';
+                $attributes['color'] = '#FF0000';
+                $attributes['shape'] = 'doublecircle';
             }
+            $backgroundColor = $workflowMetadata->getMetadata('bg_color', $place);
+            if (null !== $backgroundColor) {
+                $attributes['style'] = 'filled';
+                $attributes['fillcolor'] = $backgroundColor;
+            } else {
+                $attributes['style'] = 'filled';
+                $attributes['fillcolor'] = 'lightgreen';
 
-            // Highlight terminal places with high contrast
-            $hasOutgoing = false;
-            foreach ($definition->getTransitions() as $t) {
-                if (in_array($place, $t->getFroms(), true)) {
-                    $hasOutgoing = true;
-                    break;
-                }
-            }
-            if (!$hasOutgoing) {
-                $attrs['fillcolor'] = '#2C3E50';
-                $attrs['fontcolor'] = '#ffffff';
             }
             if ($withMetadata) {
-                $attrs['metadata'] = $store->getPlaceMetadata($place);
+                $attributes['metadata'] = $workflowMetadata->getPlaceMetadata($place);
             }
-
-            $label = $store->getMetadata('label', $place) ?? $place;
-            if (isset($attrs['metadata']['label'])) {
-                unset($attrs['metadata']['label']);
+            $label = $workflowMetadata->getMetadata('label', $place);
+            if (null !== $label) {
+                $attributes['name'] = $label;
+                if ($withMetadata) {
+                    // Don't include label in metadata if already used as name
+                    unset($attributes['metadata']['label']);
+                }
             }
-
-            $places[$place] = ['attributes' => $attrs, 'label' => $label];
+            $places[$place] = [
+                'attributes' => $attributes,
+            ];
         }
 
         return $places;
     }
 
+    /**
+     * @internal
+     */
     protected function findTransitions(Definition $definition, bool $withMetadata): array
     {
-        $options     = $this->dumpOptions;
-        $store       = $definition->getMetadataStore();
+        $workflowMetadata = $definition->getMetadataStore();
+
         $transitions = [];
 
-        foreach ($definition->getTransitions() as $i => $transition) {
-            $attrs = [
-                'shape'     => $options['transition']['shape'],
-                'style'     => 'filled',
-                'fillcolor' => $store->getMetadata('bg_color', $transition) ?? $options['transition']['fillcolor'],
-            ];
-            $name = $store->getMetadata('label', $transition) ?? $transition->getName();
-            $metadata = $withMetadata ? $store->getTransitionMetadata($transition) : [];
-            unset($metadata['label']);
+        foreach ($definition->getTransitions() as $transition) {
+            $attributes = ['shape' => $this->transitionShape, 'regular' => true];
 
-            $transitions[$i] = ['attributes' => $attrs, 'name' => $name, 'metadata' => $metadata];
+            $backgroundColor = $workflowMetadata->getMetadata('bg_color', $transition);
+            if (null !== $backgroundColor) {
+                $attributes['style'] = 'filled';
+                $attributes['fillcolor'] = $backgroundColor;
+            }
+            $name = $workflowMetadata->getMetadata('label', $transition) ?? $transition->getName();
+
+
+            $metadata = [];
+            if ($withMetadata) {
+                $metadata = $workflowMetadata->getTransitionMetadata($transition);
+                unset($metadata['label']);
+            }
+
+            $transitions[] = [
+                'attributes' => $attributes,
+                'name' => $name,
+                'metadata' => $metadata,
+            ];
         }
 
         return $transitions;
     }
 
-    protected function findEdges(Definition $definition): array
-    {
-        $store = $definition->getMetadataStore();
-        $edges = [];
-
-        foreach ($definition->getTransitions() as $i => $transition) {
-            $label = $store->getMetadata('label', $transition) ?? $transition->getName();
-            foreach ($transition->getFroms() as $from) {
-                $edges[] = ['from' => $from, 'to' => $label, 'transition' => $i];
-            }
-            foreach ($transition->getTos() as $to) {
-                $edges[] = ['from' => $label, 'to' => $to, 'transition' => $i];
-            }
-        }
-
-        return $edges;
-    }
-
+    /**
+     * @internal
+     */
     protected function addPlaces(array $places, float $withMetadata): string
     {
         $code = '';
+
         foreach ($places as $id => $place) {
-            $dotId = $this->dotize($id);
-            $label = $this->escape($place['label']);
-            if ($withMetadata && !empty($place['attributes']['metadata'])) {
-                $label = sprintf('<<B>%s</B>%s>', $this->escape($place['label']), $this->addMetadata($place['attributes']['metadata']));
+            if (isset($place['attributes']['name'])) {
+                $placeName = $place['attributes']['name'];
+                unset($place['attributes']['name']);
+            } else {
+                $placeName = $id;
+            }
+
+            if ($withMetadata) {
+                $escapedLabel = \sprintf('<<B>%s</B>%s>', $this->escape($placeName), $this->addMetadata($place['attributes']['metadata']));
+                // Don't include metadata in default attributes used to format the place
                 unset($place['attributes']['metadata']);
             } else {
-                $label = sprintf('"%s"', $label);
+                $escapedLabel = \sprintf('"%s"', $this->escape($placeName));
             }
-            $code .= sprintf("    place_%s [label=%s %s];\n", $dotId, $label, $this->addAttributes($place['attributes']));
+
+            $code .= \sprintf("  place_%s [label=%s, shape=%s%s];\n", $this->dotize($id), $escapedLabel,
+                $this->placeShape,
+                $this->addAttributes($place['attributes']));
         }
+
         return $code;
     }
 
+    /**
+     * @internal
+     */
     protected function addTransitions(array $transitions, bool $withMetadata): string
     {
         $code = '';
-        foreach ($transitions as $i => $tran) {
-            $dotId = $this->dotize((string)$i);
-            $label = $this->escape($tran['name']);
-            if ($withMetadata && !empty($tran['metadata'])) {
-                $label = sprintf('<<B>%s</B>%s>', $this->escape($tran['name']), $this->addMetadata($tran['metadata']));
+
+        foreach ($transitions as $i => $place) {
+            if ($withMetadata) {
+//                $escapedLabel = \sprintf('<<B>%s</B><SUP>1</SUP>%s>', $this->escape($place['name']), $this->addMetadata($place['metadata']));
+                $escapedLabel = \sprintf('<<B>%s</B>%s>', $this->escape($place['name']), $this->addMetadata($place['metadata']));
             } else {
-                $label = sprintf('"%s"', $label);
+                $escapedLabel = '"' . $this->escape($place['name']) . '"';
             }
-            $code .= sprintf("    transition_%s [label=%s %s];\n", $dotId, $label, $this->addAttributes($tran['attributes']));
+
+            $code .= \sprintf("  transition_%s [label=%s,%s];\n",
+                $this->dotize($i),
+                $escapedLabel, $this->addAttributes($place['attributes']));
         }
+
         return $code;
     }
 
+    /**
+     * @internal
+     */
+    protected function findEdges(Definition $definition): array
+    {
+        $workflowMetadata = $definition->getMetadataStore();
+
+        $dotEdges = [];
+
+        foreach ($definition->getTransitions() as $i => $transition) {
+            $transitionName = $workflowMetadata->getMetadata('label', $transition) ?? $transition->getName();
+
+            foreach ($transition->getFroms() as $from) {
+                $dotEdges[] = [
+                    'from' => $from,
+                    'to' => $transitionName,
+                    'direction' => 'from',
+                    'transition_number' => $i, // $from . $i,
+                ];
+            }
+            foreach ($transition->getTos() as $to) {
+                $dotEdges[] = [
+                    'from' => $transitionName,
+                    'to' => $to,
+                    'direction' => 'to',
+                    'transition_number' => $i,
+                ];
+            }
+        }
+
+        return $dotEdges;
+    }
+
+    /**
+     * @internal
+     */
     protected function addEdges(array $edges): string
     {
         $code = '';
+
         foreach ($edges as $edge) {
-            $fromId = $this->dotize($edge['from']);
-            $toId   = $this->dotize($edge['to']);
-            $code .= sprintf("  place_%s -> transition_%s [style=\"solid\"];\n", $fromId, $edge['transition']);
-            $code .= sprintf("  transition_%s -> place_%s [style=\"solid\"];\n", $edge['transition'], $toId);
+            if ('from' === $edge['direction']) {
+                $code .= \sprintf('  place_%s -> transition_%s [style="solid", comment="%s"];' . "\n",
+                    $this->dotize($edge['from']),
+                    $this->dotize($edge['transition_number']),
+                    $edge['from']
+                );
+            } else {
+                $code .= \sprintf("  transition_%s -> place_%s [style=\"solid\"];\n",
+                    $this->dotize($edge['transition_number']),
+                    $this->dotize($edge['to'])
+                );
+            }
         }
+
         return $code;
     }
 
+    /**
+     * @internal
+     */
     protected function startDot(array $options, string $label): string
     {
-        $graphOpts = $this->addOptions($options['graph']);
-        $nodeOpts  = $this->addOptions($options['node']);
-        $edgeOpts  = $this->addOptions($options['edge']);
-        $labelCmd  = $label && $label !== '<>' ? "  label=$label\n" : '';
-        return "digraph workflow {\n  $graphOpts\n$labelCmd  node [$nodeOpts];\n  edge [$edgeOpts];\n\n";
+        return \sprintf("digraph workflow {\n  %s%s\n  node [%s];\n  edge [%s];\n\n",
+            $this->addOptions($options['graph']),
+            '""' !== $label && '<>' !== $label ? \sprintf(' label=%s', $label) : '',
+            $this->addOptions($options['node']),
+            $this->addOptions($options['edge'])
+        );
     }
 
+    /**
+     * @internal
+     */
     protected function endDot(): string
     {
         return "}\n";
     }
 
-    protected function formatLabel(Definition $definition, string $withMetadata, array $options): string
+    /**
+     * @internal
+     */
+    protected function dotize(string $id): string
     {
-        $current = $options['label'] ?? '';
-        $store   = $definition->getMetadataStore()->getWorkflowMetadata();
-        if (!$withMetadata) {
-            return sprintf('"%s"', $this->escape($current));
-        }
-        if ($current === '') {
-            return sprintf('<%s>', $this->addMetadata($store, false));
-        }
-        return sprintf('<<B>%s</B>%s>', $this->escape($current), $this->addMetadata($store));
+        // inject slugger?
+        return $id;
+        return hash('sha1', $id);
     }
 
+    /**
+     * @internal
+     */
     protected function escape(string|bool|null $value): string
     {
-        if (!is_string($value)) {
+        if (is_bool($value)) {
             return '';
         }
-        $value = htmlspecialchars($value, ENT_QUOTES);
-        return addslashes(wordwrap($value, 20, "<BR/>", true));
+
+        if (is_string($value)) {
+            $value = htmlspecialchars($value);
+            $value = wordwrap($value, 20, "<BR/>", true);
+        }
+        $value = \is_bool($value) ? ($value ? '1' : '0') : addslashes($value);
+        return $value;
     }
 
+    /**
+     * @internal
+     */
     protected function addAttributes(array $attributes): string
     {
-        $parts = [];
+        $code = [];
+
         foreach ($attributes as $k => $v) {
-            $parts[] = sprintf('%s="%s"', $k, $this->escape((string)$v));
+            $code[] = \sprintf('%s="%s"', $k, $this->escape($v));
         }
-        return $parts ? implode(' ', $parts) : '';
+
+        return $code ? ' ' . implode(' ', $code) : '';
     }
 
-    protected function addOptions(array $options): string
+    /**
+     * Handles the label of the graph depending on whether a label was set in CLI,
+     * if metadata should be included and if there are any.
+     *
+     * The produced label must be escaped.
+     *
+     * @internal
+     */
+    protected function formatLabel(Definition $definition, string $withMetadata, array $options): string
     {
-        $parts = [];
+        $currentLabel = $options['label'] ?? '';
+        $withMetadata = true;
+
+//        if (!$withMetadata) {
+//            // Only currentLabel to handle. If null, will be translated to empty string
+//            return \sprintf('"%s"', $this->escape($currentLabel));
+//        }
+        $workflowMetadata = $definition->getMetadataStore()->getWorkflowMetadata();
+
+        if ('' === $currentLabel) {
+            // Only metadata to handle
+            return \sprintf('<%s>', $this->addMetadata($workflowMetadata, false));
+        }
+
+        // currentLabel and metadata to handle
+        return \sprintf('<<B>%s</B>%s>', $this->escape($currentLabel), $this->addMetadata($workflowMetadata));
+    }
+
+    private function addOptions(array $options): string
+    {
+        $code = [];
+
         foreach ($options as $k => $v) {
-            $parts[] = sprintf('%s="%s"', $k, $v);
+            $code[] = \sprintf('%s="%s"', $k, $v);
         }
-        return implode(' ', $parts);
+
+        return implode(' ', $code);
     }
 
-    protected function addMetadata(array $metadata, bool $lineBreakFirstIfNotEmpty = true): string
+    /**
+     * @param bool $lineBreakFirstIfNotEmpty Whether to add a separator in the first place when metadata is not empty
+     */
+    private function addMetadata(array $metadata, bool $lineBreakFirstIfNotEmpty = true): string
     {
-        $code  = [];
-        $first = !$lineBreakFirstIfNotEmpty;
-        foreach ($metadata as $key => $val) {
-            if ($key === 'bg_color') {
-                continue;
+        $code = [];
+
+        $skipSeparator = !$lineBreakFirstIfNotEmpty;
+
+        foreach ($metadata as $key => $value) {
+            if ($skipSeparator) {
+                $code[] = \sprintf('%s: %s', $this->escape($key), $this->escape($value));
+                $skipSeparator = false;
+            } else {
+                switch ($key) {
+                    case 'transport':
+                        if ($value) {
+                            $code[] = "<BR/>Via: " . $value;
+                        }
+                        break;
+                    case 'next':
+                        $code[] = "<BR/><BR/>Then: ";
+                        foreach ($value ?? [] as $nextValue) {
+                            $code[] = $nextValue;
+//                            $code[] = \sprintf('-><U>%s</U>', $this->escape($nextValue));
+                        }
+                        break;
+                    case 'guard':
+
+                        $value = preg_replace('/\.(is|has)/', '.', $value);
+                        $value = str_replace('()', '', $value);
+                        $value = str_replace('subject.', '', $value);
+                        if (preg_match('|is_granted\(" ?(.*?)" ?\)|', $value, $matches)) {
+                            $value = str_replace($matches[0], $matches[1], $value);
+//                            $value =
+//                            dd($matches, $value);
+                        }
+//                        dump($value);
+                        $code[] = \sprintf('%s<U>%s</U>', '<BR/>',
+                            $this->escape($value));
+                        break;
+                    case 'description':
+                        if ($value) {
+                            $code[] = \sprintf('%s<I>%s</I>', '<BR/>',
+                                $this->escape($value));
+                        }
+                        break;
+                    case 'bg_color':
+                        // ignore, since the node is going to be that color
+                        break;
+                    default:
+                        $code[] = \sprintf('%s%s: %s', '<BR/>', $this->escape($key), $this->escape($value));
+
+                }
             }
-            $prefix = $first ? '' : '<BR/>';
-            // Handle array values as comma-delimited list
-            if (is_array($val)) {
-                $val = implode(', ', $val);
-            }
-            // Style description and guard differently
-            switch ($key) {
-                case 'description':
-                    $code[] = sprintf('%s<I>%s</I>', $prefix, $this->escape((string)$val));
-                    break;
-                case 'guard':
-                    $code[] = sprintf('%s<U>%s</U>', $prefix, $this->escape((string)$val));
-                    break;
-                default:
-                    $code[] = sprintf('%s%s: %s', $prefix, $this->escape($key), $this->escape((string)$val));
-            }
-            $first = false;
         }
+
         return $code ? implode('', $code) : '';
     }
 
-    protected function dotize(string $id): string
-    {
-        return (string) preg_replace('/[^A-Za-z0-9_]/', '_', $id);
-    }
+
 }

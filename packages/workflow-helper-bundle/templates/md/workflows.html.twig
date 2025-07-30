@@ -1,21 +1,24 @@
+{# @SurvosWorkflow/md/workflows.html.twig #}
+
 Markdown for {{ workflowName }}
 
 ![{{ workflowName }}.svg]({{ workflowName }}.svg)
 
-{% for type, e in events %}
+{% for transition, actions in eventsByTransition %}
 
-{% for code, x in e %}
+---
+## Transition: {{ transition }}
 
-## {{ code }} -- {{ type }}
+{% for action, handlers in actions %}
+### {{ transition }}.{{ action|capitalize }} {{ handlers[0].method }}
 
-{#{{ e|json_encode }}#}
-
-{% for a in x %}
+{% for handler in handlers %}
 ```php
-{{ a.source|raw }}
+{{ handler.source|raw }}
 ```
-{{ a.link }}
-        {% endfor %}
+[View source]({{ handler.link }})
+{% endfor %}
 
 {% endfor %}
-{%- endfor -%}
+
+{% endfor %}

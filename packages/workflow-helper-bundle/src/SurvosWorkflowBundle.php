@@ -151,7 +151,9 @@ class SurvosWorkflowBundle extends AbstractBundle implements CompilerPassInterfa
         $builder->autowire(WorkflowListener::class)
             ->setArgument('$workflowHelperService', new Reference(WorkflowHelperService::class))
             ->setArgument('$messageBus', new Reference(MessageBusInterface::class))
-            ->addTag('kernel.event_listener', ['event' => 'workflow.completed', 'method' => 'onCompleted']);
+            ->addTag('kernel.event_listener', ['event' => 'workflow.completed', 'method' => 'onCompleted'])
+            ->addTag('kernel.event_listener', ['event' => 'workflow.entered', 'method' => 'onEntered'])
+        ;
 
         foreach ([IterateCommand::class, MakeWorkflowCommand::class] as $commandClass) {
             $builder->autowire($commandClass)

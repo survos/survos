@@ -172,6 +172,8 @@ class SurvosGraphVizDumper extends GraphvizDumper
                 unset($place['attributes']['metadata']);
             } else {
                 $escapedLabel = \sprintf('"%s"', $this->escape($placeName));
+
+
             }
 
             $code .= \sprintf("  place_%s [label=%s, shape=%s%s];\n", $this->dotize($id), $escapedLabel,
@@ -381,7 +383,7 @@ class SurvosGraphVizDumper extends GraphvizDumper
                 switch ($key) {
                     case 'transport':
                         if ($value) {
-                            $code[] = "<BR/>Via: " . $value;
+                            $code[] = "<BR/><BR/>Via: " . $value;
                         }
                         break;
                     case 'next':

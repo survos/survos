@@ -14,7 +14,7 @@ use Survos\WorkflowBundle\Command\VizCommand;
 use Survos\WorkflowBundle\Controller\WorkflowController;
 use Survos\WorkflowBundle\Doctrine\TransitionListener;
 use Survos\WorkflowBundle\Service\ConfigureFromAttributesService;
-use Survos\WorkflowBundle\Service\SurvosGraphVizDumper;
+use Survos\WorkflowBundle\Service\SurvosGraphVizDumper3;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Survos\WorkflowBundle\Service\WorkflowListener;
 use Survos\WorkflowBundle\Twig\WorkflowExtension;

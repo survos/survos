@@ -4,6 +4,7 @@ namespace Survos\WorkflowBundle\Command;
 
 use Roave\BetterReflection\BetterReflection;
 use Survos\WorkflowBundle\Service\SurvosGraphVizDumper;
+use Survos\WorkflowBundle\Service\SurvosGraphVizDumper3;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

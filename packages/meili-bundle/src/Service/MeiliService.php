@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpClient\Psr18Client as SymfonyPsr18Client;
 
+use Zenstruck\Bytes;
 use function Symfony\Component\String\u;
 use Symfony\Component\HttpClient\Psr18Client;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -306,41 +307,58 @@ class MeiliService
     {
         $repo = $this->entityManager->getRepository($message->entityClass);
         $metadata = $this->entityManager->getClassMetadata($message->entityClass);
-        $identifierField = $metadata->getSingleIdentifierFieldName(); // primary key field name
+        $identifierField = $metadata->getSingleIdentifierFieldName();
 
         $groups = $this->settingsService->getNormalizationGroups($message->entityClass);
-        $objects = $repo->findBy([$identifierField => $message->entitiesData]);
-        $data = $this->normalizer->normalize($objects, 'array', ['groups' => $groups]);
-        $data = SurvosUtils::removeNullsAndEmptyArrays($data);
-
         $meiliIndex = $this->getMeiliIndex($message->entityClass);
-        assert($identifierField == $meiliIndex->getPrimaryKey(), "Pk mismatch  $identifierField");
+        $payloadThreshold = 50_000_000; // ~1MB
+        $documents = [];
+        $payloadSize = 0;
 
-            $this->logger?->warning(sprintf(
-                "Batch indexing %d entities of class %s in MeiliSearch",
-                count($message->entitiesData),
-                $message->entityClass
-            ));
+        $batchSize = 500;
+        foreach (array_chunk($message->entitiesData, $batchSize) as $chunk) {
+            $entities = $repo->findBy([$identifierField => $chunk]);
 
-            $task = $meiliIndex->addDocuments($data);
-//            $this->waitForTask($task);
+            foreach ($entities as $entity) {
+                $normalized = $this->normalizer->normalize($entity, 'array', ['groups' => $groups]);
+                $normalized = SurvosUtils::removeNullsAndEmptyArrays($normalized);
 
-            $this->logger?->debug(sprintf(
-                "MeiliSearch batch index task %s created for %d %s entities",
-                $task['taskUid'] ?? 'unknown',
-                count($message->entitiesData),
-                $message->entityClass
-            ));
+                $json = json_encode($normalized);
+                $size = $json ? strlen($json) : 0;
+                $payloadSize += $size;
+                $documents[] = $normalized;
 
+                if ($payloadSize >= $payloadThreshold) {
+                    $this->flushToMeili($meiliIndex, $documents, count($documents));
+                    $documents = [];
+                    $payloadSize = 0;
+                    $this->entityManager->clear();
+                    gc_collect_cycles();
+                }
+            }
+            $this->entityManager->clear(); // clear batch
+        }
+
+        if (!empty($documents)) {
+            $this->flushToMeili($meiliIndex, $documents, count($documents));
+        }
+    }
+
+    private function flushToMeili($meiliIndex, array $documents, int $count): void
+    {
         try {
+            $task = $meiliIndex->addDocuments($documents);
+            $this->logger?->debug(sprintf(
+                "MeiliSearch task %s created for %d documents",
+                $task['taskUid'] ?? 'unknown',
+                $count
+            ));
         } catch (\Exception $e) {
             $this->logger?->error(sprintf(
-                "Failed to batch index %d entities of class %s: %s",
-                count($message->entitiesData),
-                $message->entityClass,
+                "Failed to index %d documents: %s",
+                $count,
                 $e->getMessage()
             ));
-
             throw $e;
         }
     }

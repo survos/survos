@@ -19,6 +19,7 @@ use Survos\MeiliBundle\Service\MeiliService;
 use Survos\MeiliBundle\Service\SettingsService;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
+use Symfony\Component\Messenger\TraceableMessageBus;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Messenger\Monitor\Stamp\TagStamp;
@@ -32,6 +33,8 @@ class DoctrineEventListener
 {
     private array $pendingIndexOperations = [];
     private array $pendingRemoveOperations = [];
+
+    private static bool $dispatching = false;
 
     public function __construct(
         private readonly MeiliService              $meiliService,
@@ -50,13 +53,37 @@ class DoctrineEventListener
 
     public function postFlush(PostFlushEventArgs $args): void
     {
+        if (self::$dispatching || !$this->messageBus) {
+            return;
+        }
+
+        self::$dispatching = true;
+        try {
+            $this->dispatchPendingMessages();
+        } finally {
+            self::$dispatching = false;
+        }
+    }
+
+    private function dispatchPendingMessages(): void
+    {
+
+
+
         // Batch index operations by entity class
-        foreach ($this->pendingIndexOperations as $entityClass => $entityIds) {
-//            $entitiesData = array_column($operations, 'data');
+        foreach ($this->pendingIndexOperations as $entityClass => $objects) {
+            // this isn't necessary, because they won't be added if not indexed. Debugging when messages were in doctrine too
+//            if (!in_array($entityClass, $this->meiliService->indexedEntities)) {
+//                $this->logger?->warning(sprintf("Skipping entity class %s (not indexed)", $entityClass));
+//                continue;
+//            }
+            $groups = $this->settingsService->getNormalizationGroups($entityClass);
+            $normalized = $this->normalizer->normalize($objects, 'array', ['groups' => $groups]);
+            SurvosUtils::removeNullsAndEmptyArrays($normalized);
 
             $this->logger?->info(sprintf(
                 "Dispatching batch index message for %d %s entities",
-                count($entityIds),
+                count($objects),
                 $entityClass
             ));
 
@@ -65,9 +92,11 @@ class DoctrineEventListener
             if (class_exists(TagStamp::class)) {
                 $stamps[] = new TagStamp(new \ReflectionClass($entityClass)->getShortName());
             }
+
             $this->messageBus->dispatch(new BatchIndexEntitiesMessage(
                 $entityClass,
-                $entityIds,
+                $normalized,
+                reload: false
             ), $stamps);
         }
 
@@ -112,6 +141,8 @@ class DoctrineEventListener
         // normalization may be slow, so move this to the message handler
         $id = $this->propertyAccessor->getValue($object, 'id');
 
+        // BUT the entity is already hydrated, so maybe it _is_ better to do it here.
+
         if (!$id) {
             $this->logger?->warning(sprintf(
                 "Cannot schedule entity %s for indexing: no ID found",
@@ -119,10 +150,7 @@ class DoctrineEventListener
             ));
             return;
         }
-
-
-
-        $this->pendingIndexOperations[$object::class][] = $id;
+        $this->pendingIndexOperations[$object::class][] = $object;
     }
 
     public function preRemove(PreRemoveEventArgs $args): void
@@ -147,4 +175,5 @@ class DoctrineEventListener
             'id' => $id,
         ];
     }
+
 }

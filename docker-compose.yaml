@@ -77,7 +77,7 @@ services:
 #            - ./.docker/chroma:/data
 
     meilisearch:
-        image: getmeili/meilisearch:v1.15.2
+        image: getmeili/meilisearch:v1.16
         container_name: 'meilisearch'
         ports:
             - 7700:7700

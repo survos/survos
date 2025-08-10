@@ -6,6 +6,7 @@ use Survos\Bundle\MakerBundle\Service\MakerService;
 use Survos\CodeBundle\Command\MakeCommand;
 use Survos\CodeBundle\Command\MakeConstructor;
 use Survos\CodeBundle\Command\MakeController;
+use Survos\CodeBundle\Command\MakeRelation;
 use Survos\CodeBundle\Command\MakeService;
 use Survos\CodeBundle\Service\GeneratorService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -29,7 +30,7 @@ class SurvosCodeBundle extends AbstractBundle
             ->setArgument('$projectDir', '%kernel.project_dir%')
             ->setArgument('$generatorService', new Reference(GeneratorService::class))
             ->addTag('console.command')
-            , [MakeCommand::class, MakeService::class, MakeController::class, MakeConstructor::class]);
+            , [MakeCommand::class, MakeService::class, MakeController::class, MakeRelation::class,  MakeConstructor::class]);
 
     }
 

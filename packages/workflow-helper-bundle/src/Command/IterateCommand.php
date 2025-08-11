@@ -136,4 +136,259 @@ final class IterateCommand extends Command
 
             // Pick transition (if not provided)
             $transitions = [];
-            foreach (
+            foreach ($workflow->getDefinition()->getTransitions() as $t) {
+                if (in_array($marking, $t->getFroms(), true)) {
+                    $help = $this->wfTransitionDescription($workflow, $t) ?? $t->getName();
+                    if ($guard = $this->wfTransitionGuard($workflow, $t)) {
+                        $help .= " (if: {$guard})";
+                    }
+                    $transitions[$t->getName()] = $help;
+                }
+            }
+
+            if ($transition) {
+                if (!array_key_exists($transition, $transitions)) {
+                    $io->error("Invalid transition: {$transition}\nValid from '{$marking}':\n - " . implode("\n - ", array_keys($transitions)));
+                    return Command::FAILURE;
+                }
+            } else {
+                $question = new ChoiceQuestion('Transition?', array_keys($transitions));
+                $transition = $io->askQuestion($question);
+            }
+        }
+
+        $io->title($className);
+
+        // Build where (supports IN() for multiple markings)
+        $where = [];
+        if ($marking) {
+            $where['marking'] = array_values(array_filter(array_map('trim', explode(',', $marking))));
+        }
+
+        // Determine total count
+        if (!$count) {
+            $count = $repo->count($where);
+            if (!$count) {
+                $io->warning('No items found for filter: ' . json_encode($where));
+                return Command::SUCCESS;
+            }
+        }
+
+        $progressBar = new ProgressBar($io, $count);
+
+        // Prepare stamps
+        $stamps = [];
+        $shortClass = (new \ReflectionClass($className))->getShortName();
+
+        if ($workflow && $transition) {
+            $wfMeta = $this->workflowHelperService->getTransitionMetadata($transition, $workflow);
+            $transport ??= $wfMeta['transport'] ?? $this->defaultTransport;
+        }
+        if ($transport) {
+            $stamps[] = new TransportNamesStamp([$transport]);
+        }
+        if (class_exists(TagStamp::class)) {
+            $stamps[] = new TagStamp($transition ?? 'iterate');
+        }
+
+        // Optional dump table
+        $table = null;
+        $headers = [];
+        if ($dump) {
+            $headers = array_values(array_unique(array_filter(array_map('trim', explode(',', $dump)))));
+            if (!in_array('key', $headers, true)) {
+                $headers[] = 'key';
+            }
+            $table = new Table($io);
+            $table->setHeaders($headers);
+        }
+
+        // Build query
+        $qb = $this->entityManager->getRepository($className)->createQueryBuilder('t');
+        foreach ($where as $key => $value) {
+            if (is_array($value)) {
+                $qb->andWhere("t.$key IN (:{$key})");
+            } else {
+                $qb->andWhere("t.$key = :{$key}");
+            }
+            $qb->setParameter($key, $value);
+        }
+
+        // Identifier handling (single id only)
+        $classMeta = $this->entityManager->getClassMetadata($className);
+        $idFields = $classMeta->getIdentifierFieldNames();
+        if (count($idFields) !== 1) {
+            $io->error('Composite identifiers are not supported by this command.');
+            return Command::FAILURE;
+        }
+        $identifier = $idFields[0];
+
+        // PRE event
+        $this->eventDispatcher->dispatch(new RowEvent(
+            $className,
+            type: RowEvent::PRE_ITERATE,
+            action: self::class,
+        ));
+
+        // Iterate
+        $processed = 0;
+        foreach ($qb->getQuery()->toIterable() as $item) {
+            $key = $this->propertyAccessor->getValue($item, $identifier);
+
+            if ($table) {
+                $row = [];
+                foreach ($headers as $h) {
+                    $value = $h === 'key'
+                        ? $key
+                        : $this->propertyAccessor->getValue($item, $h);
+                    $row[] = substr((string)($value ?? ''), 0, 120);
+                }
+                $table->addRow($row);
+            }
+
+            if ($workflow && $transition) {
+                if (!$workflow->can($item, $transition)) {
+                    foreach ($workflow->buildTransitionBlockerList($item, $transition) as $blocker) {
+                        $io->warning($blocker->getMessage());
+                    }
+                    $progressBar->advance();
+                    $processed++;
+                    if ($max && $processed >= $max) {
+                        break;
+                    }
+                    continue;
+                }
+
+                $messageStamps = $stamps;
+                if (class_exists(DescriptionStamp::class)) {
+                    $messageStamps[] = new DescriptionStamp("{$shortClass}:{$key} {$marking}->{$transition}");
+                }
+
+                $this->bus->dispatch(
+                    new TransitionMessage($key, $className, $transition, $workflowName),
+                    $messageStamps
+                );
+            } else {
+                // No workflow: emit a row event and let listeners handle it
+                $this->eventDispatcher->dispatch(new RowEvent(
+                    $className,
+                    $item,
+                    $key,
+                    $processed,
+                    $count,
+                    type: RowEvent::LOAD,
+                    action: self::class,
+                    context: [
+                        'tags' => $tags ? explode(',', $tags) : [],
+                        'transition' => $transition,
+                        'transport' => $transport,
+                    ]
+                ));
+            }
+
+            $processed++;
+            if ($max && $processed >= $max) {
+                break;
+            }
+
+            // Optional: free memory on big runs (beware: detaches entities)
+            if (($processed % 200) === 0) {
+                $this->entityManager->clear();
+            }
+
+            $progressBar->advance();
+        }
+
+        $progressBar->finish();
+
+        if ($table) {
+            $table->render();
+        }
+
+        // POST event
+        $this->eventDispatcher->dispatch(new RowEvent(
+            $className,
+            type: RowEvent::POST_LOAD,
+            action: self::class,
+            context: [
+                'tags' => $tags ? explode(',', $tags) : [],
+                'transition' => $transition,
+                'transport' => $transport,
+            ]
+        ));
+
+        // Optional stats if a workflow was in play
+        if ($workflow) {
+            $this->showStats($io, $className, $availableTransitions, $workflow);
+        }
+
+        $io->success($this->getName() . ' success ' . $className);
+        return Command::SUCCESS;
+    }
+
+    private function getAllDoctrineEntitiesFqcn(): array
+    {
+        $entitiesFqcn = [];
+        foreach ($this->doctrine->getManagers() as $entityManager) {
+            $classesMetadata = $entityManager->getMetadataFactory()->getAllMetadata();
+            foreach ($classesMetadata as $classMetadata) {
+                $entitiesFqcn[lcfirst($classMetadata->getReflectionClass()->getShortName())] = $classMetadata->getName();
+            }
+        }
+        return $entitiesFqcn;
+    }
+
+    private function wfTransitionDescription(WorkflowInterface $workflow, Transition $t): ?string
+    {
+        $store = $workflow->getMetadataStore();
+        if (method_exists($store, 'getTransitionMetadata')) {
+            $meta = $store->getTransitionMetadata($t);
+            return $meta['description'] ?? null;
+        }
+        return $store->getMetadata('description', $t) ?? null;
+    }
+
+    private function wfTransitionGuard(WorkflowInterface $workflow, Transition $t): ?string
+    {
+        $store = $workflow->getMetadataStore();
+        if (method_exists($store, 'getTransitionMetadata')) {
+            $meta = $store->getTransitionMetadata($t);
+            return $meta['guard'] ?? null;
+        }
+        return $store->getMetadata('guard', $t) ?? null;
+    }
+
+    public function showStats(
+        SymfonyStyle $io,
+        string $className,
+        array $availableTransitions,
+        WorkflowInterface $workflow
+    ): void {
+        $counts = $this->workflowHelperService->getCounts($className, 'marking');
+        $table = new Table($io);
+        $table->setHeaderTitle($className);
+        $table->setHeaders(['marking', 'description', 'count', 'Available Transitions']);
+
+        $store = $workflow->getMetadataStore();
+
+        foreach ($counts as $name => $count) {
+            $markingHelp = null;
+            if (method_exists($store, 'getPlaceMetadata')) {
+                $pm = $store->getPlaceMetadata($name);
+                $markingHelp = $pm['description'] ?? null;
+            } else {
+                $markingHelp = $store->getMetadata('description', $name) ?? null;
+            }
+
+            $lines = [];
+            foreach ($availableTransitions[$name] ?? [] as $t) {
+                $desc = $this->wfTransitionDescription($workflow, $t);
+                $lines[] = sprintf('(%s) %s', $t->getName(), $desc ?? '');
+            }
+
+            $table->addRow([$name, $markingHelp, $count, implode("\n", $lines)]);
+        }
+
+        $table->render();
+    }
+}

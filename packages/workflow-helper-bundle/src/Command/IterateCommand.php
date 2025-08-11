@@ -47,21 +47,21 @@ final class IterateCommand extends Command
     public function __invoke(
         SymfonyStyle $io,
 
-        // ARGUMENTS — description first
+        // ARGUMENTS — description only (name inferred from parameter)
         #[Argument('FQCN or short name of the Doctrine entity')] ?string $className = null,
 
-        // OPTIONS — description first, then shortcut (single char)
-        #[Option('Messenger transport name', 'p')] ?string $transport = null,
-        #[Option('Workflow transition name', 't')] ?string $transition = null,
-        #[Option('Comma-separated marking(s) to filter', 'm')] ?string $marking = null,
-        #[Option('Workflow name/code if multiple on class', 'w')] ?string $workflowName = null,
-        #[Option('Comma-separated tags for listeners', 'g')] string $tags = '',
-        #[Option('Comma-separated property paths to dump for each row', 'd')] string $dump = '',
+        // OPTIONS — description first; name inferred from parameter; explicit shortcut
+        #[Option('Messenger transport name', shortcut: 'p')] ?string $transport = null,
+        #[Option('Workflow transition name', shortcut: 't')] ?string $transition = null,
+        #[Option('Comma-separated marking(s) to filter', shortcut: 'm')] ?string $marking = null,
+        #[Option('Workflow name/code if multiple on class', shortcut: 'w')] ?string $workflowName = null,
+        #[Option('Comma-separated tags for listeners', shortcut: 'g')] string $tags = '',
+        #[Option('Comma-separated property paths to dump for each row', shortcut: 'd')] string $dump = '',
         #[Option('grid:index after flush?')] ?bool $indexAfterFlush = null,
-        #[Option('Show counts per marking and exit', 's')] ?bool $stats = null,
-        #[Option('Process at most this many items', 'x')] int $max = 0,
+        #[Option('Show counts per marking and exit', shortcut: 's')] ?bool $stats = null,
+        #[Option('Process at most this many items', shortcut: 'x')] int $max = 0,
         #[Option('[deprecated] Use --max instead')] int $limit = 0,
-        #[Option('Use this count for progress bar', 'c')] int $count = 0,
+        #[Option('Use this count for progress bar', shortcut: 'c')] int $count = 0,
     ): int {
         // --limit shim
         if ($limit) {
@@ -372,6 +372,7 @@ final class IterateCommand extends Command
         $store = $workflow->getMetadataStore();
 
         foreach ($counts as $name => $count) {
+            // Place description
             $markingHelp = null;
             if (method_exists($store, 'getPlaceMetadata')) {
                 $pm = $store->getPlaceMetadata($name);

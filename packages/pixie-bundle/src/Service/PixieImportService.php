@@ -817,11 +817,12 @@ class PixieImportService
 // 2) Compute content hash from the source payload you consider authoritative
 //    (often the mapped "rowObj" after header mapping / data rules).
 //    Optionally include a version salt so changes in mapping code force reprocess.
-        $hash = ImportUtil::contentHash([
-            'v'    => 'pixie-import-v1',        // bump this if your mapping logic changes
-            'core' => $tableName,
-            'row'  => $r,                  // already normalized by your header rules/dataRules
-        ]);
+
+        $hash = ImportUtil::contentHash(
+            ['v' => 'pixie-import-v1', 'core' => $tableName, 'row' => $r],
+            ignoreKeys: ['updated_at', '_debug', 'taskId'],   // add any ephemeral keys you want to ignore
+            unicodeNormalize: true                  // if you ingest mixed Unicode sources
+        );
 
 // 3) Look up previous state
         /** @var RowImportState|null $state */

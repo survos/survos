@@ -11,6 +11,7 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 use function Symfony\Component\String\u;
+use \SplFileObject as SplFileObject;
 
 class SurvosUtils
 {
@@ -300,55 +301,34 @@ class SurvosUtils
      */
     static function removeNullsAndEmptyArrays($data): object|array
     {
-        // If it's an object, treat it like an associative array
-        if (is_object($data)) {
+        $isObject = is_object($data);
+        if ($isObject) {
             $data = (array) $data;
-            $isObject = true;
-        } else {
-            $isObject = false;
         }
 
-        // Only arrays need recursion
         if (is_array($data)) {
             $clean = [];
 
             foreach ($data as $key => $value) {
-                // Recursively clean arrays/objects
                 if (is_array($value) || is_object($value)) {
                     $value = self::removeNullsAndEmptyArrays($value);
                 }
 
-                // Skip nulls
-                if ($value === null) {
-                    continue;
-                }
+                if ($value === null) continue;
+                if (is_string($value) && $value === '') continue;
+                if (is_array($value) && $value === []) continue;
+                if (is_object($value) && (array) $value === []) continue;
 
-                // Skip empty arrays
-                if (is_array($value) && count($value) === 0) {
-                    continue;
-                }
-
-                // skip empty strings
-                if (is_string($value) && $value === '') {
-                    continue;
-                }
-
-
-                // Otherwise keep it
                 $clean[$key] = $value;
             }
 
-            // If originally an object, cast back
-            if ($isObject) {
-                return (object) $clean;
-            }
-
-            return $clean;
+            return $isObject ? (object) $clean : $clean;
         }
 
-        // Scalars (string, int, bool, etc) get returned untouched
         return $data;
     }
+
+
 
     public static function getConfigDirectory(string $appName = ''): string
     {
@@ -359,6 +339,25 @@ class SurvosUtils
         };
 
         return $appName ? "$baseDir/$appName" : $baseDir;
+    }
+
+    static public function readNdjsonLd(string $path): \Generator {
+        // hack, small files only
+        $f = file($path);
+//        $f = new SplFileObject($path, 'r');
+//        $f->setFlags(SplFileObject::DROP_NEW_LINE | SplFileObject::SKIP_EMPTY);
+        foreach ($f as $line) {
+            if ($line === null || $line === '' || ltrim($line)[0] === '#') {
+                continue; // skip blanks/comments
+            }
+            $row = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
+            try {
+                yield $row;
+            } catch (\JsonException $e) {
+                // handle or log and continue
+                error_log("Bad JSON line: " . $e->getMessage());
+            }
+        }
     }
 
 

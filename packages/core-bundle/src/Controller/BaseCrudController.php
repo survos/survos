@@ -32,9 +32,18 @@ abstract class BaseCrudController extends AbstractCrudController
             ;
     }
 
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->showEntityActionsInlined()
+            ;
+    }
+
     public function configureActions(Actions $actions): Actions
     {
         return parent::configureActions($actions)
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->setPermission(Action::NEW, 'ROLE_ADMIN')
             ->setPermission(Action::EDIT, 'ROLE_ADMIN')
             ->setPermission(Action::DELETE, 'ROLE_ADMIN')
@@ -49,11 +58,13 @@ abstract class BaseCrudController extends AbstractCrudController
 
     public function configureFilters(Filters $filters): Filters
     {
-        $places = $this->workflow->getDefinition()->getPlaces();
-        return $filters
-            ->add(ChoiceFilter::new('marking')
-                ->setChoices($this->getPlaces())
-            );
+        if (property_exists($this, 'workflow') && $this->workflow) {
+            $places = $this->workflow->getDefinition()->getPlaces();
+            return $filters
+                ->add(ChoiceFilter::new('marking')
+                    ->setChoices($this->getPlaces())
+                );
+        }
     }
 
     public function configureFields(string $pageName): iterable

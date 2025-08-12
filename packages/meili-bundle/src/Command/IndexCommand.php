@@ -57,7 +57,7 @@ class IndexCommand extends Command
         private LoggerInterface                               $logger,
         private MeiliService                                  $meiliService,
         private SettingsService                               $settingsService,
-        private NormalizerInterface                           $normalizer,
+//        private NormalizerInterface                           $normalizer,
         #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales=[],
 
     )
@@ -89,8 +89,8 @@ class IndexCommand extends Command
         #[Option("reset the meili index")] ?bool $reset = null,
         #[Option("fetch and index the documents")] ?bool $fetch = null,
         #[Option("wait until index is finished before exiting")] ?bool $wait = null,
-        #[Option()] ?string $transport=null,
-        #[Option("batch-size for sending documents to meili", name: 'batch')] int $batchSize = 100,
+        #[Option(shortcut: 'p')] ?string $transport=null,
+        #[Option("batch-size for sending documents to meili", name: 'batch')] int $batchSize = 1000,
     ): int
     {
 
@@ -169,7 +169,8 @@ class IndexCommand extends Command
             if ($fetch) {
                 // this needs to be dispatched so we can index large collections.
                 $stats = $this->indexClass($class, $index,
-                    batchSize: $batchSize, indexName: $indexName, groups: $groups,
+                    batchSize: $batchSize,
+                    indexName: $indexName, groups: $groups,
                     limit: $limit??0,
                     filter: $filter ? $filterArray: null,
                     primaryKey: $index->getPrimaryKey(),
@@ -455,18 +456,18 @@ class IndexCommand extends Command
 
     }
 
-    private function getTranslationArray($entity, $accessor) {
-        $rows = [];
-        $updatedRow = [Instance::DB_CODE_FIELD => $entity->getCode()];
-        foreach ($entity->getTranslations() as $translation) {
-            foreach (Instance::TRANSLATABLE_FIELDS as $fieldName) {
-                $translatedValue = $accessor->getValue($translation, $fieldName);
-                $updatedRow['_translations'][$translation->getLocale()][$fieldName] = $translatedValue;
-            }
-        }
-
-        return $updatedRow;
-    }
+//    private function getTranslationArray($entity, $accessor) {
+//        $rows = [];
+//        $updatedRow = [Instance::DB_CODE_FIELD => $entity->getCode()];
+//        foreach ($entity->getTranslations() as $translation) {
+//            foreach (Instance::TRANSLATABLE_FIELDS as $fieldName) {
+//                $translatedValue = $accessor->getValue($translation, $fieldName);
+//                $updatedRow['_translations'][$translation->getLocale()][$fieldName] = $translatedValue;
+//            }
+//        }
+//
+//        return $updatedRow;
+//    }
 
     public function getProcessBar(int $total=0): ProgressBar
     {

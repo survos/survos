@@ -118,10 +118,19 @@ EOL
         }
 
         $pixieService = $this->pixieService;
-        $config = $pixieService->selectConfig($configCode);
+
+        $ctx  = $pixieService->getReference($configCode);
+        $em   = $ctx->em;
+        $core = $pixieService->getCore('row', $configCode);
+        $config = $ctx->config;
+//        dd(count($core->rows), $ctx->ownerRef->name, $config);
+// ... persist rows, etc.
+//        $em->flush();
+
+//        $config = $pixieService->selectConfig($configCode);
         // make sure the local owner is set.
 
-        assert($config, "Missing $configCode");
+//        assert($config, "Missing $configCode");
         $sourceDir = $pixieService->getSourceFilesDir($configCode, subCode: $subCode);
         assert(is_dir($sourceDir), "Invalid source dir: $sourceDir");
 

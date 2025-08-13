@@ -13,7 +13,7 @@ use Survos\PixieBundle\Entity\Field\Field;
 #[ORM\Entity(repositoryClass: OwnerRepository::class)]
 #[ORM\Table(name: 'owner')]
 #[ORM\UniqueConstraint(name: 'owner_code', columns: ['code'])]
-class Owner
+class Owner implements \Stringable
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::STRING, length: 255)]
@@ -88,8 +88,8 @@ class Owner
     #[ApiProperty(description: "Total associated image count across projects/cores.")]
     public ?int $imageCount = null;
 
-    #[ORM\Column(length: 7)]
-    #[ApiProperty(description: "Default locale/language code for this owner (e.g., en, es-MX).")]
+    #[ORM\Column(length: 7, nullable: true)]
+    #[ApiProperty(description: "Default locale/language code for this owner (e.g., en, es-MX).  null if multi-lingual")]
     public ?string $locale = null;
 
     /** @var Collection<int, Field> */
@@ -177,5 +177,10 @@ class Owner
             }
         }
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->id;
     }
 }

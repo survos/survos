@@ -19,6 +19,7 @@ use Survos\PixieBundle\Message\PixieTransitionMessage;
 use Survos\PixieBundle\Meta\PixieInterface;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Item;
+use Survos\PixieBundle\Model\PixieContext;
 use Survos\PixieBundle\Model\Property;
 use Survos\PixieBundle\Model\Source;
 use Survos\PixieBundle\Model\Table;
@@ -393,7 +394,57 @@ class PixieService
 //
 //    }
 
+// PixieService.php
+    public function getCoreInContext(PixieContext $ctx, string $tableName): Core
+    {
+        $em       = $ctx->em;
+        $coreRepo = $em->getRepository(Core::class);
+
+        // Make sure we have a managed Owner proxy now
+        if (!$ctx->ownerRef) {
+            // Owner must already exist; error out if not.
+            $exists = (bool)$em->getConnection()->fetchOne(
+                'SELECT 1 FROM owner WHERE id = ?', [$ctx->pixieCode]
+            );
+            if (!$exists) {
+                throw new \RuntimeException("Owner '{$ctx->pixieCode}' not found in current pixie DB.");
+            }
+            $ctx->ownerRef = $em->getReference(Owner::class, $ctx->pixieCode);
+        }
+
+        $core = $coreRepo->findOneBy(['code' => $tableName]);
+        if (!$core) {
+            $core = new Core($tableName, $tableName);
+            $core->owner = $ctx->ownerRef;             // owning side
+            $em->persist($core);
+        } elseif ($core->owner === null) {
+            $core->owner = $ctx->ownerRef;             // repair if missing
+        }
+
+        return $core;
+    }
+
     public function getCore(string $tableName, string|Owner $ownerInput): Core
+    {
+        $ownerCode = \is_string($ownerInput) ? $ownerInput : (string)$ownerInput->code;
+
+        $ctx      = $this->getReference($ownerCode);
+        $em       = $ctx->em;
+        $coreRepo = $em->getRepository(Core::class);
+
+        // Core codes are globally unique in your schema (unique index on code),
+        // so scoping by owner is not required; if you later scope by owner, add it here.
+        $core = $coreRepo->findOneBy(['code' => $tableName]);
+        if (!$core) {
+            $core = new Core($tableName, $tableName); // don’t pass Owner here
+            $core->owner = $ctx->ownerRef;            // set owning side; no $owner->addCore() needed
+            $em->persist($core);
+        }
+
+        return $core;
+    }
+
+    public function getCoreXX(string $tableName, string|Owner $ownerInput): Core
     {
         // 1) Resolve owner code/id (don’t trust cross-EM objects)
         $ownerCode = is_string($ownerInput) ? $ownerInput : (string)$ownerInput->code;
@@ -425,6 +476,45 @@ class PixieService
         return $core;
     }
 
+// ...
+
+    /**
+     * Switch the sqlite connection to `$pixieCode`, return:
+     *  - the normalized Config for that pixie,
+     *  - the (current) pixie EM,
+     *  - a MANAGED Owner proxy for `$pixieCode`.
+     *
+     * Never pass Owner objects across calls; always re-acquire via this method.
+     */
+// PixieService.php
+// PixieService.php
+    public function getReference(string $pixieCode): PixieContext
+    {
+        // switch the EM/connection to this pixie
+        $this->selectConfig($pixieCode);
+        $em = $this->pixieEntityManager;
+
+        // stable Config object for this pixie
+        $config = $this->selectConfigNEW($pixieCode, $em);
+
+        // only set ownerRef if the row already exists
+        $ownerRef = null;
+        if ((bool)$em->getConnection()->fetchOne(
+            'SELECT 1 FROM owner WHERE id = ?', [$pixieCode]
+        )) {
+            $ownerRef = $em->getReference(Owner::class, $pixieCode);
+        }
+
+        return new PixieContext($pixieCode, $config, $em, $ownerRef);
+    }
+
+    /** If you REALLY need a managed Owner later (and only after you persist it) */
+    public function attachOwnerRef(PixieContext $ctx): void
+    {
+        $exists = (bool) $ctx->em->getConnection()
+            ->fetchOne('SELECT 1 FROM owner WHERE id = ?', [$ctx->pixieCode]);
+        $ctx->ownerRef = $exists ? $ctx->em->getReference(Owner::class, $ctx->pixieCode) : null;
+    }
 
 
 
@@ -457,122 +547,89 @@ class PixieService
         return $config;
     }
 
-    // @todo: add custom dataDir, etc.
-    public function selectConfig(string $pixieCode, bool $switchDatabase = true): ?Config
+    /**
+     * Return the normalized (template-expanded) Config for a pixie.
+     * Does NOT touch the database/EM. Cached per pixieCode.
+     */
+    public function getConfigSnapshot(string $pixieCode): Config
     {
-        static $configCache = null;
+        static $fixed = []; // cache of fixed configs
 
-        $conn = $this->pixieEntityManager->getConnection();
-        $currentName = pathinfo($this->dbName($pixieCode), PATHINFO_FILENAME);
-        if ($currentName === $pixieCode) {
-//            $switchDatabase = false;
-        } else {
-//            $conn->selectDatabase($this->dbName($pixieCode));
-        }
-
-        if ($switchDatabase) {
-//            dd($currentName, $pixieCode);
-            try {
-                $this->pixieEntityManager->flush();
-                $this->pixieEntityManager->clear();
-            } catch (\Exception $e) {
-                // warn?
+        if (!isset($fixed[$pixieCode])) {
+            $all = $this->getConfigFiles();                 // your existing cache/loader
+            $raw = $all[$pixieCode] ?? null;
+            if (!$raw) {
+                throw new \RuntimeException("Unknown pixieCode '$pixieCode'.");
             }
-            $conn = $this->pixieEntityManager->getConnection();
-            $toDbName = $this->dbName($pixieCode);
-            $conn->selectDatabase($toDbName);
-        }
 
-        if (null === $configCache) {
-            $configCache = $this->getConfigFiles();
-        }
-        try {
-            // this is the owner in the sqlite file, not in the app.
-            if ($config = $configCache[$pixieCode] ?? null) {
-                $config = StorageBox::fix($config, $this->getTemplates());
-            }
-            if (!$config) {
-                return null;
-            }
-            // not sure this should be here -- selectConfig is called during migrate, and owner doesn't yet exist
-            $owner = $this->pixieEntityManager->getRepository(Owner::class)->find($pixieCode);
-            $config->setOwner($owner);
-        } catch (\Exception $e) {
-//            assert(false);
-            $this->logger->warning(" creating " . $pixieCode . "\n\n" . $e->getMessage());
-//            return null;
-        }
-        return $config;
+            // Clone to avoid cross-call mutations, then expand templates, set paths.
+            $cfg = clone $raw;
+            $cfg = StorageBox::fix($cfg, $this->getTemplates());
+            $cfg->setPixieFilename($this->getPixieFilename($pixieCode));
+            $cfg->dataDir = $this->resolveFilename($cfg->getSourceFilesDir(), 'data');
 
-        dd($pixieCode, $this->bundleConfig);
-        static $configs = [];
-        if ($config = $configs[$pixieCode] ?? false) {
-            return $config;
+            // Important: avoid putting a MANAGED entity into Config (cross-EM trouble)
+            $cfg->setOwner(null);
+
+            $fixed[$pixieCode] = $cfg;
         }
-        $configFilename = $this->getConfigFilename($pixieCode);
-        assert($configFilename, "$configFilename $pixieCode");
-        if (!file_exists($configFilename)) {
+        return $fixed[$pixieCode];
+    }
+
+    // @todo: add custom dataDir, etc.
+// PixieService.php
+
+// PixieService.php
+
+    public function selectConfig(string $pixieCode): ?\Survos\PixieBundle\Model\Config
+    {
+        // 1) Load and normalize Config (from bundle config)
+        $configs = $this->getConfigFiles(pixieCode: $pixieCode);
+        $config  = $configs[$pixieCode] ?? null;
+        if (!$config) {
             return null;
         }
-        assert(file_exists($configFilename), "$configFilename does not exist");
+
+        // Expand templates / normalize tables & properties
+        $config = \Survos\PixieBundle\StorageBox::fix($config, $this->getTemplates());
+
+        // Ensure filenames/dirs are set
+        if (!$config->getPixieFilename()) {
+            $config->setPixieFilename($this->getPixieFilename($pixieCode));
+        }
+        if (!$config->getDataDir()) {
+            $resolved = $this->resolveFilename($config->getSourceFilesDir(), 'data');
+            $config->dataDir = $resolved;
+        }
+
+        // 2) SWITCH the EM/connection to this pixie DB if not already
+        $em     = $this->pixieEntityManager;
+        $conn   = $em->getConnection();
+
+        $params       = $conn->getParams();
+        $currentPath  = $params['path'] ?? null;                 // current sqlite path
+        $targetPath   = $this->dbName($pixieCode);               // desired sqlite path for this pixie
+
+        if ($currentPath !== $targetPath) {
+            // Finish any pending work on the old DB, then switch
+            try { $em->flush(); } catch (\Throwable $ignore) {}
+            $em->clear();
+            $conn->selectDatabase($targetPath);
+        }
+
+        // 3) Optionally attach Owner (if present in this pixie DB)
         try {
-            $configData = Yaml::parseFile($configFilename, Yaml::PARSE_CONSTANT); // so we can use php constants!
-            $yaml = Yaml::dump($configData);
-
-
-//        $yaml = file_get_contents($configFilename);
-//        $config = $this->denormalizer->denormalize($configData, Config::class);
-//        dd(config: $config, data: $configData);
-//        $config->setConfigFilename($configFilename);
-            $config = $this->serializer->deserialize(
-                $yaml,
-                Config::class, 'yaml');
-        } catch (NotNormalizableValueException $exception) {
-            dd($configFilename, $exception->getMessage());
-        }
-        // nested array access: https://packagist.org/packages/dflydev/dot-access-data
-
-        // if the properties are strings, we need to parse them
-        foreach ($config->getTables() as $tableName => $table) {
-            $properties = [];
-            $table->setName($tableName);
-            foreach ($table->getProperties() as $propIndex => $propData) {
-                if (is_string($propData)) {
-                    $property = Parser::parseConfigHeader($propData);
-                } else {
-                    $property = new Property(
-                        index: $propData['index'] ?? null,
-                        code: $propData['name'] ?? dd($propData),
-                        generated: $propData['generated'] ?? true,
-                        initial: $propData['initial'] ?? null,
-                        type: $propData['type'] ?? null // maybe default type based on code?
-                    );
-                }
-                // better would be to look for ## or something like that
-                if ($propIndex == 0) {
-                    $primaryKey = $property->getCode();
-                    $table->setPkName($primaryKey);
-                    $property->setIndex('PRIMARY');
-                }
-                $properties[] = $property;
+            $owner = $em->getRepository(\Survos\PixieBundle\Entity\Owner::class)->find($pixieCode);
+            if ($owner) {
+                $config->setOwner($owner);
             }
-            $table->setProperties($properties);
+        } catch (\Throwable $e) {
+            $this->logger?->warning("selectConfig($pixieCode): owner lookup failed: ".$e->getMessage());
         }
 
-        $config->code = $pixieCode; // quirky
-        $config->setConfigFilename($configFilename);
-//        dd($config);
-        assert($config instanceof Config);
-//        assert($config->source, $configFilename . " missing source key");
-//        assert($config->source instanceof Source);
-        foreach ($config->getTables() as $idx => $table) {
-            assert($table instanceof Table, "table $idx is not of class Table");
-        }
-//        dd($config, $configFilename, $config);
-        $configs[$pixieCode] = $config;
-//        dd($config);
         return $config;
     }
+
 
     public function getConfigFilename(string $pixieCode): string
     {
@@ -843,8 +900,8 @@ class PixieService
 //        $fromSchema = $schemaTool->createSchemaForComparison($toSchema);
 //        return $this->platform->getAlterSchemaSQL($schemaDiff);
         $comparator = $fromSchemaManager->createComparator();
-
-        $this->selectConfig($config->getCode());
+        $ctx = $this->getReference($config->getCode());
+//        $this->selectConfig($config->getCode());
         $toConnection = $this->pixieEntityManager->getConnection();
 //        $toConnection = DriverManager::getConnection(['path' => $toDbName, 'driver' => 'pdo_sqlite']);
 //        $toConnection->selectDatabase($toDbName);

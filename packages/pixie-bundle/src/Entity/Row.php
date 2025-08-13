@@ -27,16 +27,16 @@ class Row implements MarkingInterface, \Stringable
 
     #[ORM\ManyToOne(inversedBy: 'rows')] # , cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    protected Core $core;
+    public Core $core;
 
     #[ORM\Column(length: 255)]
-    private ?string $label = null;
+    public ?string $label = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $description = null;
+    public ?string $description = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
-    private ?array $data = null;
+    public ?array $data = null;
 
     /**
      * keyed by locale, then by translatable field name, e.g. en.label, en.description
@@ -54,7 +54,7 @@ class Row implements MarkingInterface, \Stringable
     private Collection $images;
 
     #[ORM\Column(nullable: true)]
-    private ?array $raw = null;
+    public ?array $raw = null;
 
     public function __construct(
         ?Core $core=null, ?string $id=null)

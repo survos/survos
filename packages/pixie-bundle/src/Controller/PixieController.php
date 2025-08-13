@@ -122,7 +122,7 @@ class PixieController extends AbstractController
         assert($property, $propertyCode);
         $cores = [];
         foreach ($this->coreRepository->findAll() as $core) {
-            $cores[$core->getCode()] = $core;
+            $cores[$core->code] = $core;
         }
         dd($cores);
 
@@ -581,7 +581,7 @@ class PixieController extends AbstractController
 
         $cores = [];
         foreach ($this->coreRepository->findAll() as $core) {
-            $cores[$core->getCode()] = $core;
+            $cores[$core->code] = $core;
         }
             return [
                 'owner' => $config->getOwner(),

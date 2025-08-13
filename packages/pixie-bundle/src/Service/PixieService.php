@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Survos\BootstrapBundle\Event\KnpMenuEvent;
 use Survos\PixieBundle\CsvSchema\Parser;
 use Survos\PixieBundle\Debug\TraceableStorageBox;
+use Survos\PixieBundle\Entity\Core;
 use Survos\PixieBundle\Entity\Owner;
 use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Event\StorageBoxEvent;
@@ -348,6 +349,82 @@ class PixieService
         sort($out);
         return $out;
     }
+
+//    public function getCoreOLD(string $tableName, ?Owner $owner=null): Core
+//    {
+//        // switch the database
+//        $this->getConfig($owner->pixieCode);
+//        $coreRepository = $this->pixieEntityManager->getRepository(Core::class);
+//        $ownerCode = $owner?->code;
+//        // this doesn't pass the smell test.
+//        if ( empty($owner) || empty($this->cores[$owner->code])) {
+//            foreach ($coreRepository->findAll() as $core) {
+////                assert($core->getOwner(), "Missing owner in core");
+////                if ($core->getOwner() !== $owner) {
+////                    dd($core->getOwner(), $owner);
+////                }
+////                assert($core->getOwner() === $owner);
+//                $this->cores[$ownerCode][$core->code] = $core;
+//            }
+//        }
+//
+////        if (!$core = $this->coreRepository->find($tableName)) {
+////        if (!$core = $this->cores[$owner->code][$tableName]??null) {
+//        if (!$core = $coreRepository->findOneBy(['code' => $tableName])) {
+////            dump($this->cores);
+////            dd("Shouldn't $tableName already be in core?");
+//            $core = new Core($tableName, $tableName, $owner);
+//            $owner->addCore($core);
+//
+////            foreach ($this->coreRepository->findAll() as $existingCore) {
+////                dump($existingCore->get   Code(), $existingCore);
+////            }
+//            assert($owner, "owner required when creating core");
+//            $this->pixieEntityManager->persist($core);
+//            assert($this->pixieEntityManager->contains($core));
+//            $this->cores[$ownerCode][$tableName] = $core;
+////            dump($tableName, array_keys($this->cores));
+//        }
+//        if (!$this->pixieEntityManager->contains($core)) {
+//            dd($core, $this->cores);
+//        }
+////        dd($this->serializer->serialize($core, 'json', ['groups' => 'core.read']));
+//        return $core;
+//
+//    }
+
+    public function getCore(string $tableName, string|Owner $ownerInput): Core
+    {
+        // 1) Resolve owner code/id (don’t trust cross-EM objects)
+        $ownerCode = is_string($ownerInput) ? $ownerInput : (string)$ownerInput->code;
+        $ownerId   = is_string($ownerInput)
+            ? $ownerInput                       // if your PK == code
+            : (property_exists($ownerInput, 'id') ? (string)$ownerInput->id : (string)$ownerInput->code);
+
+        // 2) Switch DB/EM for this owner
+        $this->getConfig($ownerCode);           // sets $this->pixieEntityManager to the right EM
+        $em       = $this->pixieEntityManager;
+        $coreRepo = $em->getRepository(Core::class);
+
+        // 3) Get a MANAGED Owner reference in THIS EM
+        $ownerRef = $em->getReference(Owner::class, $ownerId); // lightweight, no SELECT unless needed
+
+        // (Optional) sanity: ensure the owner row exists in this DB
+        // $exists = (bool)$em->getConnection()->fetchOne('SELECT 1 FROM owner WHERE id = ?', [$ownerId]);
+        // if (!$exists) { throw new \RuntimeException("Owner '$ownerId' not found in current DB"); }
+
+        // 4) Find Core by code (code is unique). Prefer also scoping by owner if code isn’t truly global.
+        $core = $coreRepo->findOneBy(['code' => $tableName]);
+        if (!$core) {
+            // Constructor should be side-effect free; don’t pass $owner here
+            $core = new Core($tableName, $tableName);
+            $core->owner = $ownerRef;           // set the owning side; no addCore() needed
+            $em->persist($core);
+        }
+
+        return $core;
+    }
+
 
 
 

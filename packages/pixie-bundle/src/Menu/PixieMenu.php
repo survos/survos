@@ -69,8 +69,8 @@ final class PixieMenu implements KnpMenuHelperInterface
         $subMenu = $this->addSubmenu($menu, $tableName ?: "choose");
         $this->add($subMenu, 'pixie_overview', ['pixieCode' => $pixieCode]);
         foreach ($owner->getCores() as $core) {
-            $tableRp = ['tableName' => $core->getCode(), 'pixieCode' => $pixieCode];
-            $this->add($subMenu, 'pixie_meili_browse', $tableRp, label: $core->getCode());
+            $tableRp = ['tableName' => $core->code, 'pixieCode' => $pixieCode];
+            $this->add($subMenu, 'pixie_meili_browse', $tableRp, label: $core->code);
         }
 
             return;

@@ -149,7 +149,7 @@ class PixieImportService
             }
 
 
-            $this->coreService->getCore($tableName, $owner);
+            $this->pixieService->getCore($tableName, $owner);
             SurvosUtils::assertKeyExists($tableName, $filesByTablename, "Missing table $tableName look for filename, not table");
             $filenames = $filesByTablename[$tableName];
             foreach ($filenames as $fn)
@@ -291,7 +291,7 @@ class PixieImportService
                             context: $context);
                         $event = $this->eventDispatcher->dispatch($rowEvent);
                         $rowObj = $event->row;
-                        
+
                         if ($event->type !== RowEvent::DISCARD) {
                             $row = $this->addRow($rowObj, $table, $owner); // insert row from file iterator
                         } else {
@@ -589,7 +589,8 @@ class PixieImportService
                             //
                         } elseif (in_array($valueType, ['@label', '@labels'])) {
 //                                dd($relatedRowData);
-                            if (!$sourceLang = $item->getCore()->getOwner()->getLocale() ?? null) {
+                            $owner = $item->getCore()->owner;
+                            if (!$sourceLang = $owner->locale ?? null) {
                                 if (!$sourceLang = $config->getSource()->locale) {
                                     assert(false, "unable to get source language");
                                     dd($row);
@@ -756,7 +757,7 @@ class PixieImportService
         $tableName = $table->getName();
 
         $id = $row[$pkName]; // unique within core
-        $core = $this->coreService->getCore($tableName, $owner);
+        $core = $this->pixieService->getCore($tableName, $owner);
         $rowId = Row::RowIdentifier($core, $id);
 
         // @todo: inject the handler based on the configCode
@@ -772,9 +773,10 @@ class PixieImportService
             dd($instance);
         }
 
+        $rowRepository = $this->entityManager->getRepository(Row::class);
 
         /** @var Row $r */
-        if (!$r = $this->repo($this->entityManager, Row::class)->find($rowId)) {
+        if (!$r = $rowRepository->find($rowId)) {
             $r = new Row($core, $id);
             assert($r->getId() === $rowId, "$rowId is not " . $r->getId());
             $this->entityManager->persist($r);
@@ -782,7 +784,7 @@ class PixieImportService
 
         // hard-coded hack for testing mapper
 
-        $targetClass = 'App\\Dto\\' . ucfirst($owner->getCode())
+        $targetClass = 'App\\Dto\\' . ucfirst($owner->code)
             . '\\' . ucfirst($table->getName());
         // or use the base class?
         if (class_exists($targetClass)) {
@@ -822,14 +824,14 @@ class PixieImportService
 //        $row = json_encode($row, JSON_FORCE_OBJECT);
 
         // this should be in the RowWorkflow!  here for testing only
-//        assert($owner->getPixieCode(), "missing pixieCode in ".$owner->getCode());
+//        assert($owner->getPixieCode(), "missing pixieCode in ".$owner->code);
         // argh, this should work and cleanup a lot!  but it doesn't
-//        $this->importHandler->process($owner->getCode(), $r);
+//        $this->importHandler->process($owner->code, $r);
 //        dd($row, $rowId);
 
         // 1) Ensure we have the row’s id within core
         $pk = $table->getPkName();
-//        dd($id, $core->getId());
+//        dd($id, $core->id);
 
         $idWithinCore = $id; // (string)($rowObj->{$pk} ?? $rowObj[$pk] ?? null);
         assert($idWithinCore);
@@ -847,21 +849,23 @@ class PixieImportService
             ignoreKeys: ['updated_at', '_debug', 'taskId'],   // add any ephemeral keys you want to ignore
             unicodeNormalize: true                  // if you ingest mixed Unicode sources
         );
+//        $hash = null; //  hash('xxh3', json_encode($row));
 
 // 3) Look up previous state
         /** @var RowImportState|null $state */
         if (!$state = $this->entityManager->find(RowImportState::class, [
-            'core_id' => $core->getId(),        // Core primary key (string in your schema)
+            'core_id' => $core->id,        // Core primary key (string in your schema)
             'row_id'  => $idWithinCore,         // id within core (not the composite Row::id)
         ])) {
             $state = new RowImportState(
-                $core->getId(),
+                $core->id,
                 $id
             );
             $this->entityManager->persist($state);
         }
 
         $overwrite = false;
+        $overwrite = true;
 // 4) Skip unchanged rows unless overwrite was requested
         if ($state && !$overwrite && $state->contentHash === $hash) {
             $this->logger->warning("Skipping the write");

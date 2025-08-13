@@ -237,8 +237,8 @@ EOL
         // ack
         $owner = $this->pixieEntityManager->find(Owner::class, $configCode);
         foreach ($config->getTables() as $table) {
-            $core = $this->coreService->getCore($table->getName(), $owner);
-            $count = $core->getRowCount();
+            $core = $this->pixieService->getCore($table->getName(), $owner);
+            $count = $core->rowCount;
 //            $count = -3; // $kv->count($table->getName());
             $url = sprintf("%s://%s", $configCode, $subCode);
             // table? Or core?

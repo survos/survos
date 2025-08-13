@@ -124,7 +124,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
             fn(Core $core) => $core->getRowCount() > 0
         ) as $core) {
 
-            $tableName = $core->getCode();
+            $tableName = $core->code;
             // maybe someday we'll store them and use meili for lookup
             if ($tableName === PixieInterface::PIXIE_STRING_TABLE) {
                 continue;
@@ -398,7 +398,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         $qb = $this->rowRepository->createQueryBuilder('row')
             ->join('row.core', 'core')
             ->andWhere('core.id = :core')
-            ->setParameter('core', $core->getId());
+            ->setParameter('core', $core->id);
         $query = $qb->getQuery();
         if ($limit) {
             $query->setMaxResults($limit);
@@ -478,7 +478,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
             // or add the table_name to the key if multiple tables exist in one index.
 //                $data->pixie_key = $this->asciiSlugger->slug(sprintf("%s_%s", $tableName, $row->getKey()))->toString();
 
-            $tableName = $core->getCode(); // a mess. @todo: cleanup!
+            $tableName = $core->code; // a mess. @todo: cleanup!
 //            $data->coreId = $tableName;
             $data->table = $tableName;
             $data->rp = [

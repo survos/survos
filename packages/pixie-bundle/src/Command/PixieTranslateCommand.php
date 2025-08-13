@@ -299,8 +299,8 @@ final class PixieTranslateCommand extends InvokableServiceCommand
         $ownerIndex = $this->getMeiliClient()->getIndex('Owner');
         foreach ($projects as $idx => $project) {
             $owner = $project->getOwner();
-            if (!in_array($owner->getCode(), $seenOwners)) {
-                $seenOwners[$owner->getCode()] = $owner;
+            if (!in_array($owner->code, $seenOwners)) {
+                $seenOwners[$owner->code] = $owner;
             }
 
             $progressBar->advance();

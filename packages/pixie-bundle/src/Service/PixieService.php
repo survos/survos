@@ -335,6 +335,51 @@ class PixieService
     }
 
 
+    /** @return list<class-string> */
+    private function pixieEntityClasses(EntityManagerInterface $em): array
+    {
+        $out = [];
+        foreach ($em->getMetadataFactory()->getAllMetadata() as $m) {
+            $name = $m->getName();
+            if (str_starts_with($name, 'Survos\\PixieBundle\\Entity\\')) {
+                $out[] = $name;
+            }
+        }
+        sort($out);
+        return $out;
+    }
+
+
+
+    public function selectConfigNEW(string $pixieCode, ?EntityManagerInterface $em = null): ?Config
+    {
+        static $configCache = null;
+
+        if ($configCache === null) {
+            $configCache = $this->getConfigFiles();
+        }
+
+        $config = $configCache[$pixieCode] ?? null;
+        if (!$config) {
+            return null;
+        }
+
+        // Expand templates, etc.
+        $config = StorageBox::fix($config, $this->getTemplates());
+
+        // Optionally hydrate Owner from the passed EM (correct pixie DB)
+        if (false && $em) {
+            try {
+                $owner = $em->getRepository(Owner::class)->find($pixieCode);
+                $config->setOwner($owner);
+            } catch (\Throwable $e) {
+                $this->logger->warning("Unable to load Owner($pixieCode): " . $e->getMessage());
+            }
+        }
+
+        return $config;
+    }
+
     // @todo: add custom dataDir, etc.
     public function selectConfig(string $pixieCode, bool $switchDatabase = true): ?Config
     {

@@ -41,6 +41,7 @@ use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\LibreTranslateService;
 use Survos\PixieBundle\Service\PixieConvertService;
+use Survos\PixieBundle\Service\PixieEntityManagerProvider;
 use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieTranslationService;
@@ -94,6 +95,12 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             ->setAutowired(true)
             ->setArgument('$logger', new Reference('logger'))
             ->setArgument('$purgeBeforeImport', $config['purge_before_import'])
+        ;
+
+        $builder->register(PixieEntityManagerProvider::class)
+            ->setAutowired(true)
+//            ->setArgument('$logger', new Reference('logger'))
+//            ->setArgument('$purgeBeforeImport', $config['purge_before_import'])
         ;
 
         /* @ack!! these needs to be in a translation bundle and optionally wired */

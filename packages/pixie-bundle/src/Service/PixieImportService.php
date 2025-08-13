@@ -53,6 +53,9 @@ use function Symfony\Component\String\u;
 
 class PixieImportService
 {
+    // do NOT inject these, get them from the current EM
+//    private RowRepository                     $rowRepository;
+
     public function __construct(
         private readonly PixieService             $pixieService,
         private readonly LoggerInterface          $logger,
@@ -60,13 +63,13 @@ class PixieImportService
         #[Target('pixieEntityManager')]
         private EntityManagerInterface            $entityManager,
         private CoreService                       $coreService,
-        private PropertyAccessorInterface $propertyAccessor,
+//private PixieEntityManagerProvider $provider,
+//        private PropertyAccessorInterface         $propertyAccessor,
 //        private ImportHandler                     $importHandler,
-        private CoreRepository                    $coreRepository,
-        private OriginalImageRepository $originalImageRepository,
-        private InstanceRepository                $instanceRepository,
-        private RowRepository                     $rowRepository,
-        private StrRepository                     $translateTextRepository,
+//        private CoreRepository                    $coreRepository,
+//        private OriginalImageRepository $originalImageRepository,
+//        private InstanceRepository                $instanceRepository,
+//        private StrRepository                     $strRepository,
         private readonly SerializerInterface      $serializer,
         private readonly SqliteService            $sqliteService,
         public bool                               $purgeBeforeImport = false,
@@ -91,10 +94,21 @@ class PixieImportService
     {
 
         $config = $this->pixieService->selectConfig($pixieCode);
-        if (!$kv) {
+//        $em = $this->pixieEntityManager;
 
-        }
-        $owner = $config->getOwner();
+        $this->entityManager->clear();
+//        $em   = $this->provider->get($pixieCode, $subCode);
+//        $rowRepositoryX = $em->getRepository(Row::class);
+
+        $rowRepository = $this->repo($this->entityManager, Row::class);
+//        assert($rowRepository === $rowRepositoryX, "repo mismatch");
+
+        $ownerRepository = $this->entityManager->getRepository(Owner::class);
+//        $ownerRepository = $this->repo($this->entityManager, Owner::class);
+        /** @var Owner $owner */
+        $owner = $ownerRepository->find($pixieCode);
+//        dd($owner->getName());
+//        $owner = $config->getOwner();
 //        $owner = $this->entityManager->getRepository(Owner::class)->find($pixieCode);
         assert($owner, "Missing owner $pixieCode in PIXIE owner table");
 
@@ -365,7 +379,7 @@ class PixieImportService
 //        $pixieEm = $this->sqliteService->getPixieEntityManager($original->root);
 //        dump($this->pixieEntityManager->getConnection()->getDriver());
         /** @var OriginalImage */
-        if (!$image = $this->originalImageRepository->find($original->getKey())) {
+        if (!$image = $this->repo($this->entityManager, OriginalImage::class)->find($original->getKey())) {
             // create the entity
             $image = new OriginalImage($original->imageUrl, $original->getKey(), $original->root);
             $row->addImage($image);
@@ -540,8 +554,9 @@ class PixieImportService
                     $this->listsByLabel[$relatedTableName] = [];
                     // eh, don't we have this as a pixie table?
 
-                    // use core instances!
-                    foreach ($this->rowRepository->findAll() as $rowEntity) {
+                    // use core instances!  This seems bad, could be too many row
+                    // should be on-demand
+                    foreach ($this->repo($this->entityManager, Row::class)->findAll() as $rowEntity) {
                         $this->listsByLabel[$rowEntity->getCoreCode()][$rowEntity->getLabel()] = $rowEntity->getId();
                     }
 //                    dd($this->listsByLabel);
@@ -617,7 +632,7 @@ class PixieImportService
 //                                        dd($translationModel->toArray(), $translationModel->getHash());
                                         // same as in handleRelations, need to refactor.
 
-                                        if (!$tt = $this->translateTextRepository->find($translationModel->getHash())) {
+                                        if (!$tt = $this->repo($this->entityManager, Str::class)->find($translationModel->getHash())) {
                                             $tt = new Str(
                                                 $translationModel->getText(),
                                                 $translationModel->getSource(),
@@ -725,6 +740,15 @@ class PixieImportService
         return $c;
     }
 
+    /** @template T of object */
+    public function repo(EntityManagerInterface $em, string $class)
+    {
+        assert($em === $this->entityManager);
+        /** @var \Doctrine\Persistence\ObjectRepository<T> */
+        return $em->getRepository($class);
+    }
+
+
     /** the one and only place it's add to the database, to core, etc. */
     public function addRow(array|object $row, Table $table, Owner $owner): Row
     {
@@ -750,7 +774,7 @@ class PixieImportService
 
 
         /** @var Row $r */
-        if (!$r = $this->rowRepository->find($rowId)) {
+        if (!$r = $this->repo($this->entityManager, Row::class)->find($rowId)) {
             $r = new Row($core, $id);
             assert($r->getId() === $rowId, "$rowId is not " . $r->getId());
             $this->entityManager->persist($r);
@@ -1010,7 +1034,7 @@ class PixieImportService
                     // this populate Str for translations.
                     foreach ($trEvent->translationModels as $transModel) {
                         /** @var $tt Str */
-                        if (!$tt = $this->translateTextRepository->find($transModel->getHash())) {
+                        if (!$tt = $this->repo($this->entityManager, Str::class)->find($transModel->getHash())) {
                             $tt = new Str(
                                 $transModel->getText(),
                                 $sourceLocale,

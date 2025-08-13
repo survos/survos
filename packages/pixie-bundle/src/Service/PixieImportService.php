@@ -107,7 +107,7 @@ class PixieImportService
 //        $ownerRepository = $this->repo($this->entityManager, Owner::class);
         /** @var Owner $owner */
         $owner = $ownerRepository->find($pixieCode);
-        dd($owner->getName());
+//        dd($owner->getName());
 //        $owner = $config->getOwner();
 //        $owner = $this->entityManager->getRepository(Owner::class)->find($pixieCode);
         assert($owner, "Missing owner $pixieCode in PIXIE owner table");

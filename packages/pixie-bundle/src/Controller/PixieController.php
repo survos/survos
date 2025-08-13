@@ -2,6 +2,9 @@
 
 namespace Survos\PixieBundle\Controller;
 
+use Survos\PixieBundle\Entity\OriginalImage;
+use Survos\PixieBundle\Entity\Str;
+use Survos\PixieBundle\Entity\Table;
 use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\CoreRepository;
@@ -482,7 +485,7 @@ class PixieController extends AbstractController
 //        return $this->render(, );
     }
 
-    #[Route('/{pixieCode}/home', name: 'pixie_homepage')]
+    #[Route('/{pixieCode}/home', name: 'pixie_homepage', options: ['expose' => true])]
     #[Route('/{pixieCode}', name: 'pixie_overview')]
     public function info(
         string                   $pixieCode,
@@ -490,6 +493,13 @@ class PixieController extends AbstractController
         #[MapQueryParameter] int $limit = 100
     ): Response
     {
+        $ctx = $this->pixieService->getReference($pixieCode);
+        $em = $ctx->em;
+        $tables = $em->getRepository(Table::class)->findAll();
+
+        $stringCount = $em->getRepository(Str::class)->count();
+        $imageCount = $em->getRepository(OriginalImage::class)->count();
+//        dd($stringCount, $imageCount);
 
         $conn = $this->pixieEntityManager->getConnection();
         $sm = $conn->createSchemaManager();
@@ -511,7 +521,8 @@ class PixieController extends AbstractController
 
         $countsByCore = $this->pixieService->getCountsByCore();
         foreach ($countsByCore as $code => $count) {
-            $core = $this->coreService->getCore($code, $config->getOwner());
+            $core = $this->pixieService->getCoreInContext($ctx, $config->getOwner());
+            dd($core->code, $core->rows);
             $data[$code] = $core->getRows()->slice(0, $limit); // $this->rowRepository->findBy(['core.id' => $code], [], $limit);
         }
 

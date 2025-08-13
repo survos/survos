@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Str
 {
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
-    private array $t = [];
+    public array $t = [];
 
     #[ORM\Column(nullable: true, options: ['jsonb' => true])]
     private ?array $extra = null;
@@ -24,24 +24,33 @@ class Str
      */
     public function __construct(
         #[ORM\Column(type: Types::TEXT)]
-        private ?string $original = null,
+        private(set) ?string $original = null,
 
         #[ORM\Column(length: 2)]
         #[Assert\Length(min: 2, max: 2)]
         #[Assert\Locale]
-        private ?string $locale = null,
+        private(set) ?string $locale = null,
 
         #[ORM\Column(length: 32)]
         #[ORM\Id]
-        private ?string $code = null,
+        private(set) ?string $code = null,
     )
     {
+    }
+
+    public function text(): string
+    {
+        return $this->original;
+    }
+
+    public string $text {
+        get => $this->original;
     }
 
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->code;
     }
 
     public function getCode(): ?string

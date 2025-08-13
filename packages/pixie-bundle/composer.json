@@ -60,8 +60,7 @@
         "survos/libre-translate-bundle": "^1.5",
         "doctrine/orm": "^3.3",
         "survos/sais-bundle": "^1.5",
-        "stof/doctrine-extensions-bundle": "^1.13",
-        "doctrine/doctrine-bundle": "^2.15"
+        "stof/doctrine-extensions-bundle": "^1.13"
     },
     "autoload": {
         "psr-4": {

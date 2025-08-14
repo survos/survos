@@ -808,7 +808,7 @@ class PixieImportService
                 ]
             );
 
-            $r->setRaw($rawEntity);
+            $r->raw = $rawEntity;
         }
 
 //        $entity->json = $row;

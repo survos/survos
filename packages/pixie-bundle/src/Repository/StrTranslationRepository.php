@@ -6,14 +6,15 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Survos\PixieBundle\Entity\Str;
+use Survos\PixieBundle\Entity\StrTranslation;
 
-class StrRepository extends ServiceEntityRepository
+class StrTranslationRepository extends ServiceEntityRepository
 {
     private EntityManagerInterface $_em;
     public function __construct(ManagerRegistry $registry)
     {
         $this->_em = $registry->getManager();
-        parent::__construct($registry, Str::class);
+        parent::__construct($registry, StrTranslation::class);
     }
 
     /**
@@ -49,5 +50,35 @@ class StrRepository extends ServiceEntityRepository
             ->select('COUNT(s.code)')
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+
+    /** @param string[] $codes
+     *  @return array<string,string> map[code] => value
+     */
+    public function fetchByCodesAndLocale(array $codes, string $locale): array
+    {
+        if (!$codes) return [];
+        $qb = $this->createQueryBuilder('t')
+            ->select('s.code AS code, t.value AS value')
+            ->join('t.str', 's')
+            ->where('t.locale = :loc')
+            ->andWhere('s.code IN (:codes)')
+            ->setParameter('loc', $locale)
+            ->setParameter('codes', $codes);
+
+        $out = [];
+        foreach ($qb->getQuery()->toIterable([], 1000) as $row) {
+            $out[$row['code']] = $row['value'];
+        }
+        return $out;
+    }
+
+    /** Single lookup with fallback chain */
+    public function fetchOne(string $code, string $locale, string $fallback = 'en'): ?string
+    {
+        $val = $this->fetchByCodesAndLocale([$code], $locale)[$code] ?? null;
+        if ($val !== null || $locale === $fallback) return $val;
+        return $this->fetchByCodesAndLocale([$code], $fallback)[$code] ?? null;
     }
 }

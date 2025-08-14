@@ -31,6 +31,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Intl\Locales;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -61,7 +62,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
         private EventDispatcherInterface                      $eventDispatcher,
         private EntityManagerInterface                        $pixieEntityManager,
         private RowRepository                                 $rowRepository,
-        private SqliteService                                 $sqliteService, private readonly OriginalImageRepository $originalImageRepository,
+        private SqliteService                                 $sqliteService, private readonly OriginalImageRepository $originalImageRepository, private readonly NormalizerInterface $normalizer,
 
         private ?MeiliService                                 $meiliService = null,
         private ?SluggerInterface                             $asciiSlugger = null,
@@ -120,8 +121,8 @@ final class PixieIndexCommand extends InvokableServiceCommand
         $summary = [];
         $owner = $config->getOwner(); // the owner record in pixie EM
         $recordsToWrite=[];
-        foreach ($owner->getCores()->filter(
-            fn(Core $core) => $core->getRowCount() > 0
+        foreach ($owner->cores->filter(
+            fn(Core $core) => $core->rowCount > 0
         ) as $core) {
 
             $tableName = $core->code;
@@ -404,7 +405,7 @@ final class PixieIndexCommand extends InvokableServiceCommand
             $query->setMaxResults($limit);
         }
 
-        $progressBar = new ProgressBar($this->io(), $core->getRowCount());
+        $progressBar = new ProgressBar($this->io(), $core->rowCount);
         $progressBar->setFormat(
             "<fg=white;bg=cyan> %status:-45s%</>\n%current%/%max% [%bar%] %percent:3s%%\n🏁  %estimated:-21s% %memory:21s%"
         );
@@ -413,11 +414,15 @@ final class PixieIndexCommand extends InvokableServiceCommand
         /** @var Row $row */
         foreach ($progressBar->iterate($rows) as $row) {
 
-            $data = (object) $row->getData()??$row->getRaw(); // this _should_ be the final version after polish!
+            $data = (object) $row->getData()??$row->raw; // this _should_ be the final version after polish!
             // hack for testing
             // could also be id-within-core if each core has its own index
             $data->pixie_key = $row->getId();
-//            dd($data, $row);
+            $normalized = $this->normalizer->normalize($row, 'array', [
+                'groups' => ['row.read', 'row.images']
+            ]);
+            dd($core->coreCode, $row, $normalized);
+            dd($data, $row);
             if (0)
             if ($data->images_count ?? 0) {
                 foreach ($data->images as $image) {

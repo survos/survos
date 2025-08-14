@@ -154,7 +154,7 @@ class Row implements MarkingInterface, \Stringable
 
     public function getOwner(): Owner
     {
-        return $this->getCore()->getOwner();
+        return $this->core->owner;
 
     }
 

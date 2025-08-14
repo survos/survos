@@ -15,6 +15,8 @@ use Survos\PixieBundle\Command\PixieIndexCommand;
 use Survos\PixieBundle\Command\PixieMakeCommand;
 use Survos\PixieBundle\Command\PixiePrepareCommand;
 use Survos\PixieBundle\Command\PixieSyncCommand;
+use Survos\PixieBundle\Command\PullUnamInstitutionsCommand;
+use Survos\PixieBundle\Command\PullUnamObrasCommand;
 use Survos\PixieBundle\Components\DatabaseComponent;
 use Survos\PixieBundle\Components\RowComponent;
 use Survos\PixieBundle\Controller\PixieController;
@@ -205,6 +207,8 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                      PixiePrepareCommand::class,
                      PixieImportCommand::class,
                      PixieExportCommand::class,
+PullUnamInstitutionsCommand::class,
+PullUnamObrasCommand::class,
 //                     PixieTranslateCommand::class,
                      IterateCommand::class,
 //                     PixieMediaCommand::class,

@@ -6,12 +6,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Survos\LibreTranslateBundle\Service\TranslationClientService;
 use Survos\PixieBundle\Repository\StrRepository;
 use Survos\PixieBundle\Repository\StrTranslationRepository;
+use Survos\WorkflowBundle\Traits\MarkingInterface;
+use Survos\WorkflowBundle\Traits\MarkingTrait;
 
 #[ORM\Entity(repositoryClass: StrTranslationRepository::class)]
 #[ORM\Table()]
 #[ORM\Index(name: 'idx_tr_locale', columns: ['locale'])]
-class StrTranslation implements \Stringable
+class StrTranslation implements \Stringable, MarkingInterface
 {
+    use MarkingTrait;
     // composite key (str_code, locale)
     #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: Str::class)]

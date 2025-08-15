@@ -46,11 +46,33 @@ class StrTranslationRepository extends ServiceEntityRepository
 
     public function totalCount(): int
     {
-        return (int)$this->createQueryBuilder('s')
-            ->select('COUNT(s.code)')
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s)')
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function countByLocale(string $locale): int
+    {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s)')
+            ->andWhere('s.locale = :loc')
+            ->setParameter('loc', $locale)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    // Count distinct source strings that have at least one translation
+    //
+    // (no join needed; use IDENTITY() to count the FK column)
+    public function totalSourceCount(): int
+    {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(DISTINCT IDENTITY(s.str))')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
 
 
     /** @param string[] $codes

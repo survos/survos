@@ -23,7 +23,7 @@ class StrRepository extends ServiceEntityRepository
     public function iterateAll(int $batchSize = 1000): \Generator
     {
         $qb = $this->createQueryBuilder('s')
-            ->orderBy('s.code', 'ASC');
+            ->orderBy('s.code_pk', 'ASC');
 
         $first = 0;
         while (true) {
@@ -46,7 +46,7 @@ class StrRepository extends ServiceEntityRepository
     public function totalCount(): int
     {
         return (int)$this->createQueryBuilder('s')
-            ->select('COUNT(s.code)')
+            ->select('COUNT(s)')
             ->getQuery()
             ->getSingleScalarResult();
     }

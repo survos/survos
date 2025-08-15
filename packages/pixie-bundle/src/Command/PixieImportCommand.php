@@ -270,7 +270,7 @@ EOL
         }
         // this only queues source translations, so unrelated to indexing
         if ($populate) {
-            $cli = "pixie:translate --queue $configCode";
+            $cli = "pixie:translate  $configCode";
             $this->io->warning('bin/console ' . $cli);
 //            $this->runCommand($cli);
         }

@@ -1,44 +1,65 @@
 <?php
-// src/Entity/StrTranslation.php
 namespace Survos\PixieBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Survos\LibreTranslateBundle\Service\TranslationClientService;
+use Survos\PixieBundle\Repository\StrRepository;
+use Survos\PixieBundle\Repository\StrTranslationRepository;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'pixie_str_translation')]
-#[ORM\UniqueConstraint(name: 'uniq_str_locale', columns: ['str_id','locale'])]
-#[ORM\Index(name: 'idx_locale', columns: ['locale'])]
-class StrTranslation
+#[ORM\Entity(repositoryClass: StrTranslationRepository::class)]
+#[ORM\Table()]
+#[ORM\Index(name: 'idx_tr_locale', columns: ['locale'])]
+class StrTranslation implements \Stringable
 {
-    #[ORM\Id, ORM\Column(type: Types::STRING, options: ['length' => 35])]
-    private string $code;
-
+    // composite key (str_code, locale)
+    #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: Str::class)]
-    #[ORM\JoinColumn(name: 'str_id', nullable: false, onDelete: 'CASCADE')]
-    private Str $str;
+    #[ORM\JoinColumn(name: 'str_code', referencedColumnName: 'code', nullable: false, onDelete: 'CASCADE')]
+    private Str $str_ref;
 
-    #[ORM\Column(length: 12)]
-    private string $locale; // e.g. 'en', 'es-MX'
+    #[ORM\Id]
+    #[ORM\Column(name: 'locale', length: 15)]
+    private string $locale_raw;
 
-    #[ORM\Column(type: 'text')]
-    private string $value;
+    #[ORM\Column(name: 'value', type: Types::TEXT)]
+    private string $value_raw;
 
-    // Optional quality/status fields
-    #[ORM\Column(length: 32, options: ['default' => 'verified'])]
-    private string $status = 'verified';
+    #[ORM\Column(name: 'value_hash', length: 64)]
+    private string $value_hash;
 
-    #[ORM\Column(type: 'datetime_immutable', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private \DateTimeImmutable $updatedAt;
+    #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $created_at;
 
-    public function __construct() { $this->updatedAt = new \DateTimeImmutable(); }
+    #[ORM\Column(name: 'updated_at', type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $updated_at;
 
-    // Property hook-ish convenience (PHP 8.4) – keep it simple:
-    public function setValue(string $value): self {
-        $this->value = $value;
-        $this->updatedAt = new \DateTimeImmutable();
-        return $this;
+    public function __construct(Str $str, string $locale, string $value)
+    {
+        $this->str_ref    = $str;
+        $this->locale_raw = $locale;
+        $this->value      = $value; // go through hook
+        $now = new \DateTimeImmutable();
+        $this->created_at = $now;
+        $this->updated_at = $now;
     }
 
-    // getters/setters omitted for brevity
+    private function touch(): void { $this->updated_at = new \DateTimeImmutable(); }
+
+    // Virtuals
+
+    public Str $str { get => $this->str_ref; }
+    public string $code { get => $this->str_ref->code; }   // convenience
+
+    public string $locale { get => $this->locale_raw; }
+
+    public string $value {
+        get => $this->value_raw;
+        set { $this->value_raw = $value; $this->value_hash = TranslationClientService::calcHash($value, $this->locale_raw); $this->touch(); }
+    }
+
+    public function __toString()
+    {
+        return mb_substr($this->value, 0, 60);
+    }
 }

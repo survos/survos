@@ -8,6 +8,7 @@ use Survos\PixieBundle\Entity\OriginalImage;
 use Survos\PixieBundle\Entity\Owner;
 use Survos\PixieBundle\Entity\RowImportState;
 use Survos\PixieBundle\Model\OriginalImage as OriginalImageModel;
+use Survos\PixieBundle\Model\PixieContext;
 use Survos\PixieBundle\Service\SqliteService;
 use Survos\PixieBundle\Entity\Core;
 use Survos\PixieBundle\Entity\Instance;
@@ -93,23 +94,11 @@ class PixieImportService
                            ?callable   $callback = null): StorageBox
     {
 
-        $config = $this->pixieService->selectConfig($pixieCode);
-//        $em = $this->pixieEntityManager;
-
-        $this->entityManager->clear();
-//        $em   = $this->provider->get($pixieCode, $subCode);
-//        $rowRepositoryX = $em->getRepository(Row::class);
-
-        $rowRepository = $this->repo($this->entityManager, Row::class);
-//        assert($rowRepository === $rowRepositoryX, "repo mismatch");
-
-        $ownerRepository = $this->entityManager->getRepository(Owner::class);
-//        $ownerRepository = $this->repo($this->entityManager, Owner::class);
-        /** @var Owner $owner */
-        $owner = $ownerRepository->find($pixieCode);
-//        dd($owner->getName());
-//        $owner = $config->getOwner();
-//        $owner = $this->entityManager->getRepository(Owner::class)->find($pixieCode);
+        $ctx = $this->pixieService->getReference($pixieCode);
+        $strRepo = $ctx->repo(Str::class);
+        $config = $ctx->config;
+        $rowRepository = $ctx->repo(Row::class);
+        $owner = $ctx->ownerRef;
         assert($owner, "Missing owner $pixieCode in PIXIE owner table");
 
         // the json files, slightly processed in :prepare, no csv
@@ -314,7 +303,7 @@ class PixieImportService
                     }
 //                    $row['saisImages'][] = $item->addImage($imageEntity);
 
-                    $rowObj = $this->handleRelations($kv, $row, $config, $pixieCode, $table, $owner, $rowObj);
+                    $rowObj = $this->handleRelations($ctx, $row, $config, $pixieCode, $table, $owner, $rowObj);
 
 //                    $rowObj = $this->handleImages($kv, $row, $config, $pixieCode, $table, $owner, $rowObj);
 
@@ -506,7 +495,7 @@ class PixieImportService
      * @param Table $table
      * @return array $row modified row, side effect of creating lists.
      */
-    public function handleRelations(?StorageBox $kv,
+    public function handleRelations(PixieContext $ctx,
                                     Row         $item,
                                     Config      $config,
                                     string      $pixieCode,
@@ -514,6 +503,7 @@ class PixieImportService
                                     Owner       $owner,
                                     array       $row): array
     {
+        $strRepo = $ctx->repo(Str::class);
         foreach ($table->getProperties() as $property) {
 
             $propertyCode = $property->getCode();
@@ -618,7 +608,7 @@ class PixieImportService
                                             $sourceLang,
                                             $sourceLang,
                                             row: $item,
-                                            storageBox: $kv,
+                                            ctx: $ctx,
                                             pixieCode: $pixieCode,
                                             table: $relatedTableName,
                                             key: $relatedId,
@@ -632,19 +622,15 @@ class PixieImportService
                                         assert($translationModel->isSource(), "translations have been moved.");
 //                                        dd($translationModel->toArray(), $translationModel->getHash());
                                         // same as in handleRelations, need to refactor.
-
-                                        if (!$tt = $this->repo($this->entityManager, Str::class)->find($translationModel->getHash())) {
-                                            $tt = new Str(
-                                                $translationModel->getText(),
-                                                $translationModel->getSource(),
-                                                $translationModel->getHash()
+                                        $hash = $translationModel->getHash();
+                                        if (!$str = $strRepo->find($hash)) {
+                                            $str = new Str(
+                                                code: $translationModel->getHash(),
+                                                original: $translationModel->getText(),
+                                                srcLocale: $translationModel->getSource(),
                                             );
-                                            $this->entityManager->persist($tt);
+                                            $this->entityManager->persist($str);
                                         }
-
-//                                        if (!$kv->has($translationModel->getHash(), table: PixieInterface::PIXIE_STRING_TABLE, preloadKeys: true)) {
-//                                            $kv->set($translationModel->toArray(), PixieInterface::PIXIE_STRING_TABLE);
-//                                        }
                                     }
 
                                     // the label and _translations have been set
@@ -1040,16 +1026,12 @@ class PixieImportService
                         /** @var $tt Str */
                         if (!$tt = $this->repo($this->entityManager, Str::class)->find($transModel->getHash())) {
                             $tt = new Str(
-                                $transModel->getText(),
-                                $sourceLocale,
                                 $transModel->getHash(),
+                                original: $transModel->getText(),
+                                srcLocale: $sourceLocale,
                             );
                             $this->entityManager->persist($tt);
                         }
-                        $tt->setExtra([
-                            'core' => $tableName, // for debugging,
-                            'key' => $rowObj[$table->getPkName()],
-                        ]);
                     }
                 }
         }

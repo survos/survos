@@ -26,6 +26,7 @@ use Survos\PixieBundle\DataCollector\PixieDataCollector;
 use Survos\PixieBundle\Debug\TraceableStorageBox;
 use Survos\PixieBundle\EventListener\CsvHeaderEventListener;
 use Survos\PixieBundle\EventListener\PixieControllerEventListener;
+use Survos\PixieBundle\EventListener\PixiePostLoadListener;
 use Survos\PixieBundle\EventListener\TranslationRowEventListener;
 use Survos\PixieBundle\Menu\PixieItemMenu;
 use Survos\PixieBundle\Menu\PixieMenu;
@@ -38,6 +39,7 @@ use Survos\PixieBundle\Repository\ReferenceRepository;
 use Survos\PixieBundle\Repository\RelationRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\StrRepository;
+use Survos\PixieBundle\Repository\StrTranslationRepository;
 use Survos\PixieBundle\Repository\TableRepository;
 use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\ImportHandler;
@@ -126,6 +128,8 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                      OriginalImageRepository::class,
                      RelationService::class,
                      CoreRepository::class,
+                     StrRepository::class,
+                     StrTranslationRepository::class,
                      RowRepository::class,
                      StrRepository::class,
                      TableRepository::class,
@@ -207,8 +211,8 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                      PixiePrepareCommand::class,
                      PixieImportCommand::class,
                      PixieExportCommand::class,
-PullUnamInstitutionsCommand::class,
-PullUnamObrasCommand::class,
+//PullUnamInstitutionsCommand::class,
+//PullUnamObrasCommand::class,
 //                     PixieTranslateCommand::class,
                      IterateCommand::class,
 //                     PixieMediaCommand::class,
@@ -235,7 +239,7 @@ PullUnamObrasCommand::class,
         ;
 
         // register our listener.  We could disable or set priority in the config
-        foreach ([TranslationRowEventListener::class, CsvHeaderEventListener::class, PixieControllerEventListener::class] as $listenerClass) {
+        foreach ([TranslationRowEventListener::class, CsvHeaderEventListener::class, PixiePostLoadListener::class, PixieControllerEventListener::class] as $listenerClass) {
             $builder->register($listenerClass)
                 ->setAutowired(true)
                 ->setAutoconfigured(true)

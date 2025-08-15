@@ -4,6 +4,7 @@ namespace Survos\PixieBundle\Controller;
 
 use Survos\PixieBundle\Entity\OriginalImage;
 use Survos\PixieBundle\Entity\Str;
+use Survos\PixieBundle\Entity\StrTranslation;
 use Survos\PixieBundle\Entity\Table;
 use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Survos\PixieBundle\Repository\RowRepository;
@@ -485,6 +486,7 @@ class PixieController extends AbstractController
 //        return $this->render(, );
     }
 
+
     #[Route('/{pixieCode}/home', name: 'pixie_homepage', options: ['expose' => true])]
     #[Route('/{pixieCode}', name: 'pixie_overview')]
     public function info(
@@ -521,9 +523,9 @@ class PixieController extends AbstractController
 
         $countsByCore = $this->pixieService->getCountsByCore();
         foreach ($countsByCore as $code => $count) {
-            $core = $this->pixieService->getCoreInContext($ctx, $config->getOwner());
-            dd($core->code, $core->rows);
-            $data[$code] = $core->getRows()->slice(0, $limit); // $this->rowRepository->findBy(['core.id' => $code], [], $limit);
+            $core = $this->pixieService->getCoreInContext($ctx, $code);
+            assert($core, "Missing core $code");
+            $data[$code] = $core->rows->slice(0, $limit); // $this->rowRepository->findBy(['core.id' => $code], [], $limit);
         }
 
 //        dump($em->getConnection()->getParams());
@@ -540,23 +542,6 @@ class PixieController extends AbstractController
         }
         $tables = [];
 
-        // @todo: refactor counts to be stored with core / field / stats
-        if (false) {
-            $kv = $this->pixieService->getStorageBox($pixieCode);
-            foreach ($kv->getTableNames() as $tableName)
-            {
-                $counts = [];
-                // this are the FIELD counts, and need to be refactored for relation, category, list and probably attribute
-                foreach ($kv->getIndexes($tableName) as $indexName) {
-                    $counts[$indexName] = -1; // $kv->getCounts($indexName, $tableName, $limit);
-                }
-                $tables[$tableName] = [
-                    'count' => -2, // $kv->count($tableName),
-                    'counts' => $counts
-                ];
-            }
-
-        }
 //        return $this->render('@SurvosPixie/pixie/overview.html.twig', [
         return $this->render('@SurvosPixie/pixie/info.html.twig', [
             'data' => $data,
@@ -568,10 +553,9 @@ class PixieController extends AbstractController
             'cores' => $cores,
             'tables' => $tables,
             'pixieCode' => $pixieCode,
-            'config' => $this->pixieService->selectConfig($pixieCode)
+            'config' => $ctx->config
             ]);
     }
-
 
     #[Route('/schema/{pixieCode}', name: 'pixie_schema')]
     #[Template('@SurvosPixie/pixie/schema.html.twig')]
@@ -607,11 +591,15 @@ class PixieController extends AbstractController
     #[Template('@SurvosPixie/pixie/translations.html.twig')]
     public function translations(
         string                   $pixieCode,
-    ): array
+        #[MapQueryParameter] ?string $marking = null,
+        #[MapQueryParameter] int $limit = 100
+    ): Response|array
     {
-//        $kv = $this->pixieService->getStorageBox($pixieCode);
-        $config = $this->pixieService->selectConfig($pixieCode);
-
+        $ctx = $this->pixieService->getReference($pixieCode);
+        $rows = [];
+        foreach ([Str::class, StrTranslation::class] as $class) {
+            $rows[$class] = $ctx->repo($class)->findBy([], [], 10);
+        }
         return [
             'tableName' => 'str', // @todo: move pixie metadata to bundle
             'translationColumn' => 'trans', // in 'str'

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Survos\PixieBundle\Entity\Traits\TranslatableFieldsByCode;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Traits\CoreIdTrait;
 use Survos\WorkflowBundle\Traits\MarkingInterface;
@@ -25,6 +26,20 @@ class Row implements MarkingInterface, \Stringable
     use CoreIdTrait;
     use MarkingTrait;
 
+    // inside your Row entity (example for "title" and "description")
+    use TranslatableFieldsByCode;
+
+    // Virtual fields that your app reads:
+    public string $title        { get => $this->translated('title'); }
+    public string $description  { get => $this->translated('description'); }
+
+    // If you want to *write source* via the entity during import, you can define:
+    // public string $titleSource {
+    //   set => $this->setSourceAndBind($this->strFactory, 'title', $value, $this->owner->locale);
+    // }
+    //
+    // But often you’ll do this binding in the importer service directly.
+
     #[ORM\ManyToOne(inversedBy: 'rows')] # , cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     public Core $core;
@@ -32,8 +47,8 @@ class Row implements MarkingInterface, \Stringable
     #[ORM\Column(length: 255)]
     public ?string $label = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    public ?string $description = null;
+//    #[ORM\Column(length: 255, nullable: true)]
+//    public ?string $description = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
     public ?array $data = null;

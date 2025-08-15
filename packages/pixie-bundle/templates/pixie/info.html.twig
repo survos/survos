@@ -5,7 +5,9 @@
 
     {% for core in cores %}
         <li>
+            <h3>
             {{ core.code }}
+            </h3>
             iCount: {{ core.instanceCount }}
             rCount: {{ core.rows|length }}
 

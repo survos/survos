@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Survos\PixieBundle\EventListener;
 
+use App\Service\LocaleContext;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Event\PostLoadEventArgs;
@@ -33,16 +34,14 @@ final class PixiePostLoadListener
         private readonly PixieService $pixieService,
         private readonly RequestStack $requestStack,
         private PropertyAccessorInterface $propertyAccessor,
+        private readonly LocaleContext $localeContext,
         private readonly ?LoggerInterface $logger = null,
+
     ) {}
 
     public function postLoad(PostLoadEventArgs $args): void
     {
-        // if this is the CLI, don't do anything.  @todo: get from an arg.
-        if (!$this->requestStack->getCurrentRequest()) {
-            return;
-        }
-        $locale = $this->requestStack->getCurrentRequest()->getLocale();
+        $locale = $this->localeContext->get();
         $entity = $args->getObject();
         // 1) Only process entities that belong to the Pixie bundle namespace
         $class = $entity::class;
@@ -91,32 +90,13 @@ final class PixiePostLoadListener
 //                        dd($translation);
 //                    }
                     }
+//                    dd($field, $newValue);
                     // the problem is that if this entity gets saved, we're hosed.
                     $this->propertyAccessor->setValue($entity, $field, $newValue);
-
                 }
                 $values[] = $value;
             }
         }
-//        if (count($values)) {
-//            if ($lang === $locale ) {
-//                // get the Str
-//            } else {
-//                // get the translations
-//            }
-//            $strs = $strRepository->findBy(['code' => $values]);
-//            dd($values, $strs);
-//        }
-//
-//        foreach ($table->getTranslatable() as $field) {
-//            $actualText = $strs[$field] ?? null;
-//            $this->propertyAccessor->setValue($entity, $field, $actualText)) {
-//                $lang = substr($value, 3, 2); // zero-based index
-//                $values[] = $value;
-//            }
-//        }
-
-//        dd($entity, $ctx, $table, $values);
         if (!$ctx) {
             // Optional debug — keep quiet in prod
             $this->logger?->debug('PixiePostLoad: no ctx resolved', ['class' => $class]);

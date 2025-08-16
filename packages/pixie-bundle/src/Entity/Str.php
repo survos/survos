@@ -15,7 +15,7 @@ class Str implements \Stringable
     // Backing fields (mapped)
     #[ORM\Id]
     #[ORM\Column(name: 'code', length: 64)]
-    private string $code_pk;
+    private(set) string $code_pk;
 
     #[ORM\Column(name: 'original', type: Types::TEXT)]
     private string $original_raw;
@@ -45,6 +45,7 @@ class Str implements \Stringable
         $this->created_at     = new \DateTimeImmutable();
         $this->updated_at     = $this->created_at;
     }
+
 
     private function touch(): void { $this->updated_at = new \DateTimeImmutable(); }
 

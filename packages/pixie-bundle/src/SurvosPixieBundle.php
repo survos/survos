@@ -44,6 +44,7 @@ use Survos\PixieBundle\Repository\TableRepository;
 use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\LibreTranslateService;
+use Survos\PixieBundle\Service\LocaleContext;
 use Survos\PixieBundle\Service\PixieConvertService;
 use Survos\PixieBundle\Service\PixieEntityManagerProvider;
 use Survos\PixieBundle\Service\PixieImportService;
@@ -51,7 +52,8 @@ use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieTranslationService;
 use Survos\PixieBundle\Service\ReferenceService;
 use Survos\PixieBundle\Service\RelationService;
-use Survos\PixieBundle\Service\SqliteService;
+use Survos\PixieBundle\Service\RowIngestor;
+use Survos\PixieBundle\Service\TranslationResolver;
 use Survos\PixieBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
@@ -115,14 +117,17 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             ->setAutowired(true)
         ;
 
-        foreach ([DatabaseComponent::class, RowComponent::class, SqliteService::class, CoreService::class,
+        foreach ([DatabaseComponent::class, RowComponent::class, CoreService::class,
+                     LocaleContext::class,
                      ReferenceRepository::class,
                      ImportHandler::class,
-
+PixiePostLoadListener::class,
+TranslationResolver::class,
 //                     LarcoHandler::class,
 //                     BelvedereHandler::class,
 
                      RelationRepository::class,
+                     RowIngestor::class,
                      OwnerRepository::class, // maybe better to have Settings or a different name at least
                      InstanceRepository::class,
                      OriginalImageRepository::class,
@@ -172,10 +177,6 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                 ->setAutoconfigured(true)
                 ->setPublic(true);
         }
-        $builder->autowire(SqliteServce::class)
-            ->setAutowired(true)
-            ->setPublic(true);
-
         $builder->autowire(PixieController::class)
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')

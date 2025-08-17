@@ -9,7 +9,6 @@ use Survos\PixieBundle\Entity\Owner;
 use Survos\PixieBundle\Entity\RowImportState;
 use Survos\PixieBundle\Model\OriginalImage as OriginalImageModel;
 use Survos\PixieBundle\Model\PixieContext;
-use Survos\PixieBundle\Service\SqliteService;
 use Survos\PixieBundle\Entity\Core;
 use Survos\PixieBundle\Entity\Instance;
 use Survos\PixieBundle\Entity\Row;
@@ -63,7 +62,7 @@ class PixieImportService
         private readonly EventDispatcherInterface $eventDispatcher,
         #[Target('pixieEntityManager')]
         private EntityManagerInterface            $entityManager,
-        private CoreService                       $coreService,
+        private RowIngestor $rowIngestor,
 //private PixieEntityManagerProvider $provider,
 //        private PropertyAccessorInterface         $propertyAccessor,
 //        private ImportHandler                     $importHandler,
@@ -72,7 +71,6 @@ class PixieImportService
 //        private InstanceRepository                $instanceRepository,
 //        private StrRepository                     $strRepository,
         private readonly SerializerInterface      $serializer,
-        private readonly SqliteService            $sqliteService,
         public bool                               $purgeBeforeImport = false,
         private array                             $listsByLabel = [],
 
@@ -365,8 +363,6 @@ class PixieImportService
 
     public function addImage(Row $row, OriginalImageModel $original, ?string $thumbUrl=null): OriginalImage
     {
-//        $pixieEm = $this->sqliteService->getPixieEntityManager($original->root);
-//        dump($this->pixieEntityManager->getConnection()->getDriver());
         /** @var OriginalImage */
         if (!$image = $this->repo($this->entityManager, OriginalImage::class)->find($original->getKey())) {
             // create the entity
@@ -768,6 +764,7 @@ class PixieImportService
             $this->entityManager->persist($r);
         }
 
+
         // hard-coded hack for testing mapper
 
         $targetClass = 'App\\Dto\\' . ucfirst($owner->code)
@@ -784,6 +781,12 @@ class PixieImportService
             }
             $merged = (array)$this->mergeObjects($entity, (object)$row);
             $row = (array)$this->mergeObjects($entity, (object)$row);
+            $ctx = $this->pixieService->getReference($owner->pixieCode);
+
+//            $config = $ctx->config;
+//            $table = $config->getTable($core->code);
+//            $this->rowIngestor->ingest((array)$merged, $r, $owner->locale, ['label','description']);
+//            dd($merged, $row, $entity, $r->getResolvedStrings(), $r->getStrCodeMap());
 
             $rawEntity = $this->serializer->normalize(
                 $entity,
@@ -799,13 +802,13 @@ class PixieImportService
 
 //        $entity->json = $row;
 
-        $label = $row[Instance::DB_LABEL_FIELD]??null;
-        if (!$label) {
-            // y
-            $label = 'row ' . $rowId;
-            dump($row, Instance::DB_LABEL_FIELD);
-        }
-        $r->setLabel($label);
+//        $label = $row[Instance::DB_LABEL_FIELD]??null;
+//        if (!$label) {
+//            // y
+//            $label = 'row ' . $rowId;
+//            dump($row, Instance::DB_LABEL_FIELD);
+//        }
+//        $r->lla($label);
 
 //        $row = json_encode($row, JSON_FORCE_OBJECT);
 
@@ -816,7 +819,7 @@ class PixieImportService
 //        dd($row, $rowId);
 
         // 1) Ensure we have the row’s id within core
-        $pk = $table->getPkName();
+//        $pk = $table->getPkName();
 //        dd($id, $core->id);
 
         $idWithinCore = $id; // (string)($rowObj->{$pk} ?? $rowObj[$pk] ?? null);

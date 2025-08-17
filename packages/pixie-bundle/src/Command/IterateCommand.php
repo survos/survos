@@ -2,11 +2,10 @@
 
 namespace Survos\PixieBundle\Command;
 
-use App\Event\RowEvent;
-use App\Service\LocaleContext;
 use Psr\Log\LoggerInterface;
 use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Message\PixieTransitionMessage;
+use Survos\PixieBundle\Service\LocaleContext;
 use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;

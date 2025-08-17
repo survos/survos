@@ -9,7 +9,6 @@ use Survos\PixieBundle\Entity\Table;
 use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\CoreRepository;
-//use Survos\PixieBundle\Service\SqliteService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Survos\PixieBundle\Entity\Owner;
@@ -26,7 +25,6 @@ use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\PixieTranslationService;
-use Survos\PixieBundle\Service\SqliteService;
 use Survos\PixieBundle\StorageBox;
 use Survos\PixieBundle\SurvosPixieBundle;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
@@ -63,7 +61,6 @@ class PixieController extends AbstractController
         private EntityManagerInterface          $pixieEntityManager,
         private StrRepository $strRepository,
         private RowRepository                   $rowRepository,
-        private SqliteService                   $sqliteService,
         private PixieTranslationService         $translationService,
         private readonly RequestStack           $requestStack,
         private readonly CoreRepository $coreRepository,
@@ -93,15 +90,6 @@ class PixieController extends AbstractController
         }
         assert(false, "$fn not found");
         return null;
-    }
-
-    private function selectDatabase(string $pixieCode): EntityManagerInterface
-    {
-        // really it sets it
-        return $this->sqliteService->setPixieEntityManager($pixieCode);
-        dump($pixieCode);
-//        return $this->pixieEntityManager;
-
     }
 
     #[Route('/property/{pixieCode}/{tableName}/{propertyCode}', name: 'pixie_show_property', requirements: ['key' => '.+'])]

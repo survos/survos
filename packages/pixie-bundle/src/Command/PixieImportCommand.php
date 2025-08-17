@@ -11,7 +11,6 @@ use Survos\PixieBundle\Model\Translation;
 use Survos\PixieBundle\Repository\TableRepository;
 use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\ImportHandler;
-use Survos\PixieBundle\Service\SqliteService;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -56,7 +55,6 @@ final class PixieImportCommand extends Command
         private CoreRepository                             $coreRepository,
         private PixieImportService                         $pixieImportService,
         private ImportHandler                              $importHandler,
-        private readonly SqliteService                     $sqliteService,
         private readonly CoreService                       $coreService,
         private readonly TableRepository                   $tableRepository,
     )

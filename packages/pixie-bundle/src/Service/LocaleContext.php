@@ -1,32 +1,33 @@
 <?php
-// src/Service/LocaleContext.php
-
+// packages/pixie-bundle/src/Service/LocaleContext.php
 declare(strict_types=1);
 
-namespace App\Service;
+namespace Survos\PixieBundle\Service;
 
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Translation\LocaleSwitcher;
 use Symfony\Contracts\Translation\LocaleAwareInterface;
 
 final class LocaleContext
 {
     private string $current;
+    private string $default;
+    /** @var string[] */
+    private array $enabled;
 
-    /**
-     * @param LocaleAwareInterface|null $translator Any LocaleAware service (translator is fine)
-     * @param LocaleSwitcher|null $switcher Optional; if available, it switches all LocaleAware services
-     * @param string $default '%kernel.default_locale%'
-     * @param string[] $enabled '%kernel.enabled_locales%'
-     */
     public function __construct(
-        private ?LocaleSwitcher $switcher = null,
-        #[Autowire(service: 'translator', lazy: true)] private ?LocaleAwareInterface $translator = null,
-        #[Autowire('%kernel.default_locale%')] private string $default = 'en',
-        #[Autowire('%kernel.enabled_locales%')] private array $enabled = [],
+        private ?LocaleAwareInterface $translator = null,      // e.g. the "translator" service (optional)
+        private ?LocaleSwitcher $switcher = null,              // e.g. "locale.switcher" (optional)
+        ?ParameterBagInterface $params = null                  // to read kernel params without attributes
     ) {
+        $this->default = (string) ($params?->get('kernel.default_locale') ?? 'en');
+        $enabled = $params?->get('kernel.enabled_locales') ?? [];
+        $this->enabled = \is_array($enabled) ? $enabled : [];
+
         $this->current = $this->default;
         \Locale::setDefault($this->current);
+
+        // If available, keep framework services in sync
         if ($this->switcher) {
             $this->switcher->setLocale($this->current);
         } elseif ($this->translator) {
@@ -48,29 +49,17 @@ final class LocaleContext
         \Locale::setDefault($locale);
 
         if ($this->switcher) {
-            $this->switcher->setLocale($locale);   // affects all LocaleAware services
+            $this->switcher->setLocale($locale);
         } elseif ($this->translator) {
-            $this->translator->setLocale($locale); // at least keep the translator in sync
+            $this->translator->setLocale($locale);
         }
     }
 
     /**
-     * Temporarily switch locale for the duration of $callback.
-     * Restores the previous locale even if an exception is thrown.
-     *
-     * @template T
-     * @param callable():T $callback
-     * @return T
+     * Temporarily run code under a specific locale and restore afterwards.
      */
     public function run(string $locale, callable $callback): mixed
     {
-        $locale = $this->normalize($locale);
-        $this->assertSupported($locale);
-
-        if ($this->switcher) {
-            return $this->switcher->runWithLocale($locale, $callback);
-        }
-
         $prev = $this->get();
         $this->set($locale);
         try {
@@ -82,16 +71,16 @@ final class LocaleContext
 
     private function normalize(string $locale): string
     {
-        // allow "es_MX" input; normalize to "es-MX"
         return str_replace('_', '-', trim($locale));
     }
 
     private function assertSupported(string $locale): void
     {
-        if ($this->enabled && !in_array($locale, $this->enabled, true)) {
+        if ($this->enabled && !\in_array($locale, $this->enabled, true)) {
             throw new \InvalidArgumentException(sprintf(
                 'Unsupported locale "%s". Allowed: %s',
-                $locale, implode(', ', $this->enabled)
+                $locale,
+                implode(', ', $this->enabled)
             ));
         }
     }

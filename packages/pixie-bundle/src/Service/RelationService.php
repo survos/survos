@@ -17,7 +17,6 @@ class RelationService
     public function __construct(
         private readonly RelationRepository     $relationRepository,
         private readonly EntityManagerInterface $pixieEntityManager,
-        private readonly ?AppService             $appService = null,
     ) {
     }
 
@@ -148,13 +147,12 @@ class RelationService
                         ->setIsReverse(true)
                         ->setLabel($reverseLabel);
                     $reverseFieldSet->addField($reverseRelationField);
-                    $this->appService?->validate($reverseFieldSet);
+//                    $this->appService?->validate($reverseFieldSet);
 
                 }
             }
-            $relationField->setCurrentLocale($projectCore->getProjectLocale()); // hack, not persisted or needed
+//            $relationField->setCurrentLocale($projectCore->getProjectLocale()); // hack, not persisted or needed
 //            $relationField->getImportFields()
-            $this->appService?->validate($relationField);
 
             $seen[$relationField->__toString()] = $relationField;
 //            dd($seen, $key, $relationField->getId(), $relationField->getCode());

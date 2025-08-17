@@ -8,7 +8,6 @@ use Survos\PixieBundle\Entity\Core;
 use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Repository\OriginalImageRepository;
 use Survos\PixieBundle\Repository\RowRepository;
-use Survos\PixieBundle\Service\SqliteService;
 use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
@@ -62,7 +61,8 @@ final class PixieIndexCommand extends InvokableServiceCommand
         private EventDispatcherInterface                      $eventDispatcher,
         private EntityManagerInterface                        $pixieEntityManager,
         private RowRepository                                 $rowRepository,
-        private SqliteService                                 $sqliteService, private readonly OriginalImageRepository $originalImageRepository, private readonly NormalizerInterface $normalizer,
+        private readonly OriginalImageRepository $originalImageRepository,
+        private readonly NormalizerInterface $normalizer,
 
         private ?MeiliService                                 $meiliService = null,
         private ?SluggerInterface                             $asciiSlugger = null,
@@ -95,8 +95,8 @@ final class PixieIndexCommand extends InvokableServiceCommand
     ): int
     {
         $configCode ??= getenv('PIXIE_CODE');
-        $this->pixieService->selectConfig($configCode);
-//        $pixieEm = $this->sqliteService->setPixieEntityManager($configCode);
+        $ctx = $this->pixieService->getReference($configCode);
+        $config = $ctx->config;
         $reset ??= true;
 
         if (!$this->meiliService) {
@@ -110,8 +110,6 @@ final class PixieIndexCommand extends InvokableServiceCommand
         }
 
         $this->initialized = true;
-        $this->pixieService->selectConfig($configCode);
-        $config = $pixieService->selectConfig($configCode);
         $io->title("using pixie EM $configCode");
 
 

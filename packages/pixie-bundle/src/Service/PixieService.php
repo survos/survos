@@ -52,7 +52,6 @@ class PixieService
 //        #[Autowire('%kernel.debug%')] private readonly bool                                        $isDebug,
 
         private EntityManagerInterface                           $pixieEntityManager,
-        private SqliteService                                    $sqliteService,
         private readonly CoreRepository                          $coreRepository,
         private readonly bool                                    $isDebug = false,
         private array                                            $data = [],
@@ -428,6 +427,16 @@ class PixieService
         }
 
         return $core;
+    }
+
+    /** Fail-fast version you can use inside services */
+    public function requireContext(object|string|null $subject = null): PixieContext
+    {
+        $ctx = $this->contextFor($subject);
+        if (!$ctx) {
+            throw new \RuntimeException('PixieContext not set. Call setCurrentPixieCode() first or pass a code.');
+        }
+        return $ctx;
     }
 
     public function getCore(string $tableName, string|Owner $ownerInput): Core
@@ -1111,7 +1120,44 @@ dump($diff);
             }
         }
     }
+    /**
+     * Resolve a PixieContext from an entity or a code.
+     * - Row: uses $row->getCoreCode()
+     * - string: treated as config/pixie code
+     * - otherwise: falls back to $this->currentPixieCode
+     */
+    public function contextFor(object|string|null $subject = null): ?PixieContext
+    {
+        // 1) explicit code given
+        if (\is_string($subject) && $subject !== '') {
+            return $this->getReference($subject);
+        }
 
+        // 2) entity-based inference (extend with other entity types if desired)
+        if ($subject instanceof Row) {
+            $code = $subject->getCoreCode();     // your Row already exposes this
+            if ($code) {
+                return $this->getReference($code);
+            }
+        }
+
+        // 3) fallback to the service-wide "current" code
+        if ($this->currentPixieCode) {
+            return $this->getReference($this->currentPixieCode);
+        }
+
+        // Could also throw here if you prefer hard failure:
+        // throw new \RuntimeException('Unable to resolve PixieContext; set currentPixieCode or pass a code.');
+        return null;
+    }
+
+    /**
+     * Set the current pixie code explicitly (CLI/controllers can call this).
+     */
+    public function setCurrentPixieCode(?string $code): void
+    {
+        $this->currentPixieCode = $code ?: null;
+    }
 
     public function getReference(string $pixieCode): PixieContext
     {

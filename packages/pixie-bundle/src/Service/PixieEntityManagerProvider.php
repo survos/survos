@@ -9,6 +9,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 
 /**
+ * Deprecated, moved to pixieService, this is problematic
+ *
  * One EntityManager per pixie SQLite file.
  * Reuses mapping/listeners from the base 'pixie' manager; only the DBAL
  * connection params differ (pointing to the per-pixie file path).

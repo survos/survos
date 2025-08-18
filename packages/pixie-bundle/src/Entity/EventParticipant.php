@@ -12,27 +12,24 @@ use Survos\PixieBundle\Repository\EventParticipantRepository;
 #[ORM\Index(name: 'idx_actor_role', columns: ['actor_row_id','role_code'])]
 class EventParticipant
 {
-    #[ORM\Id] #[ORM\GeneratedValue] #[ORM\Column] private ?int $id = null;
+    public function __construct(
+        #[ORM\Id]
+        #[ORM\GeneratedValue]
+        #[ORM\Column]
+        private(set) ?int $id = null,
 
-    #[ORM\ManyToOne(targetEntity: Event::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private Event $event;
+        #[ORM\ManyToOne(targetEntity: Event::class)]
+        #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+        public Event $event,
 
-    #[ORM\Column(length: 80)]
-    private string $roleCode;
+        #[ORM\Column(length: 80, name: 'role_code')]
+        public string $roleCode,
 
-    #[ORM\ManyToOne(targetEntity: Row::class)]
-    #[ORM\JoinColumn(name: 'actor_row_id', nullable: false, onDelete: 'CASCADE')]
-    private Row $actor;
+        #[ORM\ManyToOne(targetEntity: Row::class)]
+        #[ORM\JoinColumn(name: 'actor_row_id', nullable: false, onDelete: 'CASCADE')]
+        public Row $actor,
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
-    private bool $certain = true;
-
-    public function __construct(Event $event, string $roleCode, Row $actor, bool $certain = true)
-    {
-        $this->event = $event;
-        $this->roleCode = $roleCode;
-        $this->actor = $actor;
-        $this->certain = $certain;
-    }
+        #[ORM\Column(type: 'boolean', options: ['default' => true])]
+        public bool $certain = true,
+    ) {}
 }

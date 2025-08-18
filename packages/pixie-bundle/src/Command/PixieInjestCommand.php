@@ -10,6 +10,7 @@ use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Command\Command;
 
 #[AsCommand('pixie:injest', 'Import normalized JSON into Rows (file or directory)')]
 final class PixieInjestCommand
@@ -104,6 +105,6 @@ final class PixieInjestCommand
         }
 
         $io->success("Done. Imported $total rows to core=$core.");
-        return 0;
+        return Command::SUCCESS;
     }
 }

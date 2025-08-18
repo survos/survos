@@ -470,6 +470,7 @@ class PixieService
     /** @deprecated Use getReference() + getConfigSnapshot() */
     private function selectConfig(string $pixieCode): ?\Survos\PixieBundle\Model\Config
     {
+        assert(false);
         // 1) Load and normalize Config (from bundle config)
         $configs = $this->getConfigFiles(pixieCode: $pixieCode);
         $config  = $configs[$pixieCode] ?? null;

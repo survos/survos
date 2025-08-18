@@ -39,6 +39,11 @@ class Row implements TranslatableByCodeInterface, MarkingInterface, \Stringable
     // Virtuals for common fields (others are accessed via $row->translated('field'))
     #[ApiProperty(description: 'label used when this row is presented in a list (e.g. facet)')]
     public string $label       { get => $this->translated('label'); }
+
+    #[ApiProperty(description: 'The raw label from which the translation code comes from.  Might not be unique.  Not translated.')]
+    #[ORM\Column(type: Types::STRING)]
+    public string $rawLabel;
+
     #[ApiProperty(description: 'shortcut to description')]
     public string $description { get => $this->translated('description'); }
 

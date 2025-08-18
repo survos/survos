@@ -10,12 +10,13 @@ use Survos\PixieBundle\Repository\CoreDefinitionRepository;
 #[ORM\Table(name: 'pixie_core_definition')]
 class CoreDefinition
 {
-    public function __construct(
-        #[ORM\Id]
-        #[ORM\GeneratedValue]
-        #[ORM\Column]
-        private(set) ?int $id = null,
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private(set) ?int $id = null;
 
+
+    public function __construct(
         #[ORM\Column(length: 64, name: 'owner_code')]
         public string $ownerCode,
 

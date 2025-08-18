@@ -6,86 +6,122 @@ namespace Survos\PixieBundle\Schema;
 use Survos\PixieBundle\Entity\CoreDefinition;
 use Survos\PixieBundle\Entity\FieldDefinition;
 use Survos\PixieBundle\Model\Config;
+use Survos\PixieBundle\Model\Property;
 use Survos\PixieBundle\Service\PixieService;
 
+/**
+ * Compiles survos_pixie YAML into CoreDefinition + FieldDefinition
+ * in the *pixie database* (correct EM), not the default app EM.
+ */
 final class YamlSchemaSynchronizer
 {
-    public function __construct(private readonly PixieService $pixie) {}
+    public function __construct(
+        private readonly PixieService $pixie
+    ) {}
 
-    public function sync(string $owner, Config $config, string $schemaVersion = 'v1'): void
+    public function sync(string $ownerCode, Config $config, string $schemaVersion = 'v1'): void
     {
-        $ctx = $this->pixie->getReference($owner);
+        // get the correct EM (sqlite file) + ensure ORM schema
+        $ctx = $this->pixie->getReference($ownerCode);
         $em  = $ctx->em;
+        $this->pixie->ensureSchema($em);
 
-        $coreRepo  = $ctx->repo(CoreDefinition::class);
-        $fieldRepo = $ctx->repo(FieldDefinition::class);
+        // merge any "uses" from templates + parse property strings
+        $templates = []; // optional: $this->pixie->getTemplates(); if you use it
 
-        foreach ($config->getTables() as $core => $table) {
-            $pk  = $table->getPkName() ?? 'id';
+        foreach ($config->getTables() as $coreName => $table) {
+            // pk: first property if not set
+            $pk = $table->getPkName();
+            $props = [];
 
-            /** @var CoreDefinition|null $def */
-            $def = $coreRepo->findOneBy(['ownerCode' => $owner, 'core' => $core]);
-            if (!$def) {
-                $def = new CoreDefinition(
-                    id: null,
-                    ownerCode: $owner,
-                    core: $core,
-                    pk: $pk,
-                    schemaVersion: $schemaVersion
-                );
-            } else {
-                $def->schemaVersion = $schemaVersion;
+            // uses (optional)
+            foreach ($table->getUses() as $code) {
+                if (isset($templates['internal'])) {
+                    foreach ($templates['internal']->getProperties() as $ip) {
+                        if ($ip instanceof Property && $ip->getCode() === $code) {
+                            $props[] = $ip;
+                        }
+                    }
+                }
             }
-            $em->persist($def);
 
-            $trans = array_flip($table->getTranslatable() ?? []);
-            $pos   = 0;
+            // explicit properties
+            foreach ($table->getProperties() as $idx => $p) {
+                if (is_string($p)) {
+                    // minimal inline parser: "code:type" is enough; your Parser can do more
+                    $parts = explode(':', $p, 2);
+                    $p = new Property($parts[0]);
+                }
+                $props[] = $p;
+                if (!$pk && $idx === 0) {
+                    $pk = $p->getCode();
+                }
+            }
+            $pk = $pk ?: 'id';
 
-            foreach (($table->getProperties() ?? []) as $prop) {
-                [$name, $type] = self::split($prop);
-                [$kind, $target, $delim] = self::toKind($type);
-                if (\in_array($name, ['label','name'], true)) { $kind = 'label'; }
+            // upsert CoreDefinition
+            $coreDef = $ctx->repo(CoreDefinition::class)->findOneBy([
+                'ownerCode' => $ownerCode,
+                'core'      => $coreName,
+            ]) ?? new CoreDefinition($ownerCode, $coreName, $pk, $schemaVersion);
+            // update pk/version if changed
+            $r = new \ReflectionClass($coreDef);
+            $rp = $r->getProperty('pk');
+            $rp->setAccessible(true);
+            if ($rp->getValue($coreDef) !== $pk) { $rp->setValue($coreDef, $pk); }
+            $rv = $r->getProperty('schemaVersion'); $rv->setAccessible(true);
+            if ($rv->getValue($coreDef) !== $schemaVersion) { $rv->setValue($coreDef, $schemaVersion); }
+            $em->persist($coreDef);
 
-                /** @var FieldDefinition|null $fd */
-                $fd = $fieldRepo->findOneBy(['ownerCode' => $owner, 'core' => $core, 'incomingHeader' => $name]);
-                if ($fd) {
-                    $fd->code         = $name;
-                    $fd->kind         = $kind;
-                    $fd->targetCore   = $target;
-                    $fd->delim        = $delim;
-                    $fd->translatable = isset($trans[$name]);
-                    $fd->position     = $pos++;
-                } else {
+            // upsert FieldDefinitions
+            $position = 0;
+            foreach ($props as $prop) {
+                $code = $prop->getCode();
+                $kind = 'json_scalar';
+                $target = $prop->getSubType() ?: null;
+                $delim = method_exists($prop, 'getDelim') ? $prop->getDelim() : null;
+
+                // crude kind inference (tweak if you have richer Property)
+                if ($target && is_array($prop->getDefault() ?? null)) {
+                    $kind = 'relation_many';
+                } elseif ($target) {
+                    $kind = 'relation_one';
+                } elseif (\in_array($code, ['label'], true)) {
+                    $kind = 'label';
+                } elseif (is_array($prop->getDefault() ?? null)) {
+                    $kind = 'json_array';
+                }
+
+                if (!$fd = $ctx->repo(FieldDefinition::class)->findOneBy([
+                    'ownerCode'      => $ownerCode,
+                    'core'           => $coreName,
+                    'incomingHeader' => $code,
+                ])) {
                     $fd = new FieldDefinition(
-                        id: null,
-                        ownerCode: $owner,
-                        core: $core,
-                        incomingHeader: $name,
-                        code: $name,
-                        kind: $kind,
-                        targetCore: $target,
-                        delim: $delim,
-                        translatable: isset($trans[$name]),
-                        position: $pos++
+                        $ownerCode, $coreName, $code, $code, $kind, $target, $delim, /*translatable*/ false, $position
                     );
                 }
+
+                // update if needed (keep minimal to avoid setter boilerplate)
+                $rf = new \ReflectionClass($fd);
+                $map = [
+                    'code'         => $code,
+                    'kind'         => $kind,
+                    'targetCore'   => $target,
+                    'delim'        => $delim,
+                    'translatable' => false,
+                    'position'     => $position,
+                ];
+                foreach ($map as $propName => $val) {
+                    $rp = $rf->getProperty($propName); $rp->setAccessible(true);
+                    if ($rp->getValue($fd) !== $val) { $rp->setValue($fd, $val); }
+                }
+
                 $em->persist($fd);
+                $position++;
             }
         }
+
         $em->flush();
-    }
-
-    private static function split(string $spec): array
-    {
-        $p = explode(':', $spec, 2);
-        return [$p[0], $p[1] ?? 'text'];
-    }
-
-    private static function toKind(string $t): array
-    {
-        $t = trim($t);
-        if (str_starts_with($t, 'rel.'))  return ['relation_one',  substr($t, 4), null];
-        if (str_starts_with($t, 'list.')) return ['relation_many', preg_replace('#^list\.([^\[]+).*$#', '$1', $t), '|'];
-        return $t === 'array' ? ['json_array', null, '|'] : ['json_scalar', null, null];
     }
 }

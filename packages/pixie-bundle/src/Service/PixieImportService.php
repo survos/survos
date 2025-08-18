@@ -17,7 +17,6 @@ use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Entity\Str;
 use App\Event\FetchTranslationObjectEvent;
 use App\Metadata\ITableAndKeys;
-use Survos\PixieBundle\Repository\InstanceRepository;
 use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\StrRepository;
 use Survos\PixieBundle\Repository\CoreRepository;

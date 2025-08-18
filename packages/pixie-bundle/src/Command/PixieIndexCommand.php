@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Survos\PixieBundle\Command;
 
+use Survos\MeiliBundle\Service\MeiliService;
 use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Service\LocaleContext;
 use Survos\PixieBundle\Service\MeiliIndexer;
-use Survos\PixieBundle\Service\MeiliService;
+use Survos\PixieBundle\Util\IndexNameResolver;
 use Survos\PixieBundle\Service\PixieDocumentProjector;
 use Survos\PixieBundle\Service\PixieService;
-use Survos\PixieBundle\Util\IndexNameResolver;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\Option;

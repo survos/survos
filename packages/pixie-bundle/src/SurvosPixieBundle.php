@@ -15,6 +15,7 @@ use Survos\PixieBundle\Command\PixieIndexCommand;
 use Survos\PixieBundle\Command\PixieInjestCommand;
 use Survos\PixieBundle\Command\PixieMakeCommand;
 use Survos\PixieBundle\Command\PixiePrepareCommand;
+use Survos\PixieBundle\Command\PixieSchemaDumpCommand;
 use Survos\PixieBundle\Command\PixieSchemaSyncCommand;
 use Survos\PixieBundle\Command\PixieSyncCommand;
 use Survos\PixieBundle\Command\PullUnamInstitutionsCommand;
@@ -35,6 +36,7 @@ use Survos\PixieBundle\Menu\PixieItemMenu;
 use Survos\PixieBundle\Menu\PixieMenu;
 use Survos\PixieBundle\Repository\CoreDefinitionRepository;
 use Survos\PixieBundle\Repository\CoreRepository;
+use Survos\PixieBundle\Repository\FieldDefinitionRepository;
 use Survos\PixieBundle\Repository\FieldRepository;
 use Survos\PixieBundle\Repository\InstanceRepository;
 use Survos\PixieBundle\Repository\OriginalImageRepository;
@@ -47,10 +49,13 @@ use Survos\PixieBundle\Repository\StrTranslationRepository;
 use Survos\PixieBundle\Repository\TableRepository;
 use Survos\PixieBundle\Schema\YamlSchemaSynchronizer;
 use Survos\PixieBundle\Service\CoreService;
+use Survos\PixieBundle\Service\EventQueryService;
 use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\LibreTranslateService;
 use Survos\PixieBundle\Service\LocaleContext;
+use Survos\PixieBundle\Service\MeiliIndexer;
 use Survos\PixieBundle\Service\PixieConvertService;
+use Survos\PixieBundle\Service\PixieDocumentProjector;
 use Survos\PixieBundle\Service\PixieEntityManagerProvider;
 use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\PixieService;
@@ -99,14 +104,12 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
     }
 
 
-
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $builder->register(PixieImportService::class)
             ->setAutowired(true)
             ->setArgument('$logger', new Reference('logger'))
-            ->setArgument('$purgeBeforeImport', $config['purge_before_import'])
-        ;
+            ->setArgument('$purgeBeforeImport', $config['purge_before_import']);
 
         $builder->register(PixieEntityManagerProvider::class)
             ->setAutowired(true)
@@ -116,29 +119,31 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
 
         /* @ack!! these needs to be in a translation bundle and optionally wired */
         $builder->register(PixieTranslationService::class)
-            ->setAutowired(true)
-        ;
+            ->setAutowired(true);
         $builder->register(LibreTranslateService::class)
-            ->setAutowired(true)
-        ;
+            ->setAutowired(true);
 
         foreach ([DatabaseComponent::class, RowComponent::class, CoreService::class,
                      LocaleContext::class,
                      ReferenceRepository::class,
                      ImportHandler::class,
+                     MeiliIndexer::class,
                      YamlSchemaSynchronizer::class,
-PixiePostLoadListener::class,
-JsonIngestor::class,
-TranslationResolver::class,
+                     PixiePostLoadListener::class,
+                     JsonIngestor::class,
+                     PixieDocumentProjector::class,
+                     EventQueryService::class,
+                     TranslationResolver::class,
 //                     LarcoHandler::class,
 //                     BelvedereHandler::class,
+                     FieldDefinitionRepository::class,
 
                      RelationRepository::class,
                      RowIngestor::class,
                      CoreRepository::class,
+                     InstanceRepository::class,
                      CoreDefinitionRepository::class,
                      OwnerRepository::class, // maybe better to have Settings or a different name at least
-                     InstanceRepository::class,
                      OriginalImageRepository::class,
                      RelationService::class,
                      CoreRepository::class,
@@ -152,22 +157,19 @@ TranslationResolver::class,
             $builder->register($componentClass)
                 ->setPublic(true)
                 ->setAutowired(true)
-                ->setAutoconfigured(true)
-            ;
+                ->setAutoconfigured(true);
         }
 
         $builder->register(ImportHandler::class)
             ->setPublic(true)
             ->setAutowired(true)
-            ->setAutoconfigured(true)
-//            ->setArgument('$handlers', Auto)
+            ->setAutoconfigured(true)//            ->setArgument('$handlers', Auto)
         ;
 
         $builder->register(PixieConvertService::class)
             ->setAutowired(true)
             ->setArgument('$logger', new Reference('logger'))
-            ->setArgument('$purgeBeforeImport', $config['purge_before_import'])
-        ;
+            ->setArgument('$purgeBeforeImport', $config['purge_before_import']);
 
         if (class_exists(Environment::class)) {
             $builder
@@ -190,15 +192,13 @@ TranslationResolver::class,
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')
             ->setArgument('$bus', new Reference('debug.traced.messenger.bus.default', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-        ;
+            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE));
 
         $builder->autowire(SearchController::class)
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')
             ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setAutoconfigured(true)
-        ;
+            ->setAutoconfigured(true);
 
         $builder->autowire(PixieDataCollector::class)
             ->setArgument('$pixieService', new Reference(PixieService::class))
@@ -212,8 +212,7 @@ TranslationResolver::class,
             $builder->register($storageBoxClass)
                 ->setAutowired(true)
                 ->setAutoconfigured(true)
-                ->setArgument('$logger', new Reference('logger'))
-            ;
+                ->setArgument('$logger', new Reference('logger'));
 
         }
 
@@ -222,6 +221,7 @@ TranslationResolver::class,
                      PixieImportCommand::class,
                      PixieExportCommand::class,
                      PixieInjestCommand::class,
+                     PixieSchemaDumpCommand::class,
                      PixieSchemaSyncCommand::class,
 //PullUnamInstitutionsCommand::class,
 //PullUnamObrasCommand::class,
@@ -247,16 +247,14 @@ TranslationResolver::class,
             ->setArgument('$bundleConfig', $config)
             ->setArgument('$stopwatch', new Reference('debug.stopwatch'))
             ->setArgument('$serializer', new Reference('serializer'))
-            ->setArgument('$logger', new Reference('logger'))
-        ;
+            ->setArgument('$logger', new Reference('logger'));
 
         // register our listener.  We could disable or set priority in the config
         foreach ([TranslationRowEventListener::class, CsvHeaderEventListener::class, PixiePostLoadListener::class, PixieControllerEventListener::class] as $listenerClass) {
             $builder->register($listenerClass)
                 ->setAutowired(true)
                 ->setAutoconfigured(true)
-                ->setPublic(true)
-            ;
+                ->setPublic(true);
 
         }
     }
@@ -278,10 +276,10 @@ TranslationResolver::class,
         $children
             ->arrayNode('cores')
             ->arrayPrototype()
-                ->children()
-                    ->scalarNode('icon')->end()
-                    ->scalarNode('icon_class')->end()
-                ->end()
+            ->children()
+            ->scalarNode('icon')->end()
+            ->scalarNode('icon_class')->end()
+            ->end()
             ->end()
             ->end();
     }
@@ -312,7 +310,7 @@ TranslationResolver::class,
         $this->addSourceSection($pixieRoot);
     }
 
-    private function addTablesSection(NodeBuilder $pixieRoot, string $key='tables'): void
+    private function addTablesSection(NodeBuilder $pixieRoot, string $key = 'tables'): void
     {
 //        if ($key === 'templates') return;
         // like pixies, tables are keyed by some value, but have a prototype beneath them of rules, properties, translatableFields, etc.
@@ -339,53 +337,58 @@ TranslationResolver::class,
 
             ->scalarNode('workflow')->end()
             ->scalarNode('parent')->info("the related table (parent) in 1toMany")->defaultNull()->end()
-
-
             ->arrayNode('translatable')->info("text fields to translate")->scalarPrototype()->end()->end()
             ->arrayNode('facets')->info("facets in tombstone")->scalarPrototype()->end()->end()
             ->arrayNode('extras')->info("extras column")->scalarPrototype()->end()->end()
-
             ->arrayNode('uses')->info("get definitions from the 'internal' key in templates")
-                ->scalarPrototype()->info('key to internal table')->cannotBeEmpty()->end()
+            ->scalarPrototype()->info('key to internal table')->cannotBeEmpty()->end()
             ->end()
-
             ->arrayNode('properties')
             ->beforeNormalization()
             ->ifString()
-            ->then(function (string $v): array { dd($v); return ['name' => $v]; })
+            ->then(function (string $v): array {
+                dd($v);
+                return ['name' => $v];
+            })
             ->ifArray()
-            ->then(function ($v): void {dd($v); })
+            ->then(function ($v): void {
+                dd($v);
+            })
             ->ifString()
             ->then(fn($propData) => dd(Parser::parseConfigHeader($propData)))
             ->end()
-
-        ->scalarPrototype()->defaultValue(["*.zip"])->end()
-
-        ->scalarPrototype()
-        ->end()
-        ->end()
-
-        ->end();
+            ->scalarPrototype()->defaultValue(["*.zip"])->end()
+            ->scalarPrototype()
+            ->end()
+            ->end()
+            ->end();
 //        dd($pixieRoot, $tableRoot);
 
 //        $this
 //            ->addPropertiesSection($tableRoot, 'properties');
 
     }
-    private function addPropertiesSection(NodeBuilder $pixieRoot, string $name='properties'): void
+
+    private function addPropertiesSection(NodeBuilder $pixieRoot, string $name = 'properties'): void
     {
         $pixieRoot
             ->arrayNode($name)
             ->beforeNormalization()
-                ->ifString()
-                    ->then(function (string $v): array { dd($v); return ['name' => $v]; })
-                ->ifArray()
-                    ->then(function ($v): void {dd($v); })
-                ->ifString()
-                    ->then(fn($propData) => dd(Parser::parseConfigHeader($propData)))
+            ->ifString()
+            ->then(function (string $v): array {
+                dd($v);
+                return ['name' => $v];
+            })
+            ->ifArray()
+            ->then(function ($v): void {
+                dd($v);
+            })
+            ->ifString()
+            ->then(fn($propData) => dd(Parser::parseConfigHeader($propData)))
             ->end();
 
     }
+
     private function addSourceSection(NodeBuilder $pixieRoot): void
     {
         $source = $pixieRoot
@@ -409,15 +412,14 @@ TranslationResolver::class,
             // @todo: validate country and locale
             ->scalarNode('country')->info("2-letter country code")->end()
             ->scalarNode('locale')->end()
-
             ->scalarNode('notes')->end()
             ->scalarNode('dir')->info('defaults to <projectDir>/data')->end();
 
         $links = $source->arrayNode('links')->children();
         # this isn't right.
-        foreach (['facebook', 'twitter','github','instagram','flickr', 'api', 'contact', 'license',
+        foreach (['facebook', 'twitter', 'github', 'instagram', 'flickr', 'api', 'contact', 'license',
                      'web',
-                     'website', 'search','info'] as $socialMedia) {
+                     'website', 'search', 'info'] as $socialMedia) {
             $links->scalarNode($socialMedia)->end();
         }
 
@@ -425,16 +427,16 @@ TranslationResolver::class,
 
         $source
             ->arrayNode('ignore')->info("array of patterns to ignore")
-                ->beforeNormalization()
-                ->ifString()
-                ->then(fn($value) => [$value])
-                ->end()
-                ->scalarPrototype()->defaultValue(["*.zip"])->end()
+            ->beforeNormalization()
+            ->ifString()
+            ->then(fn($value) => [$value])
+            ->end()
+            ->scalarPrototype()->defaultValue(["*.zip"])->end()
             ->end()
             ->scalarNode('include')
             ->end()
-        ->end()
-        ->end();
+            ->end()
+            ->end();
 
     }
 
@@ -442,27 +444,27 @@ TranslationResolver::class,
     {
         $sourceRoot
             ->arrayNode('git')
-                ->children()
-                    ->scalarNode('repo')->end()
-                    ->booleanNode('lfs')->defaultFalse()->end()
-                    ->scalarNode('lsf_include')->end()
-                ->end()
+            ->children()
+            ->scalarNode('repo')->end()
+            ->booleanNode('lfs')->defaultFalse()->end()
+            ->scalarNode('lsf_include')->end()
+            ->end()
             ->end();
     }
 
-    private function addBuildSection(NodeBuilder $sourceRoot, string $nodeName='build'): void
+    private function addBuildSection(NodeBuilder $sourceRoot, string $nodeName = 'build'): void
     {
         $sourceRoot
             ->arrayNode($nodeName)
-                ->arrayPrototype()
-                    ->children()
-                        ->scalarNode('action')->end()
-                        ->scalarNode('source')->end()
-                        ->scalarNode('target')->end()
-                        ->scalarNode('unzip')->end()
-                        ->scalarNode('cmd')->end()
-                    ->end()
-                ->end()
+            ->arrayPrototype()
+            ->children()
+            ->scalarNode('action')->end()
+            ->scalarNode('source')->end()
+            ->scalarNode('target')->end()
+            ->scalarNode('unzip')->end()
+            ->scalarNode('cmd')->end()
+            ->end()
+            ->end()
             ->end();
     }
 

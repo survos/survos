@@ -148,30 +148,7 @@ class StorageBox
 
 //            $tableName=='obj' && dd($internalProperties, table: $table, uses: $table->getUses(), extends: $table->getExtends());
 //            $tableName=='obj' && dd($config, $table, $tableName, $newProperties);
-            if (false) // this handles extends, which we dont use with the doctrine schema
-            if ($extends = $table->getExtends()) {
-                SurvosUtils::assertKeyExists($extends, $templates);
-                /** @var Table $templateTable */
-                $templateTable = $templates[$extends];
-                if ($templateTable->getWorkflow()) {
-                    $table->setWorkflow($templateTable->getWorkflow());
-                }
-                foreach ($templates[$extends]->getProperties() as $propIndex => $property) {
-                    // better probably to push the properties to table rather than repeating this code.
-                    if (is_string($property)) {
-                        $property = Parser::parseConfigHeader($property);
-                        $newProperties[] = $property;
-                    }
-                    if ($propIndex == 0) {
-                        $primaryKey = $property->getCode();
-                        $table->setPkName($primaryKey);
-                        $property->generated = false;
-                        $property->setIndex('PRIMARY');
-//                        $tableName=='image' && dump($propIndex, $property);
-//                        $tableName=='image' && dd($property);
-                    }
-                }
-            }
+
             // now the pixie-specific properties
             foreach ($table->getProperties() as $propIndex => $property) {
                 if (is_string($property)) {

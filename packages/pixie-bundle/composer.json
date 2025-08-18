@@ -1,6 +1,6 @@
 {
     "name": "survos/pixie-bundle",
-    "description": "Symfony Bundle to easily allow a SQLite Key Value lookup.  Optionally uses zip and bunny utilities for sync",
+    "description": "Symfony Bundle allow allow managing museum data in an independent SQLite database using a doctrine ORM",
     "keywords": [
         "symfony-ux",
         "symfony6"

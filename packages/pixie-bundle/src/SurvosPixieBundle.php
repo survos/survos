@@ -12,8 +12,10 @@ use Survos\PixieBundle\Command\IterateCommand;
 use Survos\PixieBundle\Command\PixieExportCommand;
 use Survos\PixieBundle\Command\PixieImportCommand;
 use Survos\PixieBundle\Command\PixieIndexCommand;
+use Survos\PixieBundle\Command\PixieInjestCommand;
 use Survos\PixieBundle\Command\PixieMakeCommand;
 use Survos\PixieBundle\Command\PixiePrepareCommand;
+use Survos\PixieBundle\Command\PixieSchemaSyncCommand;
 use Survos\PixieBundle\Command\PixieSyncCommand;
 use Survos\PixieBundle\Command\PullUnamInstitutionsCommand;
 use Survos\PixieBundle\Command\PullUnamObrasCommand;
@@ -28,8 +30,10 @@ use Survos\PixieBundle\EventListener\CsvHeaderEventListener;
 use Survos\PixieBundle\EventListener\PixieControllerEventListener;
 use Survos\PixieBundle\EventListener\PixiePostLoadListener;
 use Survos\PixieBundle\EventListener\TranslationRowEventListener;
+use Survos\PixieBundle\Import\Ingest\JsonIngestor;
 use Survos\PixieBundle\Menu\PixieItemMenu;
 use Survos\PixieBundle\Menu\PixieMenu;
+use Survos\PixieBundle\Repository\CoreDefinitionRepository;
 use Survos\PixieBundle\Repository\CoreRepository;
 use Survos\PixieBundle\Repository\FieldRepository;
 use Survos\PixieBundle\Repository\InstanceRepository;
@@ -41,6 +45,7 @@ use Survos\PixieBundle\Repository\RowRepository;
 use Survos\PixieBundle\Repository\StrRepository;
 use Survos\PixieBundle\Repository\StrTranslationRepository;
 use Survos\PixieBundle\Repository\TableRepository;
+use Survos\PixieBundle\Schema\YamlSchemaSynchronizer;
 use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\LibreTranslateService;
@@ -121,13 +126,17 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
                      LocaleContext::class,
                      ReferenceRepository::class,
                      ImportHandler::class,
+                     YamlSchemaSynchronizer::class,
 PixiePostLoadListener::class,
+JsonIngestor::class,
 TranslationResolver::class,
 //                     LarcoHandler::class,
 //                     BelvedereHandler::class,
 
                      RelationRepository::class,
                      RowIngestor::class,
+                     CoreRepository::class,
+                     CoreDefinitionRepository::class,
                      OwnerRepository::class, // maybe better to have Settings or a different name at least
                      InstanceRepository::class,
                      OriginalImageRepository::class,
@@ -212,6 +221,8 @@ TranslationResolver::class,
                      PixiePrepareCommand::class,
                      PixieImportCommand::class,
                      PixieExportCommand::class,
+                     PixieInjestCommand::class,
+                     PixieSchemaSyncCommand::class,
 //PullUnamInstitutionsCommand::class,
 //PullUnamObrasCommand::class,
 //                     PixieTranslateCommand::class,

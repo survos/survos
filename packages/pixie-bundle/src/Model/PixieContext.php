@@ -19,6 +19,12 @@ final class PixieContext
     {
         return $this->em->getRepository($className);
     }
+
+    public function find(string $className, int|string $id): mixed
+    {
+        return $this->em->getRepository($className)->find($id);
+    }
+
     public function flush(): void
     {
         $this->em->flush();

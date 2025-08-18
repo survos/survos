@@ -102,7 +102,7 @@ class Row implements TranslatableByCodeInterface, MarkingInterface, \Stringable
     #[ORM\Id()]
     #[Groups(['row.read'])]
     #[ApiProperty(description: 'single key, composite of core.code - row.idWithinCore')]
-    protected ?string $id;
+    private(set) ?string $id;
 
     public static function RowIdentifier(Core $core, string $id): string
     {

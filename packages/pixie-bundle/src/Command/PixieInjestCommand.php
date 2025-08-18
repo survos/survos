@@ -75,8 +75,8 @@ final class PixieInjestCommand
 
                 $rowId = Row::RowIdentifier($coreEntity, $idWithinCore);
                 /** @var Row $row */
-                $row = $em->getRepository(Row::class)->find($rowId) ?? new Row($coreEntity, $idWithinCore);
-                if ($row->getId() !== $rowId) {
+                if (!$row = $em->getRepository(Row::class)->find($rowId)) {
+                    $row = new Row($coreEntity, $idWithinCore);
                     $em->persist($row);
                 }
 
@@ -92,7 +92,7 @@ final class PixieInjestCommand
                         }
                     }
                 }
-                $row->setLabel($label ?? ("row $core:$idWithinCore"));
+                $row->rawLabel =  ($label ?? ("row $core:$idWithinCore"));
 
                 // Optional DTO normalization
                 if ($dtoClass && $this->dtoMapper) {
@@ -105,7 +105,7 @@ final class PixieInjestCommand
                     }
                 }
 
-                $row->setData($record);
+                $row->data = $record;
 
                 if ((++$i % $batch) === 0) {
                     $em->flush();

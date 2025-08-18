@@ -14,7 +14,10 @@ use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * JSON/NDJSON/CSV → Row importer. Optional DTO normalization via --dto/--dto-class.
+ * JSON/NDJSON/CSV → Row importer.
+ * Stores:
+ *   - Row->raw  = original record
+ *   - Row->data = normalized DTO output (or original if no DTO)
  */
 #[AsCommand('pixie:injest', 'Import JSON/NDJSON/CSV into Rows (file or directory)')]
 final class PixieInjestCommand
@@ -22,7 +25,7 @@ final class PixieInjestCommand
     public function __construct(
         private readonly PixieService $pixie,
         private readonly JsonIngestor $json,
-        private readonly ?CsvIngestor $csv = null,  // optional; autowired if available
+        private readonly ?CsvIngestor $csv = null,
         private readonly ?DtoMapper $dtoMapper = null,
     ) {}
 
@@ -34,19 +37,18 @@ final class PixieInjestCommand
         #[Option('core')] string $core = 'obj',
         #[Option('pk')] string $pk = 'id',
         #[Option('label-field')] ?string $labelField = null,
-        #[Option('dto-class')] ?string $dtoClass = null,      // class name
-        #[Option('dto')] ?string $dtoAlias = null,            // alias of dto-class
+        #[Option('dto-class')] ?string $dtoClass = null,
+        #[Option('dto')] ?string $dtoAlias = null,    // alias of dto-class
         #[Option('batch')] int $batch = 1000,
         #[Option('limit')] int $limit = 0,
     ): int {
-        // Unify dto option
         $dtoClass = $dtoClass ?? $dtoAlias;
 
-        $ctx   = $this->pixie->getReference($pixieCode); // switches DB + ensure schema
+        $ctx   = $this->pixie->getReference($pixieCode); // switch DB + ensure schema
         $owner = $ctx->ownerRef;
         $em    = $ctx->em;
 
-        // Resolve sources (dir supports .json/.jsonl/.csv)
+        // Resolve sources (dir picks up .json/.jsonl/.csv)
         $sources = [];
         if ($file) {
             $sources = [$file];
@@ -83,7 +85,7 @@ final class PixieInjestCommand
 
             $iter = match ($ext) {
                 'json','jsonl' => $this->json->iterate($path),
-                'csv' => $this->requireCsv()->iterate($path, null), // you can pass expected headers if you want
+                'csv' => $this->requireCsv()->iterate($path, null),
                 default => null
             };
             if (!$iter) {
@@ -94,36 +96,43 @@ final class PixieInjestCommand
             foreach ($iter as $record) {
                 if (!\is_array($record)) continue;
 
+                // PK
                 $idWithinCore = (string)($record[$pk] ?? '');
                 if ($idWithinCore === '' || isset($seen[$idWithinCore])) {
                     continue;
                 }
                 $seen[$idWithinCore] = true;
 
-                // Optional DTO normalization
+                // Normalize via DTO (or fall back to original)
+                $normalized = $record;
                 if ($dtoClass && $this->dtoMapper) {
                     try {
                         $dto  = $this->dtoMapper->mapRecord($record, $dtoClass);
-                        $norm = $this->dtoMapper->toArray($dto);
-                        $record['_norm'] = $norm;
+                        $normalized = $this->dtoMapper->toArray($dto);
                     } catch (\Throwable $e) {
                         $io->warning("DTO mapping failed for id=$idWithinCore: ".$e->getMessage());
                     }
                 }
 
-                // Upsert Row
+                // Upsert Row (preferred style)
                 $rowId = Row::RowIdentifier($coreEntity, $idWithinCore);
-                /** @var Row $row */
-                $row = $ctx->repo(Row::class)->find($rowId) ?? new Row($coreEntity, $idWithinCore);
-                if ($row->getId() !== $rowId) {
+                /** @var Row|null $row */
+                if (!$row = $ctx->repo(Row::class)->find($rowId)) {
+                    $row = new Row($coreEntity, $idWithinCore);
                     $em->persist($row);
                 }
 
-                // Pick label: DTO -> name/title -> generic
-                $label = $record['_norm']['label'] ?? ($record['label'] ?? ($record['name'] ?? ($record['title'] ?? null)));
+                // Label (prefer normalized label/name/title, then fallback)
+                $label = $normalized['label'] ?? ($normalized['name'] ?? ($normalized['title'] ?? null));
+                if (!$label && $labelField && isset($record[$labelField])) {
+                    $label = (string)$record[$labelField];
+                }
                 $row->setLabel($label ?: ("row $core:$idWithinCore"));
 
-                $row->setData($record);
+                // Store raw and normalized
+                // NOTE: Row has a public $raw property in your model; if not, add a setRaw().
+                $row->raw = $record;            // original for debugging
+                $row->setData($normalized);     // normalized for runtime
 
                 if ((++$i % $batch) === 0) {
                     $em->flush();
@@ -144,7 +153,7 @@ final class PixieInjestCommand
     private function requireCsv(): CsvIngestor
     {
         if (!$this->csv) {
-            throw new \RuntimeException('CsvIngestor service is not available. Install league/csv and wire CsvIngestor.');
+            throw new \RuntimeException('CsvIngestor not available. Install league/csv and wire CsvIngestor.');
         }
         return $this->csv;
     }

@@ -31,6 +31,7 @@ use Survos\PixieBundle\EventListener\CsvHeaderEventListener;
 use Survos\PixieBundle\EventListener\PixieControllerEventListener;
 use Survos\PixieBundle\EventListener\PixiePostLoadListener;
 use Survos\PixieBundle\EventListener\TranslationRowEventListener;
+use Survos\PixieBundle\Import\Ingest\CsvIngestor;
 use Survos\PixieBundle\Import\Ingest\JsonIngestor;
 use Survos\PixieBundle\Menu\PixieItemMenu;
 use Survos\PixieBundle\Menu\PixieMenu;
@@ -64,6 +65,7 @@ use Survos\PixieBundle\Service\ReferenceService;
 use Survos\PixieBundle\Service\RelationService;
 use Survos\PixieBundle\Service\RowIngestor;
 use Survos\PixieBundle\Service\SchemaViewService;
+use Survos\PixieBundle\Service\SqlViewService;
 use Survos\PixieBundle\Service\TranslationResolver;
 use Survos\PixieBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -127,6 +129,8 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
         foreach ([DatabaseComponent::class, RowComponent::class, CoreService::class,
                      LocaleContext::class,
                      SchemaViewService::class,
+                     SqlViewService::class,
+                     CsvIngestor::class,
                      ReferenceRepository::class,
                      ImportHandler::class,
                      MeiliIndexer::class,

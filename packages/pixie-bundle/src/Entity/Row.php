@@ -76,8 +76,12 @@ class Row implements TranslatableByCodeInterface, MarkingInterface, \Stringable
     public Core $core;
 
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
-    #[ApiProperty(description: 'the object that meilisearch indexes, all of the important data in key/value pairs EXCEPT translatable strings')]
+    #[ApiProperty(description: 'the normalized object that meilisearch indexes, all of the important data in key/value pairs EXCEPT translatable strings')]
     public ?array $data = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+    #[ApiProperty(description: 'the raw data for debugging')]
+    public ?array $rawData  = null;
 
     /**
      * keyed by locale, then by translatable field name, e.g. en.label, en.description
@@ -174,5 +178,17 @@ class Row implements TranslatableByCodeInterface, MarkingInterface, \Stringable
     {
         return $this->core->owner;
 
+    }
+
+    public function setLabel(string $label): static
+    {
+        $this->rawLabel = $label;
+        return $this;
+    }
+
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+        return $this;
     }
 }

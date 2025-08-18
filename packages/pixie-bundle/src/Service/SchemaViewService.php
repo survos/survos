@@ -11,9 +11,9 @@ use Survos\PixieBundle\Entity\FieldDefinition;
  * Builds a view-friendly structure of the compiled schema
  * (CoreDefinition + FieldDefinition) using ctx->repo() and public properties.
  */
-final class SchemaViewService
+final readonly class SchemaViewService
 {
-    public function __construct(private readonly PixieService $pixie) {}
+    public function __construct(private PixieService $pixie) {}
 
     /**
      * @return array{

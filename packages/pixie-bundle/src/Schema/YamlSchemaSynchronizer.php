@@ -8,6 +8,7 @@ use Survos\PixieBundle\Entity\FieldDefinition;
 use Survos\PixieBundle\Model\Config;
 use Survos\PixieBundle\Model\Property;
 use Survos\PixieBundle\Service\PixieService;
+use Survos\PixieBundle\Service\SqlViewService;
 
 /**
  * Compiles survos_pixie YAML into CoreDefinition + FieldDefinition
@@ -16,7 +17,8 @@ use Survos\PixieBundle\Service\PixieService;
 final class YamlSchemaSynchronizer
 {
     public function __construct(
-        private readonly PixieService $pixie
+        private readonly PixieService $pixie,
+        private SqlViewService $sqlViewService,
     ) {}
 
     public function sync(string $ownerCode, Config $config, string $schemaVersion = 'v1'): void
@@ -113,14 +115,20 @@ final class YamlSchemaSynchronizer
                     'position'     => $position,
                 ];
                 foreach ($map as $propName => $val) {
-                    $rp = $rf->getProperty($propName); $rp->setAccessible(true);
-                    if ($rp->getValue($fd) !== $val) { $rp->setValue($fd, $val); }
+                    $rp = $rf->getProperty($propName);
+                    $rp->setAccessible(true);
+                    if ($rp->getValue($fd) !== $val) {
+                        $rp->setValue($fd, $val);
+                    }
                 }
 
                 $em->persist($fd);
                 $position++;
             }
         }
+
+        $this->sqlViewService->createCoreViews($ownerCode, alsoPrefixed: true);
+
 
         $em->flush();
     }

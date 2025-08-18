@@ -46,17 +46,12 @@ final class PixieImportCommand extends Command
 
     public function __construct(
         private LoggerInterface                            $logger,
-        private ParameterBagInterface                      $bag,
         private readonly PixieService                      $pixieService,
         #[Target('pixieEntityManager')]
         private EntityManagerInterface                     $pixieEntityManager,
         private EventDispatcherInterface                   $eventDispatcher,
         #[Autowire('%env(SITE_BASE_URL)%')] private string $baseUrl,
-        private CoreRepository                             $coreRepository,
         private PixieImportService                         $pixieImportService,
-        private ImportHandler                              $importHandler,
-        private readonly CoreService                       $coreService,
-        private readonly TableRepository                   $tableRepository,
     )
     {
         parent::__construct();

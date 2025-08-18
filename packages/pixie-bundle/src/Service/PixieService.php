@@ -268,6 +268,7 @@ class PixieService
             }
             $config = $this->serializer->denormalize($pixie, Config::class);
             $config->setPixieFilename($this->getPixieFilename($code));
+            $config->code = $code;
 
 
             // eh.
@@ -1061,10 +1062,14 @@ dump($diff);
         $this->currentPixieCode = $code ?: null;
     }
 
-    public function getReference(string $pixieCode): PixieContext
+    public function getReference(?string $pixieCode=null): PixieContext
     {
-        $em = $this->switchToPixieDatabase($pixieCode); // switch sqlite file
-        $this->ensureSchema($em);                       // ensure ORM tables exist
+        if (!$pixieCode) {
+            $pixieCode = $this->currentPixieCode;
+        } else {
+            $em = $this->switchToPixieDatabase($pixieCode); // switch sqlite file
+            $this->ensureSchema($em);                       // ensure ORM tables exist
+        }
 
         $config = $this->buildConfigSnapshot($pixieCode, $em); // <- from current EM
 

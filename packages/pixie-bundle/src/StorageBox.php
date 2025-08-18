@@ -58,8 +58,8 @@ class StorageBox
      * @param string $filename The filename that the store is located in.
      * @param array $tablesToCreate The ADDITIONAL tables to create with writing.  Others may already exist.
      */
-    function __construct(private readonly string                              $filename,
-                                     array                                       &$data, // debug data, passed from Entity
+    function __construct(private readonly ?string                              $filename=null,
+                                     array                                       &$data=[], // debug data, passed from Entity
                                      private ?Config                             $config = null, // for creation only.  Shouldn't be in constructor!
 //                                     private array                     $tablesToCreate = [],
 //                                     private ?array                     $regexRules = [],

@@ -60,13 +60,9 @@ class PixieController extends AbstractController
         private EventDispatcherInterface        $eventDispatcher,
         #[Target('pixieEntityManager')]
         private EntityManagerInterface          $pixieEntityManager,
-        private StrRepository $strRepository,
-        private RowRepository                   $rowRepository,
         private PixieTranslationService         $translationService,
         private readonly RequestStack           $requestStack,
-        private readonly CoreRepository $coreRepository,
-        private readonly CoreService $coreService, private readonly
-        OriginalImageRepository $originalImageRepository,
+        private readonly CoreService $coreService,
         private readonly ?UrlGeneratorInterface $urlGenerator=null,
         private readonly ?MessageBusInterface   $bus=null,
         private readonly ?WorkflowHelperService $workflowHelperService = null,
@@ -505,33 +501,33 @@ class PixieController extends AbstractController
         $ctx = $this->pixieService->getReference($pixieCode);
         $em = $ctx->em;
         $tables = $em->getRepository(Table::class)->findAll();
+        assert($pixieCode);
 
         $stringCount = $em->getRepository(Str::class)->count();
         $imageCount = $em->getRepository(OriginalImage::class)->count();
 //        dd($stringCount, $imageCount);
 
-        $conn = $this->pixieEntityManager->getConnection();
-        $sm = $conn->createSchemaManager();
-        foreach ($sm->listViews() as $view) {
-            $viewCode = $view->getName();
-            try {
-                $pdoResult = $conn->executeQuery("SELECT * FROM $viewCode limit $limit");
-                $data[$viewCode] = $pdoResult->fetchAllAssociative();
-            } catch (\Exception $exception) {
-                dd($view, $view->getSql(), $exception->getMessage());
-            }
-        }
+        // old way, before entities
+//        $conn = $this->pixieEntityManager->getConnection();
+//        $sm = $conn->createSchemaManager();
+//        foreach ($sm->listViews() as $view) {
+//            $viewCode = $view->getName();
+//            try {
+//                $pdoResult = $conn->executeQuery("SELECT * FROM $viewCode limit $limit");
+//                $data[$viewCode] = $pdoResult->fetchAllAssociative();
+//            } catch (\Exception $exception) {
+//                dd($view, $view->getSql(), $exception->getMessage());
+//            }
+//        }
         // $sm->listDatabases(), is not supported by sqlite
 //        dd($data,  $sm->listViews(), $sm->listTables());
-
-        // the controller listener should do this.  We could also add $config to the params
-        $config = $this->pixieService->getReference($pixieCode);
-
 
         $countsByCore = $this->pixieService->getCountsByCore();
         foreach ($countsByCore as $code => $count) {
             $core = $this->pixieService->getCoreInContext($ctx, $code);
+            $rows = $ctx->repo(Row::class)->findBy(['core' => $core], [], 50);
             assert($core, "Missing core $code");
+
             $data[$code] = $core->rows->slice(0, $limit); // $this->rowRepository->findBy(['core.id' => $code], [], $limit);
         }
 
@@ -543,7 +539,7 @@ class PixieController extends AbstractController
 
         // order?
         $cores = [];
-        foreach ($this->coreRepository->findAll() as $core) {
+        foreach ($ctx->repo(Core::class)->findAll() as $core) {
             $cores[] = $core;
 //            dd($core);
         }

@@ -19,15 +19,16 @@ final class DtoMapper
      * @param array<string,mixed> $record
      * @template T of object
      * @param class-string<T> $dtoClass
+     * @param array{pixie?:string, core?:string} $context
      * @return T
      */
-    public function mapRecord(array $record, string $dtoClass): object
+    public function mapRecord(array $record, string $dtoClass, array $context = []): object
     {
         $rc  = new ReflectionClass($dtoClass);
         $dto = $rc->newInstanceWithoutConstructor();
 
         foreach ($rc->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
-            $value = $this->resolveValue($prop, $record);
+            $value = $this->resolveValue($prop, $record, $context);
             $value = $this->coerceToPropertyType($prop, $value);
             if ($value !== null || $this->isNullable($prop)) {
                 $prop->setValue($dto, $value);
@@ -67,10 +68,21 @@ final class DtoMapper
         }
     }
 
-    private function resolveValue(ReflectionProperty $prop, array $record): mixed
+    private function resolveValue(ReflectionProperty $prop, array $record, array $context): mixed
     {
         $map = $this->getAttribute($prop, MapAttr::class);
         $core= $this->getAttribute($prop, CoreAttr::class);
+
+        // honor when/except on Map
+        if ($map) {
+            $pix = $context['pixie'] ?? null;
+            if ($pix && $map->when && !in_array($pix, $map->when, true)) {
+                return null;
+            }
+            if ($pix && $map->except && in_array($pix, $map->except, true)) {
+                return null;
+            }
+        }
 
         // 1) pick value via #[Map]
         $val = null;
@@ -96,7 +108,7 @@ final class DtoMapper
             }
         }
 
-        // 3) if #[Core], just pass-through (relation/event planner will handle later)
+        // 3) if #[Core], leave as-is (relation planner handles it)
         if ($core) {
             return $val;
         }

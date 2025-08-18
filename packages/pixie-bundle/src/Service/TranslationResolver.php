@@ -16,7 +16,10 @@ final class TranslationResolver
     /** @var array<string, array<string,string>> code => [locale => text] */
     private array $cache = [];
 
-    public function __construct(private StrRepository $strRepo) {}
+    public function __construct(
+        private PixieService $pixieService,
+//        private StrRepository $strRepo
+    ) {}
 
     /**
      * @param string[] $codes
@@ -36,8 +39,10 @@ final class TranslationResolver
         }
 
         if ($missing) {
+            $ctx = $this->pixieService->getReference();
+            $strRepo = $ctx->repo(Str::class);
             /** @var Str[] $strs */
-            $strs = $this->strRepo->findBy(['code' => $missing]);
+            $strs = $strRepo->findBy(['code' => $missing]);
             foreach ($strs as $s) {
                 $t = $s->t; // denormalized cache: [locale => text]
                 $this->cache[$s->code][$locale] = $t[$locale] ?? $s->original;

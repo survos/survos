@@ -25,6 +25,7 @@ use Survos\PixieBundle\Service\CoreService;
 use Survos\PixieBundle\Service\PixieService;
 use Survos\PixieBundle\Service\PixieImportService;
 use Survos\PixieBundle\Service\PixieTranslationService;
+use Survos\PixieBundle\Service\SchemaViewService;
 use Survos\PixieBundle\StorageBox;
 use Survos\PixieBundle\SurvosPixieBundle;
 use Survos\WorkflowBundle\Service\WorkflowHelperService;
@@ -129,6 +130,24 @@ class PixieController extends AbstractController
             'chart' => $chart
         ];
 
+    }
+
+    #[Route('/schema/{pixieCode}', name: 'pixie_schema', requirements: ['key' => '.+'], options: ['expose' => true])]
+    public function schema(string $pixieCode, Request $request, SchemaViewService $schemaView): Response
+    {
+        $ctx = $this->pixieService->getReference($pixieCode);
+        $schemas = $schemaView->getCompiledSchema($pixieCode);
+//        dd($schemas);
+//        $schemas = [];
+//        foreach ($ctx->repo(Core::class)->findAll() as $core) {
+////            $core = $request->query->get('core'); // optional ?core=obj filter
+//            $schema = $schemaView->getCompiledSchema($pixieCode, $core->code);
+//            $schemas[$core->code] = $schema;
+//        }
+//        dd($schemas);
+
+        // Twig namespace for PixieBundle is usually "@SurvosPixie"
+        return $this->render('@SurvosPixie/pixie/schema_compiled.html.twig', $schemas);
     }
 
     #[Route('/share/{pixieCode}/{tableName}/{key}', name: 'pixie_share_item', requirements: ['key' => '.+'], options: ['expose' => true])]
@@ -506,7 +525,7 @@ class PixieController extends AbstractController
 //        dd($data,  $sm->listViews(), $sm->listTables());
 
         // the controller listener should do this.  We could also add $config to the params
-        $config = $this->pixieService->selectConfig($pixieCode);
+        $config = $this->pixieService->getReference($pixieCode);
 
 
         $countsByCore = $this->pixieService->getCountsByCore();
@@ -532,7 +551,7 @@ class PixieController extends AbstractController
 
 //        return $this->render('@SurvosPixie/pixie/overview.html.twig', [
         return $this->render('@SurvosPixie/pixie/info.html.twig', [
-            'data' => $data,
+            'data' => $data??null,
             'countsByCore' => $countsByCore,
 //            'data' => $data,
             'limit' => $limit,
@@ -545,9 +564,9 @@ class PixieController extends AbstractController
             ]);
     }
 
-    #[Route('/schema/{pixieCode}', name: 'pixie_schema')]
+    #[Route('/schema/{pixieCode}', name: 'pixie_schema_OLD')]
     #[Template('@SurvosPixie/pixie/schema.html.twig')]
-    public function schema(
+    public function schemaOLD(
         string                   $pixieCode,
     ): array
     {

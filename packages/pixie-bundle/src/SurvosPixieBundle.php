@@ -63,6 +63,7 @@ use Survos\PixieBundle\Service\PixieTranslationService;
 use Survos\PixieBundle\Service\ReferenceService;
 use Survos\PixieBundle\Service\RelationService;
 use Survos\PixieBundle\Service\RowIngestor;
+use Survos\PixieBundle\Service\SchemaViewService;
 use Survos\PixieBundle\Service\TranslationResolver;
 use Survos\PixieBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -125,6 +126,7 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
 
         foreach ([DatabaseComponent::class, RowComponent::class, CoreService::class,
                      LocaleContext::class,
+                     SchemaViewService::class,
                      ReferenceRepository::class,
                      ImportHandler::class,
                      MeiliIndexer::class,

@@ -55,8 +55,8 @@ final class PixieMenu implements KnpMenuHelperInterface
         if (!$this->isGranted('ROLE_ADMIN')) {
 //            return;
         }
-        $config = $this->pixieService->selectConfig($pixieCode);
-        $owner = $config->getOwner();
+        $config = $this->pixieService->getReference($pixieCode);
+        $owner = $config->ownerRef;
         $this->add($menu, 'pixie_browse_configs');
 
 

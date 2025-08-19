@@ -12,10 +12,12 @@ use Survos\PixieBundle\Command\PixieIndexCommand;
 use Survos\PixieBundle\Command\PixieInjestCommand;
 use Survos\PixieBundle\Command\PixieMakeCommand;
 use Survos\PixieBundle\Command\PixieMediaCommand;
+use Survos\PixieBundle\Command\PixieMeiliSettingsCommand;
 use Survos\PixieBundle\Command\PixieMigrateCommand;
 use Survos\PixieBundle\Command\PixiePrepareCommand;
 use Survos\PixieBundle\Command\PixieSchemaDumpCommand;
 use Survos\PixieBundle\Command\PixieSchemaSyncCommand;
+use Survos\PixieBundle\Command\PixieStatsShowCommand;
 use Survos\PixieBundle\Command\PixieSyncCommand;
 use Survos\PixieBundle\Components\DatabaseComponent;
 use Survos\PixieBundle\Components\RowComponent;
@@ -50,6 +52,7 @@ use Survos\PixieBundle\Service\ImportHandler;
 use Survos\PixieBundle\Service\LibreTranslateService;
 use Survos\PixieBundle\Service\LocaleContext;
 use Survos\PixieBundle\Service\MeiliIndexer;
+use Survos\PixieBundle\Service\MeiliSettingsBuilder;
 use Survos\PixieBundle\Service\PixieConvertService;
 use Survos\PixieBundle\Service\PixieDocumentProjector;
 use Survos\PixieBundle\Service\PixieEntityManagerProvider;
@@ -61,6 +64,7 @@ use Survos\PixieBundle\Service\RelationService;
 use Survos\PixieBundle\Service\RowIngestor;
 use Survos\PixieBundle\Service\SchemaViewService;
 use Survos\PixieBundle\Service\SqlViewService;
+use Survos\PixieBundle\Service\StatsCollector;
 use Survos\PixieBundle\Service\TranslationResolver;
 use Survos\PixieBundle\StorageBox;
 use Survos\PixieBundle\Twig\TwigExtension;
@@ -90,9 +94,9 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             static function (Definition $definition, MapperAttr $attr, \ReflectionClass $ref): void {
                 $definition->addTag('pixie.dto', [
                     'priority' => $attr->priority,
-                    'when'     => $attr->when,
-                    'except'   => $attr->except,
-                    'cores'    => $attr->cores,
+                    'when' => $attr->when,
+                    'except' => $attr->except,
+                    'cores' => $attr->cores,
                 ]);
             }
         );
@@ -110,6 +114,18 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        foreach ([
+                     \Survos\PixieBundle\Dto\Generic\Obj::class,
+                     // add more bundle DTOs here as you create them:
+                     // \Survos\PixieBundle\Dto\Cleveland\Obj::class,
+                 ] as $dtoClass) {
+            $builder->register($dtoClass)
+                ->setAutowired(true)
+                ->setAutoconfigured(true)
+                ->setPublic(false);
+        }
+
         // repos are not public, but do need the tag
         foreach ([CoreRepository::class,
                      FieldRepository::class,
@@ -123,39 +139,40 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             $builder->register($class)
                 ->setAutowired(true)
                 ->setAutoconfigured(true)
-                ->addTag('doctrine.repository_service')
-//                ->setPublic(true)
+                ->addTag('doctrine.repository_service')//                ->setPublic(true)
             ;
 
         }
 
         // Core services
         foreach ([
-            PixieService::class,
-            PixieImportService::class,
-            PixieEntityManagerProvider::class,
-            CoreService::class,
-            LocaleContext::class,
-            JsonIngestor::class,
-            CsvIngestor::class,
-            YamlSchemaSynchronizer::class,
-            PixieDocumentProjector::class,
-            EventQueryService::class,
-            TranslationResolver::class,
-            PixieTranslationService::class,
-            LibreTranslateService::class,
-            MeiliIndexer::class,
-            PixieConvertService::class,
-            ReferenceService::class,
-            RelationService::class,
-            RowIngestor::class,
-            SchemaViewService::class,
-            SqlViewService::class,
-            DtoMapper::class,
-            DtoRegistry::class,
-            DatabaseComponent::class,
-            RowComponent::class,
-        ] as $svc) {
+                     StatsCollector::class,
+                     PixieService::class,
+                     PixieImportService::class,
+                     PixieEntityManagerProvider::class,
+                     CoreService::class,
+                     LocaleContext::class,
+                     MeiliSettingsBuilder::class,
+                     JsonIngestor::class,
+                     CsvIngestor::class,
+                     YamlSchemaSynchronizer::class,
+                     PixieDocumentProjector::class,
+                     EventQueryService::class,
+                     TranslationResolver::class,
+                     PixieTranslationService::class,
+                     LibreTranslateService::class,
+                     MeiliIndexer::class,
+                     PixieConvertService::class,
+                     ReferenceService::class,
+                     RelationService::class,
+                     RowIngestor::class,
+                     SchemaViewService::class,
+                     SqlViewService::class,
+                     DtoMapper::class,
+                     DtoRegistry::class,
+                     DatabaseComponent::class,
+                     RowComponent::class,
+                 ] as $svc) {
             $builder->register($svc)
                 ->setAutowired(true)
                 ->setAutoconfigured(true)
@@ -232,19 +249,21 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
 
         // Commands
         foreach ([
-            PixieMigrateCommand::class,
-            PixieMediaCommand::class,
-            PixiePrepareCommand::class,
-            PixieImportCommand::class,
-            PixieExportCommand::class,
-            PixieInjestCommand::class,
-            PixieSchemaDumpCommand::class,
-            PixieSchemaSyncCommand::class,
-            IterateCommand::class,
-            PixieIndexCommand::class,
-            PixieSyncCommand::class,
-            PixieMakeCommand::class,
-        ] as $commandClass) {
+                     PixieStatsShowCommand::class,
+                     PixieMeiliSettingsCommand::class,
+                     PixieMigrateCommand::class,
+                     PixieMediaCommand::class,
+                     PixiePrepareCommand::class,
+                     PixieImportCommand::class,
+                     PixieExportCommand::class,
+                     PixieInjestCommand::class,
+                     PixieSchemaDumpCommand::class,
+                     PixieSchemaSyncCommand::class,
+                     IterateCommand::class,
+                     PixieIndexCommand::class,
+                     PixieSyncCommand::class,
+                     PixieMakeCommand::class,
+                 ] as $commandClass) {
             $builder->autowire($commandClass)
                 ->setAutoconfigured(true)
                 ->addTag('console.command');
@@ -256,15 +275,15 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
         $root = $definition->rootNode();
         $root
             ->children()
-                // Use a filename extension compatible with your PixieService expectation
-                ->scalarNode('extension')->defaultValue('db')->info("pixie DB filename extension, e.g. 'db'")->end()
-                ->scalarNode('db_dir')->defaultValue('pixie')->info("directory for pixie db files")->end()
-                ->scalarNode('data_root')->defaultValue('data')->info("root for csv/json data")->end()
-                ->scalarNode('transport')->defaultNull()->info("default messenger transport for iterate")->end()
-                ->booleanNode('debug')->defaultFalse()->info("turn on profiler hooks (kernel.debug?)")->end()
-                ->booleanNode('purge_before_import')->defaultFalse()->end()
-                ->integerNode('limit')->defaultValue(0)->info("default limit for import/index/translate")->end()
-                ->scalarNode('config_dir')->defaultValue('config/packages/pixie')->end()
+            // Use a filename extension compatible with your PixieService expectation
+            ->scalarNode('extension')->defaultValue('db')->info("pixie DB filename extension, e.g. 'db'")->end()
+            ->scalarNode('db_dir')->defaultValue('pixie')->info("directory for pixie db files")->end()
+            ->scalarNode('data_root')->defaultValue('data')->info("root for csv/json data")->end()
+            ->scalarNode('transport')->defaultNull()->info("default messenger transport for iterate")->end()
+            ->booleanNode('debug')->defaultFalse()->info("turn on profiler hooks (kernel.debug?)")->end()
+            ->booleanNode('purge_before_import')->defaultFalse()->end()
+            ->integerNode('limit')->defaultValue(0)->info("default limit for import/index/translate")->end()
+            ->scalarNode('config_dir')->defaultValue('config/packages/pixie')->end()
             ->end();
 
         $this->addPixiesSection($root);
@@ -285,12 +304,12 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
     {
         $children
             ->arrayNode('cores')
-                ->arrayPrototype()
-                    ->children()
-                        ->scalarNode('icon')->end()
-                        ->scalarNode('icon_class')->end()
-                    ->end()
-                ->end()
+            ->arrayPrototype()
+            ->children()
+            ->scalarNode('icon')->end()
+            ->scalarNode('icon_class')->end()
+            ->end()
+            ->end()
             ->end();
     }
 
@@ -298,9 +317,9 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
     {
         $pixieRoot = $children
             ->arrayNode('pixies')
-                ->useAttributeAsKey('code')
-                ->arrayPrototype()
-                    ->children();
+            ->useAttributeAsKey('code')
+            ->arrayPrototype()
+            ->children();
 
         $pixieRoot->scalarNode('version')->defaultValue('1.1')->end();
         $pixieRoot->scalarNode('code')->defaultNull()->end();
@@ -310,12 +329,12 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
 
         $pixieRoot->arrayNode('members')
             ->arrayPrototype()
-                ->children()
-                    ->scalarNode('email')->defaultNull()->end()
-                    ->scalarNode('roles')->defaultNull()->end()
-                ->end()
+            ->children()
+            ->scalarNode('email')->defaultNull()->end()
+            ->scalarNode('roles')->defaultNull()->end()
             ->end()
-        ->end();
+            ->end()
+            ->end();
 
         $this->addTablesSection($pixieRoot);
         $this->addSourceSection($pixieRoot);
@@ -326,19 +345,19 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
         $tableRoot = $parent->arrayNode($key)
             ->useAttributeAsKey('name')
             ->arrayPrototype()
-                ->children()
-                    ->integerNode('total')->defaultNull()->info("if total is known for progress bar")->end()
-                    ->booleanNode('has_images')->defaultNull()->info("if images display thumbnail")->end()
-                    ->scalarNode('extends')->defaultNull()->info("inherits table data from templates")->end()
-                    ->arrayNode('rules')->scalarPrototype()->end()->end()
-                    ->scalarNode('workflow')->end()
-                    ->scalarNode('parent')->defaultNull()->info("related parent table in 1:N")->end()
-                    ->arrayNode('translatable')->scalarPrototype()->end()->end()
-                    ->arrayNode('facets')->scalarPrototype()->end()->end()
-                    ->arrayNode('extras')->scalarPrototype()->end()->end()
-                    ->arrayNode('uses')->scalarPrototype()->end()->info("use definitions from templates['internal']")->end()
-                    ->arrayNode('properties')->scalarPrototype()->end()->end()
-                ->end()
+            ->children()
+            ->integerNode('total')->defaultNull()->info("if total is known for progress bar")->end()
+            ->booleanNode('has_images')->defaultNull()->info("if images display thumbnail")->end()
+            ->scalarNode('extends')->defaultNull()->info("inherits table data from templates")->end()
+            ->arrayNode('rules')->scalarPrototype()->end()->end()
+            ->scalarNode('workflow')->end()
+            ->scalarNode('parent')->defaultNull()->info("related parent table in 1:N")->end()
+            ->arrayNode('translatable')->scalarPrototype()->end()->end()
+            ->arrayNode('facets')->scalarPrototype()->end()->end()
+            ->arrayNode('extras')->scalarPrototype()->end()->end()
+            ->arrayNode('uses')->scalarPrototype()->end()->info("use definitions from templates['internal']")->end()
+            ->arrayNode('properties')->scalarPrototype()->end()->end()
+            ->end()
             ->end();
     }
 
@@ -346,7 +365,7 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
     {
         $source = $pixieRoot
             ->arrayNode('source')
-                ->children();
+            ->children();
 
         $this->addGitSection($source);
         $this->addBuildSection($source, 'build');
@@ -367,38 +386,38 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
             ->scalarNode('notes')->end()
             ->scalarNode('dir')->info('defaults to <projectDir>/data')->end()
             ->arrayNode('links')
-                ->children()
-                    ->scalarNode('facebook')->end()
-                    ->scalarNode('twitter')->end()
-                    ->scalarNode('github')->end()
-                    ->scalarNode('instagram')->end()
-                    ->scalarNode('flickr')->end()
-                    ->scalarNode('api')->end()
-                    ->scalarNode('contact')->end()
-                    ->scalarNode('license')->end()
-                    ->scalarNode('web')->end()
-                    ->scalarNode('website')->end()
-                    ->scalarNode('search')->end()
-                    ->scalarNode('info')->end()
-                ->end()
+            ->children()
+            ->scalarNode('facebook')->end()
+            ->scalarNode('twitter')->end()
+            ->scalarNode('github')->end()
+            ->scalarNode('instagram')->end()
+            ->scalarNode('flickr')->end()
+            ->scalarNode('api')->end()
+            ->scalarNode('contact')->end()
+            ->scalarNode('license')->end()
+            ->scalarNode('web')->end()
+            ->scalarNode('website')->end()
+            ->scalarNode('search')->end()
+            ->scalarNode('info')->end()
+            ->end()
             ->end()
             ->arrayNode('ignore')
-                ->beforeNormalization()->ifString()->then(fn($v) => [$v])->end()
-                ->scalarPrototype()->end()
+            ->beforeNormalization()->ifString()->then(fn($v) => [$v])->end()
+            ->scalarPrototype()->end()
             ->end()
             ->scalarNode('include')->end()
-        ->end()->end();
+            ->end()->end();
     }
 
     private function addGitSection(NodeBuilder $sourceRoot): void
     {
         $sourceRoot
             ->arrayNode('git')
-                ->children()
-                    ->scalarNode('repo')->end()
-                    ->booleanNode('lfs')->defaultFalse()->end()
-                    ->scalarNode('lsf_include')->end()
-                ->end()
+            ->children()
+            ->scalarNode('repo')->end()
+            ->booleanNode('lfs')->defaultFalse()->end()
+            ->scalarNode('lsf_include')->end()
+            ->end()
             ->end();
     }
 
@@ -406,15 +425,15 @@ class SurvosPixieBundle extends AbstractBundle implements CompilerPassInterface
     {
         $sourceRoot
             ->arrayNode($nodeName)
-                ->arrayPrototype()
-                    ->children()
-                        ->scalarNode('action')->end()
-                        ->scalarNode('source')->end()
-                        ->scalarNode('target')->end()
-                        ->scalarNode('unzip')->end()
-                        ->scalarNode('cmd')->end()
-                    ->end()
-                ->end()
+            ->arrayPrototype()
+            ->children()
+            ->scalarNode('action')->end()
+            ->scalarNode('source')->end()
+            ->scalarNode('target')->end()
+            ->scalarNode('unzip')->end()
+            ->scalarNode('cmd')->end()
+            ->end()
+            ->end()
             ->end();
     }
 

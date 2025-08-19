@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Survos\PixieBundle\Command;
 
 use Survos\MeiliBundle\Service\MeiliService;
+use Survos\MeiliBundle\Service\SettingsService;
 use Survos\PixieBundle\Entity\Row;
 use Survos\PixieBundle\Service\LocaleContext;
 use Survos\PixieBundle\Service\MeiliIndexer;
@@ -21,7 +22,9 @@ final class PixieIndexCommand
     public function __construct(
         private readonly PixieService $pixie,
         private readonly PixieDocumentProjector $projector,
-        private readonly MeiliService $meili,
+        private readonly MeiliIndexer $meiliIndexer, // pixie
+        private readonly MeiliService $meili, // general, from our meili-bundle.
+        private readonly SettingsService $settingsService, // from our meili-bundle, for creating/updating settings
         private readonly MeiliIndexer $indexer,
         private readonly LocaleContext $locale,
     ) {}
@@ -44,10 +47,10 @@ final class PixieIndexCommand
         $index = IndexNameResolver::name($pixieCode, $core, $loc);
 
         $io->title("Meili index: $index");
-        $settings = $this->meili->getSettings($index);
+        $settings = $this->meiliIndexer->getSettings($index);
         if ($settings === null) {
             $io->warning("Index missing. Creating '$index' (pk=id).");
-            $this->meili->ensureIndex($index, 'id');
+            $this->meiliIndexer->ensureIndex($index, 'id');
         } else {
             $io->writeln(json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         }

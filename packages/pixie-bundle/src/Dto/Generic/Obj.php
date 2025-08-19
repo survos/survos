@@ -13,20 +13,60 @@ use Survos\PixieBundle\Dto\Attributes\Mapper;
 #[Mapper(priority: 0)]
 class Obj extends BaseObj
 {
-    #[Map(regex: '/\b(label|name|nombre|title|titulo|título)\b/i', priority: 100, translatable: true)]
-    public ?string $label = null;
+    #[Map(source: 'id')]
+    public ?string $id = null;
 
-    #[Map(regex: '/\b(description|descripcion|descripción|desc|tombstone)\b/i', priority: 90, translatable: true)]
+    #[Map(source: 'title',   searchable: true, translatable: true)]
+    public ?string $title = null;
+
+    #[Map(source: 'description', searchable: true, translatable: true)]
     public ?string $description = null;
 
-    #[Map(regex: '/\b(image|img|imagen|thumbnail|thumb)\b/i', priority: 50)]
+    #[Map(source: 'image')]
     public ?string $imageUrl = null;
 
-    #[Map(regex: '/\b(wikidata|wd|wikidata_id|wdid)\b/i', priority: 40)]
-    public ?string $wikidata = null;
+    #[Map(source: 'nombre',  searchable: true, translatable: true)]
+    public ?string $name = null;
 
-    #[Map(regex: '/\b(year|año|ano|date|fecha)\b/i', priority: 30, except: ['immigration'])]
-    public ?int $year = null;
+    #[Map(source: 'clave_de_referencia')]
+    public ?string $reference = null;
+
+    // Facets:
+    #[Map(source: 'nacionalidad', facet: true)]
+    public ?string $nationality = null;
+
+    #[Map(source: 'sexo',         facet: true)]
+    public ?string $gender = null;
+
+    #[Map(source: 'ocupacion',    facet: true)]
+    public ?string $occupation = null;
+
+    #[Map(source: 'estado_civil', facet: true)]
+    public ?string $maritalStatus = null;
+
+    // Places & dates (searchable where useful; years sortable)
+    #[Map(source: 'lugar_de_nacimiento', searchable: true, translatable: true)]
+    public ?string $birthPlace = null;
+
+    #[Map(source: 'fecha_de_nacimiento')]
+    public ?string $birthDate = null;
+
+    #[Map(source: 'lugar_de_entrada', searchable: true, translatable: true)]
+    public ?string $entryPlace = null;
+
+    #[Map(source: 'fecha_de_entrada')]
+    public ?string $entryDate = null;
+
+    #[Map(searchable: true, translatable: true)]
+    public ?string $label = null;
+
+    #[Map(sortable: true)]
+    public ?int $birthYear = null;
+
+    #[Map(sortable: true)]
+    public ?int $entryYear = null;
+
+    public ?string $citation = null;
 
     public function afterMap(array &$norm, array $src): void
     {

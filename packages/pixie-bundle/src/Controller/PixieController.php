@@ -560,7 +560,7 @@ class PixieController extends AbstractController
             ]);
     }
 
-    #[Route('/schema/{pixieCode}', name: 'pixie_schema_OLD')]
+    #[Route('/schemaOLD/{pixieCode}', name: 'pixie_schema_OLD')]
     #[Template('@SurvosPixie/pixie/schema.html.twig')]
     public function schemaOLD(
         string                   $pixieCode,
@@ -590,7 +590,7 @@ class PixieController extends AbstractController
         ];
     }
 
-    #[Route('/schema/{pixieCode}', name: 'pixie_translations')]
+    #[Route('/translations/{pixieCode}', name: 'pixie_translations')]
     #[Template('@SurvosPixie/pixie/translations.html.twig')]
     public function translations(
         string                   $pixieCode,

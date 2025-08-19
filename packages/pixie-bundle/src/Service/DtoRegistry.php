@@ -16,7 +16,7 @@ use ReflectionProperty;
 final class DtoRegistry
 {
     /** @var list<array{class:class-string, priority:int, when:string[], except:string[], cores:string[]}> */
-    private array $entries = [];
+    public array $entries = [];
 
     /**
      * @param iterable<object> $dtos DTO services, tagged with pixie.dto
@@ -55,6 +55,28 @@ final class DtoRegistry
         }
         return ['class' => $best[0], 'score' => $best[1]];
     }
+
+    // ... inside DtoRegistry
+    /** @return list<array{class:class-string, score:int}> */
+    public function rank(string $pixie, string $core, array $record): array
+    {
+        $scored = [];
+        foreach ($this->entries as $e) {
+            if ($e['when']   && !in_array($pixie, $e['when'], true)) continue;
+            if ($e['except'] &&  in_array($pixie, $e['except'], true)) continue;
+            if ($e['cores']  && !in_array($core,  $e['cores'], true)) continue;
+            $score = $this->score($e['class'], $record, $pixie, $e['priority']);
+            if ($score > 0) {
+                $scored[] = ['class' => $e['class'], 'score' => $score];
+            }
+        }
+        usort($scored, static fn($a, $b) => $b['score'] <=> $a['score']);
+        return $scored;
+    }
+
+    /** expose the entries if you need them elsewhere */
+    public function entries(): array { return $this->entries; }
+
 
     /** @return array{priority:int, when:string[], except:string[], cores:string[]} */
     private function readMapperMeta(string $class): array

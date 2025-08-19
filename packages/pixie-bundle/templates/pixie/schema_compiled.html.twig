@@ -1,3 +1,7 @@
+{% extends '@SurvosPixie/pixie/layout.html.twig' %}
+
+{% block body %}
+
 {# packages/pixie-bundle/templates/pixie/schema_compiled.html.twig #}
 {% set pixie = pixie ?? '(unknown)' %}
 {% set coreCount = coreCount ?? 0 %}
@@ -66,3 +70,5 @@
         </section>
     {% endfor %}
 </div>
+
+{% endblock %}

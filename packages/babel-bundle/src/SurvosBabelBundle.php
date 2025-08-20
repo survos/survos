@@ -18,6 +18,7 @@ use Survos\BabelBundle\Service\TranslationStore;
 use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -36,7 +37,8 @@ final class SurvosBabelBundle extends AbstractBundle implements CompilerPassInte
         }
         $builder->autowire(BabelTranslateMissingCommand::class)
             ->setAutoconfigured(true)
-            ->setArgument('$libreTranslateService', new Reference(LibreTranslateService::class))
+            ->setArgument('$libreTranslateService', new Reference(LibreTranslateService::class,
+            ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->addTag('console.command');
 
         foreach ([TranslationStore::class, LocaleContext::class] as $svc) {

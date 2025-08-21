@@ -164,14 +164,15 @@ class PixieService
         $event->setStorageBox($kv);
     }
 
-    function getStorageBoxXX(string  $pixieCode,
+    function getStorageBox(string  $pixieCode,
                            ?string $subCode = null,
                            ?string $filename = null, // since files can share a config?
                            bool    $destroy = false,
                            bool    $createFromConfig = false,
                            ?Config $config = null,
-    ): StorageBox
+    ): PixieContext
     {
+        return $this->getReference($pixieCode);
         // ideally we could drop this and get the configuration data without the file
         // this selects the proper database so when others access the em it is the right one
         assert(!str_contains($pixieCode, "/"), "pass in pixieCode, not filename");

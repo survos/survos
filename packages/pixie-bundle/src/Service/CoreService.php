@@ -34,7 +34,6 @@ use Survos\PixieBundle\Entity\Instance;
 use Survos\PixieBundle\Entity\InstanceCategory;
 use Survos\PixieBundle\Entity\InstanceInterface;
 use Survos\PixieBundle\Entity\Owner;
-use Survos\PixieBundle\Entity\Project;
 use Survos\PixieBundle\Repository\CoreRepository;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;

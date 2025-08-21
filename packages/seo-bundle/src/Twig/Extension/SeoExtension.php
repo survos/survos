@@ -49,21 +49,21 @@ final class SeoExtension extends AbstractExtension
     private function process(string $metaElement, string $value): string
     {
         $str = $this->prepareStr($value);
-        $brandingStr = u((string)$this->seoService->getConfigValue('branding'))->toString();
+        $brandingStr = u((string)$this->seoService->getConfigValue('branding'));
         $length = $str->length();
         [$min, $max] = $this->seoService->getMinMax($metaElement);
 
         // Nominal case
         if ($length >= $min && $length <= $max) {
             // Is there enough place for the branding?
-//            if (($length + $brandingStr->length()) <= self::MAX_TITLE_LENGTH) {
-//                $str = $str->ensureEnd($brandingStr->toString());
-//            }
+            if (($length + $brandingStr->length() <= self::MAX_TITLE_LENGTH) {
+                $str = $str->ensureEnd($brandingStr->toString());
+            }
             return $str->toString();
         }
 
         // Title too short, we add the branding
-        if ($length < $this->$min) {
+        if ($length < $min) {
             $str = $str->ensureEnd($brandingStr);
         }
 

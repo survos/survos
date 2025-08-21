@@ -3,6 +3,7 @@
 namespace Survos\PixieBundle\Entity;
 
 use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -13,6 +14,10 @@ use Survos\PixieBundle\Entity\Field\Field;
 #[ORM\Entity(repositoryClass: OwnerRepository::class)]
 #[ORM\Table(name: 'owner')]
 #[ORM\UniqueConstraint(name: 'owner_code', columns: ['code'])]
+#[ApiResource(
+    normalizationContext: ['groups' => ['owner.read']],
+    denormalizationContext: ['groups' => ['owner.write']],
+)]
 class Owner implements \Stringable
 {
     #[ORM\Id]

@@ -502,8 +502,6 @@ class PixieController extends AbstractController
         $ctx = $this->pixieService->getReference($pixieCode);
         $em = $ctx->em;
         $tables = $em->getRepository(Table::class)->findAll();
-        assert($pixieCode);
-
         $stringCount = $em->getRepository(Str::class)->count();
         $imageCount = $em->getRepository(OriginalImage::class)->count();
 //        dd($stringCount, $imageCount);

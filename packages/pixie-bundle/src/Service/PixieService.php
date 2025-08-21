@@ -576,7 +576,7 @@ class PixieService
     {
         assert(!$autoCreate);
         if (!$config) {
-            if (!$config = $this->selectConfig($pixieCode)) {
+            if (!$config = $this->getReference($pixieCode)->config) {
                 return null;
             }
 

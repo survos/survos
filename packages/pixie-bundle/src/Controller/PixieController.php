@@ -58,9 +58,10 @@ class PixieController extends AbstractController
         private readonly ParameterBagInterface  $bag,
         private readonly PixieService           $pixieService,
         private EventDispatcherInterface        $eventDispatcher,
-        #[Target('pixieEntityManager')]
-        private EntityManagerInterface          $pixieEntityManager,
-        private PixieTranslationService         $translationService,
+//        #[Target('pixieEntityManager')]
+//        private EntityManagerInterface          $pixieEntityManager,
+
+//        private PixieTranslationService         $translationService,
         private readonly RequestStack           $requestStack,
         private readonly CoreService $coreService,
         private readonly ?UrlGeneratorInterface $urlGenerator=null,
@@ -710,6 +711,8 @@ class PixieController extends AbstractController
         #[MapQueryParameter] int $limit = 25
     ): array
     {
+        $ctx = $this->pixieService->getReference($pixieCode);
+        dd($ctx->config->getTable($tableName));
         $this->pixieService->selectConfig($pixieCode);
 //        $core = $this->coreRepository->find($tableName);
         $core = $this->coreService->getCore($tableName);

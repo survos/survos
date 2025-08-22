@@ -8,6 +8,10 @@ bin/console pixie:injest <pixie> --file data/<pixie>/raw/objects.csv --dto-auto 
 bin/console pixie:schema:sync <pixie>   # also builds per-core SQLite views like "obj"
 
 # Prefill translations for a target locale (uses BabelBundle + LibreTranslate)
+bin/console pixie:translate:missing es --only-from=en --limit=2000
+
+
+# Prefill translations for a target locale (uses BabelBundle + LibreTranslate)
 bin/console babel:translate:missing es --only-from=en --limit=2000
 
 # 4) Browse

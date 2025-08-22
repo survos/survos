@@ -49,7 +49,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
 
-//#[Route('/pixie')]
+#[Route('/legacy-pixie')]
 class PixieController extends AbstractController
 {
     const TRANSITION_RESET='_reset';
@@ -450,6 +450,7 @@ class PixieController extends AbstractController
         #[MapQueryParameter] string $pixieCode = ''
     ): array|Response
     {
+        return [];
         $configs = $this->pixieService->getConfigFiles($q, limit: $limit, pixieCode: $pixieCode);
         // cache candidate!
         $tables = [];

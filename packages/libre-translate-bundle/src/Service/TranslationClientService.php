@@ -3,12 +3,13 @@
 namespace Survos\LibreTranslateBundle\Service;
 
 use Psr\Log\LoggerInterface;
+use Survos\BabelBundle\Contract\TranslatorInterface;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class TranslationClientService
+class TranslationClientService implements TranslatorInterface
 {
     public const ROUTE='/batch-translate';
     public function __construct(
@@ -19,6 +20,11 @@ class TranslationClientService
     )
     {
 
+    }
+
+    public function translate(string $text, string $from, string $to): string
+    {
+        assert(false, __CLASS__);
     }
 
     public static function calcHash(string $string, string $locale): string

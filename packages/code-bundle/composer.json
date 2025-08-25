@@ -12,7 +12,8 @@
     "symfony/http-kernel": "^7.3",
     "twig/twig": "^3.4",
     "nette/php-generator": "^4.1",
-    "roave/better-reflection": "^6.57"
+    "roave/better-reflection": "^6.57",
+    "nikic/php-parser": "^5.6"
   },
   "autoload": {
     "psr-4": {
@@ -39,7 +40,8 @@
     "survos/workflow-helper-bundle": "^1.5",
     "phpunit/phpunit": "^12.2.7",
     "doctrine/doctrine-bundle": "^2.15",
-    "symfony/http-client-contracts": "^3.6"
+    "symfony/http-client-contracts": "^3.6",
+    "survos/babel-bundle": "dev-main"
   },
   "version": "1.5.602",
   "config": {

@@ -222,7 +222,7 @@ final class StringBackedTranslatableFlushSubscriber
             $hash    = BabelHasher::forString($srcLocale, $context, $original);
 
             // trace while stabilizing
-            $this->logger->debug('babel.hash', [
+            $this->logger->warning('babel.hash', [
                 'phase' => $phase,
                 'class' => $class,
                 'field' => $field,
@@ -230,6 +230,13 @@ final class StringBackedTranslatableFlushSubscriber
                 'ctx'   => $context,
                 'hash'  => $hash,
             ]);
+            if (!$srcLocale) {
+                $this->logger->warning('Babel: srcLocale missing during flush; expected a #[BabelLocale] or default locale.', [
+                    'class' => $class,
+                    'field' => $field,
+                    'hash' => $hash,
+                ]);
+            }
 
             $this->pending[$hash] = [
                 'original' => $original,

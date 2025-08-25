@@ -3,49 +3,46 @@ declare(strict_types=1);
 
 namespace Survos\BabelBundle\Entity\Traits;
 
+use Survos\BabelBundle\Runtime\BabelRuntime;
+
+/**
+ * Attach to entities with #[Translatable] fields.
+ * - $tCodes holds field => hash (persisted if you map it)
+ * - resolveTranslatable() returns resolved text using BabelRuntime
+ * - getBackingValue() lets listeners safely access private/protected backings
+ */
 trait TranslatableHooksTrait
 {
-    /** @var array<string,string>|null field => code/hash (persisted if you map it) */
+    /** @var array<string,string>|null persisted codes: field => hash */
     public ?array $tCodes = null;
 
-    /** @var array<string,string> runtime resolved translations (field => text) */
+    /** @var array<string,string> runtime cache: field => translated text */
     private array $_resolved = [];
 
-    /**
-     * Unified resolver used by your property hooks/getters.
-     *
-     * Priority:
-     *   1) Already-resolved text (filled by TranslatableListener::postLoad via setResolvedTranslation)
-     *   2) Optional lazy lookup by tCodes[$field] if the entity provides translateHash($hash)
-     *   3) Backing/original value
-     */
-    protected function resolveTranslatable(string $field, ?string $backing, ?string $context = null): ?string
+    protected function resolveTranslatable(string $field, ?string $backingValue, ?string $context = null): ?string
     {
-        // 1) Runtime-resolved (listener populates this during postLoad)
-        if (($this->_resolved[$field] ?? '') !== '') {
+        if ($backingValue === null || $backingValue === '') {
+            return $backingValue;
+        }
+
+        // Return cached if present
+        if (\array_key_exists($field, $this->_resolved)) {
             return $this->_resolved[$field];
         }
 
-        // 2) Optional lazy resolution using a hash/code if the entity exposes translateHash()
-        //    This keeps the trait framework-agnostic; your entity can delegate to a service if desired.
-        $hash = $this->tCodes[$field] ?? null;
-        if (is_string($hash) && $hash !== '' && \method_exists($this, 'translateHash')) {
-            /** @var callable(string):(?string) $cb */
-            $cb = [$this, 'translateHash'];
-            try {
-                $translated = $cb($hash);
-                if (is_string($translated) && $translated !== '') {
-                    // cache for the remainder of the request lifecycle
-                    $this->setResolvedTranslation($field, $translated);
-                    return $translated;
-                }
-            } catch (\Throwable) {
-                // swallow and fall through to backing
-            }
+        // If runtime locale is not set (e.g. CLI without init), return source
+        $locale = BabelRuntime::getLocale();
+        if ($locale === null) {
+            return $backingValue;
         }
 
-        // 3) Fallback to backing/original
-        return $backing;
+        $context ??= $field;
+        $fallback = BabelRuntime::fallback();
+
+        $codes = (array)($this->tCodes ?? []);
+        $hash  = $codes[$field] ?? BabelRuntime::hash($backingValue, $fallback, $context);
+        $text  = BabelRuntime::lookup($hash, $locale) ?? $backingValue;
+        return $this->_resolved[$field] = $text;
     }
 
     public function setResolvedTranslation(string $field, string $text): void
@@ -58,10 +55,19 @@ trait TranslatableHooksTrait
         return $this->_resolved[$field] ?? null;
     }
 
-    /** Safe accessor for private/protected backings like $titleBacking */
-    public function getBackingValue(string $field): ?string
+    /**
+     * Safe accessor for raw source/backing content, used by listeners.
+     * Tries "$field" then "$fieldBacking".
+     */
+    public function getBackingValue(string $field): mixed
     {
-        $prop = $field . 'Backing';
-        return \property_exists($this, $prop) ? $this->{$prop} : null;
+        if (\property_exists($this, $field)) {
+            return $this->$field ?? null;
+        }
+        $backing = $field . 'Backing';
+        if (\property_exists($this, $backing)) {
+            return $this->$backing ?? null;
+        }
+        return null;
     }
 }

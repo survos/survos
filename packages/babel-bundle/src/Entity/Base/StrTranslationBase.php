@@ -8,17 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\MappedSuperclass]
 abstract class StrTranslationBase
 {
-    #[ORM\Id]
-    #[ORM\Column(length: 64)]
-    public string $hash;                 // FK to StrBase::hash (logical)
-
-    #[ORM\Id]
-    #[ORM\Column(length: 8)]
-    public string $locale;               // target locale
-
-    #[ORM\Column(type: 'text')]
-    public string $text;                 // translated text
-
     #[ORM\Column(type: 'json', nullable: true)]
     public ?array $meta = null;
 
@@ -28,11 +17,17 @@ abstract class StrTranslationBase
     #[ORM\Column]
     public \DateTimeImmutable $updatedAt;
 
-    public function __construct(string $hash, string $locale, string $text)
+    // the PostFlushListener creates this in raw SQL so the constructor is rarely called.
+    public function __construct(
+        #[ORM\Id]
+        #[ORM\Column(length: 64)]
+        public readonly string $hash,
+        #[ORM\Id]
+        #[ORM\Column(length: 8)]
+        public readonly  string $locale,
+        #[ORM\Column(type: 'text', nullable: true)]
+        public ?string $text=null)
     {
-        $this->hash      = $hash;
-        $this->locale    = $locale;
-        $this->text      = $text;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = $this->createdAt;
     }

@@ -18,6 +18,7 @@ use function Symfony\Component\String\u;
 final class SeoExtension extends AbstractExtension
 {
 
+    const MAX_TITLE_LENGTH=80;
     public function __construct(
         private readonly SeoService $seoService,
     )
@@ -56,7 +57,7 @@ final class SeoExtension extends AbstractExtension
         // Nominal case
         if ($length >= $min && $length <= $max) {
             // Is there enough place for the branding?
-            if (($length + $brandingStr->length() <= self::MAX_TITLE_LENGTH) {
+            if (($length + $brandingStr->length() <= self::MAX_TITLE_LENGTH)) {
                 $str = $str->ensureEnd($brandingStr->toString());
             }
             return $str->toString();
@@ -64,7 +65,7 @@ final class SeoExtension extends AbstractExtension
 
         // Title too short, we add the branding
         if ($length < $min) {
-            $str = $str->ensureEnd($brandingStr);
+            $str = $str->ensureEnd($brandingStr->toString());
         }
 
         // Title too long, we cup
